@@ -1,0 +1,166 @@
+{
+  "app": {
+    "title": "MyHalaqoh",
+    "attendance": "Attendance",
+    "hafalan": "Memorization",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "splash": {
+    "subtitle": "Halaqoh Management System",
+    "version": "v1.0.0"
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "loginSubtitle": "Sign in to your account",
+    "usernameLabel": "NIP / NIS",
+    "usernameHint": "Enter your NIP/NIS",
+    "passwordLabel": "PASSWORD",
+    "passwordHint": "Enter your password",
+    "forgotPassword": "Forgot Password?",
+    "loginButton": "LOGIN",
+    "validationEmpty": "NIP/NIS and Password cannot be empty",
+    "validationInvalid": "Invalid credentials. Use admin/admin, NIP (13 digits), or NIS (12 digits)."
+  },
+  "dashboard": {
+    "greeting": "Welcome,",
+    "admin": "Admin",
+    "totalSantri": "Total Santri",
+    "totalGuru": "Total Guru",
+    "totalHalaqoh": "Total Halaqoh",
+    "menuUtama": "Main Menu",
+    "kelolaSantri": "Manage Santri",
+    "kelolaGuru": "Manage Guru",
+    "kelolaHalaqoh": "Manage Halaqoh",
+    "kelolaTarget": "Manage Target",
+    "santriCount": "261 Santri",
+    "guruCount": "28 Guru",
+    "halaqohCount": "20 Halaqoh",
+    "perKelas": "Per Class"
+  },
+  "santri": {
+    "title": "Data Santri",
+    "searchHint": "Search Santri",
+    "showCount": "Showing $count Santri",
+    "identitas": "IDENTITY",
+    "kelas": "CLASS",
+    "aksi": "ACTION",
+    "filter": "Filter"
+  },
+  "guru": {
+    "title": "Data Guru",
+    "searchHint": "Search Guru",
+    "showCount": "Showing $count Guru",
+    "identitas": "IDENTITY",
+    "aksi": "ACTION",
+    "filter": "Filter"
+  },
+  "halaqoh": {
+    "title": "Data Halaqoh",
+    "searchHint": "Search Halaqoh",
+    "showCount": "Showing $count Halaqoh",
+    "sort": "Sort",
+    "santriCount": "$count Santri",
+    "kelasLabel": "Class $kelas"
+  },
+  "targetHafalan": {
+    "title": "Memorization Target",
+    "reguler": "REGULAR",
+    "takhassus": "TAKHASSUS",
+    "infoText": "Set memorization targets for each class, the target will be applied to all students in that class.",
+    "kelasLabel": "Class",
+    "targetJuz": "Target: $count Juz",
+    "juzRange": "Juz $range",
+    "smp": "SMP"
+  },
+  "editTarget": {
+    "title": "Edit Memorization Target",
+    "tahunAjaran": "ACADEMIC YEAR",
+    "pilihJuz": "SELECT JUZ",
+    "totalTarget": "TOTAL TARGET",
+    "totalJuz": "$count Juz",
+    "simpanPerubahan": "Save Changes"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "santri": "Santri",
+    "guru": "Guru",
+    "halaqoh": "Halaqoh",
+    "target": "Target"
+  },
+  "addData": {
+    "title": "Add Data",
+    "subtitle": "Choose your preferred data input method",
+    "inputManual": "Manual Input",
+    "inputManualDesc": "Fill in the form one by one in detail",
+    "uploadExcel": "Upload Excel/CSV File",
+    "uploadExcelDesc": "Import large amounts of data from a file",
+    "addSantriManual": "Add Santri Manual",
+    "addGuruManual": "Add Guru Manual",
+    "nis": "NIS",
+    "nisHint": "Student ID Number",
+    "nip": "NIP",
+    "nipHint": "Teacher ID Number",
+    "namaLengkap": "Full Name",
+    "namaSantriHint": "Student full name",
+    "namaGuruHint": "Teacher full name",
+    "kelas": "Class",
+    "kelasHint": "Select Class",
+    "nomorHp": "Phone Number",
+    "nomorHpHint": "Example: 08123456789",
+    "simpan": "Simpan",
+    "bulkTitle": "Bulk Add Data",
+    "bulkSubtitle": "Import data automatically using an Excel file.",
+    "bulkTapUpload": "Tap to upload Excel file",
+    "bulkFormat": "Format .xlsx or .csv (Max. 5MB)",
+    "bulkUploadButton": "Upload Now"
+  },
+  "addHalaqoh": {
+    "title": "Add New Halaqoh",
+    "namaHalaqoh": "Halaqoh Name",
+    "namaHalaqohHint": "Example: Halaqoh 7A",
+    "kelas": "Class",
+    "kelasHint": "Select Class",
+    "program": "Program",
+    "programHint": "Select Program",
+    "pengampu": "Instructor (Teacher)",
+    "pengampuHint": "Search instructor name...",
+    "daftarSantri": "Santri List",
+    "tambahSantri": "+ Add Santri",
+    "nis": "NIS",
+    "namaSantri": "STUDENT NAME",
+    "aksi": "ACTION",
+    "totalTerpilih": "Total: $count Santri selected",
+    "simpanHalaqoh": "SAVE HALAQOH"
+  },
+  "selectSantri": {
+    "title": "Select Santri",
+    "searchHint": "Search name or NIS...",
+    "filter": "FILTER",
+    "countLabel": "$count Santri",
+    "nis": "NIS",
+    "nama": "NAME",
+    "kelas": "CLASS",
+    "tambahkanButton": "ADD ($count) SANTRI"
+  },
+  "guruDashboard": {
+    "greeting": "AHLAN WA SAHLAN",
+    "subtitle": "Begin Halaqoh With Prayers Together To Always Be Blessed",
+    "capaianHariIni": "Today's Achievement",
+    "kehadiranHariIni": "Attendance Today",
+    "setoranHafalan": "Hafalan Submission",
+    "santriCount": "$current/$total Santri",
+    "menuUtama": "Main Menu",
+    "myHalaqoh": "My Halaqoh",
+    "scanAbsensi": "Scan Attendance",
+    "inputHafalan": "Input Hafalan",
+    "laporan": "Report",
+    "setoranTerakhir": "Recent Submissions"
+  },
+  "guruNav": {
+    "home": "Home",
+    "myHalaqoh": "My Halaqoh",
+    "laporan": "Report",
+    "profile": "Profile"
+  }
+}

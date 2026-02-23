@@ -1,0 +1,283 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+
+/// Dialog form for adding/editing a Guru manually
+class AddManualGuruDialog extends StatefulWidget {
+  final String? initialNip;
+  final String? initialNama;
+  final String? initialPhone;
+  final void Function(String? nip, String? nama, String? phone)? onSave;
+
+  const AddManualGuruDialog({
+    super.key,
+    this.initialNip,
+    this.initialNama,
+    this.initialPhone,
+    this.onSave,
+  });
+
+  static Future<void> show(
+    BuildContext context, {
+    String? initialNip,
+    String? initialNama,
+    String? initialPhone,
+    void Function(String? nip, String? nama, String? phone)? onSave,
+  }) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => AddManualGuruDialog(
+        initialNip: initialNip,
+        initialNama: initialNama,
+        initialPhone: initialPhone,
+        onSave: onSave,
+      ),
+    );
+  }
+
+  @override
+  State<AddManualGuruDialog> createState() => _AddManualGuruDialogState();
+}
+
+class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
+  final _nipController = TextEditingController();
+  final _namaController = TextEditingController();
+  final _phoneController = TextEditingController();
+
+  bool get _isEditMode => widget.initialNip != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialNip != null) _nipController.text = widget.initialNip!;
+    if (widget.initialNama != null) _namaController.text = widget.initialNama!;
+    if (widget.initialPhone != null) _phoneController.text = widget.initialPhone!;
+  }
+
+  @override
+  void dispose() {
+    _nipController.dispose();
+    _namaController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return Container(
+      padding: EdgeInsets.only(
+        top: 24.h,
+        left: 24.w,
+        right: 24.w,
+        bottom: bottomInset + 24.h,
+      ),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24.r),
+          topRight: Radius.circular(24.r),
+        ),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _isEditMode ? 'Edit Data Guru' : t.addData.addGuruManual,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Icon(
+                    Icons.close,
+                    color: colors.textSecondary,
+                    size: 22.sp,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20.h),
+
+            // Photo avatar
+            Center(
+              child: Stack(
+                children: [
+                  Container(
+                    width: 80.w,
+                    height: 80.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: colors.border,
+                        width: 2,
+                      ),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.add_a_photo_outlined,
+                        color: colors.textSecondary,
+                        size: 30.sp,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 28.w,
+                      height: 28.w,
+                      decoration: BoxDecoration(
+                        color: colors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.edit,
+                          color: colors.textOnButton,
+                          size: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 24.h),
+
+            // NIP field
+            _buildLabel(colors, t.addData.nip),
+            SizedBox(height: 8.h),
+            _buildTextField(
+              colors: colors,
+              controller: _nipController,
+              hint: t.addData.nipHint,
+              keyboardType: TextInputType.number,
+            ),
+            SizedBox(height: 18.h),
+
+            // Nama Lengkap field
+            _buildLabel(colors, t.addData.namaLengkap),
+            SizedBox(height: 8.h),
+            _buildTextField(
+              colors: colors,
+              controller: _namaController,
+              hint: t.addData.namaGuruHint,
+            ),
+            SizedBox(height: 18.h),
+
+            // Nomor HP field
+            _buildLabel(colors, t.addData.nomorHp),
+            SizedBox(height: 8.h),
+            _buildTextField(
+              colors: colors,
+              controller: _phoneController,
+              hint: t.addData.nomorHpHint,
+              keyboardType: TextInputType.phone,
+            ),
+            SizedBox(height: 28.h),
+
+            // Simpan button
+            SizedBox(
+              width: double.infinity,
+              height: 50.h,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  if (widget.onSave != null) {
+                    widget.onSave!(
+                      _nipController.text,
+                      _namaController.text,
+                      _phoneController.text,
+                    );
+                  }
+                  Navigator.of(context).pop();
+                },
+                icon: Icon(Icons.check_circle, size: 20.sp),
+                label: Text(
+                  t.addData.simpan,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.textOnButton,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25.r),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(AppColorSet colors, String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        fontSize: 13.sp,
+        fontWeight: FontWeight.w600,
+        color: colors.textPrimary,
+        fontFamily: 'Poppins',
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required AppColorSet colors,
+    required TextEditingController controller,
+    required String hint,
+    TextInputType? keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: TextStyle(
+        fontSize: 14.sp,
+        fontFamily: 'Poppins',
+        color: colors.textPrimary,
+      ),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(
+          fontSize: 14.sp,
+          color: colors.textSecondary.withValues(alpha: 0.5),
+          fontFamily: 'Poppins',
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 14.h,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide(color: colors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: BorderSide(color: colors.primary),
+        ),
+      ),
+    );
+  }
+}

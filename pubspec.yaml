@@ -1,0 +1,89 @@
+name: my_halaqoh
+description: MyHalaqoh - Absensi Halaqoh & Monitoring Hafalan
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  auto_route: ^10.1.2
+  bloc: ^9.0.0
+  cupertino_icons: ^1.0.8
+  dartz: ^0.10.1
+  dio: ^5.9.0
+  equatable: ^2.0.7
+  flutter:
+    sdk: flutter
+  animated_notch_bottom_bar: ^1.0.3
+  flutter_bloc: ^9.1.1
+  flutter_gen: ^5.12.0
+  flutter_localization: ^0.3.3
+  flutter_localizations:
+    sdk: flutter
+  flutter_screenutil: ^5.9.3
+  freezed_annotation: ^3.1.0
+  get_it: ^8.2.0
+  google_fonts: ^6.3.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  intl: ^0.20.2
+  json_annotation: ^4.9.0
+  logger: ^2.6.1
+  mobile_scanner: ^7.1.2
+  pdf: ^3.11.3
+  pretty_dio_logger: ^1.4.0
+  printing: ^5.14.2
+  share_plus: ^12.0.0
+  shared_preferences: ^2.5.4
+  slang: ^4.8.1
+  slang_flutter: ^4.8.0
+  animated_custom_dropdown: 3.1.1
+  percent_indicator: ^4.2.5
+
+dev_dependencies:
+  auto_route_generator: ^10.2.4
+  build_runner: ^2.7.1
+  flutter_gen_runner: ^5.12.0
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  freezed: ^3.2.3
+  json_serializable: ^6.11.1
+  mocktail: ^1.0.4
+  slang_build_runner: ^4.8.1
+
+flutter_gen:
+  output: lib/gen/
+  colors:
+    inputs:
+      - assets/color/colors.xml
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins/Poppins-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Poppins/Poppins-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Poppins/Poppins-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Poppins/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins/Poppins-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Poppins/Poppins-Black.ttf
+          weight: 900

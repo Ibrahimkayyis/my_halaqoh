@@ -1,0 +1,6 @@
+input_directory: lib/src/core/dictionaries/i18n
+output_directory: lib/gen/i18n
+fallback_strategy: base_locale
+output_file_name: translations.g.dart
+base_locale: en
+flutter_integration: true

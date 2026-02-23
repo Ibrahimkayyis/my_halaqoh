@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="primary">#10B981</color>
+    <color name="primaryDark">#059669</color>
+    <color name="secondary">#F5F5F5</color>
+    <color name="secondaryDark">#1F2937</color>
+    
+    <!-- Text Colors -->
+    <color name="textPrimary">#111827</color>
+    <color name="textPrimaryDark">#F9FAFB</color>
+    <color name="textSecondary">#6B7280</color>
+    <color name="textSecondaryDark">#9CA3AF</color>
+    <color name="textOnButton">#FFFFFF</color>
+    
+    <!-- Additional Colors -->
+    <color name="blue">#3B82F6</color>
+    <color name="yellow">#FBBF24</color>
+    <color name="red">#F43F5E</color>
+    <color name="green">#10B981</color>
+    
+    <!-- Background & Surface Colors -->
+    <color name="surface">#FFFFFF</color>
+    <color name="surfaceDark">#111827</color>
+    <color name="background">#F5F5F5</color>
+    <color name="backgroundDark">#0F172A</color>
+    
+    <!-- Border Colors -->
+    <color name="border">#E5E7EB</color>
+    <color name="borderDark">#374151</color>
+</resources>

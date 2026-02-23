@@ -1,0 +1,166 @@
+{
+  "app": {
+    "title": "MyHalaqoh",
+    "attendance": "Absensi",
+    "hafalan": "Hafalan",
+    "login": "Masuk",
+    "logout": "Keluar"
+  },
+  "splash": {
+    "subtitle": "Halaqoh Management System",
+    "version": "v1.0.0"
+  },
+  "auth": {
+    "loginTitle": "Masuk",
+    "loginSubtitle": "Masuk ke akun anda",
+    "usernameLabel": "NIP / NIS",
+    "usernameHint": "Masukkan NIP/NIS anda",
+    "passwordLabel": "PASSWORD",
+    "passwordHint": "Masukkan password anda",
+    "forgotPassword": "Lupa Password?",
+    "loginButton": "MASUK",
+    "validationEmpty": "NIP/NIS dan Password tidak boleh kosong",
+    "validationInvalid": "Username atau password tidak valid. Gunakan admin/admin, NIP (13 digit), atau NIS (12 digit)."
+  },
+  "dashboard": {
+    "greeting": "Selamat Datang,",
+    "admin": "Admin",
+    "totalSantri": "Total Santri",
+    "totalGuru": "Total Guru",
+    "totalHalaqoh": "Total Halaqoh",
+    "menuUtama": "Menu Utama",
+    "kelolaSantri": "Kelola data Santri",
+    "kelolaGuru": "Kelola data Guru",
+    "kelolaHalaqoh": "Kelola Halaqoh",
+    "kelolaTarget": "Kelola Target",
+    "santriCount": "261 Santri",
+    "guruCount": "28 Guru",
+    "halaqohCount": "20 Halaqoh",
+    "perKelas": "Per Kelas"
+  },
+  "santri": {
+    "title": "Data Santri",
+    "searchHint": "Cari Santri",
+    "showCount": "Menampilkan $count Santri",
+    "identitas": "IDENTITAS",
+    "kelas": "KELAS",
+    "aksi": "AKSI",
+    "filter": "Filter"
+  },
+  "guru": {
+    "title": "Data Guru",
+    "searchHint": "Cari Guru",
+    "showCount": "Menampilkan $count Guru",
+    "identitas": "IDENTITAS",
+    "aksi": "AKSI",
+    "filter": "Filter"
+  },
+  "halaqoh": {
+    "title": "Data Halaqoh",
+    "searchHint": "Cari Halaqoh",
+    "showCount": "Menampilkan $count Halaqoh",
+    "sort": "Urutkan",
+    "santriCount": "$count Santri",
+    "kelasLabel": "Kelas $kelas"
+  },
+  "targetHafalan": {
+    "title": "Target Hafalan",
+    "reguler": "REGULER",
+    "takhassus": "TAKHASSUS",
+    "infoText": "Atur target hafalan untuk setiap kelas, target akan diterapkan untuk seluruh santri pada kelas tersebut.",
+    "kelasLabel": "Kelas",
+    "targetJuz": "Target: $count Juz",
+    "juzRange": "Juz $range",
+    "smp": "SMP"
+  },
+  "editTarget": {
+    "title": "Edit Target Hafalan",
+    "tahunAjaran": "TAHUN AJARAN",
+    "pilihJuz": "PILIH JUZ",
+    "totalTarget": "TOTAL TARGET",
+    "totalJuz": "$count Juz",
+    "simpanPerubahan": "Simpan Perubahan"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "santri": "Santri",
+    "guru": "Guru",
+    "halaqoh": "Halaqoh",
+    "target": "Target"
+  },
+  "addData": {
+    "title": "Tambah Data",
+    "subtitle": "Pilih metode input data yang diinginkan",
+    "inputManual": "Input Manual",
+    "inputManualDesc": "Isi form data satu per satu secara detail",
+    "uploadExcel": "Upload File Excel/CSV",
+    "uploadExcelDesc": "Impor banyak data sekaligus dari file",
+    "addSantriManual": "Tambah Santri Manual",
+    "addGuruManual": "Tambah Guru Manual",
+    "nis": "NIS",
+    "nisHint": "Nomor Induk Santri",
+    "nip": "NIP",
+    "nipHint": "Nomor Induk Pengajar",
+    "namaLengkap": "Nama Lengkap",
+    "namaSantriHint": "Nama lengkap siswa",
+    "namaGuruHint": "Nama lengkap guru",
+    "kelas": "Kelas",
+    "kelasHint": "Pilih Kelas",
+    "nomorHp": "Nomor HP",
+    "nomorHpHint": "Contoh: 08123456789",
+    "simpan": "Simpan",
+    "bulkTitle": "Tambah Data Massal",
+    "bulkSubtitle": "Import Data secara otomatis menggunakan file excel.",
+    "bulkTapUpload": "Tap untuk upload file Excel",
+    "bulkFormat": "Format .xlsx atau .csv (Maks. 5MB)",
+    "bulkUploadButton": "Upload Sekarang"
+  },
+  "addHalaqoh": {
+    "title": "Tambah Halaqoh Baru",
+    "namaHalaqoh": "Nama Halaqoh",
+    "namaHalaqohHint": "Contoh: Halaqoh 7A",
+    "kelas": "Kelas",
+    "kelasHint": "Pilih Kelas",
+    "program": "Program",
+    "programHint": "Pilih Program",
+    "pengampu": "Pengampu (Guru)",
+    "pengampuHint": "Cari nama pengampu...",
+    "daftarSantri": "Daftar Santri",
+    "tambahSantri": "+ Tambah Santri",
+    "nis": "NIS",
+    "namaSantri": "NAMA SANTRI",
+    "aksi": "AKSI",
+    "totalTerpilih": "Total: $count Santri terpilih",
+    "simpanHalaqoh": "SIMPAN HALAQOH"
+  },
+  "selectSantri": {
+    "title": "Pilih Santri",
+    "searchHint": "Cari nama atau NIS santri...",
+    "filter": "FILTER",
+    "countLabel": "$count Santri",
+    "nis": "NIS",
+    "nama": "NAMA",
+    "kelas": "KELAS",
+    "tambahkanButton": "TAMBAHKAN ($count) SANTRI"
+  },
+  "guruDashboard": {
+    "greeting": "AHLAN WA SAHLAN",
+    "subtitle": "Awali Halaqoh Dengan Doa Bersama Agar Selalu Diberkahi",
+    "capaianHariIni": "Capaian hari ini",
+    "kehadiranHariIni": "Kehadiran Hari ini",
+    "setoranHafalan": "Setoran Hafalan",
+    "santriCount": "$current/$total Santri",
+    "menuUtama": "Menu Utama",
+    "myHalaqoh": "My Halaqoh",
+    "scanAbsensi": "Scan Absensi",
+    "inputHafalan": "Input Hafalan",
+    "laporan": "Laporan",
+    "setoranTerakhir": "Setoran Terakhir"
+  },
+  "guruNav": {
+    "home": "Home",
+    "myHalaqoh": "My Halaqoh",
+    "laporan": "Laporan",
+    "profile": "Profile"
+  }
+}
