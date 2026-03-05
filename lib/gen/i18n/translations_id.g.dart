@@ -70,6 +70,9 @@ class TranslationsId extends Translations {
 	@override late final _TranslationsEditProfileId editProfile = _TranslationsEditProfileId._(_root);
 	@override late final _TranslationsUbahPasswordId ubahPassword = _TranslationsUbahPasswordId._(_root);
 	@override late final _TranslationsPengaturanScreenId pengaturanScreen = _TranslationsPengaturanScreenId._(_root);
+	@override late final _TranslationsWaliSantriDashboardId waliSantriDashboard = _TranslationsWaliSantriDashboardId._(_root);
+	@override late final _TranslationsWaliSantriNavId waliSantriNav = _TranslationsWaliSantriNavId._(_root);
+	@override late final _TranslationsWaliSantriPengaturanScreenId WaliSantriPengaturanScreen = _TranslationsWaliSantriPengaturanScreenId._(_root);
 }
 
 // Path: app
@@ -673,6 +676,55 @@ class _TranslationsPengaturanScreenId extends TranslationsPengaturanScreenEn {
 	@override String get pilihTema => 'Pilih Tema';
 }
 
+// Path: waliSantriDashboard
+class _TranslationsWaliSantriDashboardId extends TranslationsWaliSantriDashboardEn {
+	_TranslationsWaliSantriDashboardId._(TranslationsId root) : this._root = root, super.internal(root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get progressHafalan => 'Progress Hafalan';
+	@override String get juzTerselesaikan => 'Juz Terselesaikan';
+	@override String target({required Object target}) => 'Target : ${target} Juz';
+	@override String get kehadiran => 'Kehadiran';
+	@override String periode({required Object periode}) => 'Periode: ${periode}';
+	@override String get hadir => 'Hadir';
+	@override String get sakit => 'Sakit';
+	@override String get izin => 'Izin';
+	@override String get alpha => 'Alpha';
+}
+
+// Path: waliSantriNav
+class _TranslationsWaliSantriNavId extends TranslationsWaliSantriNavEn {
+	_TranslationsWaliSantriNavId._(TranslationsId root) : this._root = root, super.internal(root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get home => 'Home';
+	@override String get hafalan => 'Hafalan';
+	@override String get absensi => 'Absensi';
+	@override String get profile => 'Profile';
+}
+
+// Path: WaliSantriPengaturanScreen
+class _TranslationsWaliSantriPengaturanScreenId extends TranslationsWaliSantriPengaturanScreenEn {
+	_TranslationsWaliSantriPengaturanScreenId._(TranslationsId root) : this._root = root, super.internal(root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Pengaturan';
+	@override String get bahasa => 'Bahasa';
+	@override String get bahasaIndonesia => 'Bahasa Indonesia';
+	@override String get english => 'English';
+	@override String get pilihBahasa => 'Pilih Bahasa';
+	@override String get tema => 'Tema';
+	@override String get terangLight => 'Terang / Light';
+	@override String get gelapDark => 'Gelap / Dark';
+	@override String get pilihTema => 'Pilih Tema';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on TranslationsId {
@@ -991,6 +1043,28 @@ extension on TranslationsId {
 			case 'pengaturanScreen.terangLight': return 'Terang / Light';
 			case 'pengaturanScreen.gelapDark': return 'Gelap / Dark';
 			case 'pengaturanScreen.pilihTema': return 'Pilih Tema';
+			case 'waliSantriDashboard.progressHafalan': return 'Progress Hafalan';
+			case 'waliSantriDashboard.juzTerselesaikan': return 'Juz Terselesaikan';
+			case 'waliSantriDashboard.target': return ({required Object target}) => 'Target : ${target} Juz';
+			case 'waliSantriDashboard.kehadiran': return 'Kehadiran';
+			case 'waliSantriDashboard.periode': return ({required Object periode}) => 'Periode: ${periode}';
+			case 'waliSantriDashboard.hadir': return 'Hadir';
+			case 'waliSantriDashboard.sakit': return 'Sakit';
+			case 'waliSantriDashboard.izin': return 'Izin';
+			case 'waliSantriDashboard.alpha': return 'Alpha';
+			case 'waliSantriNav.home': return 'Home';
+			case 'waliSantriNav.hafalan': return 'Hafalan';
+			case 'waliSantriNav.absensi': return 'Absensi';
+			case 'waliSantriNav.profile': return 'Profile';
+			case 'WaliSantriPengaturanScreen.title': return 'Pengaturan';
+			case 'WaliSantriPengaturanScreen.bahasa': return 'Bahasa';
+			case 'WaliSantriPengaturanScreen.bahasaIndonesia': return 'Bahasa Indonesia';
+			case 'WaliSantriPengaturanScreen.english': return 'English';
+			case 'WaliSantriPengaturanScreen.pilihBahasa': return 'Pilih Bahasa';
+			case 'WaliSantriPengaturanScreen.tema': return 'Tema';
+			case 'WaliSantriPengaturanScreen.terangLight': return 'Terang / Light';
+			case 'WaliSantriPengaturanScreen.gelapDark': return 'Gelap / Dark';
+			case 'WaliSantriPengaturanScreen.pilihTema': return 'Pilih Tema';
 			default: return null;
 		}
 	}

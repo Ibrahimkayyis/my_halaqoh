@@ -24,6 +24,20 @@ import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/screens/guru_
 import 'package:my_halaqoh/src/modules/wali_santri_dashboard/presentation/screens/wali_santri_dashboard_wrapper_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/screens/my_halaqoh_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/screens/detail_santri_screen.dart';
+// Wali Santri Hafalan
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_riwayat_hafalan_screen.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_progress_per_juz_screen.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_progress_per_surat_screen.dart';
+// Wali Santri Hafalan - Mutabaah
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_mutabaah_screen.dart';
+// Wali Santri Absensi
+import 'package:my_halaqoh/src/modules/wali_santri_absensi/presentation/screens/wali_santri_riwayat_absensi_screen.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_absensi/presentation/screens/wali_santri_kalender_absensi_screen.dart';
+// Wali Santri Profile
+import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_profile_screen.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_edit_profile_screen.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_ubah_password_screen.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_pengaturan_screen.dart';
 
 part 'app_router.gr.dart';
 
@@ -58,6 +72,19 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: EditProfileRoute.page),
     AutoRoute(page: UbahPasswordRoute.page),
     AutoRoute(page: PengaturanRoute.page),
+    // Wali Santri Hafalan
+    AutoRoute(page: WaliSantriRiwayatHafalanRoute.page),
+    AutoRoute(page: WaliSantriProgressPerJuzRoute.page),
+    AutoRoute(page: WaliSantriProgressPerSuratRoute.page),
+    AutoRoute(page: WaliSantriMutabaahRoute.page),
+    // Wali Santri Absensi
+    AutoRoute(page: WaliSantriRiwayatAbsensiRoute.page),
+    AutoRoute(page: WaliSantriKalenderAbsensiRoute.page),
+    // Wali Santri Profile
+    AutoRoute(page: WaliSantriProfileRoute.page),
+    AutoRoute(page: WaliSantriEditProfileRoute.page),
+    AutoRoute(page: WaliSantriUbahPasswordRoute.page),
+    AutoRoute(page: WaliSantriPengaturanRoute.page),
   ];
 
   @override

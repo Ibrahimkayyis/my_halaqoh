@@ -2,12 +2,22 @@ import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_not
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_dashboard/presentation/screens/wali_santri_dashboard_screen.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_riwayat_hafalan_screen.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_absensi/presentation/screens/wali_santri_riwayat_absensi_screen.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_profile_screen.dart';
 
-/// Dashboard wrapper for Wali Santri role with bottom navigation
+/// Dashboard wrapper for Wali Santri role with 4-tab bottom navigation
 @RoutePage()
 class WaliSantriDashboardWrapperScreen extends StatefulWidget {
-  const WaliSantriDashboardWrapperScreen({super.key});
+  final String programType;
+
+  const WaliSantriDashboardWrapperScreen({
+    super.key,
+    @PathParam('programType') this.programType = 'reguler',
+  });
 
   @override
   State<WaliSantriDashboardWrapperScreen> createState() =>
@@ -17,8 +27,9 @@ class WaliSantriDashboardWrapperScreen extends StatefulWidget {
 class _WaliSantriDashboardWrapperScreenState
     extends State<WaliSantriDashboardWrapperScreen> {
   final _pageController = PageController(initialPage: 0);
-  final NotchBottomBarController _controller =
-      NotchBottomBarController(index: 0);
+  final NotchBottomBarController _controller = NotchBottomBarController(
+    index: 0,
+  );
 
   @override
   void dispose() {
@@ -26,16 +37,24 @@ class _WaliSantriDashboardWrapperScreenState
     super.dispose();
   }
 
+  void _navigateToTab(int index) {
+    _controller.jumpTo(index);
+    _pageController.jumpToPage(index);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
     final pages = <Widget>[
-      _buildPlaceholderPage('Dashboard Wali Santri', Icons.dashboard),
-      _buildPlaceholderPage('Hafalan Anak', Icons.menu_book),
-      _buildPlaceholderPage('Absensi Anak', Icons.checklist),
-      _buildPlaceholderPage('Laporan', Icons.bar_chart),
-      _buildPlaceholderPage('Profil', Icons.person),
+      WaliSantriDashboardScreen(onNavigateToTab: _navigateToTab),
+      const WaliSantriRiwayatHafalanScreen(name: 'Ahmad', nis: '123456'),
+      WaliSantriRiwayatAbsensiScreen(
+        name: 'Ahmad',
+        nis: '123456',
+        programType: widget.programType,
+      ),
+      const WaliSantriProfileScreen(),
     ];
 
     return Scaffold(
@@ -66,75 +85,30 @@ class _WaliSantriDashboardWrapperScreenState
         elevation: 2,
         bottomBarItems: [
           BottomBarItem(
-            inActiveItem: Icon(Icons.dashboard, color: colors.textSecondary),
-            activeItem: Icon(Icons.dashboard, color: colors.textOnButton),
-            itemLabel: 'Dashboard',
+            inActiveItem: Icon(Icons.home, color: colors.textSecondary),
+            activeItem: Icon(Icons.home, color: colors.textOnButton),
+            itemLabel: t.waliSantriNav.home,
           ),
           BottomBarItem(
             inActiveItem: Icon(Icons.menu_book, color: colors.textSecondary),
             activeItem: Icon(Icons.menu_book, color: colors.textOnButton),
-            itemLabel: 'Hafalan',
+            itemLabel: t.waliSantriNav.hafalan,
           ),
           BottomBarItem(
             inActiveItem: Icon(Icons.checklist, color: colors.textSecondary),
             activeItem: Icon(Icons.checklist, color: colors.textOnButton),
-            itemLabel: 'Absensi',
-          ),
-          BottomBarItem(
-            inActiveItem: Icon(Icons.bar_chart, color: colors.textSecondary),
-            activeItem: Icon(Icons.bar_chart, color: colors.textOnButton),
-            itemLabel: 'Laporan',
+            itemLabel: t.waliSantriNav.absensi,
           ),
           BottomBarItem(
             inActiveItem: Icon(Icons.person, color: colors.textSecondary),
             activeItem: Icon(Icons.person, color: colors.textOnButton),
-            itemLabel: 'Profil',
+            itemLabel: t.waliSantriNav.profile,
           ),
         ],
         onTap: (index) {
           _pageController.jumpToPage(index);
         },
         kIconSize: 24.0,
-      ),
-    );
-  }
-
-  Widget _buildPlaceholderPage(String title, IconData icon) {
-    final colors = AppColors.of(context);
-
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 64.sp,
-              color: colors.textSecondary.withValues(alpha: 0.5),
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w600,
-                color: colors.textSecondary,
-                fontFamily: 'Poppins',
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'Coming Soon',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
-                color: colors.textSecondary.withValues(alpha: 0.6),
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

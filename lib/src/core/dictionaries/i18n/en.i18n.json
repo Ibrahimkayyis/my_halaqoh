@@ -375,5 +375,33 @@
     "terangLight": "Light",
     "gelapDark": "Dark",
     "pilihTema": "Select Theme"
+  },
+  "waliSantriDashboard": {
+    "progressHafalan": "Memorization Progress",
+    "juzTerselesaikan": "Juz Completed",
+    "target": "Target : $target Juz",
+    "kehadiran": "Attendance",
+    "periode": "Period: $periode",
+    "hadir": "Present",
+    "sakit": "Sick",
+    "izin": "Permit",
+    "alpha": "Absent"
+  },
+  "waliSantriNav": {
+    "home": "Home",
+    "hafalan": "Hafalan",
+    "absensi": "Attendance",
+    "profile": "Profile"
+  },
+  "WaliSantriPengaturanScreen": {
+    "title": "Settings",
+    "bahasa": "Language",
+    "bahasaIndonesia": "Bahasa Indonesia",
+    "english": "English",
+    "pilihBahasa": "Select Language",
+    "tema": "Theme",
+    "terangLight": "Light",
+    "gelapDark": "Dark",
+    "pilihTema": "Select Theme"
   }
 }
