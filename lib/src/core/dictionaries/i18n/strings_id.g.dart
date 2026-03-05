@@ -49,6 +49,25 @@ class TranslationsId implements Translations {
 	@override late final _TranslationsAddDataId addData = _TranslationsAddDataId._(_root);
 	@override late final _TranslationsAddHalaqohId addHalaqoh = _TranslationsAddHalaqohId._(_root);
 	@override late final _TranslationsSelectSantriId selectSantri = _TranslationsSelectSantriId._(_root);
+	@override late final _TranslationsGuruDashboardId guruDashboard = _TranslationsGuruDashboardId._(_root);
+	@override late final _TranslationsGuruNavId guruNav = _TranslationsGuruNavId._(_root);
+	@override late final _TranslationsMyHalaqohScreenId myHalaqohScreen = _TranslationsMyHalaqohScreenId._(_root);
+	@override late final _TranslationsDetailSantriId detailSantri = _TranslationsDetailSantriId._(_root);
+	@override late final _TranslationsAbsensiId absensi = _TranslationsAbsensiId._(_root);
+	@override late final _TranslationsRiwayatAbsensiId riwayatAbsensi = _TranslationsRiwayatAbsensiId._(_root);
+	@override late final _TranslationsKalenderAbsensiId kalenderAbsensi = _TranslationsKalenderAbsensiId._(_root);
+	@override late final _TranslationsAbsensiHalaqohId absensiHalaqoh = _TranslationsAbsensiHalaqohId._(_root);
+	@override late final _TranslationsDetailAbsensiHariIniId detailAbsensiHariIni = _TranslationsDetailAbsensiHariIniId._(_root);
+	@override late final _TranslationsHafalanId hafalan = _TranslationsHafalanId._(_root);
+	@override late final _TranslationsInputHafalanFormId inputHafalanForm = _TranslationsInputHafalanFormId._(_root);
+	@override late final _TranslationsRiwayatHafalanSantriId riwayatHafalanSantri = _TranslationsRiwayatHafalanSantriId._(_root);
+	@override late final _TranslationsProgressHafalanPerJuzId progressHafalanPerJuz = _TranslationsProgressHafalanPerJuzId._(_root);
+	@override late final _TranslationsProgressHafalanPerSuratId progressHafalanPerSurat = _TranslationsProgressHafalanPerSuratId._(_root);
+	@override late final _TranslationsMutabaahSantriId mutabaahSantri = _TranslationsMutabaahSantriId._(_root);
+	@override late final _TranslationsGuruProfileId guruProfile = _TranslationsGuruProfileId._(_root);
+	@override late final _TranslationsEditProfileId editProfile = _TranslationsEditProfileId._(_root);
+	@override late final _TranslationsUbahPasswordId ubahPassword = _TranslationsUbahPasswordId._(_root);
+	@override late final _TranslationsPengaturanScreenId pengaturanScreen = _TranslationsPengaturanScreenId._(_root);
 }
 
 // Path: app
@@ -286,6 +305,372 @@ class _TranslationsSelectSantriId implements TranslationsSelectSantriEn {
 	@override String tambahkanButton({required Object count}) => 'TAMBAHKAN (${count}) SANTRI';
 }
 
+// Path: guruDashboard
+class _TranslationsGuruDashboardId implements TranslationsGuruDashboardEn {
+	_TranslationsGuruDashboardId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get greeting => 'AHLAN WA SAHLAN';
+	@override String get subtitle => 'Awali Halaqoh Dengan Doa Bersama Agar Selalu Diberkahi';
+	@override String get capaianHariIni => 'Capaian hari ini';
+	@override String get kehadiranHariIni => 'Kehadiran Hari ini';
+	@override String get setoranHafalan => 'Setoran Hafalan';
+	@override String santriCount({required Object current, required Object total}) => '${current}/${total} Santri';
+	@override String get menuUtama => 'Menu Utama';
+	@override String get myHalaqoh => 'Halaqoh';
+	@override String get scanAbsensi => 'Scan Absensi';
+	@override String get inputHafalan => 'Input Hafalan';
+	@override String get laporan => 'Laporan';
+	@override String get setoranTerakhir => 'Setoran Terakhir';
+}
+
+// Path: guruNav
+class _TranslationsGuruNavId implements TranslationsGuruNavEn {
+	_TranslationsGuruNavId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get home => 'Home';
+	@override String get myHalaqoh => 'Halaqoh';
+	@override String get absensi => 'Absensi';
+	@override String get hafalan => 'Hafalan';
+	@override String get profile => 'Profile';
+}
+
+// Path: myHalaqohScreen
+class _TranslationsMyHalaqohScreenId implements TranslationsMyHalaqohScreenEn {
+	_TranslationsMyHalaqohScreenId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'My Halaqoh';
+	@override String get searchHint => 'Cari nama atau NIS santri...';
+	@override String get daftarSantri => 'Daftar Santri';
+	@override String santriCount({required Object count}) => '${count} Santri';
+	@override String kelas({required Object kelas}) => 'Kelas ${kelas}';
+	@override String program({required Object program}) => 'Program: ${program}';
+	@override String target({required Object count, required Object range}) => 'Target: ${count} Juz (${range})';
+	@override String total({required Object count}) => 'Total: ${count} Santri';
+	@override String get pengampu => 'Ustadz Kayyis';
+	@override String progressText({required Object completed, required Object target}) => '${completed} Juz terselesaikan dari ${target} Juz';
+}
+
+// Path: detailSantri
+class _TranslationsDetailSantriId implements TranslationsDetailSantriEn {
+	_TranslationsDetailSantriId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Profil Santri';
+	@override String get informasiAkademik => 'INFORMASI AKADEMIK';
+	@override String get kelas => 'Kelas';
+	@override String get program => 'Program';
+	@override String get halaqoh => 'Halaqoh';
+	@override String get pembimbing => 'Pembimbing';
+	@override String get progressHafalan => 'PROGRESS HAFALAN';
+	@override String get totalHafalan => 'Total Hafalan';
+	@override String sertifikasiInfo({required Object done, required Object total}) => '${done} dari ${total} Juz Tersertifikasi';
+	@override String get sertifikasiJuz => 'Sertifikasi Juz';
+}
+
+// Path: absensi
+class _TranslationsAbsensiId implements TranslationsAbsensiEn {
+	_TranslationsAbsensiId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get mulaiSesi => 'MULAI SESI ABSENSI';
+	@override String get searchHint => 'Cari Santri';
+	@override String get lihatAbsensiHalaqoh => 'Lihat Absensi Halaqoh';
+	@override String get lihatDetailHariIni => 'Lihat Detail Absensi Hari Ini';
+	@override String get daftarSantri => 'Daftar Santri';
+	@override String santriCount({required Object count}) => '${count} Santri';
+	@override String get riwayatAbsensi => 'RIWAYAT ABSENSI';
+	@override String get dialogTitle => 'Mulai Sesi Absensi';
+	@override String get tanggalHalaqoh => 'TANGGAL HALAQOH';
+	@override String get pilihSesi => 'PILIH SESI';
+	@override String get shubuh => 'Shubuh';
+	@override String get maghrib => 'Maghrib';
+	@override String get scanBarcode => 'SCAN BARCODE';
+	@override String get scanInstruction => 'Arahkan kamera ke QR Code Santri';
+	@override String nama({required Object name}) => 'Nama: ${name}';
+	@override String nis({required Object nis}) => 'NIS: ${nis}';
+	@override String get statusKehadiran => 'STATUS KEHADIRAN';
+	@override String get hadir => 'Hadir';
+	@override String get sakit => 'Sakit';
+	@override String get izin => 'Izin';
+	@override String get alfa => 'Alfa';
+	@override String get keterangan => 'Keterangan (opsional)';
+	@override String get batal => 'BATAL';
+	@override String get simpan => 'SIMPAN';
+}
+
+// Path: riwayatAbsensi
+class _TranslationsRiwayatAbsensiId implements TranslationsRiwayatAbsensiEn {
+	_TranslationsRiwayatAbsensiId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Riwayat Absensi';
+	@override String halaqohKelas({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
+	@override String get hadir => 'HADIR';
+	@override String get sakit => 'SAKIT';
+	@override String get izin => 'IZIN';
+	@override String get alfa => 'ALFA';
+	@override String get pagi => 'PAGI';
+	@override String get mlm => 'MLM';
+	@override String get geserHint => 'Geser untuk melihat semua tanggal';
+	@override String get lihatKalender => 'LIHAT KALENDER ABSENSI LENGKAP';
+	@override String get keterangan => 'Keterangan';
+	@override String get hadirLabel => 'Hadir';
+	@override String get sakitLabel => 'Sakit';
+	@override String get alphaLabel => 'Alpha';
+	@override String get izinLabel => 'Izin';
+	@override String get downloadLaporan => 'DOWNLOAD LAPORAN ABSENSI';
+}
+
+// Path: kalenderAbsensi
+class _TranslationsKalenderAbsensiId implements TranslationsKalenderAbsensiEn {
+	_TranslationsKalenderAbsensiId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Kalender Absensi';
+	@override String nisHalaqoh({required Object nis, required Object halaqoh}) => 'NIS: ${nis}  •  Halaqoh ${halaqoh}';
+	@override String get keterangan => 'Keterangan';
+	@override String get hadirLabel => 'Hadir';
+	@override String get sakitIzinLabel => 'Sakit / Izin';
+	@override String get alfaLabel => 'Alfa';
+	@override String get belumAbsen => 'Belum Absen';
+	@override String get pagiKiri => 'Pagi (Kiri)';
+	@override String get malamKanan => 'Malam (Kanan)';
+	@override String get aha => 'AHA';
+	@override String get sen => 'SEN';
+	@override String get sel => 'SEL';
+	@override String get rab => 'RAB';
+	@override String get kam => 'KAM';
+	@override String get jum => 'JUM';
+	@override String get sab => 'SAB';
+}
+
+// Path: absensiHalaqoh
+class _TranslationsAbsensiHalaqohId implements TranslationsAbsensiHalaqohEn {
+	_TranslationsAbsensiHalaqohId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Absensi Halaqoh';
+	@override String get tglSesi => 'TGL / SESI';
+	@override String get santri => 'SANTRI';
+	@override String get pagi => 'Pagi';
+	@override String get malam => 'Malam';
+	@override String get dhuha1 => 'Dhuha 1';
+	@override String get dhuha2 => 'Dhuha 2';
+	@override String get sore => 'Sore';
+	@override String get hadir => 'Hadir';
+	@override String get sakit => 'Sakit';
+	@override String get izin => 'Izin';
+	@override String get alfa => 'Alfa';
+	@override String get downloadLaporan => 'DOWNLOAD LAPORAN ABSENSI';
+}
+
+// Path: detailAbsensiHariIni
+class _TranslationsDetailAbsensiHariIniId implements TranslationsDetailAbsensiHariIniEn {
+	_TranslationsDetailAbsensiHariIniId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Detail Absensi Hari Ini';
+	@override String get hadir => 'Hadir';
+	@override String get sakit => 'Sakit';
+	@override String get izin => 'Izin';
+	@override String get alfa => 'Alfa';
+	@override String get belumAbsen => 'Belum Absen';
+	@override String get belumDiabsen => 'Belum Diabsen';
+	@override String get daftarKehadiranSantri => 'Daftar Kehadiran Santri';
+}
+
+// Path: hafalan
+class _TranslationsHafalanId implements TranslationsHafalanEn {
+	_TranslationsHafalanId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get cariSantri => 'Cari Santri';
+	@override String get daftarSantri => 'Daftar Santri';
+	@override String santriCount({required Object count}) => '${count} Santri';
+	@override String get riwayatHafalan => 'Riwayat Hafalan';
+	@override String get inputHafalan => 'Input Hafalan';
+}
+
+// Path: inputHafalanForm
+class _TranslationsInputHafalanFormId implements TranslationsInputHafalanFormEn {
+	_TranslationsInputHafalanFormId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String nama({required Object name}) => 'Nama: ${name}';
+	@override String get ziyadah => 'ZIYADAH';
+	@override String get murajaah => 'MURAJAAH';
+	@override String get formulirHafalan => 'Formulir Hafalan';
+	@override String get pilihSurat => 'Pilih Surat';
+	@override String get ayatAwal => 'Ayat Awal';
+	@override String get ayatAkhir => 'Ayat Akhir';
+	@override String get juz => 'Juz';
+	@override String get penilaian => 'Penilaian';
+	@override String get kelancaran => 'Kelancaran 1 - 100';
+	@override String get tajwid => 'Tajwid 1 - 100';
+	@override String get simpan => 'SIMPAN';
+	@override String get batal => 'BATAL';
+}
+
+// Path: riwayatHafalanSantri
+class _TranslationsRiwayatHafalanSantriId implements TranslationsRiwayatHafalanSantriEn {
+	_TranslationsRiwayatHafalanSantriId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Riwayat Hafalan';
+	@override String halaqohKelas({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
+	@override String get totalHafalanBaru => 'Total Hafalan Baru';
+	@override String get totalMurajaah => 'Total Muraja\'ah';
+	@override String get semuaTipe => 'Semua Tipe';
+	@override String get bukaMutabaah => 'BUKA MUTABA\'AH';
+	@override String get hafalanBaru => 'Hafalan Baru';
+	@override String get murajaah => 'Muraja\'ah';
+	@override String get lihatProgress => 'LIHAT PROGRESS HAFALAN PER SURAT';
+	@override String get downloadLaporan => 'DOWNLOAD LAPORAN HAFALAN';
+}
+
+// Path: progressHafalanPerJuz
+class _TranslationsProgressHafalanPerJuzId implements TranslationsProgressHafalanPerJuzEn {
+	_TranslationsProgressHafalanPerJuzId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Progress Hafalan';
+	@override String get targetHafalan => 'Target Hafalan';
+	@override String get pilihJuz => 'Pilih Juz untuk melihat detail progress per surat';
+	@override String suratSelesai({required Object completed, required Object total}) => '${completed} dari ${total} Surat Selesai';
+}
+
+// Path: progressHafalanPerSurat
+class _TranslationsProgressHafalanPerSuratId implements TranslationsProgressHafalanPerSuratEn {
+	_TranslationsProgressHafalanPerSuratId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Progress Per Surat';
+	@override String detailJuz({required Object juz}) => 'Detail Hafalan Juz ${juz}';
+	@override String ayatDari({required Object memorized, required Object total}) => 'Ayat ${memorized} dari ${total}';
+	@override String get selesai => 'Selesai';
+	@override String get dalamProses => 'Dalam Proses';
+	@override String get belumDimulai => 'Belum Dimulai';
+}
+
+// Path: mutabaahSantri
+class _TranslationsMutabaahSantriId implements TranslationsMutabaahSantriEn {
+	_TranslationsMutabaahSantriId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Mutaba\'ah Santri';
+	@override String get hafalanBaru => 'Hafalan Baru';
+	@override String get murajaah => 'Muraja\'ah';
+	@override String get hari => 'HARI';
+	@override String get tgl => 'TGL';
+	@override String get surat => 'SURAT';
+	@override String get ayat => 'AYAT';
+	@override String get nilai => 'NILAI';
+}
+
+// Path: guruProfile
+class _TranslationsGuruProfileId implements TranslationsGuruProfileEn {
+	_TranslationsGuruProfileId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get editProfile => 'Edit Profile';
+	@override String get ubahPassword => 'Ubah Password';
+	@override String get pengaturan => 'Pengaturan';
+	@override String get tentangAplikasi => 'Tentang Aplikasi';
+	@override String get keluar => 'Keluar';
+	@override String get guruHalaqoh => 'Guru Halaqoh';
+	@override String appVersion({required Object version}) => 'MyHalaqoh App v${version}';
+}
+
+// Path: editProfile
+class _TranslationsEditProfileId implements TranslationsEditProfileEn {
+	_TranslationsEditProfileId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Edit Profile';
+	@override String get editFotoProfil => 'Edit Foto Profil';
+	@override String get informasiPribadi => 'INFORMASI PRIBADI';
+	@override String get namaLengkap => 'Nama Lengkap';
+	@override String get nip => 'NIP';
+	@override String get jabatan => 'Jabatan';
+	@override String get kontak => 'KONTAK';
+	@override String get nomorHp => 'Nomor HP';
+	@override String get email => 'Email';
+	@override String get simpanPerubahan => 'Simpan Perubahan';
+}
+
+// Path: ubahPassword
+class _TranslationsUbahPasswordId implements TranslationsUbahPasswordEn {
+	_TranslationsUbahPasswordId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Ubah Password';
+	@override String get subtitle => 'Silakan masukkan kata sandi baru Anda untuk meningkatkan keamanan akun.';
+	@override String get kataSandiLama => 'Kata Sandi Lama';
+	@override String get kataSandiBaru => 'Kata Sandi Baru';
+	@override String get konfirmasiKataSandiBaru => 'Konfirmasi Kata Sandi Baru';
+	@override String get syaratKeamanan => 'SYARAT KEAMANAN';
+	@override String get minimal8Karakter => 'Minimal 8 karakter';
+	@override String get kombinasiHurufDanAngka => 'Kombinasi huruf dan angka';
+	@override String get ubahKataSandi => 'Ubah Kata Sandi';
+}
+
+// Path: pengaturanScreen
+class _TranslationsPengaturanScreenId implements TranslationsPengaturanScreenEn {
+	_TranslationsPengaturanScreenId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Pengaturan';
+	@override String get bahasa => 'Bahasa';
+	@override String get bahasaIndonesia => 'Bahasa Indonesia';
+	@override String get english => 'English';
+	@override String get pilihBahasa => 'Pilih Bahasa';
+	@override String get tema => 'Tema';
+	@override String get terangLight => 'Terang / Light';
+	@override String get gelapDark => 'Gelap / Dark';
+	@override String get pilihTema => 'Pilih Tema';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on TranslationsId {
@@ -409,6 +794,201 @@ extension on TranslationsId {
 			case 'selectSantri.nama': return 'NAMA';
 			case 'selectSantri.kelas': return 'KELAS';
 			case 'selectSantri.tambahkanButton': return ({required Object count}) => 'TAMBAHKAN (${count}) SANTRI';
+			case 'guruDashboard.greeting': return 'AHLAN WA SAHLAN';
+			case 'guruDashboard.subtitle': return 'Awali Halaqoh Dengan Doa Bersama Agar Selalu Diberkahi';
+			case 'guruDashboard.capaianHariIni': return 'Capaian hari ini';
+			case 'guruDashboard.kehadiranHariIni': return 'Kehadiran Hari ini';
+			case 'guruDashboard.setoranHafalan': return 'Setoran Hafalan';
+			case 'guruDashboard.santriCount': return ({required Object current, required Object total}) => '${current}/${total} Santri';
+			case 'guruDashboard.menuUtama': return 'Menu Utama';
+			case 'guruDashboard.myHalaqoh': return 'Halaqoh';
+			case 'guruDashboard.scanAbsensi': return 'Scan Absensi';
+			case 'guruDashboard.inputHafalan': return 'Input Hafalan';
+			case 'guruDashboard.laporan': return 'Laporan';
+			case 'guruDashboard.setoranTerakhir': return 'Setoran Terakhir';
+			case 'guruNav.home': return 'Home';
+			case 'guruNav.myHalaqoh': return 'Halaqoh';
+			case 'guruNav.absensi': return 'Absensi';
+			case 'guruNav.hafalan': return 'Hafalan';
+			case 'guruNav.profile': return 'Profile';
+			case 'myHalaqohScreen.title': return 'My Halaqoh';
+			case 'myHalaqohScreen.searchHint': return 'Cari nama atau NIS santri...';
+			case 'myHalaqohScreen.daftarSantri': return 'Daftar Santri';
+			case 'myHalaqohScreen.santriCount': return ({required Object count}) => '${count} Santri';
+			case 'myHalaqohScreen.kelas': return ({required Object kelas}) => 'Kelas ${kelas}';
+			case 'myHalaqohScreen.program': return ({required Object program}) => 'Program: ${program}';
+			case 'myHalaqohScreen.target': return ({required Object count, required Object range}) => 'Target: ${count} Juz (${range})';
+			case 'myHalaqohScreen.total': return ({required Object count}) => 'Total: ${count} Santri';
+			case 'myHalaqohScreen.pengampu': return 'Ustadz Kayyis';
+			case 'myHalaqohScreen.progressText': return ({required Object completed, required Object target}) => '${completed} Juz terselesaikan dari ${target} Juz';
+			case 'detailSantri.title': return 'Profil Santri';
+			case 'detailSantri.informasiAkademik': return 'INFORMASI AKADEMIK';
+			case 'detailSantri.kelas': return 'Kelas';
+			case 'detailSantri.program': return 'Program';
+			case 'detailSantri.halaqoh': return 'Halaqoh';
+			case 'detailSantri.pembimbing': return 'Pembimbing';
+			case 'detailSantri.progressHafalan': return 'PROGRESS HAFALAN';
+			case 'detailSantri.totalHafalan': return 'Total Hafalan';
+			case 'detailSantri.sertifikasiInfo': return ({required Object done, required Object total}) => '${done} dari ${total} Juz Tersertifikasi';
+			case 'detailSantri.sertifikasiJuz': return 'Sertifikasi Juz';
+			case 'absensi.mulaiSesi': return 'MULAI SESI ABSENSI';
+			case 'absensi.searchHint': return 'Cari Santri';
+			case 'absensi.lihatAbsensiHalaqoh': return 'Lihat Absensi Halaqoh';
+			case 'absensi.lihatDetailHariIni': return 'Lihat Detail Absensi Hari Ini';
+			case 'absensi.daftarSantri': return 'Daftar Santri';
+			case 'absensi.santriCount': return ({required Object count}) => '${count} Santri';
+			case 'absensi.riwayatAbsensi': return 'RIWAYAT ABSENSI';
+			case 'absensi.dialogTitle': return 'Mulai Sesi Absensi';
+			case 'absensi.tanggalHalaqoh': return 'TANGGAL HALAQOH';
+			case 'absensi.pilihSesi': return 'PILIH SESI';
+			case 'absensi.shubuh': return 'Shubuh';
+			case 'absensi.maghrib': return 'Maghrib';
+			case 'absensi.scanBarcode': return 'SCAN BARCODE';
+			case 'absensi.scanInstruction': return 'Arahkan kamera ke QR Code Santri';
+			case 'absensi.nama': return ({required Object name}) => 'Nama: ${name}';
+			case 'absensi.nis': return ({required Object nis}) => 'NIS: ${nis}';
+			case 'absensi.statusKehadiran': return 'STATUS KEHADIRAN';
+			case 'absensi.hadir': return 'Hadir';
+			case 'absensi.sakit': return 'Sakit';
+			case 'absensi.izin': return 'Izin';
+			case 'absensi.alfa': return 'Alfa';
+			case 'absensi.keterangan': return 'Keterangan (opsional)';
+			case 'absensi.batal': return 'BATAL';
+			case 'absensi.simpan': return 'SIMPAN';
+			case 'riwayatAbsensi.title': return 'Riwayat Absensi';
+			case 'riwayatAbsensi.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
+			case 'riwayatAbsensi.hadir': return 'HADIR';
+			case 'riwayatAbsensi.sakit': return 'SAKIT';
+			case 'riwayatAbsensi.izin': return 'IZIN';
+			case 'riwayatAbsensi.alfa': return 'ALFA';
+			case 'riwayatAbsensi.pagi': return 'PAGI';
+			case 'riwayatAbsensi.mlm': return 'MLM';
+			case 'riwayatAbsensi.geserHint': return 'Geser untuk melihat semua tanggal';
+			case 'riwayatAbsensi.lihatKalender': return 'LIHAT KALENDER ABSENSI LENGKAP';
+			case 'riwayatAbsensi.keterangan': return 'Keterangan';
+			case 'riwayatAbsensi.hadirLabel': return 'Hadir';
+			case 'riwayatAbsensi.sakitLabel': return 'Sakit';
+			case 'riwayatAbsensi.alphaLabel': return 'Alpha';
+			case 'riwayatAbsensi.izinLabel': return 'Izin';
+			case 'riwayatAbsensi.downloadLaporan': return 'DOWNLOAD LAPORAN ABSENSI';
+			case 'kalenderAbsensi.title': return 'Kalender Absensi';
+			case 'kalenderAbsensi.nisHalaqoh': return ({required Object nis, required Object halaqoh}) => 'NIS: ${nis}  •  Halaqoh ${halaqoh}';
+			case 'kalenderAbsensi.keterangan': return 'Keterangan';
+			case 'kalenderAbsensi.hadirLabel': return 'Hadir';
+			case 'kalenderAbsensi.sakitIzinLabel': return 'Sakit / Izin';
+			case 'kalenderAbsensi.alfaLabel': return 'Alfa';
+			case 'kalenderAbsensi.belumAbsen': return 'Belum Absen';
+			case 'kalenderAbsensi.pagiKiri': return 'Pagi (Kiri)';
+			case 'kalenderAbsensi.malamKanan': return 'Malam (Kanan)';
+			case 'kalenderAbsensi.aha': return 'AHA';
+			case 'kalenderAbsensi.sen': return 'SEN';
+			case 'kalenderAbsensi.sel': return 'SEL';
+			case 'kalenderAbsensi.rab': return 'RAB';
+			case 'kalenderAbsensi.kam': return 'KAM';
+			case 'kalenderAbsensi.jum': return 'JUM';
+			case 'kalenderAbsensi.sab': return 'SAB';
+			case 'absensiHalaqoh.title': return 'Absensi Halaqoh';
+			case 'absensiHalaqoh.tglSesi': return 'TGL / SESI';
+			case 'absensiHalaqoh.santri': return 'SANTRI';
+			case 'absensiHalaqoh.pagi': return 'Pagi';
+			case 'absensiHalaqoh.malam': return 'Malam';
+			case 'absensiHalaqoh.dhuha1': return 'Dhuha 1';
+			case 'absensiHalaqoh.dhuha2': return 'Dhuha 2';
+			case 'absensiHalaqoh.sore': return 'Sore';
+			case 'absensiHalaqoh.hadir': return 'Hadir';
+			case 'absensiHalaqoh.sakit': return 'Sakit';
+			case 'absensiHalaqoh.izin': return 'Izin';
+			case 'absensiHalaqoh.alfa': return 'Alfa';
+			case 'absensiHalaqoh.downloadLaporan': return 'DOWNLOAD LAPORAN ABSENSI';
+			case 'detailAbsensiHariIni.title': return 'Detail Absensi Hari Ini';
+			case 'detailAbsensiHariIni.hadir': return 'Hadir';
+			case 'detailAbsensiHariIni.sakit': return 'Sakit';
+			case 'detailAbsensiHariIni.izin': return 'Izin';
+			case 'detailAbsensiHariIni.alfa': return 'Alfa';
+			case 'detailAbsensiHariIni.belumAbsen': return 'Belum Absen';
+			case 'detailAbsensiHariIni.belumDiabsen': return 'Belum Diabsen';
+			case 'detailAbsensiHariIni.daftarKehadiranSantri': return 'Daftar Kehadiran Santri';
+			case 'hafalan.cariSantri': return 'Cari Santri';
+			case 'hafalan.daftarSantri': return 'Daftar Santri';
+			case 'hafalan.santriCount': return ({required Object count}) => '${count} Santri';
+			case 'hafalan.riwayatHafalan': return 'Riwayat Hafalan';
+			case 'hafalan.inputHafalan': return 'Input Hafalan';
+			case 'inputHafalanForm.nama': return ({required Object name}) => 'Nama: ${name}';
+			case 'inputHafalanForm.ziyadah': return 'ZIYADAH';
+			case 'inputHafalanForm.murajaah': return 'MURAJAAH';
+			case 'inputHafalanForm.formulirHafalan': return 'Formulir Hafalan';
+			case 'inputHafalanForm.pilihSurat': return 'Pilih Surat';
+			case 'inputHafalanForm.ayatAwal': return 'Ayat Awal';
+			case 'inputHafalanForm.ayatAkhir': return 'Ayat Akhir';
+			case 'inputHafalanForm.juz': return 'Juz';
+			case 'inputHafalanForm.penilaian': return 'Penilaian';
+			case 'inputHafalanForm.kelancaran': return 'Kelancaran 1 - 100';
+			case 'inputHafalanForm.tajwid': return 'Tajwid 1 - 100';
+			case 'inputHafalanForm.simpan': return 'SIMPAN';
+			case 'inputHafalanForm.batal': return 'BATAL';
+			case 'riwayatHafalanSantri.title': return 'Riwayat Hafalan';
+			case 'riwayatHafalanSantri.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
+			case 'riwayatHafalanSantri.totalHafalanBaru': return 'Total Hafalan Baru';
+			case 'riwayatHafalanSantri.totalMurajaah': return 'Total Muraja\'ah';
+			case 'riwayatHafalanSantri.semuaTipe': return 'Semua Tipe';
+			case 'riwayatHafalanSantri.bukaMutabaah': return 'BUKA MUTABA\'AH';
+			case 'riwayatHafalanSantri.hafalanBaru': return 'Hafalan Baru';
+			case 'riwayatHafalanSantri.murajaah': return 'Muraja\'ah';
+			case 'riwayatHafalanSantri.lihatProgress': return 'LIHAT PROGRESS HAFALAN PER SURAT';
+			case 'riwayatHafalanSantri.downloadLaporan': return 'DOWNLOAD LAPORAN HAFALAN';
+			case 'progressHafalanPerJuz.title': return 'Progress Hafalan';
+			case 'progressHafalanPerJuz.targetHafalan': return 'Target Hafalan';
+			case 'progressHafalanPerJuz.pilihJuz': return 'Pilih Juz untuk melihat detail progress per surat';
+			case 'progressHafalanPerJuz.suratSelesai': return ({required Object completed, required Object total}) => '${completed} dari ${total} Surat Selesai';
+			case 'progressHafalanPerSurat.title': return 'Progress Per Surat';
+			case 'progressHafalanPerSurat.detailJuz': return ({required Object juz}) => 'Detail Hafalan Juz ${juz}';
+			case 'progressHafalanPerSurat.ayatDari': return ({required Object memorized, required Object total}) => 'Ayat ${memorized} dari ${total}';
+			case 'progressHafalanPerSurat.selesai': return 'Selesai';
+			case 'progressHafalanPerSurat.dalamProses': return 'Dalam Proses';
+			case 'progressHafalanPerSurat.belumDimulai': return 'Belum Dimulai';
+			case 'mutabaahSantri.title': return 'Mutaba\'ah Santri';
+			case 'mutabaahSantri.hafalanBaru': return 'Hafalan Baru';
+			case 'mutabaahSantri.murajaah': return 'Muraja\'ah';
+			case 'mutabaahSantri.hari': return 'HARI';
+			case 'mutabaahSantri.tgl': return 'TGL';
+			case 'mutabaahSantri.surat': return 'SURAT';
+			case 'mutabaahSantri.ayat': return 'AYAT';
+			case 'mutabaahSantri.nilai': return 'NILAI';
+			case 'guruProfile.editProfile': return 'Edit Profile';
+			case 'guruProfile.ubahPassword': return 'Ubah Password';
+			case 'guruProfile.pengaturan': return 'Pengaturan';
+			case 'guruProfile.tentangAplikasi': return 'Tentang Aplikasi';
+			case 'guruProfile.keluar': return 'Keluar';
+			case 'guruProfile.guruHalaqoh': return 'Guru Halaqoh';
+			case 'guruProfile.appVersion': return ({required Object version}) => 'MyHalaqoh App v${version}';
+			case 'editProfile.title': return 'Edit Profile';
+			case 'editProfile.editFotoProfil': return 'Edit Foto Profil';
+			case 'editProfile.informasiPribadi': return 'INFORMASI PRIBADI';
+			case 'editProfile.namaLengkap': return 'Nama Lengkap';
+			case 'editProfile.nip': return 'NIP';
+			case 'editProfile.jabatan': return 'Jabatan';
+			case 'editProfile.kontak': return 'KONTAK';
+			case 'editProfile.nomorHp': return 'Nomor HP';
+			case 'editProfile.email': return 'Email';
+			case 'editProfile.simpanPerubahan': return 'Simpan Perubahan';
+			case 'ubahPassword.title': return 'Ubah Password';
+			case 'ubahPassword.subtitle': return 'Silakan masukkan kata sandi baru Anda untuk meningkatkan keamanan akun.';
+			case 'ubahPassword.kataSandiLama': return 'Kata Sandi Lama';
+			case 'ubahPassword.kataSandiBaru': return 'Kata Sandi Baru';
+			case 'ubahPassword.konfirmasiKataSandiBaru': return 'Konfirmasi Kata Sandi Baru';
+			case 'ubahPassword.syaratKeamanan': return 'SYARAT KEAMANAN';
+			case 'ubahPassword.minimal8Karakter': return 'Minimal 8 karakter';
+			case 'ubahPassword.kombinasiHurufDanAngka': return 'Kombinasi huruf dan angka';
+			case 'ubahPassword.ubahKataSandi': return 'Ubah Kata Sandi';
+			case 'pengaturanScreen.title': return 'Pengaturan';
+			case 'pengaturanScreen.bahasa': return 'Bahasa';
+			case 'pengaturanScreen.bahasaIndonesia': return 'Bahasa Indonesia';
+			case 'pengaturanScreen.english': return 'English';
+			case 'pengaturanScreen.pilihBahasa': return 'Pilih Bahasa';
+			case 'pengaturanScreen.tema': return 'Tema';
+			case 'pengaturanScreen.terangLight': return 'Terang / Light';
+			case 'pengaturanScreen.gelapDark': return 'Gelap / Dark';
+			case 'pengaturanScreen.pilihTema': return 'Pilih Tema';
 			default: return null;
 		}
 	}

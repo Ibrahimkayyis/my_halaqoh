@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 
-/// Menu card for guru dashboard — icon + label side by side
+/// Vertical menu card for guru dashboard — icon on top, label below
 class GuruMenuCard extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -28,7 +28,7 @@ class GuruMenuCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: BorderRadius.circular(14.r),
@@ -40,36 +40,36 @@ class GuruMenuCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Icon container
             Container(
-              width: 40.w,
-              height: 40.w,
+              width: 44.w,
+              height: 44.w,
               decoration: BoxDecoration(
                 color: iBgColor,
-                borderRadius: BorderRadius.circular(10.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Icon(
                 icon,
-                size: 22.sp,
+                size: 24.sp,
                 color: iColor,
               ),
             ),
-            SizedBox(width: 12.w),
+            SizedBox(height: 8.h),
             // Label
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: colors.textPrimary,
-                  fontFamily: 'Poppins',
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: colors.textPrimary,
+                fontFamily: 'Poppins',
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

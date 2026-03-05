@@ -41,7 +41,13 @@ class _LoginScreenState extends State<LoginScreen> {
       context.router.replace(const DashboardWrapperRoute());
     } else if (RegExp(r'^\d{13}$').hasMatch(username)) {
       // Guru role → NIP is 13 digits
-      context.router.replace(const GuruDashboardWrapperRoute());
+      // Determine program type from NIP:
+      // - 1234567890124 → takhassus
+      // - all other NIPs → reguler
+      final programType = username == '1234567890124' ? 'takhassus' : 'reguler';
+      context.router.replace(
+        GuruDashboardWrapperRoute(programType: programType),
+      );
     } else if (RegExp(r'^\d{12}$').hasMatch(username)) {
       // Wali Santri role → NIS is 12 digits
       context.router.replace(const WaliSantriDashboardWrapperRoute());
@@ -54,15 +60,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(fontFamily: 'Poppins'),
-        ),
+        content: Text(message, style: const TextStyle(fontFamily: 'Poppins')),
         backgroundColor: AppColors.of(context).error,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.r),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
       ),
     );
   }
@@ -75,10 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: colors.background,
       body: SingleChildScrollView(
         child: Column(
-          children: [
-            _buildHeader(colors),
-            _buildLoginCard(colors),
-          ],
+          children: [_buildHeader(colors), _buildLoginCard(colors)],
         ),
       ),
     );
@@ -92,10 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            colors.primary,
-            colors.primary.withValues(alpha: 0.85),
-          ],
+          colors: [colors.primary, colors.primary.withValues(alpha: 0.85)],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30.r),

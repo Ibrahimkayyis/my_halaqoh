@@ -52,6 +52,25 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsAddDataEn addData = TranslationsAddDataEn._(_root);
 	late final TranslationsAddHalaqohEn addHalaqoh = TranslationsAddHalaqohEn._(_root);
 	late final TranslationsSelectSantriEn selectSantri = TranslationsSelectSantriEn._(_root);
+	late final TranslationsGuruDashboardEn guruDashboard = TranslationsGuruDashboardEn._(_root);
+	late final TranslationsGuruNavEn guruNav = TranslationsGuruNavEn._(_root);
+	late final TranslationsMyHalaqohScreenEn myHalaqohScreen = TranslationsMyHalaqohScreenEn._(_root);
+	late final TranslationsDetailSantriEn detailSantri = TranslationsDetailSantriEn._(_root);
+	late final TranslationsAbsensiEn absensi = TranslationsAbsensiEn._(_root);
+	late final TranslationsRiwayatAbsensiEn riwayatAbsensi = TranslationsRiwayatAbsensiEn._(_root);
+	late final TranslationsKalenderAbsensiEn kalenderAbsensi = TranslationsKalenderAbsensiEn._(_root);
+	late final TranslationsAbsensiHalaqohEn absensiHalaqoh = TranslationsAbsensiHalaqohEn._(_root);
+	late final TranslationsDetailAbsensiHariIniEn detailAbsensiHariIni = TranslationsDetailAbsensiHariIniEn._(_root);
+	late final TranslationsHafalanEn hafalan = TranslationsHafalanEn._(_root);
+	late final TranslationsInputHafalanFormEn inputHafalanForm = TranslationsInputHafalanFormEn._(_root);
+	late final TranslationsRiwayatHafalanSantriEn riwayatHafalanSantri = TranslationsRiwayatHafalanSantriEn._(_root);
+	late final TranslationsProgressHafalanPerJuzEn progressHafalanPerJuz = TranslationsProgressHafalanPerJuzEn._(_root);
+	late final TranslationsProgressHafalanPerSuratEn progressHafalanPerSurat = TranslationsProgressHafalanPerSuratEn._(_root);
+	late final TranslationsMutabaahSantriEn mutabaahSantri = TranslationsMutabaahSantriEn._(_root);
+	late final TranslationsGuruProfileEn guruProfile = TranslationsGuruProfileEn._(_root);
+	late final TranslationsEditProfileEn editProfile = TranslationsEditProfileEn._(_root);
+	late final TranslationsUbahPasswordEn ubahPassword = TranslationsUbahPasswordEn._(_root);
+	late final TranslationsPengaturanScreenEn pengaturanScreen = TranslationsPengaturanScreenEn._(_root);
 }
 
 // Path: app
@@ -525,6 +544,762 @@ class TranslationsSelectSantriEn {
 	String tambahkanButton({required Object count}) => 'ADD (${count}) SANTRI';
 }
 
+// Path: guruDashboard
+class TranslationsGuruDashboardEn {
+	TranslationsGuruDashboardEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'AHLAN WA SAHLAN'
+	String get greeting => 'AHLAN WA SAHLAN';
+
+	/// en: 'Begin Halaqoh With Prayers Together To Always Be Blessed'
+	String get subtitle => 'Begin Halaqoh With Prayers Together To Always Be Blessed';
+
+	/// en: 'Today's Achievement'
+	String get capaianHariIni => 'Today\'s Achievement';
+
+	/// en: 'Attendance Today'
+	String get kehadiranHariIni => 'Attendance Today';
+
+	/// en: 'Hafalan Submission'
+	String get setoranHafalan => 'Hafalan Submission';
+
+	/// en: '$current/$total Santri'
+	String santriCount({required Object current, required Object total}) => '${current}/${total} Santri';
+
+	/// en: 'Main Menu'
+	String get menuUtama => 'Main Menu';
+
+	/// en: 'Halaqoh'
+	String get myHalaqoh => 'Halaqoh';
+
+	/// en: 'Scan Attendance'
+	String get scanAbsensi => 'Scan Attendance';
+
+	/// en: 'Input Hafalan'
+	String get inputHafalan => 'Input Hafalan';
+
+	/// en: 'Report'
+	String get laporan => 'Report';
+
+	/// en: 'Recent Submissions'
+	String get setoranTerakhir => 'Recent Submissions';
+}
+
+// Path: guruNav
+class TranslationsGuruNavEn {
+	TranslationsGuruNavEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Home'
+	String get home => 'Home';
+
+	/// en: 'Halaqoh'
+	String get myHalaqoh => 'Halaqoh';
+
+	/// en: 'Attendance'
+	String get absensi => 'Attendance';
+
+	/// en: 'Hafalan'
+	String get hafalan => 'Hafalan';
+
+	/// en: 'Profile'
+	String get profile => 'Profile';
+}
+
+// Path: myHalaqohScreen
+class TranslationsMyHalaqohScreenEn {
+	TranslationsMyHalaqohScreenEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'My Halaqoh'
+	String get title => 'My Halaqoh';
+
+	/// en: 'Search name or NIS...'
+	String get searchHint => 'Search name or NIS...';
+
+	/// en: 'Student List'
+	String get daftarSantri => 'Student List';
+
+	/// en: '$count Santri'
+	String santriCount({required Object count}) => '${count} Santri';
+
+	/// en: 'Grade $kelas'
+	String kelas({required Object kelas}) => 'Grade ${kelas}';
+
+	/// en: 'Program: $program'
+	String program({required Object program}) => 'Program: ${program}';
+
+	/// en: 'Target: $count Juz ($range)'
+	String target({required Object count, required Object range}) => 'Target: ${count} Juz (${range})';
+
+	/// en: 'Total: $count Santri'
+	String total({required Object count}) => 'Total: ${count} Santri';
+
+	/// en: 'Ustadz Kayyis'
+	String get pengampu => 'Ustadz Kayyis';
+
+	/// en: '$completed Juz completed of $target Juz'
+	String progressText({required Object completed, required Object target}) => '${completed} Juz completed of ${target} Juz';
+}
+
+// Path: detailSantri
+class TranslationsDetailSantriEn {
+	TranslationsDetailSantriEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Student Profile'
+	String get title => 'Student Profile';
+
+	/// en: 'ACADEMIC INFORMATION'
+	String get informasiAkademik => 'ACADEMIC INFORMATION';
+
+	/// en: 'Class'
+	String get kelas => 'Class';
+
+	/// en: 'Program'
+	String get program => 'Program';
+
+	/// en: 'Halaqoh'
+	String get halaqoh => 'Halaqoh';
+
+	/// en: 'Mentor'
+	String get pembimbing => 'Mentor';
+
+	/// en: 'MEMORIZATION PROGRESS'
+	String get progressHafalan => 'MEMORIZATION PROGRESS';
+
+	/// en: 'Total Memorization'
+	String get totalHafalan => 'Total Memorization';
+
+	/// en: '$done of $total Juz Certified'
+	String sertifikasiInfo({required Object done, required Object total}) => '${done} of ${total} Juz Certified';
+
+	/// en: 'Juz Certification'
+	String get sertifikasiJuz => 'Juz Certification';
+}
+
+// Path: absensi
+class TranslationsAbsensiEn {
+	TranslationsAbsensiEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'START ATTENDANCE SESSION'
+	String get mulaiSesi => 'START ATTENDANCE SESSION';
+
+	/// en: 'Search Student'
+	String get searchHint => 'Search Student';
+
+	/// en: 'View Halaqoh Attendance'
+	String get lihatAbsensiHalaqoh => 'View Halaqoh Attendance';
+
+	/// en: 'View Today's Attendance Detail'
+	String get lihatDetailHariIni => 'View Today\'s Attendance Detail';
+
+	/// en: 'Student List'
+	String get daftarSantri => 'Student List';
+
+	/// en: '$count Students'
+	String santriCount({required Object count}) => '${count} Students';
+
+	/// en: 'ATTENDANCE HISTORY'
+	String get riwayatAbsensi => 'ATTENDANCE HISTORY';
+
+	/// en: 'Start Attendance Session'
+	String get dialogTitle => 'Start Attendance Session';
+
+	/// en: 'HALAQOH DATE'
+	String get tanggalHalaqoh => 'HALAQOH DATE';
+
+	/// en: 'SELECT SESSION'
+	String get pilihSesi => 'SELECT SESSION';
+
+	/// en: 'Shubuh'
+	String get shubuh => 'Shubuh';
+
+	/// en: 'Maghrib'
+	String get maghrib => 'Maghrib';
+
+	/// en: 'SCAN BARCODE'
+	String get scanBarcode => 'SCAN BARCODE';
+
+	/// en: 'Point camera at Student QR Code'
+	String get scanInstruction => 'Point camera at Student QR Code';
+
+	/// en: 'Name: $name'
+	String nama({required Object name}) => 'Name: ${name}';
+
+	/// en: 'NIS: $nis'
+	String nis({required Object nis}) => 'NIS: ${nis}';
+
+	/// en: 'ATTENDANCE STATUS'
+	String get statusKehadiran => 'ATTENDANCE STATUS';
+
+	/// en: 'Present'
+	String get hadir => 'Present';
+
+	/// en: 'Sick'
+	String get sakit => 'Sick';
+
+	/// en: 'Excused'
+	String get izin => 'Excused';
+
+	/// en: 'Absent'
+	String get alfa => 'Absent';
+
+	/// en: 'Notes (optional)'
+	String get keterangan => 'Notes (optional)';
+
+	/// en: 'CANCEL'
+	String get batal => 'CANCEL';
+
+	/// en: 'SAVE'
+	String get simpan => 'SAVE';
+}
+
+// Path: riwayatAbsensi
+class TranslationsRiwayatAbsensiEn {
+	TranslationsRiwayatAbsensiEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Attendance History'
+	String get title => 'Attendance History';
+
+	/// en: 'Halaqoh $halaqoh - Class $kelas'
+	String halaqohKelas({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
+
+	/// en: 'PRESENT'
+	String get hadir => 'PRESENT';
+
+	/// en: 'SICK'
+	String get sakit => 'SICK';
+
+	/// en: 'EXCUSED'
+	String get izin => 'EXCUSED';
+
+	/// en: 'ABSENT'
+	String get alfa => 'ABSENT';
+
+	/// en: 'MORNING'
+	String get pagi => 'MORNING';
+
+	/// en: 'NIGHT'
+	String get mlm => 'NIGHT';
+
+	/// en: 'Swipe to see all dates'
+	String get geserHint => 'Swipe to see all dates';
+
+	/// en: 'VIEW FULL ATTENDANCE CALENDAR'
+	String get lihatKalender => 'VIEW FULL ATTENDANCE CALENDAR';
+
+	/// en: 'Legend'
+	String get keterangan => 'Legend';
+
+	/// en: 'Present'
+	String get hadirLabel => 'Present';
+
+	/// en: 'Sick'
+	String get sakitLabel => 'Sick';
+
+	/// en: 'Absent'
+	String get alphaLabel => 'Absent';
+
+	/// en: 'Excused'
+	String get izinLabel => 'Excused';
+
+	/// en: 'DOWNLOAD ATTENDANCE REPORT'
+	String get downloadLaporan => 'DOWNLOAD ATTENDANCE REPORT';
+}
+
+// Path: kalenderAbsensi
+class TranslationsKalenderAbsensiEn {
+	TranslationsKalenderAbsensiEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Attendance Calendar'
+	String get title => 'Attendance Calendar';
+
+	/// en: 'NIS: $nis • Halaqoh $halaqoh'
+	String nisHalaqoh({required Object nis, required Object halaqoh}) => 'NIS: ${nis}  •  Halaqoh ${halaqoh}';
+
+	/// en: 'Legend'
+	String get keterangan => 'Legend';
+
+	/// en: 'Present'
+	String get hadirLabel => 'Present';
+
+	/// en: 'Sick / Excused'
+	String get sakitIzinLabel => 'Sick / Excused';
+
+	/// en: 'Absent'
+	String get alfaLabel => 'Absent';
+
+	/// en: 'Not Yet'
+	String get belumAbsen => 'Not Yet';
+
+	/// en: 'Morning (Left)'
+	String get pagiKiri => 'Morning (Left)';
+
+	/// en: 'Night (Right)'
+	String get malamKanan => 'Night (Right)';
+
+	/// en: 'SUN'
+	String get aha => 'SUN';
+
+	/// en: 'MON'
+	String get sen => 'MON';
+
+	/// en: 'TUE'
+	String get sel => 'TUE';
+
+	/// en: 'WED'
+	String get rab => 'WED';
+
+	/// en: 'THU'
+	String get kam => 'THU';
+
+	/// en: 'FRI'
+	String get jum => 'FRI';
+
+	/// en: 'SAT'
+	String get sab => 'SAT';
+}
+
+// Path: absensiHalaqoh
+class TranslationsAbsensiHalaqohEn {
+	TranslationsAbsensiHalaqohEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Halaqoh Attendance'
+	String get title => 'Halaqoh Attendance';
+
+	/// en: 'DATE / SESSION'
+	String get tglSesi => 'DATE / SESSION';
+
+	/// en: 'STUDENT'
+	String get santri => 'STUDENT';
+
+	/// en: 'Morning'
+	String get pagi => 'Morning';
+
+	/// en: 'Night'
+	String get malam => 'Night';
+
+	/// en: 'Dhuha 1'
+	String get dhuha1 => 'Dhuha 1';
+
+	/// en: 'Dhuha 2'
+	String get dhuha2 => 'Dhuha 2';
+
+	/// en: 'Afternoon'
+	String get sore => 'Afternoon';
+
+	/// en: 'Present'
+	String get hadir => 'Present';
+
+	/// en: 'Sick'
+	String get sakit => 'Sick';
+
+	/// en: 'Excused'
+	String get izin => 'Excused';
+
+	/// en: 'Absent'
+	String get alfa => 'Absent';
+
+	/// en: 'DOWNLOAD ATTENDANCE REPORT'
+	String get downloadLaporan => 'DOWNLOAD ATTENDANCE REPORT';
+}
+
+// Path: detailAbsensiHariIni
+class TranslationsDetailAbsensiHariIniEn {
+	TranslationsDetailAbsensiHariIniEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Today's Attendance Detail'
+	String get title => 'Today\'s Attendance Detail';
+
+	/// en: 'Present'
+	String get hadir => 'Present';
+
+	/// en: 'Sick'
+	String get sakit => 'Sick';
+
+	/// en: 'Excused'
+	String get izin => 'Excused';
+
+	/// en: 'Absent'
+	String get alfa => 'Absent';
+
+	/// en: 'Not Yet'
+	String get belumAbsen => 'Not Yet';
+
+	/// en: 'Not Recorded'
+	String get belumDiabsen => 'Not Recorded';
+
+	/// en: 'Student Attendance List'
+	String get daftarKehadiranSantri => 'Student Attendance List';
+}
+
+// Path: hafalan
+class TranslationsHafalanEn {
+	TranslationsHafalanEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Search Student'
+	String get cariSantri => 'Search Student';
+
+	/// en: 'Student List'
+	String get daftarSantri => 'Student List';
+
+	/// en: '$count Students'
+	String santriCount({required Object count}) => '${count} Students';
+
+	/// en: 'Memorization History'
+	String get riwayatHafalan => 'Memorization History';
+
+	/// en: 'Input Memorization'
+	String get inputHafalan => 'Input Memorization';
+}
+
+// Path: inputHafalanForm
+class TranslationsInputHafalanFormEn {
+	TranslationsInputHafalanFormEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Name: $name'
+	String nama({required Object name}) => 'Name: ${name}';
+
+	/// en: 'ZIYADAH'
+	String get ziyadah => 'ZIYADAH';
+
+	/// en: 'MURAJAAH'
+	String get murajaah => 'MURAJAAH';
+
+	/// en: 'Memorization Form'
+	String get formulirHafalan => 'Memorization Form';
+
+	/// en: 'Select Surah'
+	String get pilihSurat => 'Select Surah';
+
+	/// en: 'Start Verse'
+	String get ayatAwal => 'Start Verse';
+
+	/// en: 'End Verse'
+	String get ayatAkhir => 'End Verse';
+
+	/// en: 'Juz'
+	String get juz => 'Juz';
+
+	/// en: 'Assessment'
+	String get penilaian => 'Assessment';
+
+	/// en: 'Fluency 1 - 100'
+	String get kelancaran => 'Fluency 1 - 100';
+
+	/// en: 'Tajwid 1 - 100'
+	String get tajwid => 'Tajwid 1 - 100';
+
+	/// en: 'SAVE'
+	String get simpan => 'SAVE';
+
+	/// en: 'CANCEL'
+	String get batal => 'CANCEL';
+}
+
+// Path: riwayatHafalanSantri
+class TranslationsRiwayatHafalanSantriEn {
+	TranslationsRiwayatHafalanSantriEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Memorization History'
+	String get title => 'Memorization History';
+
+	/// en: 'Halaqoh $halaqoh - Class $kelas'
+	String halaqohKelas({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
+
+	/// en: 'Total New Memorization'
+	String get totalHafalanBaru => 'Total New Memorization';
+
+	/// en: 'Total Review'
+	String get totalMurajaah => 'Total Review';
+
+	/// en: 'All Types'
+	String get semuaTipe => 'All Types';
+
+	/// en: 'OPEN MUTABA'AH'
+	String get bukaMutabaah => 'OPEN MUTABA\'AH';
+
+	/// en: 'New Memorization'
+	String get hafalanBaru => 'New Memorization';
+
+	/// en: 'Review'
+	String get murajaah => 'Review';
+
+	/// en: 'VIEW PROGRESS PER SURAH'
+	String get lihatProgress => 'VIEW PROGRESS PER SURAH';
+
+	/// en: 'DOWNLOAD MEMORIZATION REPORT'
+	String get downloadLaporan => 'DOWNLOAD MEMORIZATION REPORT';
+}
+
+// Path: progressHafalanPerJuz
+class TranslationsProgressHafalanPerJuzEn {
+	TranslationsProgressHafalanPerJuzEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Memorization Progress'
+	String get title => 'Memorization Progress';
+
+	/// en: 'Memorization Target'
+	String get targetHafalan => 'Memorization Target';
+
+	/// en: 'Select Juz to view detailed progress per surah'
+	String get pilihJuz => 'Select Juz to view detailed progress per surah';
+
+	/// en: '$completed of $total Surah Completed'
+	String suratSelesai({required Object completed, required Object total}) => '${completed} of ${total} Surah Completed';
+}
+
+// Path: progressHafalanPerSurat
+class TranslationsProgressHafalanPerSuratEn {
+	TranslationsProgressHafalanPerSuratEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Progress Per Surah'
+	String get title => 'Progress Per Surah';
+
+	/// en: 'Memorization Detail Juz $juz'
+	String detailJuz({required Object juz}) => 'Memorization Detail Juz ${juz}';
+
+	/// en: 'Ayat $memorized of $total'
+	String ayatDari({required Object memorized, required Object total}) => 'Ayat ${memorized} of ${total}';
+
+	/// en: 'Completed'
+	String get selesai => 'Completed';
+
+	/// en: 'In Progress'
+	String get dalamProses => 'In Progress';
+
+	/// en: 'Not Started'
+	String get belumDimulai => 'Not Started';
+}
+
+// Path: mutabaahSantri
+class TranslationsMutabaahSantriEn {
+	TranslationsMutabaahSantriEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Mutaba'ah Santri'
+	String get title => 'Mutaba\'ah Santri';
+
+	/// en: 'New Memorization'
+	String get hafalanBaru => 'New Memorization';
+
+	/// en: 'Review'
+	String get murajaah => 'Review';
+
+	/// en: 'DAY'
+	String get hari => 'DAY';
+
+	/// en: 'DATE'
+	String get tgl => 'DATE';
+
+	/// en: 'SURAH'
+	String get surat => 'SURAH';
+
+	/// en: 'AYAT'
+	String get ayat => 'AYAT';
+
+	/// en: 'SCORE'
+	String get nilai => 'SCORE';
+}
+
+// Path: guruProfile
+class TranslationsGuruProfileEn {
+	TranslationsGuruProfileEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Edit Profile'
+	String get editProfile => 'Edit Profile';
+
+	/// en: 'Change Password'
+	String get ubahPassword => 'Change Password';
+
+	/// en: 'Settings'
+	String get pengaturan => 'Settings';
+
+	/// en: 'About App'
+	String get tentangAplikasi => 'About App';
+
+	/// en: 'Logout'
+	String get keluar => 'Logout';
+
+	/// en: 'Halaqoh Teacher'
+	String get guruHalaqoh => 'Halaqoh Teacher';
+
+	/// en: 'MyHalaqoh App v$version'
+	String appVersion({required Object version}) => 'MyHalaqoh App v${version}';
+}
+
+// Path: editProfile
+class TranslationsEditProfileEn {
+	TranslationsEditProfileEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Edit Profile'
+	String get title => 'Edit Profile';
+
+	/// en: 'Edit Profile Photo'
+	String get editFotoProfil => 'Edit Profile Photo';
+
+	/// en: 'PERSONAL INFORMATION'
+	String get informasiPribadi => 'PERSONAL INFORMATION';
+
+	/// en: 'Full Name'
+	String get namaLengkap => 'Full Name';
+
+	/// en: 'NIP'
+	String get nip => 'NIP';
+
+	/// en: 'Position'
+	String get jabatan => 'Position';
+
+	/// en: 'CONTACT'
+	String get kontak => 'CONTACT';
+
+	/// en: 'Phone Number'
+	String get nomorHp => 'Phone Number';
+
+	/// en: 'Email'
+	String get email => 'Email';
+
+	/// en: 'Save Changes'
+	String get simpanPerubahan => 'Save Changes';
+}
+
+// Path: ubahPassword
+class TranslationsUbahPasswordEn {
+	TranslationsUbahPasswordEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Change Password'
+	String get title => 'Change Password';
+
+	/// en: 'Please enter your new password to improve your account security.'
+	String get subtitle => 'Please enter your new password to improve your account security.';
+
+	/// en: 'Old Password'
+	String get kataSandiLama => 'Old Password';
+
+	/// en: 'New Password'
+	String get kataSandiBaru => 'New Password';
+
+	/// en: 'Confirm New Password'
+	String get konfirmasiKataSandiBaru => 'Confirm New Password';
+
+	/// en: 'SECURITY REQUIREMENTS'
+	String get syaratKeamanan => 'SECURITY REQUIREMENTS';
+
+	/// en: 'Minimum 8 characters'
+	String get minimal8Karakter => 'Minimum 8 characters';
+
+	/// en: 'Combination of letters and numbers'
+	String get kombinasiHurufDanAngka => 'Combination of letters and numbers';
+
+	/// en: 'Change Password'
+	String get ubahKataSandi => 'Change Password';
+}
+
+// Path: pengaturanScreen
+class TranslationsPengaturanScreenEn {
+	TranslationsPengaturanScreenEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Settings'
+	String get title => 'Settings';
+
+	/// en: 'Language'
+	String get bahasa => 'Language';
+
+	/// en: 'Bahasa Indonesia'
+	String get bahasaIndonesia => 'Bahasa Indonesia';
+
+	/// en: 'English'
+	String get english => 'English';
+
+	/// en: 'Select Language'
+	String get pilihBahasa => 'Select Language';
+
+	/// en: 'Theme'
+	String get tema => 'Theme';
+
+	/// en: 'Light'
+	String get terangLight => 'Light';
+
+	/// en: 'Dark'
+	String get gelapDark => 'Dark';
+
+	/// en: 'Select Theme'
+	String get pilihTema => 'Select Theme';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
@@ -648,6 +1423,201 @@ extension on Translations {
 			case 'selectSantri.nama': return 'NAME';
 			case 'selectSantri.kelas': return 'CLASS';
 			case 'selectSantri.tambahkanButton': return ({required Object count}) => 'ADD (${count}) SANTRI';
+			case 'guruDashboard.greeting': return 'AHLAN WA SAHLAN';
+			case 'guruDashboard.subtitle': return 'Begin Halaqoh With Prayers Together To Always Be Blessed';
+			case 'guruDashboard.capaianHariIni': return 'Today\'s Achievement';
+			case 'guruDashboard.kehadiranHariIni': return 'Attendance Today';
+			case 'guruDashboard.setoranHafalan': return 'Hafalan Submission';
+			case 'guruDashboard.santriCount': return ({required Object current, required Object total}) => '${current}/${total} Santri';
+			case 'guruDashboard.menuUtama': return 'Main Menu';
+			case 'guruDashboard.myHalaqoh': return 'Halaqoh';
+			case 'guruDashboard.scanAbsensi': return 'Scan Attendance';
+			case 'guruDashboard.inputHafalan': return 'Input Hafalan';
+			case 'guruDashboard.laporan': return 'Report';
+			case 'guruDashboard.setoranTerakhir': return 'Recent Submissions';
+			case 'guruNav.home': return 'Home';
+			case 'guruNav.myHalaqoh': return 'Halaqoh';
+			case 'guruNav.absensi': return 'Attendance';
+			case 'guruNav.hafalan': return 'Hafalan';
+			case 'guruNav.profile': return 'Profile';
+			case 'myHalaqohScreen.title': return 'My Halaqoh';
+			case 'myHalaqohScreen.searchHint': return 'Search name or NIS...';
+			case 'myHalaqohScreen.daftarSantri': return 'Student List';
+			case 'myHalaqohScreen.santriCount': return ({required Object count}) => '${count} Santri';
+			case 'myHalaqohScreen.kelas': return ({required Object kelas}) => 'Grade ${kelas}';
+			case 'myHalaqohScreen.program': return ({required Object program}) => 'Program: ${program}';
+			case 'myHalaqohScreen.target': return ({required Object count, required Object range}) => 'Target: ${count} Juz (${range})';
+			case 'myHalaqohScreen.total': return ({required Object count}) => 'Total: ${count} Santri';
+			case 'myHalaqohScreen.pengampu': return 'Ustadz Kayyis';
+			case 'myHalaqohScreen.progressText': return ({required Object completed, required Object target}) => '${completed} Juz completed of ${target} Juz';
+			case 'detailSantri.title': return 'Student Profile';
+			case 'detailSantri.informasiAkademik': return 'ACADEMIC INFORMATION';
+			case 'detailSantri.kelas': return 'Class';
+			case 'detailSantri.program': return 'Program';
+			case 'detailSantri.halaqoh': return 'Halaqoh';
+			case 'detailSantri.pembimbing': return 'Mentor';
+			case 'detailSantri.progressHafalan': return 'MEMORIZATION PROGRESS';
+			case 'detailSantri.totalHafalan': return 'Total Memorization';
+			case 'detailSantri.sertifikasiInfo': return ({required Object done, required Object total}) => '${done} of ${total} Juz Certified';
+			case 'detailSantri.sertifikasiJuz': return 'Juz Certification';
+			case 'absensi.mulaiSesi': return 'START ATTENDANCE SESSION';
+			case 'absensi.searchHint': return 'Search Student';
+			case 'absensi.lihatAbsensiHalaqoh': return 'View Halaqoh Attendance';
+			case 'absensi.lihatDetailHariIni': return 'View Today\'s Attendance Detail';
+			case 'absensi.daftarSantri': return 'Student List';
+			case 'absensi.santriCount': return ({required Object count}) => '${count} Students';
+			case 'absensi.riwayatAbsensi': return 'ATTENDANCE HISTORY';
+			case 'absensi.dialogTitle': return 'Start Attendance Session';
+			case 'absensi.tanggalHalaqoh': return 'HALAQOH DATE';
+			case 'absensi.pilihSesi': return 'SELECT SESSION';
+			case 'absensi.shubuh': return 'Shubuh';
+			case 'absensi.maghrib': return 'Maghrib';
+			case 'absensi.scanBarcode': return 'SCAN BARCODE';
+			case 'absensi.scanInstruction': return 'Point camera at Student QR Code';
+			case 'absensi.nama': return ({required Object name}) => 'Name: ${name}';
+			case 'absensi.nis': return ({required Object nis}) => 'NIS: ${nis}';
+			case 'absensi.statusKehadiran': return 'ATTENDANCE STATUS';
+			case 'absensi.hadir': return 'Present';
+			case 'absensi.sakit': return 'Sick';
+			case 'absensi.izin': return 'Excused';
+			case 'absensi.alfa': return 'Absent';
+			case 'absensi.keterangan': return 'Notes (optional)';
+			case 'absensi.batal': return 'CANCEL';
+			case 'absensi.simpan': return 'SAVE';
+			case 'riwayatAbsensi.title': return 'Attendance History';
+			case 'riwayatAbsensi.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
+			case 'riwayatAbsensi.hadir': return 'PRESENT';
+			case 'riwayatAbsensi.sakit': return 'SICK';
+			case 'riwayatAbsensi.izin': return 'EXCUSED';
+			case 'riwayatAbsensi.alfa': return 'ABSENT';
+			case 'riwayatAbsensi.pagi': return 'MORNING';
+			case 'riwayatAbsensi.mlm': return 'NIGHT';
+			case 'riwayatAbsensi.geserHint': return 'Swipe to see all dates';
+			case 'riwayatAbsensi.lihatKalender': return 'VIEW FULL ATTENDANCE CALENDAR';
+			case 'riwayatAbsensi.keterangan': return 'Legend';
+			case 'riwayatAbsensi.hadirLabel': return 'Present';
+			case 'riwayatAbsensi.sakitLabel': return 'Sick';
+			case 'riwayatAbsensi.alphaLabel': return 'Absent';
+			case 'riwayatAbsensi.izinLabel': return 'Excused';
+			case 'riwayatAbsensi.downloadLaporan': return 'DOWNLOAD ATTENDANCE REPORT';
+			case 'kalenderAbsensi.title': return 'Attendance Calendar';
+			case 'kalenderAbsensi.nisHalaqoh': return ({required Object nis, required Object halaqoh}) => 'NIS: ${nis}  •  Halaqoh ${halaqoh}';
+			case 'kalenderAbsensi.keterangan': return 'Legend';
+			case 'kalenderAbsensi.hadirLabel': return 'Present';
+			case 'kalenderAbsensi.sakitIzinLabel': return 'Sick / Excused';
+			case 'kalenderAbsensi.alfaLabel': return 'Absent';
+			case 'kalenderAbsensi.belumAbsen': return 'Not Yet';
+			case 'kalenderAbsensi.pagiKiri': return 'Morning (Left)';
+			case 'kalenderAbsensi.malamKanan': return 'Night (Right)';
+			case 'kalenderAbsensi.aha': return 'SUN';
+			case 'kalenderAbsensi.sen': return 'MON';
+			case 'kalenderAbsensi.sel': return 'TUE';
+			case 'kalenderAbsensi.rab': return 'WED';
+			case 'kalenderAbsensi.kam': return 'THU';
+			case 'kalenderAbsensi.jum': return 'FRI';
+			case 'kalenderAbsensi.sab': return 'SAT';
+			case 'absensiHalaqoh.title': return 'Halaqoh Attendance';
+			case 'absensiHalaqoh.tglSesi': return 'DATE / SESSION';
+			case 'absensiHalaqoh.santri': return 'STUDENT';
+			case 'absensiHalaqoh.pagi': return 'Morning';
+			case 'absensiHalaqoh.malam': return 'Night';
+			case 'absensiHalaqoh.dhuha1': return 'Dhuha 1';
+			case 'absensiHalaqoh.dhuha2': return 'Dhuha 2';
+			case 'absensiHalaqoh.sore': return 'Afternoon';
+			case 'absensiHalaqoh.hadir': return 'Present';
+			case 'absensiHalaqoh.sakit': return 'Sick';
+			case 'absensiHalaqoh.izin': return 'Excused';
+			case 'absensiHalaqoh.alfa': return 'Absent';
+			case 'absensiHalaqoh.downloadLaporan': return 'DOWNLOAD ATTENDANCE REPORT';
+			case 'detailAbsensiHariIni.title': return 'Today\'s Attendance Detail';
+			case 'detailAbsensiHariIni.hadir': return 'Present';
+			case 'detailAbsensiHariIni.sakit': return 'Sick';
+			case 'detailAbsensiHariIni.izin': return 'Excused';
+			case 'detailAbsensiHariIni.alfa': return 'Absent';
+			case 'detailAbsensiHariIni.belumAbsen': return 'Not Yet';
+			case 'detailAbsensiHariIni.belumDiabsen': return 'Not Recorded';
+			case 'detailAbsensiHariIni.daftarKehadiranSantri': return 'Student Attendance List';
+			case 'hafalan.cariSantri': return 'Search Student';
+			case 'hafalan.daftarSantri': return 'Student List';
+			case 'hafalan.santriCount': return ({required Object count}) => '${count} Students';
+			case 'hafalan.riwayatHafalan': return 'Memorization History';
+			case 'hafalan.inputHafalan': return 'Input Memorization';
+			case 'inputHafalanForm.nama': return ({required Object name}) => 'Name: ${name}';
+			case 'inputHafalanForm.ziyadah': return 'ZIYADAH';
+			case 'inputHafalanForm.murajaah': return 'MURAJAAH';
+			case 'inputHafalanForm.formulirHafalan': return 'Memorization Form';
+			case 'inputHafalanForm.pilihSurat': return 'Select Surah';
+			case 'inputHafalanForm.ayatAwal': return 'Start Verse';
+			case 'inputHafalanForm.ayatAkhir': return 'End Verse';
+			case 'inputHafalanForm.juz': return 'Juz';
+			case 'inputHafalanForm.penilaian': return 'Assessment';
+			case 'inputHafalanForm.kelancaran': return 'Fluency 1 - 100';
+			case 'inputHafalanForm.tajwid': return 'Tajwid 1 - 100';
+			case 'inputHafalanForm.simpan': return 'SAVE';
+			case 'inputHafalanForm.batal': return 'CANCEL';
+			case 'riwayatHafalanSantri.title': return 'Memorization History';
+			case 'riwayatHafalanSantri.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
+			case 'riwayatHafalanSantri.totalHafalanBaru': return 'Total New Memorization';
+			case 'riwayatHafalanSantri.totalMurajaah': return 'Total Review';
+			case 'riwayatHafalanSantri.semuaTipe': return 'All Types';
+			case 'riwayatHafalanSantri.bukaMutabaah': return 'OPEN MUTABA\'AH';
+			case 'riwayatHafalanSantri.hafalanBaru': return 'New Memorization';
+			case 'riwayatHafalanSantri.murajaah': return 'Review';
+			case 'riwayatHafalanSantri.lihatProgress': return 'VIEW PROGRESS PER SURAH';
+			case 'riwayatHafalanSantri.downloadLaporan': return 'DOWNLOAD MEMORIZATION REPORT';
+			case 'progressHafalanPerJuz.title': return 'Memorization Progress';
+			case 'progressHafalanPerJuz.targetHafalan': return 'Memorization Target';
+			case 'progressHafalanPerJuz.pilihJuz': return 'Select Juz to view detailed progress per surah';
+			case 'progressHafalanPerJuz.suratSelesai': return ({required Object completed, required Object total}) => '${completed} of ${total} Surah Completed';
+			case 'progressHafalanPerSurat.title': return 'Progress Per Surah';
+			case 'progressHafalanPerSurat.detailJuz': return ({required Object juz}) => 'Memorization Detail Juz ${juz}';
+			case 'progressHafalanPerSurat.ayatDari': return ({required Object memorized, required Object total}) => 'Ayat ${memorized} of ${total}';
+			case 'progressHafalanPerSurat.selesai': return 'Completed';
+			case 'progressHafalanPerSurat.dalamProses': return 'In Progress';
+			case 'progressHafalanPerSurat.belumDimulai': return 'Not Started';
+			case 'mutabaahSantri.title': return 'Mutaba\'ah Santri';
+			case 'mutabaahSantri.hafalanBaru': return 'New Memorization';
+			case 'mutabaahSantri.murajaah': return 'Review';
+			case 'mutabaahSantri.hari': return 'DAY';
+			case 'mutabaahSantri.tgl': return 'DATE';
+			case 'mutabaahSantri.surat': return 'SURAH';
+			case 'mutabaahSantri.ayat': return 'AYAT';
+			case 'mutabaahSantri.nilai': return 'SCORE';
+			case 'guruProfile.editProfile': return 'Edit Profile';
+			case 'guruProfile.ubahPassword': return 'Change Password';
+			case 'guruProfile.pengaturan': return 'Settings';
+			case 'guruProfile.tentangAplikasi': return 'About App';
+			case 'guruProfile.keluar': return 'Logout';
+			case 'guruProfile.guruHalaqoh': return 'Halaqoh Teacher';
+			case 'guruProfile.appVersion': return ({required Object version}) => 'MyHalaqoh App v${version}';
+			case 'editProfile.title': return 'Edit Profile';
+			case 'editProfile.editFotoProfil': return 'Edit Profile Photo';
+			case 'editProfile.informasiPribadi': return 'PERSONAL INFORMATION';
+			case 'editProfile.namaLengkap': return 'Full Name';
+			case 'editProfile.nip': return 'NIP';
+			case 'editProfile.jabatan': return 'Position';
+			case 'editProfile.kontak': return 'CONTACT';
+			case 'editProfile.nomorHp': return 'Phone Number';
+			case 'editProfile.email': return 'Email';
+			case 'editProfile.simpanPerubahan': return 'Save Changes';
+			case 'ubahPassword.title': return 'Change Password';
+			case 'ubahPassword.subtitle': return 'Please enter your new password to improve your account security.';
+			case 'ubahPassword.kataSandiLama': return 'Old Password';
+			case 'ubahPassword.kataSandiBaru': return 'New Password';
+			case 'ubahPassword.konfirmasiKataSandiBaru': return 'Confirm New Password';
+			case 'ubahPassword.syaratKeamanan': return 'SECURITY REQUIREMENTS';
+			case 'ubahPassword.minimal8Karakter': return 'Minimum 8 characters';
+			case 'ubahPassword.kombinasiHurufDanAngka': return 'Combination of letters and numbers';
+			case 'ubahPassword.ubahKataSandi': return 'Change Password';
+			case 'pengaturanScreen.title': return 'Settings';
+			case 'pengaturanScreen.bahasa': return 'Language';
+			case 'pengaturanScreen.bahasaIndonesia': return 'Bahasa Indonesia';
+			case 'pengaturanScreen.english': return 'English';
+			case 'pengaturanScreen.pilihBahasa': return 'Select Language';
+			case 'pengaturanScreen.tema': return 'Theme';
+			case 'pengaturanScreen.terangLight': return 'Light';
+			case 'pengaturanScreen.gelapDark': return 'Dark';
+			case 'pengaturanScreen.pilihTema': return 'Select Theme';
 			default: return null;
 		}
 	}

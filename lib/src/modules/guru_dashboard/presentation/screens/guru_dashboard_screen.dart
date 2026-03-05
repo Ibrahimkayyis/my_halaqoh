@@ -93,65 +93,39 @@ class GuruDashboardScreen extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
 
-            // 2x2 menu grid
+            // 3 menu cards in a single row
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Column(
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GuruMenuCard(
-                          icon: Icons.groups,
-                          label: t.guruDashboard.myHalaqoh,
-                          iconColor: colors.primary,
-                          iconBgColor:
-                              colors.primary.withValues(alpha: 0.1),
-                          onTap: () => onNavigateToTab?.call(1),
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: GuruMenuCard(
-                          icon: Icons.qr_code_scanner,
-                          label: t.guruDashboard.scanAbsensi,
-                          iconColor: colors.primary,
-                          iconBgColor:
-                              colors.primary.withValues(alpha: 0.1),
-                          onTap: () {
-                            // TODO: Navigate to scan absensi
-                          },
-                        ),
-                      ),
-                    ],
+                  Expanded(
+                    child: GuruMenuCard(
+                      icon: Icons.groups,
+                      label: t.guruDashboard.myHalaqoh,
+                      iconColor: colors.primary,
+                      iconBgColor: colors.primary.withValues(alpha: 0.1),
+                      onTap: () => onNavigateToTab?.call(1),
+                    ),
                   ),
-                  SizedBox(height: 12.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GuruMenuCard(
-                          icon: Icons.edit_note,
-                          label: t.guruDashboard.inputHafalan,
-                          iconColor: colors.primary,
-                          iconBgColor:
-                              colors.primary.withValues(alpha: 0.1),
-                          onTap: () {
-                            // TODO: Navigate to input hafalan
-                          },
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: GuruMenuCard(
-                          icon: Icons.bar_chart,
-                          label: t.guruDashboard.laporan,
-                          iconColor: colors.primary,
-                          iconBgColor:
-                              colors.primary.withValues(alpha: 0.1),
-                          onTap: () => onNavigateToTab?.call(2),
-                        ),
-                      ),
-                    ],
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: GuruMenuCard(
+                      icon: Icons.qr_code_scanner,
+                      label: t.guruNav.absensi,
+                      iconColor: colors.primary,
+                      iconBgColor: colors.primary.withValues(alpha: 0.1),
+                      onTap: () => onNavigateToTab?.call(2),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: GuruMenuCard(
+                      icon: Icons.edit_note,
+                      label: t.guruNav.hafalan,
+                      iconColor: colors.primary,
+                      iconBgColor: colors.primary.withValues(alpha: 0.1),
+                      onTap: () => onNavigateToTab?.call(3),
+                    ),
                   ),
                 ],
               ),

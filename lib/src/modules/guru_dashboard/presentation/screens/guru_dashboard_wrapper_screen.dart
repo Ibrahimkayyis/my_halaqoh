@@ -5,11 +5,20 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/screens/guru_dashboard_screen.dart';
+import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/screens/my_halaqoh_screen.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/presentation/screens/attendance_screen.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/screens/hafalan_screen.dart';
+import 'package:my_halaqoh/src/modules/guru_profile/presentation/screens/guru_profile_screen.dart';
 
-/// Dashboard wrapper for Guru role with 4-tab bottom navigation
+/// Dashboard wrapper for Guru role with 5-tab bottom navigation
 @RoutePage()
 class GuruDashboardWrapperScreen extends StatefulWidget {
-  const GuruDashboardWrapperScreen({super.key});
+  final String programType;
+
+  const GuruDashboardWrapperScreen({
+    super.key,
+    @PathParam('programType') this.programType = 'reguler',
+  });
 
   @override
   State<GuruDashboardWrapperScreen> createState() =>
@@ -19,8 +28,9 @@ class GuruDashboardWrapperScreen extends StatefulWidget {
 class _GuruDashboardWrapperScreenState
     extends State<GuruDashboardWrapperScreen> {
   final _pageController = PageController(initialPage: 0);
-  final NotchBottomBarController _controller =
-      NotchBottomBarController(index: 0);
+  final NotchBottomBarController _controller = NotchBottomBarController(
+    index: 0,
+  );
 
   @override
   void dispose() {
@@ -38,12 +48,11 @@ class _GuruDashboardWrapperScreenState
     final colors = AppColors.of(context);
 
     final pages = <Widget>[
-      GuruDashboardScreen(
-        onNavigateToTab: _navigateToTab,
-      ),
-      _buildPlaceholderPage('My Halaqoh', Icons.auto_stories),
-      _buildPlaceholderPage(t.guruNav.laporan, Icons.bar_chart),
-      _buildPlaceholderPage(t.guruNav.profile, Icons.person),
+      GuruDashboardScreen(onNavigateToTab: _navigateToTab),
+      const MyHalaqohScreen(),
+      AttendanceScreen(programType: widget.programType),
+      const HafalanScreen(),
+      const GuruProfileScreen(),
     ];
 
     return Scaffold(
@@ -79,15 +88,22 @@ class _GuruDashboardWrapperScreenState
             itemLabel: t.guruNav.home,
           ),
           BottomBarItem(
-            inActiveItem:
-                Icon(Icons.auto_stories, color: colors.textSecondary),
+            inActiveItem: Icon(Icons.auto_stories, color: colors.textSecondary),
             activeItem: Icon(Icons.auto_stories, color: colors.textOnButton),
             itemLabel: t.guruNav.myHalaqoh,
           ),
           BottomBarItem(
-            inActiveItem: Icon(Icons.bar_chart, color: colors.textSecondary),
-            activeItem: Icon(Icons.bar_chart, color: colors.textOnButton),
-            itemLabel: t.guruNav.laporan,
+            inActiveItem: Icon(
+              Icons.qr_code_scanner,
+              color: colors.textSecondary,
+            ),
+            activeItem: Icon(Icons.qr_code_scanner, color: colors.textOnButton),
+            itemLabel: t.guruNav.absensi,
+          ),
+          BottomBarItem(
+            inActiveItem: Icon(Icons.menu_book, color: colors.textSecondary),
+            activeItem: Icon(Icons.menu_book, color: colors.textOnButton),
+            itemLabel: t.guruNav.hafalan,
           ),
           BottomBarItem(
             inActiveItem: Icon(Icons.person, color: colors.textSecondary),
@@ -99,46 +115,6 @@ class _GuruDashboardWrapperScreenState
           _pageController.jumpToPage(index);
         },
         kIconSize: 24.0,
-      ),
-    );
-  }
-
-  Widget _buildPlaceholderPage(String title, IconData icon) {
-    final colors = AppColors.of(context);
-
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 64.sp,
-              color: colors.textSecondary.withValues(alpha: 0.5),
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w600,
-                color: colors.textSecondary,
-                fontFamily: 'Poppins',
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'Coming Soon',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
-                color: colors.textSecondary.withValues(alpha: 0.6),
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
