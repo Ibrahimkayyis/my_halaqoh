@@ -919,16 +919,547 @@ class UbahPasswordRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [WaliSantriDashboardWrapperScreen]
-class WaliSantriDashboardWrapperRoute extends PageRouteInfo<void> {
-  const WaliSantriDashboardWrapperRoute({List<PageRouteInfo>? children})
-    : super(WaliSantriDashboardWrapperRoute.name, initialChildren: children);
+class WaliSantriDashboardWrapperRoute
+    extends PageRouteInfo<WaliSantriDashboardWrapperRouteArgs> {
+  WaliSantriDashboardWrapperRoute({
+    Key? key,
+    String programType = 'reguler',
+    List<PageRouteInfo>? children,
+  }) : super(
+         WaliSantriDashboardWrapperRoute.name,
+         args: WaliSantriDashboardWrapperRouteArgs(
+           key: key,
+           programType: programType,
+         ),
+         rawPathParams: {'programType': programType},
+         initialChildren: children,
+       );
 
   static const String name = 'WaliSantriDashboardWrapperRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const WaliSantriDashboardWrapperScreen();
+      final pathParams = data.inheritedPathParams;
+      final args = data.argsAs<WaliSantriDashboardWrapperRouteArgs>(
+        orElse: () => WaliSantriDashboardWrapperRouteArgs(
+          programType: pathParams.getString('programType', 'reguler'),
+        ),
+      );
+      return WaliSantriDashboardWrapperScreen(
+        key: args.key,
+        programType: args.programType,
+      );
+    },
+  );
+}
+
+class WaliSantriDashboardWrapperRouteArgs {
+  const WaliSantriDashboardWrapperRouteArgs({
+    this.key,
+    this.programType = 'reguler',
+  });
+
+  final Key? key;
+
+  final String programType;
+
+  @override
+  String toString() {
+    return 'WaliSantriDashboardWrapperRouteArgs{key: $key, programType: $programType}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! WaliSantriDashboardWrapperRouteArgs) return false;
+    return key == other.key && programType == other.programType;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ programType.hashCode;
+}
+
+/// generated route for
+/// [WaliSantriEditProfileScreen]
+class WaliSantriEditProfileRoute extends PageRouteInfo<void> {
+  const WaliSantriEditProfileRoute({List<PageRouteInfo>? children})
+    : super(WaliSantriEditProfileRoute.name, initialChildren: children);
+
+  static const String name = 'WaliSantriEditProfileRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const WaliSantriEditProfileScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [WaliSantriKalenderAbsensiScreen]
+class WaliSantriKalenderAbsensiRoute
+    extends PageRouteInfo<WaliSantriKalenderAbsensiRouteArgs> {
+  WaliSantriKalenderAbsensiRoute({
+    Key? key,
+    required String name,
+    required String nis,
+    String programType = 'reguler',
+    List<PageRouteInfo>? children,
+  }) : super(
+         WaliSantriKalenderAbsensiRoute.name,
+         args: WaliSantriKalenderAbsensiRouteArgs(
+           key: key,
+           name: name,
+           nis: nis,
+           programType: programType,
+         ),
+         rawPathParams: {'name': name, 'nis': nis, 'programType': programType},
+         initialChildren: children,
+       );
+
+  static const String name = 'WaliSantriKalenderAbsensiRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final pathParams = data.inheritedPathParams;
+      final args = data.argsAs<WaliSantriKalenderAbsensiRouteArgs>(
+        orElse: () => WaliSantriKalenderAbsensiRouteArgs(
+          name: pathParams.getString('name'),
+          nis: pathParams.getString('nis'),
+          programType: pathParams.getString('programType', 'reguler'),
+        ),
+      );
+      return WaliSantriKalenderAbsensiScreen(
+        key: args.key,
+        name: args.name,
+        nis: args.nis,
+        programType: args.programType,
+      );
+    },
+  );
+}
+
+class WaliSantriKalenderAbsensiRouteArgs {
+  const WaliSantriKalenderAbsensiRouteArgs({
+    this.key,
+    required this.name,
+    required this.nis,
+    this.programType = 'reguler',
+  });
+
+  final Key? key;
+
+  final String name;
+
+  final String nis;
+
+  final String programType;
+
+  @override
+  String toString() {
+    return 'WaliSantriKalenderAbsensiRouteArgs{key: $key, name: $name, nis: $nis, programType: $programType}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! WaliSantriKalenderAbsensiRouteArgs) return false;
+    return key == other.key &&
+        name == other.name &&
+        nis == other.nis &&
+        programType == other.programType;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^ name.hashCode ^ nis.hashCode ^ programType.hashCode;
+}
+
+/// generated route for
+/// [WaliSantriMutabaahScreen]
+class WaliSantriMutabaahRoute
+    extends PageRouteInfo<WaliSantriMutabaahRouteArgs> {
+  WaliSantriMutabaahRoute({
+    Key? key,
+    required String name,
+    required String nis,
+    List<PageRouteInfo>? children,
+  }) : super(
+         WaliSantriMutabaahRoute.name,
+         args: WaliSantriMutabaahRouteArgs(key: key, name: name, nis: nis),
+         initialChildren: children,
+       );
+
+  static const String name = 'WaliSantriMutabaahRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<WaliSantriMutabaahRouteArgs>();
+      return WaliSantriMutabaahScreen(
+        key: args.key,
+        name: args.name,
+        nis: args.nis,
+      );
+    },
+  );
+}
+
+class WaliSantriMutabaahRouteArgs {
+  const WaliSantriMutabaahRouteArgs({
+    this.key,
+    required this.name,
+    required this.nis,
+  });
+
+  final Key? key;
+
+  final String name;
+
+  final String nis;
+
+  @override
+  String toString() {
+    return 'WaliSantriMutabaahRouteArgs{key: $key, name: $name, nis: $nis}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! WaliSantriMutabaahRouteArgs) return false;
+    return key == other.key && name == other.name && nis == other.nis;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ name.hashCode ^ nis.hashCode;
+}
+
+/// generated route for
+/// [WaliSantriPengaturanScreen]
+class WaliSantriPengaturanRoute extends PageRouteInfo<void> {
+  const WaliSantriPengaturanRoute({List<PageRouteInfo>? children})
+    : super(WaliSantriPengaturanRoute.name, initialChildren: children);
+
+  static const String name = 'WaliSantriPengaturanRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const WaliSantriPengaturanScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [WaliSantriProfileScreen]
+class WaliSantriProfileRoute extends PageRouteInfo<void> {
+  const WaliSantriProfileRoute({List<PageRouteInfo>? children})
+    : super(WaliSantriProfileRoute.name, initialChildren: children);
+
+  static const String name = 'WaliSantriProfileRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const WaliSantriProfileScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [WaliSantriProgressPerJuzScreen]
+class WaliSantriProgressPerJuzRoute
+    extends PageRouteInfo<WaliSantriProgressPerJuzRouteArgs> {
+  WaliSantriProgressPerJuzRoute({
+    Key? key,
+    required String name,
+    required String nis,
+    List<PageRouteInfo>? children,
+  }) : super(
+         WaliSantriProgressPerJuzRoute.name,
+         args: WaliSantriProgressPerJuzRouteArgs(
+           key: key,
+           name: name,
+           nis: nis,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'WaliSantriProgressPerJuzRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<WaliSantriProgressPerJuzRouteArgs>();
+      return WaliSantriProgressPerJuzScreen(
+        key: args.key,
+        name: args.name,
+        nis: args.nis,
+      );
+    },
+  );
+}
+
+class WaliSantriProgressPerJuzRouteArgs {
+  const WaliSantriProgressPerJuzRouteArgs({
+    this.key,
+    required this.name,
+    required this.nis,
+  });
+
+  final Key? key;
+
+  final String name;
+
+  final String nis;
+
+  @override
+  String toString() {
+    return 'WaliSantriProgressPerJuzRouteArgs{key: $key, name: $name, nis: $nis}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! WaliSantriProgressPerJuzRouteArgs) return false;
+    return key == other.key && name == other.name && nis == other.nis;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ name.hashCode ^ nis.hashCode;
+}
+
+/// generated route for
+/// [WaliSantriProgressPerSuratScreen]
+class WaliSantriProgressPerSuratRoute
+    extends PageRouteInfo<WaliSantriProgressPerSuratRouteArgs> {
+  WaliSantriProgressPerSuratRoute({
+    Key? key,
+    required String name,
+    required String nis,
+    required int juzNumber,
+    List<PageRouteInfo>? children,
+  }) : super(
+         WaliSantriProgressPerSuratRoute.name,
+         args: WaliSantriProgressPerSuratRouteArgs(
+           key: key,
+           name: name,
+           nis: nis,
+           juzNumber: juzNumber,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'WaliSantriProgressPerSuratRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<WaliSantriProgressPerSuratRouteArgs>();
+      return WaliSantriProgressPerSuratScreen(
+        key: args.key,
+        name: args.name,
+        nis: args.nis,
+        juzNumber: args.juzNumber,
+      );
+    },
+  );
+}
+
+class WaliSantriProgressPerSuratRouteArgs {
+  const WaliSantriProgressPerSuratRouteArgs({
+    this.key,
+    required this.name,
+    required this.nis,
+    required this.juzNumber,
+  });
+
+  final Key? key;
+
+  final String name;
+
+  final String nis;
+
+  final int juzNumber;
+
+  @override
+  String toString() {
+    return 'WaliSantriProgressPerSuratRouteArgs{key: $key, name: $name, nis: $nis, juzNumber: $juzNumber}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! WaliSantriProgressPerSuratRouteArgs) return false;
+    return key == other.key &&
+        name == other.name &&
+        nis == other.nis &&
+        juzNumber == other.juzNumber;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^ name.hashCode ^ nis.hashCode ^ juzNumber.hashCode;
+}
+
+/// generated route for
+/// [WaliSantriRiwayatAbsensiScreen]
+class WaliSantriRiwayatAbsensiRoute
+    extends PageRouteInfo<WaliSantriRiwayatAbsensiRouteArgs> {
+  WaliSantriRiwayatAbsensiRoute({
+    Key? key,
+    required String name,
+    required String nis,
+    String programType = 'reguler',
+    List<PageRouteInfo>? children,
+  }) : super(
+         WaliSantriRiwayatAbsensiRoute.name,
+         args: WaliSantriRiwayatAbsensiRouteArgs(
+           key: key,
+           name: name,
+           nis: nis,
+           programType: programType,
+         ),
+         rawPathParams: {'name': name, 'nis': nis, 'programType': programType},
+         initialChildren: children,
+       );
+
+  static const String name = 'WaliSantriRiwayatAbsensiRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final pathParams = data.inheritedPathParams;
+      final args = data.argsAs<WaliSantriRiwayatAbsensiRouteArgs>(
+        orElse: () => WaliSantriRiwayatAbsensiRouteArgs(
+          name: pathParams.getString('name'),
+          nis: pathParams.getString('nis'),
+          programType: pathParams.getString('programType', 'reguler'),
+        ),
+      );
+      return WaliSantriRiwayatAbsensiScreen(
+        key: args.key,
+        name: args.name,
+        nis: args.nis,
+        programType: args.programType,
+      );
+    },
+  );
+}
+
+class WaliSantriRiwayatAbsensiRouteArgs {
+  const WaliSantriRiwayatAbsensiRouteArgs({
+    this.key,
+    required this.name,
+    required this.nis,
+    this.programType = 'reguler',
+  });
+
+  final Key? key;
+
+  final String name;
+
+  final String nis;
+
+  final String programType;
+
+  @override
+  String toString() {
+    return 'WaliSantriRiwayatAbsensiRouteArgs{key: $key, name: $name, nis: $nis, programType: $programType}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! WaliSantriRiwayatAbsensiRouteArgs) return false;
+    return key == other.key &&
+        name == other.name &&
+        nis == other.nis &&
+        programType == other.programType;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^ name.hashCode ^ nis.hashCode ^ programType.hashCode;
+}
+
+/// generated route for
+/// [WaliSantriRiwayatHafalanScreen]
+class WaliSantriRiwayatHafalanRoute
+    extends PageRouteInfo<WaliSantriRiwayatHafalanRouteArgs> {
+  WaliSantriRiwayatHafalanRoute({
+    Key? key,
+    required String name,
+    required String nis,
+    List<PageRouteInfo>? children,
+  }) : super(
+         WaliSantriRiwayatHafalanRoute.name,
+         args: WaliSantriRiwayatHafalanRouteArgs(
+           key: key,
+           name: name,
+           nis: nis,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'WaliSantriRiwayatHafalanRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<WaliSantriRiwayatHafalanRouteArgs>();
+      return WaliSantriRiwayatHafalanScreen(
+        key: args.key,
+        name: args.name,
+        nis: args.nis,
+      );
+    },
+  );
+}
+
+class WaliSantriRiwayatHafalanRouteArgs {
+  const WaliSantriRiwayatHafalanRouteArgs({
+    this.key,
+    required this.name,
+    required this.nis,
+  });
+
+  final Key? key;
+
+  final String name;
+
+  final String nis;
+
+  @override
+  String toString() {
+    return 'WaliSantriRiwayatHafalanRouteArgs{key: $key, name: $name, nis: $nis}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! WaliSantriRiwayatHafalanRouteArgs) return false;
+    return key == other.key && name == other.name && nis == other.nis;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ name.hashCode ^ nis.hashCode;
+}
+
+/// generated route for
+/// [WaliSantriUbahPasswordScreen]
+class WaliSantriUbahPasswordRoute extends PageRouteInfo<void> {
+  const WaliSantriUbahPasswordRoute({List<PageRouteInfo>? children})
+    : super(WaliSantriUbahPasswordRoute.name, initialChildren: children);
+
+  static const String name = 'WaliSantriUbahPasswordRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const WaliSantriUbahPasswordScreen();
     },
   );
 }

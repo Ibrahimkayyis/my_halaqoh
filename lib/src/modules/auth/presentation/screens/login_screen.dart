@@ -50,7 +50,13 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else if (RegExp(r'^\d{12}$').hasMatch(username)) {
       // Wali Santri role → NIS is 12 digits
-      context.router.replace(const WaliSantriDashboardWrapperRoute());
+      // Determine program type from NIS:
+      // - 123456789013 → takhassus
+      // - all other NISs → reguler
+      final programType = username == '123456789013' ? 'takhassus' : 'reguler';
+      context.router.replace(
+        WaliSantriDashboardWrapperRoute(programType: programType),
+      );
     } else {
       _showError(t.auth.validationInvalid);
       return;

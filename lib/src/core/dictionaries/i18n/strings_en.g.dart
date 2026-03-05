@@ -71,6 +71,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsEditProfileEn editProfile = TranslationsEditProfileEn._(_root);
 	late final TranslationsUbahPasswordEn ubahPassword = TranslationsUbahPasswordEn._(_root);
 	late final TranslationsPengaturanScreenEn pengaturanScreen = TranslationsPengaturanScreenEn._(_root);
+	late final TranslationsWaliSantriDashboardEn waliSantriDashboard = TranslationsWaliSantriDashboardEn._(_root);
+	late final TranslationsWaliSantriNavEn waliSantriNav = TranslationsWaliSantriNavEn._(_root);
+	late final TranslationsWaliSantriPengaturanScreenEn WaliSantriPengaturanScreen = TranslationsWaliSantriPengaturanScreenEn._(_root);
 }
 
 // Path: app
@@ -1300,6 +1303,99 @@ class TranslationsPengaturanScreenEn {
 	String get pilihTema => 'Select Theme';
 }
 
+// Path: waliSantriDashboard
+class TranslationsWaliSantriDashboardEn {
+	TranslationsWaliSantriDashboardEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Memorization Progress'
+	String get progressHafalan => 'Memorization Progress';
+
+	/// en: 'Juz Completed'
+	String get juzTerselesaikan => 'Juz Completed';
+
+	/// en: 'Target : $target Juz'
+	String target({required Object target}) => 'Target : ${target} Juz';
+
+	/// en: 'Attendance'
+	String get kehadiran => 'Attendance';
+
+	/// en: 'Period: $periode'
+	String periode({required Object periode}) => 'Period: ${periode}';
+
+	/// en: 'Present'
+	String get hadir => 'Present';
+
+	/// en: 'Sick'
+	String get sakit => 'Sick';
+
+	/// en: 'Permit'
+	String get izin => 'Permit';
+
+	/// en: 'Absent'
+	String get alpha => 'Absent';
+}
+
+// Path: waliSantriNav
+class TranslationsWaliSantriNavEn {
+	TranslationsWaliSantriNavEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Home'
+	String get home => 'Home';
+
+	/// en: 'Hafalan'
+	String get hafalan => 'Hafalan';
+
+	/// en: 'Attendance'
+	String get absensi => 'Attendance';
+
+	/// en: 'Profile'
+	String get profile => 'Profile';
+}
+
+// Path: WaliSantriPengaturanScreen
+class TranslationsWaliSantriPengaturanScreenEn {
+	TranslationsWaliSantriPengaturanScreenEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Settings'
+	String get title => 'Settings';
+
+	/// en: 'Language'
+	String get bahasa => 'Language';
+
+	/// en: 'Bahasa Indonesia'
+	String get bahasaIndonesia => 'Bahasa Indonesia';
+
+	/// en: 'English'
+	String get english => 'English';
+
+	/// en: 'Select Language'
+	String get pilihBahasa => 'Select Language';
+
+	/// en: 'Theme'
+	String get tema => 'Theme';
+
+	/// en: 'Light'
+	String get terangLight => 'Light';
+
+	/// en: 'Dark'
+	String get gelapDark => 'Dark';
+
+	/// en: 'Select Theme'
+	String get pilihTema => 'Select Theme';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
@@ -1618,6 +1714,28 @@ extension on Translations {
 			case 'pengaturanScreen.terangLight': return 'Light';
 			case 'pengaturanScreen.gelapDark': return 'Dark';
 			case 'pengaturanScreen.pilihTema': return 'Select Theme';
+			case 'waliSantriDashboard.progressHafalan': return 'Memorization Progress';
+			case 'waliSantriDashboard.juzTerselesaikan': return 'Juz Completed';
+			case 'waliSantriDashboard.target': return ({required Object target}) => 'Target : ${target} Juz';
+			case 'waliSantriDashboard.kehadiran': return 'Attendance';
+			case 'waliSantriDashboard.periode': return ({required Object periode}) => 'Period: ${periode}';
+			case 'waliSantriDashboard.hadir': return 'Present';
+			case 'waliSantriDashboard.sakit': return 'Sick';
+			case 'waliSantriDashboard.izin': return 'Permit';
+			case 'waliSantriDashboard.alpha': return 'Absent';
+			case 'waliSantriNav.home': return 'Home';
+			case 'waliSantriNav.hafalan': return 'Hafalan';
+			case 'waliSantriNav.absensi': return 'Attendance';
+			case 'waliSantriNav.profile': return 'Profile';
+			case 'WaliSantriPengaturanScreen.title': return 'Settings';
+			case 'WaliSantriPengaturanScreen.bahasa': return 'Language';
+			case 'WaliSantriPengaturanScreen.bahasaIndonesia': return 'Bahasa Indonesia';
+			case 'WaliSantriPengaturanScreen.english': return 'English';
+			case 'WaliSantriPengaturanScreen.pilihBahasa': return 'Select Language';
+			case 'WaliSantriPengaturanScreen.tema': return 'Theme';
+			case 'WaliSantriPengaturanScreen.terangLight': return 'Light';
+			case 'WaliSantriPengaturanScreen.gelapDark': return 'Dark';
+			case 'WaliSantriPengaturanScreen.pilihTema': return 'Select Theme';
 			default: return null;
 		}
 	}

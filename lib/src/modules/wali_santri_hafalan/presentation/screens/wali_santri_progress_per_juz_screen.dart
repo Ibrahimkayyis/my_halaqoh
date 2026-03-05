@@ -1,0 +1,274 @@
+﻿import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+
+/// Progress Hafalan Per Juz — shows juz-level progress cards for a santri (Wali Santri view)
+@RoutePage()
+class WaliSantriProgressPerJuzScreen extends StatelessWidget {
+  final String name;
+  final String nis;
+
+  const WaliSantriProgressPerJuzScreen({
+    super.key,
+    required this.name,
+    required this.nis,
+  });
+
+  // Juz data: juz number, total surahs, completed surahs (dummy)
+  static final List<Map<String, dynamic>> _juzData = [
+    {'juz': 30, 'total': 37, 'completed': 37},
+    {'juz': 29, 'total': 11, 'completed': 11},
+    {'juz': 28, 'total': 9, 'completed': 9},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return Scaffold(
+      backgroundColor: colors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // AppBar
+            Padding(
+              padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 24.w),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  SizedBox(width: 4.w),
+                  Text(
+                    t.progressHafalanPerJuz.title,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w700,
+                      color: colors.textPrimary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 8.h),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Green gradient profile card
+                    _buildProfileCard(colors),
+                    SizedBox(height: 20.h),
+
+                    // Target Hafalan header
+                    Text(
+                      t.progressHafalanPerJuz.targetHafalan,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: colors.textPrimary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      t.progressHafalanPerJuz.pilihJuz,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w400,
+                        color: colors.textSecondary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    SizedBox(height: 14.h),
+
+                    // Juz cards
+                    ..._juzData.map(
+                      (juz) => _buildJuzCard(context, juz, colors),
+                    ),
+                    SizedBox(height: 24.h),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileCard(AppColorSet colors) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [colors.primary, colors.primary.withValues(alpha: 0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 50.w,
+            height: 50.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.2),
+            ),
+            child: Icon(Icons.person, size: 26.sp, color: Colors.white),
+          ),
+          SizedBox(width: 14.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                'NIS: $nis',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              Text(
+                t.riwayatHafalanSantri.halaqohKelas(halaqoh: 'A', kelas: '7'),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildJuzCard(
+    BuildContext context,
+    Map<String, dynamic> juz,
+    AppColorSet colors,
+  ) {
+    final juzNum = juz['juz'] as int;
+    final total = juz['total'] as int;
+    final completed = juz['completed'] as int;
+    final percent = total > 0 ? (completed / total * 100).round() : 0;
+    final progress = total > 0 ? completed / total : 0.0;
+
+    return GestureDetector(
+      onTap: () {
+        context.router.push(
+          WaliSantriProgressPerSuratRoute(
+            name: name,
+            nis: nis,
+            juzNumber: juzNum,
+          ),
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(14.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Juz $juzNum',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: colors.textPrimary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      t.progressHafalanPerJuz.suratSelesai(
+                        completed: '$completed',
+                        total: '$total',
+                      ),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: colors.textSecondary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  '$percent %',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w800,
+                    color: colors.primary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
+            Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4.r),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 6.h,
+                      backgroundColor: colors.border,
+                      valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Icon(
+                  Icons.chevron_right,
+                  size: 22.sp,
+                  color: colors.textSecondary,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
