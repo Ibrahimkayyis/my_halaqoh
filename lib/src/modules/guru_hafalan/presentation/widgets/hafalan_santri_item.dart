@@ -92,7 +92,7 @@ class HafalanSantriItem extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
 
-          // Bottom row: two buttons
+          // Bottom row: two buttons — keduanya punya border 1.5 agar tinggi sama
           Row(
             children: [
               // Riwayat Hafalan (outlined)
@@ -120,6 +120,8 @@ class HafalanSantriItem extends StatelessWidget {
                         SizedBox(width: 6.w),
                         Text(
                           riwayatLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
@@ -134,7 +136,7 @@ class HafalanSantriItem extends StatelessWidget {
               ),
               SizedBox(width: 10.w),
 
-              // Input Hafalan (filled)
+              // Input Hafalan (filled) — transparent border agar tinggi sama
               Expanded(
                 child: GestureDetector(
                   onTap: onInputTap,
@@ -143,6 +145,10 @@ class HafalanSantriItem extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: colors.primary,
                       borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(
+                        color: Colors.transparent,
+                        width: 1.5,
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

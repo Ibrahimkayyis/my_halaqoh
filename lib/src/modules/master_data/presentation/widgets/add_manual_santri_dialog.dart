@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Dialog form for adding/editing a Santri manually
 class AddManualSantriDialog extends StatefulWidget {
@@ -49,8 +50,18 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
   String? _selectedKelas;
 
   final List<String> _kelasList = [
-    '7R', '7T', '8R', '8T', '9R', '9T',
-    '10R', '10T', '11R', '11T', '12R', '12T',
+    '7R',
+    '7T',
+    '8R',
+    '8T',
+    '9R',
+    '9T',
+    '10R',
+    '10T',
+    '11R',
+    '11T',
+    '12R',
+    '12T',
   ];
 
   bool get _isEditMode => widget.initialNis != null;
@@ -60,7 +71,8 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
     super.initState();
     if (widget.initialNis != null) _nisController.text = widget.initialNis!;
     if (widget.initialNama != null) _namaController.text = widget.initialNama!;
-    if (widget.initialKelas != null && _kelasList.contains(widget.initialKelas)) {
+    if (widget.initialKelas != null &&
+        _kelasList.contains(widget.initialKelas)) {
       _selectedKelas = widget.initialKelas;
     }
   }
@@ -130,10 +142,7 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
                     height: 80.w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: colors.border,
-                        width: 2,
-                      ),
+                      border: Border.all(color: colors.border, width: 2),
                     ),
                     child: Center(
                       child: Icon(
@@ -198,7 +207,10 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
               onChanged: (value) {
                 setState(() => _selectedKelas = value);
               },
-              closedHeaderPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              closedHeaderPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 14.h,
+              ),
               decoration: CustomDropdownDecoration(
                 closedBorderRadius: BorderRadius.circular(10.r),
                 closedBorder: Border.all(color: colors.border),
@@ -226,38 +238,26 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
             SizedBox(height: 28.h),
 
             // Simpan button
-            SizedBox(
+            PrimaryButton(
               width: double.infinity,
-              height: 50.h,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  if (widget.onSave != null) {
-                    widget.onSave!(
-                      _nisController.text,
-                      _namaController.text,
-                      _selectedKelas,
-                    );
-                  }
+              onPressed: () async {
+                final confirmed = await ConfirmSaveDialog.show(context);
+                if (!confirmed) return;
+
+                if (widget.onSave != null) {
+                  widget.onSave!(
+                    _nisController.text,
+                    _namaController.text,
+                    _selectedKelas,
+                  );
+                }
+                if (context.mounted) {
                   Navigator.of(context).pop();
-                },
-                icon: Icon(Icons.check_circle, size: 20.sp),
-                label: Text(
-                  t.addData.simpan,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colors.primary,
-                  foregroundColor: colors.textOnButton,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.r),
-                  ),
-                  elevation: 0,
-                ),
-              ),
+                }
+              },
+              label: t.addData.simpan,
+              icon: Icons.check_circle,
+              borderRadius: 25.r,
             ),
           ],
         ),
@@ -298,10 +298,7 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
           color: colors.textSecondary.withValues(alpha: 0.5),
           fontFamily: 'Poppins',
         ),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 14.h,
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
           borderSide: BorderSide(color: colors.border),

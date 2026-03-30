@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Dialog for bulk uploading data via Excel/CSV file
 class BulkUploadDialog extends StatelessWidget {
@@ -145,32 +146,15 @@ class BulkUploadDialog extends StatelessWidget {
           SizedBox(height: 24.h),
 
           // Upload button
-          SizedBox(
+          PrimaryButton(
             width: double.infinity,
-            height: 50.h,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Upload file
-                Navigator.of(context).pop();
-              },
-              icon: Icon(Icons.cloud_upload, size: 20.sp),
-              label: Text(
-                t.addData.bulkUploadButton,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primary,
-                foregroundColor: colors.textOnButton,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25.r),
-                ),
-                elevation: 0,
-              ),
-            ),
+            onPressed: () {
+              // TODO: Upload file
+              Navigator.of(context).pop();
+            },
+            icon: Icons.cloud_upload,
+            label: t.addData.bulkUploadButton,
+            borderRadius: 25.r,
           ),
         ],
       ),

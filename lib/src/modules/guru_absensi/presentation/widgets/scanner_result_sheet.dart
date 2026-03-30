@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Bottom sheet shown after scanning a QR code — displays student info, status chips, notes, and save/cancel
 class ScannerResultSheet extends StatefulWidget {
@@ -178,52 +179,19 @@ class _ScannerResultSheetState extends State<ScannerResultSheet> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               // Batal button
-              OutlinedButton(
+              CustomOutlinedButton(
                 onPressed: widget.onCancel,
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: colors.border, width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 20.w,
-                    vertical: 10.h,
-                  ),
-                ),
-                child: Text(
-                  t.absensi.batal,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: colors.textPrimary,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
+                label: t.absensi.batal,
+                borderRadius: 10.r,
+                height: 40.h,
               ),
               SizedBox(width: 12.w),
               // Simpan button
-              ElevatedButton(
+              PrimaryButton(
                 onPressed: widget.onSave,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  elevation: 0,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 20.w,
-                    vertical: 10.h,
-                  ),
-                ),
-                child: Text(
-                  t.absensi.simpan,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w700,
-                    color: colors.textOnButton,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
+                label: t.absensi.simpan,
+                borderRadius: 10.r,
+                height: 40.h,
               ),
             ],
           ),

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/screens/splash_screen.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/screens/login_screen.dart';
@@ -19,6 +20,7 @@ import 'package:my_halaqoh/src/modules/guru_profile/presentation/screens/ubah_pa
 import 'package:my_halaqoh/src/modules/guru_profile/presentation/screens/pengaturan_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/dashboard_wrapper_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/add_halaqoh_screen.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/screens/pengaturan_master_data_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/select_santri_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/screens/guru_dashboard_wrapper_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_dashboard/presentation/screens/wali_santri_dashboard_wrapper_screen.dart';
@@ -57,6 +59,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: HafalanRoute.page),
     AutoRoute(page: AddHalaqohRoute.page),
     AutoRoute(page: SelectSantriRoute.page),
+    AutoRoute(page: PengaturanMasterDataRoute.page),
     AutoRoute(page: MyHalaqohRoute.page),
     AutoRoute(page: DetailSantriRoute.page),
     AutoRoute(page: BarcodeScannerRoute.page),

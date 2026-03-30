@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Riwayat Hafalan Santri — individual student memorization history
 @RoutePage()
@@ -25,23 +26,8 @@ class RiwayatHafalanSantriScreen extends StatefulWidget {
 
 class _RiwayatHafalanSantriScreenState
     extends State<RiwayatHafalanSantriScreen> {
-  int _currentMonth = 11; // November
+  int _currentMonth = 11;
   int _currentYear = 2025;
-
-  final List<String> _monthNames = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
 
   final List<String> _dayNames = [
     'AHA',
@@ -53,7 +39,6 @@ class _RiwayatHafalanSantriScreenState
     'SAB',
   ];
 
-  // Dummy hafalan records
   final List<Map<String, dynamic>> _records = [
     {
       'day': 1,
@@ -107,7 +92,7 @@ class _RiwayatHafalanSantriScreenState
     {
       'day': 12,
       'type': 'baru',
-      'surah': 'Al - Ma\'arij',
+      'surah': "Al - Ma'arij",
       'ayat': 'Ayat 1 - 10',
       'score': 82,
     },
@@ -163,7 +148,7 @@ class _RiwayatHafalanSantriScreenState
     {
       'day': 25,
       'type': 'murajaah',
-      'surah': 'Al - Ma\'arij',
+      'surah': "Al - Ma'arij",
       'ayat': 'Ayat 1 - 10',
       'score': 93,
     },
@@ -183,7 +168,8 @@ class _RiwayatHafalanSantriScreenState
     },
   ];
 
-  // Filter options: display label -> filter key
+  int? _activeDeleteIndex;
+
   final List<String> _filterOptions = [
     'Semua Tipe',
     'Hafalan Baru',
@@ -198,8 +184,14 @@ class _RiwayatHafalanSantriScreenState
   }
 
   List<Map<String, dynamic>> get _filteredRecords {
-    if (_filterKey == 'semua') return _records;
-    return _records.where((r) => r['type'] == _filterKey).toList();
+    List<Map<String, dynamic>> list;
+    if (_filterKey == 'semua') {
+      list = List.from(_records);
+    } else {
+      list = _records.where((r) => r['type'] == _filterKey).toList();
+    }
+    list.sort((a, b) => (b['day'] as int).compareTo(a['day'] as int));
+    return list;
   }
 
   int get _totalBaru => _records.where((r) => r['type'] == 'baru').length;
@@ -241,7 +233,7 @@ class _RiwayatHafalanSantriScreenState
       body: SafeArea(
         child: Column(
           children: [
-            // AppBar
+            // ── AppBar ──
             Padding(
               padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 24.w),
               child: Row(
@@ -265,14 +257,14 @@ class _RiwayatHafalanSantriScreenState
             ),
             SizedBox(height: 8.h),
 
-            // Content
+            // ── Content ──
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Green gradient profile card
+                    // Profile card
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(18.w),
@@ -320,7 +312,6 @@ class _RiwayatHafalanSantriScreenState
                                 'NIS: ${widget.nis}',
                                 style: TextStyle(
                                   fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
                                   color: Colors.white.withValues(alpha: 0.85),
                                   fontFamily: 'Poppins',
                                 ),
@@ -332,7 +323,6 @@ class _RiwayatHafalanSantriScreenState
                                 ),
                                 style: TextStyle(
                                   fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
                                   color: Colors.white.withValues(alpha: 0.85),
                                   fontFamily: 'Poppins',
                                 ),
@@ -344,47 +334,29 @@ class _RiwayatHafalanSantriScreenState
                     ),
                     SizedBox(height: 16.h),
 
-                    // Month navigator
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 10.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(24.r),
-                        border: Border.all(color: colors.border, width: 1),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: _prevMonth,
-                            child: Icon(
-                              Icons.chevron_left,
-                              color: colors.primary,
-                              size: 24.sp,
-                            ),
+                    // ── Month navigator (global widgets) ──
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppMonthSelector(
+                            month: _currentMonth,
+                            year: _currentYear,
+                            onPrev: _prevMonth,
+                            onNext: _nextMonth,
                           ),
-                          Text(
-                            '${_monthNames[_currentMonth - 1]} $_currentYear',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color: colors.textPrimary,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: _nextMonth,
-                            child: Icon(
-                              Icons.chevron_right,
-                              color: colors.primary,
-                              size: 24.sp,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                        SizedBox(width: 10.w),
+                        AppCalendarPickerButton(
+                          currentMonth: _currentMonth,
+                          currentYear: _currentYear,
+                          onSelected: (month, year) {
+                            setState(() {
+                              _currentMonth = month;
+                              _currentYear = year;
+                            });
+                          },
+                        ),
+                      ],
                     ),
                     SizedBox(height: 16.h),
 
@@ -413,7 +385,6 @@ class _RiwayatHafalanSantriScreenState
                     // Filter + Buka Mutaba'ah
                     Row(
                       children: [
-                        // Filter dropdown (animated_custom_dropdown)
                         SizedBox(
                           width: 150.w,
                           child: CustomDropdown<String>(
@@ -453,8 +424,6 @@ class _RiwayatHafalanSantriScreenState
                           ),
                         ),
                         SizedBox(width: 10.w),
-
-                        // Buka Mutaba'ah button
                         Expanded(
                           child: GestureDetector(
                             onTap: () {
@@ -499,69 +468,37 @@ class _RiwayatHafalanSantriScreenState
                     SizedBox(height: 16.h),
 
                     // Records list
-                    ...filtered.map(
-                      (record) => _buildRecordCard(record, colors),
+                    ...filtered.asMap().entries.map(
+                      (e) => _buildRecordCard(e.value, e.key, colors),
                     ),
                     SizedBox(height: 16.h),
 
                     // Lihat Progress button
-                    SizedBox(
+                    CustomOutlinedButton(
                       width: double.infinity,
                       height: 48.h,
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          context.router.push(
-                            ProgressHafalanPerJuzRoute(
-                              name: widget.name,
-                              nis: widget.nis,
-                            ),
-                          );
-                        },
-                        icon: Icon(Icons.menu_book, size: 18.sp),
-                        label: Text(
-                          t.riwayatHafalanSantri.lihatProgress,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Poppins',
+                      onPressed: () {
+                        context.router.push(
+                          ProgressHafalanPerJuzRoute(
+                            name: widget.name,
+                            nis: widget.nis,
                           ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colors.primary,
-                          side: BorderSide(color: colors.primary, width: 1.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                        ),
-                      ),
+                        );
+                      },
+                      icon: Icons.menu_book,
+                      label: t.riwayatHafalanSantri.lihatProgress,
                     ),
                     SizedBox(height: 10.h),
 
                     // Download Laporan button
-                    SizedBox(
+                    CustomOutlinedButton(
                       width: double.infinity,
                       height: 48.h,
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          // TODO: Download report
-                        },
-                        icon: Icon(Icons.download, size: 18.sp),
-                        label: Text(
-                          t.riwayatHafalanSantri.downloadLaporan,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colors.primary,
-                          side: BorderSide(color: colors.primary, width: 1.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                        ),
-                      ),
+                      onPressed: () {
+                        // TODO: Download report
+                      },
+                      icon: Icons.download,
+                      label: t.riwayatHafalanSantri.downloadLaporan,
                     ),
                     SizedBox(height: 24.h),
                   ],
@@ -609,61 +546,43 @@ class _RiwayatHafalanSantriScreenState
     );
   }
 
-  Widget _buildRecordCard(Map<String, dynamic> record, AppColorSet colors) {
+  Widget _buildRecordCard(
+    Map<String, dynamic> record,
+    int index,
+    AppColorSet colors,
+  ) {
     final dayStr = record['day'].toString().padLeft(2, '0');
     final dayName = _getDayName(record['day']);
     final isBaru = record['type'] == 'baru';
+    final isShowingDelete = _activeDeleteIndex == index;
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(14.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Day info
-          Column(
-            children: [
-              Text(
-                dayName,
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w500,
-                  color: colors.textSecondary,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-              Text(
-                dayStr,
-                style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w800,
-                  color: colors.textPrimary,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 16.w),
-
-          // Surah info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onLongPress: () {
+        setState(() {
+          _activeDeleteIndex = isShowingDelete ? null : index;
+        });
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(14.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Day info
+            Column(
               children: [
                 Text(
-                  isBaru
-                      ? t.riwayatHafalanSantri.hafalanBaru
-                      : t.riwayatHafalanSantri.murajaah,
+                  dayName,
                   style: TextStyle(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w500,
@@ -672,38 +591,98 @@ class _RiwayatHafalanSantriScreenState
                   ),
                 ),
                 Text(
-                  record['surah'],
+                  dayStr,
                   style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w800,
                     color: colors.textPrimary,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                Text(
-                  record['ayat'],
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w400,
-                    color: colors.textSecondary,
                     fontFamily: 'Poppins',
                   ),
                 ),
               ],
             ),
-          ),
+            SizedBox(width: 16.w),
 
-          // Score
-          Text(
-            '${record['score']}',
-            style: TextStyle(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w800,
-              color: colors.textPrimary,
-              fontFamily: 'Poppins',
+            // Surah info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isBaru
+                        ? t.riwayatHafalanSantri.hafalanBaru
+                        : t.riwayatHafalanSantri.murajaah,
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w500,
+                      color: colors.textSecondary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  Text(
+                    record['surah'],
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: colors.textPrimary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  Text(
+                    record['ayat'],
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: colors.textSecondary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // Score & delete
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${record['score']}',
+                  style: TextStyle(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w800,
+                    color: colors.textPrimary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                if (isShowingDelete) ...[
+                  SizedBox(width: 12.w),
+                  GestureDetector(
+                    onTap: () async {
+                      final confirmed = await ConfirmDeleteDialog.show(context);
+                      if (confirmed && context.mounted) {
+                        setState(() {
+                          _records.remove(record);
+                          _activeDeleteIndex = null;
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: colors.red.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.delete_outline,
+                        size: 20.sp,
+                        color: colors.red,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

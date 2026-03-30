@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Screen for selecting santri to add to a halaqoh
 @RoutePage()
@@ -220,30 +221,13 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
               child: SizedBox(
                 width: double.infinity,
                 height: 50.h,
-                child: ElevatedButton.icon(
+                child: PrimaryButton(
                   onPressed: _selectedNis.isEmpty ? null : _confirmSelection,
-                  icon: Icon(Icons.check, size: 20.sp),
-                  label: Text(
-                    t.selectSantri.tambahkanButton(
-                      count: _selectedNis.length.toString(),
-                    ),
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Poppins',
-                      letterSpacing: 0.5,
-                    ),
+                  icon: Icons.check,
+                  label: t.selectSantri.tambahkanButton(
+                    count: _selectedNis.length.toString(),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primary,
-                    foregroundColor: colors.textOnButton,
-                    disabledBackgroundColor: colors.primary.withValues(alpha: 0.4),
-                    disabledForegroundColor: colors.textOnButton.withValues(alpha: 0.6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.r),
-                    ),
-                    elevation: 0,
-                  ),
+                  borderRadius: 25.r,
                 ),
               ),
             ),

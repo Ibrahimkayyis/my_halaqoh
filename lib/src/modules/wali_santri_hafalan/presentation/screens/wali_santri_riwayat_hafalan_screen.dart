@@ -1,9 +1,10 @@
-﻿import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_mutabaah_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_progress_per_juz_screen.dart';
 
@@ -29,20 +30,7 @@ class _WaliSantriRiwayatHafalanScreenState
   int _currentMonth = 11; // November
   int _currentYear = 2025;
 
-  final List<String> _monthNames = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
+
 
   final List<String> _dayNames = [
     'AHA',
@@ -322,46 +310,28 @@ class _WaliSantriRiwayatHafalanScreenState
                     SizedBox(height: 16.h),
 
                     // Month navigator
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 10.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(24.r),
-                        border: Border.all(color: colors.border, width: 1),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: _prevMonth,
-                            child: Icon(
-                              Icons.chevron_left,
-                              color: colors.primary,
-                              size: 24.sp,
-                            ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppMonthSelector(
+                            month: _currentMonth,
+                            year: _currentYear,
+                            onPrev: _prevMonth,
+                            onNext: _nextMonth,
                           ),
-                          Text(
-                            '${_monthNames[_currentMonth - 1]} $_currentYear',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color: colors.textPrimary,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: _nextMonth,
-                            child: Icon(
-                              Icons.chevron_right,
-                              color: colors.primary,
-                              size: 24.sp,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                        SizedBox(width: 8.w),
+                        AppCalendarPickerButton(
+                          currentMonth: _currentMonth,
+                          currentYear: _currentYear,
+                          onSelected: (month, year) {
+                            setState(() {
+                              _currentMonth = month;
+                              _currentYear = year;
+                            });
+                          },
+                        ),
+                      ],
                     ),
                     SizedBox(height: 16.h),
 
@@ -487,7 +457,9 @@ class _WaliSantriRiwayatHafalanScreenState
                     SizedBox(
                       width: double.infinity,
                       height: 48.h,
-                      child: OutlinedButton.icon(
+                      child: CustomOutlinedButton(
+                        width: double.infinity,
+                        height: 48.h,
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -498,22 +470,8 @@ class _WaliSantriRiwayatHafalanScreenState
                             ),
                           );
                         },
-                        icon: Icon(Icons.menu_book, size: 18.sp),
-                        label: Text(
-                          t.riwayatHafalanSantri.lihatProgress,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colors.primary,
-                          side: BorderSide(color: colors.primary, width: 1.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                        ),
+                        icon: Icons.menu_book,
+                        label: t.riwayatHafalanSantri.lihatProgress,
                       ),
                     ),
                     SizedBox(height: 10.h),

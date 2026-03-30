@@ -2,8 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
-import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/widgets/absensi_santri_item.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/widgets/mulai_absensi_dialog.dart';
 
@@ -23,16 +24,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   String _searchQuery = '';
 
   final List<Map<String, String>> _allSantri = [
-    {'name': 'Ahmad', 'nis': '123456'},
-    {'name': 'Fauzan', 'nis': '123457'},
-    {'name': 'Yusuf', 'nis': '123458'},
-    {'name': 'Ibrahim', 'nis': '123459'},
-    {'name': 'Khalid', 'nis': '123460'},
-    {'name': 'Lukman', 'nis': '123461'},
-    {'name': 'Musa', 'nis': '123462'},
-    {'name': 'Naufal', 'nis': '123463'},
-    {'name': 'Omar', 'nis': '123464'},
-    {'name': 'Putra', 'nis': '123465'},
+    {'name': 'Ahmad', 'nis': '220512140601'},
+    {'name': 'Fauzan', 'nis': '220512140602'},
+    {'name': 'Yusuf', 'nis': '220512140603'},
+    {'name': 'Ibrahim', 'nis': '220512140604'},
+    {'name': 'Khalid', 'nis': '220512140605'},
+    {'name': 'Usman', 'nis': '220512140606'},
+    {'name': 'Ghulam', 'nis': '220512140607'},
+    {'name': 'Haikal', 'nis': '220512140608'},
+    {'name': 'Fikrie', 'nis': '220512140609'},
+    {'name': 'Ghatfhan', 'nis': '220512140610'},
   ];
 
   List<Map<String, String>> get _filteredSantri {
@@ -59,10 +60,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         onScanBarcode: () {
           context.router.push(const BarcodeScannerRoute());
         },
-        onTandaiSemuaHadir: () {
-          // TODO: mark all santri as present
-        },
+        onTandaiSemuaHadir: _handleTandaiSemuaHadir,
       ),
+    );
+  }
+
+  /// Tandai semua hadir — pass semua NIS sebagai scannedNisList
+  /// sehingga DetailAbsensiHariIniScreen akan pre-fill semua status ke "hadir"
+  void _handleTandaiSemuaHadir() {
+    final allNisList = _allSantri.map((s) => s['nis']!).toList();
+    context.router.push(
+      DetailAbsensiHariIniRoute(scannedNisList: allNisList),
     );
   }
 
@@ -85,30 +93,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               child: SizedBox(
                 width: double.infinity,
                 height: 52.h,
-                child: ElevatedButton.icon(
+                child: PrimaryButton(
+                  width: double.infinity,
+                  height: 52.h,
                   onPressed: _showMulaiAbsensiDialog,
-                  icon: Icon(
-                    Icons.qr_code_scanner,
-                    size: 22.sp,
-                    color: colors.textOnButton,
-                  ),
-                  label: Text(
-                    t.absensi.mulaiSesi,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textOnButton,
-                      fontFamily: 'Poppins',
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                    elevation: 0,
-                  ),
+                  icon: Icons.qr_code_scanner,
+                  label: t.absensi.mulaiSesi,
                 ),
               ),
             ),
@@ -181,7 +171,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     t.absensi.lihatDetailHariIni,
                     colors,
                     () {
-                      context.router.push(const DetailAbsensiHariIniRoute());
+                      // Buka tanpa data scan — semua santri mulai dari "belum"
+                      context.router.push(
+                         DetailAbsensiHariIniRoute(),
+                      );
                     },
                   ),
                 ],

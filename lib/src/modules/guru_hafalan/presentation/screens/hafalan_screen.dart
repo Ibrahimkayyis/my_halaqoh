@@ -34,9 +34,11 @@ class _HafalanScreenState extends State<HafalanScreen> {
   List<Map<String, String>> get _filteredSantri {
     if (_searchQuery.isEmpty) return _santriList;
     return _santriList
-        .where((s) =>
-            s['name']!.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            s['nis']!.contains(_searchQuery))
+        .where(
+          (s) =>
+              s['name']!.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              s['nis']!.contains(_searchQuery),
+        )
         .toList();
   }
 
@@ -158,13 +160,26 @@ class _HafalanScreenState extends State<HafalanScreen> {
                         ),
                       );
                     },
-                    onInputTap: () {
-                      context.router.push(
+                    onInputTap: () async {
+                      final result = await context.router.push(
                         InputHafalanRoute(
                           name: santri['name']!,
                           nis: santri['nis']!,
                         ),
                       );
+                      if (result != null && result is Map<String, dynamic>) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text(
+                                'Hafalan berhasil disimpan!',
+                                style: TextStyle(fontFamily: 'Poppins'),
+                              ),
+                              backgroundColor: colors.primary,
+                            ),
+                          );
+                        }
+                      }
                     },
                   );
                 },

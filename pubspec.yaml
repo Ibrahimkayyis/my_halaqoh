@@ -7,15 +7,17 @@ environment:
   sdk: ^3.9.2
 
 dependencies:
+  animated_custom_dropdown: 3.1.1
+  animated_notch_bottom_bar: ^1.0.3
   auto_route: ^10.1.2
   bloc: ^9.0.0
+  collection: ^1.19.1
   cupertino_icons: ^1.0.8
   dartz: ^0.10.1
   dio: ^5.9.0
   equatable: ^2.0.7
   flutter:
     sdk: flutter
-  animated_notch_bottom_bar: ^1.0.3
   flutter_bloc: ^9.1.1
   flutter_gen: ^5.12.0
   flutter_localization: ^0.3.3
@@ -32,14 +34,13 @@ dependencies:
   logger: ^2.6.1
   mobile_scanner: ^7.1.2
   pdf: ^3.11.3
+  percent_indicator: ^4.2.5
   pretty_dio_logger: ^1.4.0
   printing: ^5.14.2
   share_plus: ^12.0.0
   shared_preferences: ^2.5.4
   slang: ^4.8.1
   slang_flutter: ^4.8.0
-  animated_custom_dropdown: 3.1.1
-  percent_indicator: ^4.2.5
 
 dev_dependencies:
   auto_route_generator: ^10.2.4
@@ -61,7 +62,7 @@ flutter_gen:
 
 flutter:
   uses-material-design: true
-  
+
   assets:
     - assets/images/
     - assets/icons/

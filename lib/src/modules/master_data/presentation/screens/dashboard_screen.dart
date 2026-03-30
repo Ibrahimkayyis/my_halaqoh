@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/dashboard_header.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/stat_card.dart';
@@ -10,10 +12,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/menu_car
 class DashboardScreen extends StatelessWidget {
   final void Function(int index)? onNavigateToTab;
 
-  const DashboardScreen({
-    super.key,
-    this.onNavigateToTab,
-  });
+  const DashboardScreen({super.key, this.onNavigateToTab});
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +28,9 @@ class DashboardScreen extends StatelessWidget {
             DashboardHeader(
               greeting: t.dashboard.greeting,
               name: t.dashboard.admin,
+              onSettingsTap: () {
+                context.router.push(const PengaturanMasterDataRoute());
+              },
             ),
             SizedBox(height: 20.h),
 

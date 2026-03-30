@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Dialog form for adding/editing a Guru manually
 class AddManualGuruDialog extends StatefulWidget {
@@ -54,7 +55,9 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
     super.initState();
     if (widget.initialNip != null) _nipController.text = widget.initialNip!;
     if (widget.initialNama != null) _namaController.text = widget.initialNama!;
-    if (widget.initialPhone != null) _phoneController.text = widget.initialPhone!;
+    if (widget.initialPhone != null) {
+      _phoneController.text = widget.initialPhone!;
+    }
   }
 
   @override
@@ -123,10 +126,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
                     height: 80.w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: colors.border,
-                        width: 2,
-                      ),
+                      border: Border.all(color: colors.border, width: 2),
                     ),
                     child: Center(
                       child: Icon(
@@ -193,38 +193,26 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
             SizedBox(height: 28.h),
 
             // Simpan button
-            SizedBox(
+            PrimaryButton(
               width: double.infinity,
-              height: 50.h,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  if (widget.onSave != null) {
-                    widget.onSave!(
-                      _nipController.text,
-                      _namaController.text,
-                      _phoneController.text,
-                    );
-                  }
+              onPressed: () async {
+                final confirmed = await ConfirmSaveDialog.show(context);
+                if (!confirmed) return;
+
+                if (widget.onSave != null) {
+                  widget.onSave!(
+                    _nipController.text,
+                    _namaController.text,
+                    _phoneController.text,
+                  );
+                }
+                if (context.mounted) {
                   Navigator.of(context).pop();
-                },
-                icon: Icon(Icons.check_circle, size: 20.sp),
-                label: Text(
-                  t.addData.simpan,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colors.primary,
-                  foregroundColor: colors.textOnButton,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.r),
-                  ),
-                  elevation: 0,
-                ),
-              ),
+                }
+              },
+              label: t.addData.simpan,
+              icon: Icons.check_circle,
+              borderRadius: 25.r,
             ),
           ],
         ),
@@ -265,10 +253,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
           color: colors.textSecondary.withValues(alpha: 0.5),
           fontFamily: 'Poppins',
         ),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 14.h,
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
           borderSide: BorderSide(color: colors.border),

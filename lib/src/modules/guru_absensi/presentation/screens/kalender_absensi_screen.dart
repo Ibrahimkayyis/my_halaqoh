@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Kalender Absensi Lengkap — full month calendar with pagi/malam dots
 @RoutePage()
@@ -23,25 +24,9 @@ class KalenderAbsensiScreen extends StatefulWidget {
 }
 
 class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
-  int _currentMonth = 11; // November
+  int _currentMonth = 11;
   int _currentYear = 2025;
 
-  final List<String> _monthNames = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
-
-  /// Session keys based on program type
   List<String> get _sessionKeys {
     if (widget.programType == 'takhassus') {
       return ['shubuh', 'dhuha1', 'dhuha2', 'ashar', 'maghrib'];
@@ -49,21 +34,16 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
     return ['pagi', 'mlm'];
   }
 
-  /// Session labels for legend
   List<String> get _sessionLabels {
     if (widget.programType == 'takhassus') {
       return [
-        'P = Pagi',
-        'D1 = Dhuha 1',
-        'D2 = Dhuha 2',
-        'S = Sore',
-        'M = Malam',
+        'P = Pagi', 'D1 = Dhuha 1', 'D2 = Dhuha 2',
+        'S = Sore', 'M = Malam',
       ];
     }
     return ['Pagi (Kiri)', 'Malam (Kanan)'];
   }
 
-  // Dummy data generated based on program type
   late Map<int, Map<String, String>> _attendanceData;
 
   @override
@@ -75,10 +55,8 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
   void _generateDummyData() {
     _attendanceData = {};
     final keys = _sessionKeys;
-    final statuses = ['H', 'S', 'A'];
     final daysInMonth = _daysInMonth(_currentYear, _currentMonth);
     for (int d = 1; d <= daysInMonth; d++) {
-      // Only generate data for some days (simulating partial month)
       if (d > 16) continue;
       _attendanceData[d] = {};
       for (final key in keys) {
@@ -101,6 +79,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
         _currentMonth = 12;
         _currentYear--;
       }
+      _generateDummyData();
     });
   }
 
@@ -111,16 +90,14 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
         _currentMonth = 1;
         _currentYear++;
       }
+      _generateDummyData();
     });
   }
 
-  int _daysInMonth(int year, int month) {
-    return DateTime(year, month + 1, 0).day;
-  }
+  int _daysInMonth(int year, int month) => DateTime(year, month + 1, 0).day;
 
-  int _firstWeekdayOfMonth(int year, int month) {
-    return DateTime(year, month, 1).weekday % 7; // 0=Sunday
-  }
+  int _firstWeekdayOfMonth(int year, int month) =>
+      DateTime(year, month, 1).weekday % 7;
 
   @override
   Widget build(BuildContext context) {
@@ -128,12 +105,8 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
     final daysInMonth = _daysInMonth(_currentYear, _currentMonth);
     final firstWeekday = _firstWeekdayOfMonth(_currentYear, _currentMonth);
     final dayHeaders = [
-      t.kalenderAbsensi.aha,
-      t.kalenderAbsensi.sen,
-      t.kalenderAbsensi.sel,
-      t.kalenderAbsensi.rab,
-      t.kalenderAbsensi.kam,
-      t.kalenderAbsensi.jum,
+      t.kalenderAbsensi.aha, t.kalenderAbsensi.sen, t.kalenderAbsensi.sel,
+      t.kalenderAbsensi.rab, t.kalenderAbsensi.kam, t.kalenderAbsensi.jum,
       t.kalenderAbsensi.sab,
     ];
 
@@ -163,7 +136,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
           children: [
             SizedBox(height: 8.h),
 
-            // Profile card
+            // ── Profile card ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Container(
@@ -189,11 +162,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
                         shape: BoxShape.circle,
                         color: Colors.white.withValues(alpha: 0.2),
                       ),
-                      child: Icon(
-                        Icons.person,
-                        size: 24.sp,
-                        color: Colors.white,
-                      ),
+                      child: Icon(Icons.person, size: 24.sp, color: Colors.white),
                     ),
                     SizedBox(width: 14.w),
                     Column(
@@ -216,7 +185,6 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
                           ),
                           style: TextStyle(
                             fontSize: 13.sp,
-                            fontWeight: FontWeight.w400,
                             color: Colors.white.withValues(alpha: 0.85),
                             fontFamily: 'Poppins',
                           ),
@@ -229,59 +197,37 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
             ),
             SizedBox(height: 20.h),
 
-            // Month navigator
+            // ── Month navigator (global widgets) ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: _prevMonth,
-                    child: Container(
-                      width: 36.w,
-                      height: 36.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colors.primary.withValues(alpha: 0.1),
-                      ),
-                      child: Icon(
-                        Icons.chevron_left,
-                        color: colors.primary,
-                        size: 22.sp,
-                      ),
+                  Expanded(
+                    child: AppMonthSelector(
+                      month: _currentMonth,
+                      year: _currentYear,
+                      onPrev: _prevMonth,
+                      onNext: _nextMonth,
                     ),
                   ),
-                  Text(
-                    '${_monthNames[_currentMonth - 1]} $_currentYear',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: _nextMonth,
-                    child: Container(
-                      width: 36.w,
-                      height: 36.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colors.primary.withValues(alpha: 0.1),
-                      ),
-                      child: Icon(
-                        Icons.chevron_right,
-                        color: colors.primary,
-                        size: 22.sp,
-                      ),
-                    ),
+                  SizedBox(width: 10.w),
+                  AppCalendarPickerButton(
+                    currentMonth: _currentMonth,
+                    currentYear: _currentYear,
+                    onSelected: (month, year) {
+                      setState(() {
+                        _currentMonth = month;
+                        _currentYear = year;
+                        _generateDummyData();
+                      });
+                    },
                   ),
                 ],
               ),
             ),
             SizedBox(height: 20.h),
 
-            // Calendar grid
+            // ── Calendar grid ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Column(
@@ -315,7 +261,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
             ),
             SizedBox(height: 24.h),
 
-            // Keterangan card
+            // ── Keterangan card ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Container(
@@ -347,11 +293,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
                     SizedBox(height: 14.h),
                     Row(
                       children: [
-                        _buildLegendDot(
-                          colors.primary,
-                          t.kalenderAbsensi.hadirLabel,
-                          colors,
-                        ),
+                        _buildLegendDot(colors.primary, t.kalenderAbsensi.hadirLabel, colors),
                         SizedBox(width: 30.w),
                         _buildLegendDot(colors.yellow, 'Sakit', colors),
                       ],
@@ -361,30 +303,18 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
                       children: [
                         _buildLegendDot(colors.blue, 'Izin', colors),
                         SizedBox(width: 30.w),
-                        _buildLegendDot(
-                          colors.red,
-                          t.kalenderAbsensi.alfaLabel,
-                          colors,
-                        ),
+                        _buildLegendDot(colors.red, t.kalenderAbsensi.alfaLabel, colors),
                       ],
                     ),
                     SizedBox(height: 10.h),
                     Row(
                       children: [
-                        _buildLegendDot(
-                          colors.border,
-                          t.kalenderAbsensi.belumAbsen,
-                          colors,
-                        ),
+                        _buildLegendDot(colors.border, t.kalenderAbsensi.belumAbsen, colors),
                       ],
                     ),
                     SizedBox(height: 14.h),
-                    Divider(
-                      color: colors.border.withValues(alpha: 0.5),
-                      height: 1,
-                    ),
+                    Divider(color: colors.border.withValues(alpha: 0.5), height: 1),
                     SizedBox(height: 14.h),
-                    // Session position legend
                     if (widget.programType == 'takhassus')
                       Wrap(
                         spacing: 12.w,
@@ -404,17 +334,9 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
                     else
                       Row(
                         children: [
-                          _buildSessionLegend(
-                            '●',
-                            t.kalenderAbsensi.pagiKiri,
-                            colors,
-                          ),
+                          _buildSessionLegend('●', t.kalenderAbsensi.pagiKiri, colors),
                           SizedBox(width: 24.w),
-                          _buildSessionLegend(
-                            '●',
-                            t.kalenderAbsensi.malamKanan,
-                            colors,
-                          ),
+                          _buildSessionLegend('●', t.kalenderAbsensi.malamKanan, colors),
                         ],
                       ),
                   ],
@@ -435,8 +357,6 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
   ) {
     final rows = <Widget>[];
     int dayCounter = 1;
-
-    // Total cells needed
     final totalCells = firstWeekday + daysInMonth;
     final totalRows = (totalCells / 7).ceil();
 
@@ -445,13 +365,11 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
       for (int col = 0; col < 7; col++) {
         final cellIndex = row * 7 + col;
         if (cellIndex < firstWeekday || dayCounter > daysInMonth) {
-          // Empty cell
           cells.add(const Expanded(child: SizedBox()));
         } else {
           final day = dayCounter;
           final data = _attendanceData[day];
           final isPresent = data != null;
-
           cells.add(
             Expanded(
               child: _buildCalendarCell(
@@ -518,7 +436,6 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
           if (hasData && data != null) ...[
             SizedBox(height: 2.h),
             if (widget.programType == 'takhassus')
-              // 5 dots: row of 3 + row of 2
               Column(
                 children: [
                   Row(
@@ -569,16 +486,11 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
 
   Color _statusColor(String? status, AppColorSet colors) {
     switch (status) {
-      case 'H':
-        return colors.primary;
-      case 'S':
-        return colors.yellow;
-      case 'I':
-        return colors.blue;
-      case 'A':
-        return colors.red;
-      default:
-        return colors.border;
+      case 'H': return colors.primary;
+      case 'S': return colors.yellow;
+      case 'I': return colors.blue;
+      case 'A': return colors.red;
+      default:  return colors.border;
     }
   }
 
@@ -617,10 +529,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          icon,
-          style: TextStyle(fontSize: 8.sp, color: colors.border),
-        ),
+        Text(icon, style: TextStyle(fontSize: 8.sp, color: colors.border)),
         SizedBox(width: 4.w),
         Icon(
           label.contains('Pagi') || label.contains('Morning')
@@ -634,7 +543,6 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
           label,
           style: TextStyle(
             fontSize: 12.sp,
-            fontWeight: FontWeight.w400,
             color: colors.textSecondary,
             fontFamily: 'Poppins',
           ),

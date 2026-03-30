@@ -64,16 +64,19 @@ class AbsensiSantriItem extends StatelessWidget {
               children: [
                 Text(
                   name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: colors.primary,
                     fontFamily: 'Poppins',
+                    height: 1.2,
                   ),
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'NIS: $nis',
+                  nis,
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w400,
@@ -84,6 +87,7 @@ class AbsensiSantriItem extends StatelessWidget {
               ],
             ),
           ),
+          SizedBox(width: 8.w),
 
           // Riwayat Absensi button
           GestureDetector(
@@ -91,10 +95,10 @@ class AbsensiSantriItem extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
               decoration: BoxDecoration(
-                color: colors.surface,
+                color: colors.primary.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8.r),
                 border: Border.all(
-                  color: colors.border,
+                  color: colors.primary.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),

@@ -3,18 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Bottom sheet dialog for editing target hafalan per class
 class EditTargetDialog extends StatefulWidget {
   final String kelasTitle;
   final String programLabel;
   final Set<int> initialSelectedJuz;
+  final void Function(int target, String juzRange)? onSave;
 
   const EditTargetDialog({
     super.key,
     required this.kelasTitle,
     required this.programLabel,
     this.initialSelectedJuz = const {},
+    this.onSave,
   });
 
   /// Show this dialog as a bottom sheet
@@ -23,6 +26,7 @@ class EditTargetDialog extends StatefulWidget {
     required String kelasTitle,
     required String programLabel,
     Set<int> initialSelectedJuz = const {},
+    void Function(int target, String juzRange)? onSave,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -32,6 +36,7 @@ class EditTargetDialog extends StatefulWidget {
         kelasTitle: kelasTitle,
         programLabel: programLabel,
         initialSelectedJuz: initialSelectedJuz,
+        onSave: onSave,
       ),
     );
   }
@@ -161,7 +166,10 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                     onChanged: (v) {
                       if (v != null) setState(() => _selectedTahun = v);
                     },
-                    closedHeaderPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                    closedHeaderPadding: EdgeInsets.symmetric(
+                      horizontal: 14.w,
+                      vertical: 12.h,
+                    ),
                     decoration: CustomDropdownDecoration(
                       closedBorderRadius: BorderRadius.circular(10.r),
                       closedBorder: Border.all(color: colors.border),
@@ -216,32 +224,33 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
           Padding(
             padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
             child: SafeArea(
-              child: SizedBox(
+              child: PrimaryButton(
                 width: double.infinity,
-                height: 50.h,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Save target
+                onPressed: () async {
+                  final confirmed = await ConfirmSaveDialog.show(context);
+                  if (!confirmed) return;
+
+                  if (widget.onSave != null && _selectedJuz.isNotEmpty) {
+                    // Calculate range string
+                    final sorted = _selectedJuz.toList()..sort();
+                    String juzRangeStr;
+                    if (sorted.length == 1) {
+                      juzRangeStr = '${sorted.first}';
+                    } else {
+                      // For simplicity, just show first and last.
+                      // It handles wrapping correctly if UI enforces continuous selection.
+                      juzRangeStr = '${sorted.first} - ${sorted.last}';
+                    }
+                    widget.onSave!(sorted.length, juzRangeStr);
+                  }
+
+                  if (context.mounted) {
                     Navigator.of(context).pop();
-                  },
-                  icon: Icon(Icons.save, size: 20.sp),
-                  label: Text(
-                    t.editTarget.simpanPerubahan,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primary,
-                    foregroundColor: colors.textOnButton,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.r),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+                  }
+                },
+                icon: Icons.save,
+                label: t.editTarget.simpanPerubahan,
+                borderRadius: 25.r,
               ),
             ),
           ),
@@ -305,9 +314,7 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
               color: isSelected ? colors.primary : Colors.transparent,
               shape: BoxShape.circle,
               border: Border.all(
-                color: isSelected
-                    ? colors.primary
-                    : colors.border,
+                color: isSelected ? colors.primary : colors.border,
                 width: 1.5,
               ),
             ),
@@ -317,7 +324,9 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? colors.textOnButton : colors.textSecondary,
+                  color: isSelected
+                      ? colors.textOnButton
+                      : colors.textSecondary,
                   fontFamily: 'Poppins',
                 ),
               ),
@@ -352,16 +361,10 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.verified,
-                size: 22.sp,
-                color: colors.primary,
-              ),
+              Icon(Icons.verified, size: 22.sp, color: colors.primary),
               SizedBox(width: 8.w),
               Text(
-                t.editTarget.totalJuz(
-                  count: _selectedJuz.length.toString(),
-                ),
+                t.editTarget.totalJuz(count: _selectedJuz.length.toString()),
                 style: TextStyle(
                   fontSize: 26.sp,
                   fontWeight: FontWeight.w800,

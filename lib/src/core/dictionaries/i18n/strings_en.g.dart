@@ -74,6 +74,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsWaliSantriDashboardEn waliSantriDashboard = TranslationsWaliSantriDashboardEn._(_root);
 	late final TranslationsWaliSantriNavEn waliSantriNav = TranslationsWaliSantriNavEn._(_root);
 	late final TranslationsWaliSantriPengaturanScreenEn WaliSantriPengaturanScreen = TranslationsWaliSantriPengaturanScreenEn._(_root);
+	late final TranslationsDialogsEn dialogs = TranslationsDialogsEn._(_root);
+	late final TranslationsMasterDataSettingsEn masterDataSettings = TranslationsMasterDataSettingsEn._(_root);
 }
 
 // Path: app
@@ -363,14 +365,17 @@ class TranslationsNavEn {
 	/// en: 'Santri'
 	String get santri => 'Santri';
 
-	/// en: 'Guru'
-	String get guru => 'Guru';
+	/// en: 'Teacher'
+	String get guru => 'Teacher';
 
 	/// en: 'Halaqoh'
 	String get halaqoh => 'Halaqoh';
 
 	/// en: 'Target'
 	String get target => 'Target';
+
+	/// en: 'Settings'
+	String get pengaturan => 'Settings';
 }
 
 // Path: addData
@@ -1396,6 +1401,66 @@ class TranslationsWaliSantriPengaturanScreenEn {
 	String get pilihTema => 'Select Theme';
 }
 
+// Path: dialogs
+class TranslationsDialogsEn {
+	TranslationsDialogsEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Delete Data?'
+	String get deleteTitle => 'Delete Data?';
+
+	/// en: 'Are you sure you want to delete this data? This action cannot be undone and it will be permanently lost.'
+	String get deleteMessage => 'Are you sure you want to delete this data? This action cannot be undone and it will be permanently lost.';
+
+	/// en: 'Save Changes?'
+	String get saveTitle => 'Save Changes?';
+
+	/// en: 'Please ensure all entered data is correct before saving.'
+	String get saveMessage => 'Please ensure all entered data is correct before saving.';
+
+	/// en: 'Cancel'
+	String get batal => 'Cancel';
+
+	/// en: 'Delete'
+	String get hapus => 'Delete';
+
+	/// en: 'Save'
+	String get simpan => 'Save';
+
+	/// en: 'Log Out?'
+	String get logoutTitle => 'Log Out?';
+
+	/// en: 'Are you sure you want to log out from this account? You will need to log in again to use the app.'
+	String get logoutMessage => 'Are you sure you want to log out from this account? You will need to log in again to use the app.';
+
+	/// en: 'Log Out'
+	String get keluar => 'Log Out';
+}
+
+// Path: masterDataSettings
+class TranslationsMasterDataSettingsEn {
+	TranslationsMasterDataSettingsEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Settings'
+	String get title => 'Settings';
+
+	/// en: 'About App'
+	String get tentangAplikasi => 'About App';
+
+	/// en: 'Log Out'
+	String get keluar => 'Log Out';
+
+	/// en: 'Version {version}'
+	String get appVersion => 'Version {version}';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
@@ -1467,9 +1532,10 @@ extension on Translations {
 			case 'editTarget.simpanPerubahan': return 'Save Changes';
 			case 'nav.dashboard': return 'Dashboard';
 			case 'nav.santri': return 'Santri';
-			case 'nav.guru': return 'Guru';
+			case 'nav.guru': return 'Teacher';
 			case 'nav.halaqoh': return 'Halaqoh';
 			case 'nav.target': return 'Target';
+			case 'nav.pengaturan': return 'Settings';
 			case 'addData.title': return 'Add Data';
 			case 'addData.subtitle': return 'Choose your preferred data input method';
 			case 'addData.inputManual': return 'Manual Input';
@@ -1736,6 +1802,20 @@ extension on Translations {
 			case 'WaliSantriPengaturanScreen.terangLight': return 'Light';
 			case 'WaliSantriPengaturanScreen.gelapDark': return 'Dark';
 			case 'WaliSantriPengaturanScreen.pilihTema': return 'Select Theme';
+			case 'dialogs.deleteTitle': return 'Delete Data?';
+			case 'dialogs.deleteMessage': return 'Are you sure you want to delete this data? This action cannot be undone and it will be permanently lost.';
+			case 'dialogs.saveTitle': return 'Save Changes?';
+			case 'dialogs.saveMessage': return 'Please ensure all entered data is correct before saving.';
+			case 'dialogs.batal': return 'Cancel';
+			case 'dialogs.hapus': return 'Delete';
+			case 'dialogs.simpan': return 'Save';
+			case 'dialogs.logoutTitle': return 'Log Out?';
+			case 'dialogs.logoutMessage': return 'Are you sure you want to log out from this account? You will need to log in again to use the app.';
+			case 'dialogs.keluar': return 'Log Out';
+			case 'masterDataSettings.title': return 'Settings';
+			case 'masterDataSettings.tentangAplikasi': return 'About App';
+			case 'masterDataSettings.keluar': return 'Log Out';
+			case 'masterDataSettings.appVersion': return 'Version {version}';
 			default: return null;
 		}
 	}

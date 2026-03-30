@@ -7,15 +7,13 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_lis
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_data_method_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_manual_guru_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/bulk_upload_dialog.dart';
+import 'package:my_halaqoh/src/core/widget/dialog/confirm_delete_dialog.dart';
 
 /// Guru list screen (Tab 2 & Menu Card)
 class GuruListScreen extends StatefulWidget {
   final bool showBackButton;
 
-  const GuruListScreen({
-    super.key,
-    this.showBackButton = false,
-  });
+  const GuruListScreen({super.key, this.showBackButton = false});
 
   @override
   State<GuruListScreen> createState() => _GuruListScreenState();
@@ -27,14 +25,46 @@ class _GuruListScreenState extends State<GuruListScreen> {
 
   // Dummy data
   final List<Map<String, String>> _guruData = [
-    {'nip': '198501012010011001', 'name': 'Ustadz Ahmad Fauzi, S.Pd.I', 'phone': '081234567890'},
-    {'nip': '198805122011012003', 'name': 'Ustadzah Siti Aminah, Lc.', 'phone': '081234567891'},
-    {'nip': '199003152015021005', 'name': 'Ustadz Budi Santoso, M.Ag', 'phone': '081234567892'},
-    {'nip': '199207202018012002', 'name': 'Ustadzah Dewi Sartika, S.Hum', 'phone': '081234567893'},
-    {'nip': '198711102012011004', 'name': 'Ustadz Rahmat Hidayat, Al-Hafizh', 'phone': '081234567894'},
-    {'nip': '199502282019022001', 'name': 'Ustadzah Nurul Huda', 'phone': '081234567895'},
-    {'nip': '198909092014011002', 'name': 'Ustadz Zainal Abidin', 'phone': '081234567896'},
-    {'nip': '199304142017011003', 'name': 'Ustadz Abdullah Faqih', 'phone': '081234567897'},
+    {
+      'nip': '198501012010011001',
+      'name': 'Ustadz Ahmad Fauzi, S.Pd.I',
+      'phone': '081234567890',
+    },
+    {
+      'nip': '198805122011012003',
+      'name': 'Ustadzah Siti Aminah, Lc.',
+      'phone': '081234567891',
+    },
+    {
+      'nip': '199003152015021005',
+      'name': 'Ustadz Budi Santoso, M.Ag',
+      'phone': '081234567892',
+    },
+    {
+      'nip': '199207202018012002',
+      'name': 'Ustadzah Dewi Sartika, S.Hum',
+      'phone': '081234567893',
+    },
+    {
+      'nip': '198711102012011004',
+      'name': 'Ustadz Rahmat Hidayat, Al-Hafizh',
+      'phone': '081234567894',
+    },
+    {
+      'nip': '199502282019022001',
+      'name': 'Ustadzah Nurul Huda',
+      'phone': '081234567895',
+    },
+    {
+      'nip': '198909092014011002',
+      'name': 'Ustadz Zainal Abidin',
+      'phone': '081234567896',
+    },
+    {
+      'nip': '199304142017011003',
+      'name': 'Ustadz Abdullah Faqih',
+      'phone': '081234567897',
+    },
   ];
 
   @override
@@ -55,9 +85,11 @@ class _GuruListScreenState extends State<GuruListScreen> {
         _filteredData = List.from(_guruData);
       } else {
         _filteredData = _guruData
-            .where((g) =>
-                g['name']!.toLowerCase().contains(query.toLowerCase()) ||
-                g['nip']!.contains(query))
+            .where(
+              (g) =>
+                  g['name']!.toLowerCase().contains(query.toLowerCase()) ||
+                  g['nip']!.contains(query),
+            )
             .toList();
       }
     });
@@ -87,8 +119,11 @@ class _GuruListScreenState extends State<GuruListScreen> {
     );
   }
 
-  void _onDelete(int index) {
+  Future<void> _onDelete(int index) async {
     final item = _filteredData[index];
+    final confirmed = await ConfirmDeleteDialog.show(context);
+    if (!confirmed) return;
+
     setState(() {
       _guruData.removeWhere((g) => g['nip'] == item['nip']);
       _onSearch(_searchController.text);
@@ -159,7 +194,19 @@ class _GuruListScreenState extends State<GuruListScreen> {
           onPressed: () {
             AddDataMethodDialog.show(
               context,
-              onManualTap: () => AddManualGuruDialog.show(context),
+              onManualTap: () => AddManualGuruDialog.show(
+                context,
+                onSave: (nip, nama, phone) {
+                  setState(() {
+                    _guruData.add({
+                      'nip': nip ?? '',
+                      'name': nama ?? '',
+                      'phone': phone ?? '',
+                    });
+                    _onSearch(_searchController.text);
+                  });
+                },
+              ),
               onBulkUploadTap: () => BulkUploadDialog.show(context),
             );
           },

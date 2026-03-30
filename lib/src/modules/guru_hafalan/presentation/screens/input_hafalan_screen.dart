@@ -1,15 +1,17 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Surah data model
 class _SurahData {
   final int number;
   final String name;
   final int juz;
-  final String type; // Makkiyah / Madaniyah
+  final String type;
   final int ayatCount;
 
   const _SurahData({
@@ -24,11 +26,11 @@ class _SurahData {
 /// Selected surah state
 class _SelectedSurah {
   final _SurahData surah;
-  bool semuaAyat;
+  bool semuaAyat = false;
   final TextEditingController ayatAwalController;
   final TextEditingController ayatAkhirController;
 
-  _SelectedSurah({required this.surah, this.semuaAyat = false})
+  _SelectedSurah({required this.surah})
     : ayatAwalController = TextEditingController(text: '1'),
       ayatAkhirController = TextEditingController(
         text: surah.ayatCount.toString(),
@@ -52,8 +54,12 @@ class InputHafalanScreen extends StatefulWidget {
   State<InputHafalanScreen> createState() => _InputHafalanScreenState();
 }
 
-class _InputHafalanScreenState extends State<InputHafalanScreen> {
-  String _selectedTab = 'ziyadah';
+class _InputHafalanScreenState extends State<InputHafalanScreen>
+    with SingleTickerProviderStateMixin {
+  // ── Tab controller (replaces _selectedTab string) ─────────────────────────
+  late TabController _tabController;
+
+  DateTime _tanggalSetoran = DateTime.now();
 
   final _juzController = TextEditingController();
   final _kelancaranController = TextEditingController(text: '0');
@@ -61,7 +67,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
 
   final List<_SelectedSurah> _selectedSurahs = [];
 
-  // Dummy surah data (first 30 juz 30 surahs for demo)
+  // Dummy surah data
   final List<_SurahData> _surahList = const [
     _SurahData(
       number: 1,
@@ -360,7 +366,14 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
   void dispose() {
+    _tabController.dispose();
     _juzController.dispose();
     _kelancaranController.dispose();
     _tajwidController.dispose();
@@ -370,12 +383,13 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
     super.dispose();
   }
 
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  String get _selectedTab => _tabController.index == 0 ? 'ziyadah' : 'murajaah';
+
   void _showSurahBottomSheet() {
     final colors = AppColors.of(context);
     final searchController = TextEditingController();
     String searchQuery = '';
-
-    // Temporary selection set (start with currently selected numbers)
     final tempSelected = <int>{..._selectedSurahs.map((s) => s.surah.number)};
 
     showModalBottomSheet(
@@ -402,8 +416,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
               child: Column(
                 children: [
                   SizedBox(height: 20.h),
-
-                  // Title + subtitle + close
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
                     child: Row(
@@ -427,7 +439,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                                 'Pilih satu atau lebih surat',
                                 style: TextStyle(
                                   fontSize: 13.sp,
-                                  fontWeight: FontWeight.w400,
                                   color: colors.textSecondary,
                                   fontFamily: 'Poppins',
                                 ),
@@ -447,8 +458,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                     ),
                   ),
                   SizedBox(height: 16.h),
-
-                  // Search field
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
                     child: Container(
@@ -487,8 +496,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                     ),
                   ),
                   SizedBox(height: 8.h),
-
-                  // Surah list
                   Expanded(
                     child: ListView.builder(
                       padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -496,7 +503,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                       itemBuilder: (_, idx) {
                         final surah = filtered[idx];
                         final isSelected = tempSelected.contains(surah.number);
-
                         return InkWell(
                           onTap: () {
                             setSheetState(() {
@@ -511,7 +517,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                             padding: EdgeInsets.symmetric(vertical: 14.h),
                             child: Row(
                               children: [
-                                // Circle number badge
                                 Container(
                                   width: 36.w,
                                   height: 36.w,
@@ -533,8 +538,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                                   ),
                                 ),
                                 SizedBox(width: 14.w),
-
-                                // Surah name only
                                 Expanded(
                                   child: Text(
                                     surah.name,
@@ -546,8 +549,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                                     ),
                                   ),
                                 ),
-
-                                // Circle checkbox
                                 Icon(
                                   isSelected
                                       ? Icons.check_circle
@@ -564,94 +565,40 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                       },
                     ),
                   ),
-
-                  // KONFIRMASI PILIHAN button
                   Padding(
                     padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
-                    child: SizedBox(
+                    child: PrimaryButton(
                       width: double.infinity,
                       height: 50.h,
-                      child: ElevatedButton(
-                        onPressed: totalCount > 0
-                            ? () {
-                                // Remove de-selected surahs
-                                _selectedSurahs.removeWhere((sel) {
-                                  if (!tempSelected.contains(
-                                    sel.surah.number,
-                                  )) {
-                                    sel.dispose();
-                                    return true;
-                                  }
-                                  return false;
-                                });
-
-                                // Add newly selected surahs
-                                for (final num in tempSelected) {
-                                  if (!_selectedSurahs.any(
-                                    (s) => s.surah.number == num,
-                                  )) {
-                                    final surah = _surahList.firstWhere(
-                                      (s) => s.number == num,
-                                    );
-                                    _selectedSurahs.add(
-                                      _SelectedSurah(surah: surah),
-                                    );
-                                  }
+                      onPressed: totalCount > 0
+                          ? () {
+                              _selectedSurahs.removeWhere((sel) {
+                                if (!tempSelected.contains(sel.surah.number)) {
+                                  sel.dispose();
+                                  return true;
                                 }
-
-                                setState(() {});
-                                Navigator.pop(ctx);
+                                return false;
+                              });
+                              for (final num in tempSelected) {
+                                if (!_selectedSurahs.any(
+                                  (s) => s.surah.number == num,
+                                )) {
+                                  final surah = _surahList.firstWhere(
+                                    (s) => s.number == num,
+                                  );
+                                  _selectedSurahs.add(
+                                    _SelectedSurah(surah: surah),
+                                  );
+                                }
                               }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colors.primary,
-                          foregroundColor: colors.textOnButton,
-                          disabledBackgroundColor: colors.primary.withValues(
-                            alpha: 0.4,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'KONFIRMASI PILIHAN',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: colors.textOnButton,
-                                fontFamily: 'Poppins',
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            if (totalCount > 0) ...[
-                              SizedBox(width: 8.w),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8.w,
-                                  vertical: 2.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.25),
-                                  borderRadius: BorderRadius.circular(10.r),
-                                ),
-                                child: Text(
-                                  totalCount.toString(),
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: colors.textOnButton,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
+                              setState(() {});
+                              Navigator.pop(ctx);
+                            }
+                          : null,
+                      label: totalCount > 0
+                          ? 'KONFIRMASI PILIHAN  ($totalCount)'
+                          : 'KONFIRMASI PILIHAN',
+                      borderRadius: 14.r,
                     ),
                   ),
                 ],
@@ -661,6 +608,30 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
         );
       },
     );
+  }
+
+  Future<void> _selectTanggalSetoran(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _tanggalSetoran,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.of(context).primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.of(context).textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _tanggalSetoran) {
+      setState(() => _tanggalSetoran = picked);
+    }
   }
 
   @override
@@ -763,21 +734,17 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                   ),
                   SizedBox(height: 18.h),
 
-                  // ── Ziyadah / Murajaah tabs ──
-                  Row(
-                    children: [
-                      _buildTab('ziyadah', t.inputHafalanForm.ziyadah, colors),
-                      SizedBox(width: 10.w),
-                      _buildTab(
-                        'murajaah',
-                        t.inputHafalanForm.murajaah,
-                        colors,
-                      ),
+                  // ── Ziyadah / Murajaah tab selector ──
+                  AppTabSelector(
+                    controller: _tabController,
+                    tabs: [
+                      t.inputHafalanForm.ziyadah,
+                      t.inputHafalanForm.murajaah,
                     ],
+                    horizontalPadding: 0,
                   ),
                   SizedBox(height: 24.h),
 
-                  // ── Formulir Hafalan header ──
                   Row(
                     children: [
                       Icon(Icons.menu_book, size: 20.sp, color: colors.primary),
@@ -794,6 +761,62 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                     ],
                   ),
                   SizedBox(height: 14.h),
+
+                  // ── Tanggal Setoran Picker ──
+                  GestureDetector(
+                    onTap: () => _selectTanggalSetoran(context),
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 14.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: colors.border, width: 1),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Tanggal Setoran',
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: colors.textSecondary,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  DateFormat(
+                                    'EEEE, d MMMM yyyy',
+                                    'id',
+                                  ).format(_tanggalSetoran),
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.textPrimary,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.calendar_month,
+                            size: 22.sp,
+                            color: colors.primary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
 
                   // ── Pilih Daftar Surat button ──
                   GestureDetector(
@@ -850,8 +873,11 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
 
                   // ── Selected surah cards ──
                   ...List.generate(_selectedSurahs.length, (index) {
-                    final sel = _selectedSurahs[index];
-                    return _buildSurahCard(index, sel, colors);
+                    return _buildSurahCard(
+                      index,
+                      _selectedSurahs[index],
+                      colors,
+                    );
                   }),
 
                   // ── Juz ──
@@ -925,56 +951,36 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // SIMPAN
-                SizedBox(
+                PrimaryButton(
                   width: double.infinity,
                   height: 50.h,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: Save hafalan data
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colors.primary,
-                      foregroundColor: colors.textOnButton,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      t.inputHafalanForm.simpan,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                  ),
+                  onPressed: () async {
+                    final confirmed = await ConfirmSaveDialog.show(context);
+                    if (confirmed && context.mounted) {
+                      final dummyData = {
+                        'day': DateTime.now().day,
+                        'type': _selectedTab,
+                        'surah': _selectedSurahs.isNotEmpty
+                            ? _selectedSurahs.first.surah.name
+                            : 'Surat Baru',
+                        'ayat': _selectedSurahs.isNotEmpty
+                            ? 'Ayat ${_selectedSurahs.first.ayatAwalController.text} - ${_selectedSurahs.first.ayatAkhirController.text}'
+                            : 'Ayat 1-10',
+                        'score': int.tryParse(_kelancaranController.text) ?? 80,
+                      };
+                      Navigator.of(context).pop(dummyData);
+                    }
+                  },
+                  label: t.inputHafalanForm.simpan,
+                  borderRadius: 14.r,
                 ),
                 SizedBox(height: 10.h),
-                // BATAL
-                SizedBox(
+                CustomOutlinedButton(
                   width: double.infinity,
                   height: 50.h,
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: colors.textPrimary,
-                      side: BorderSide(color: colors.border, width: 1.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
-                    ),
-                    child: Text(
-                      t.inputHafalanForm.batal,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                  label: t.inputHafalanForm.batal,
+                  borderRadius: 14.r,
                 ),
               ],
             ),
@@ -984,47 +990,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
     );
   }
 
-  // ── Tab widget ──
-  Widget _buildTab(String value, String label, AppColorSet colors) {
-    final isSelected = _selectedTab == value;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedTab = value),
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12.h),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.transparent : colors.background,
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          child: Column(
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: isSelected ? colors.primary : colors.textSecondary,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Container(
-                width: 40.w,
-                height: 3.h,
-                decoration: BoxDecoration(
-                  color: isSelected ? colors.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Surah card ──
+  // ── Surah card ─────────────────────────────────────────────────────────────
   Widget _buildSurahCard(int index, _SelectedSurah sel, AppColorSet colors) {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
@@ -1040,10 +1006,8 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: number badge + surah name + delete
           Row(
             children: [
-              // Number badge
               Container(
                 width: 28.w,
                 height: 28.w,
@@ -1080,7 +1044,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
                       'Juz ${sel.surah.juz} • ${sel.surah.type}',
                       style: TextStyle(
                         fontSize: 11.sp,
-                        fontWeight: FontWeight.w400,
                         color: colors.textSecondary,
                         fontFamily: 'Poppins',
                       ),
@@ -1104,8 +1067,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
             ],
           ),
           SizedBox(height: 10.h),
-
-          // Semua Ayat checkbox
           GestureDetector(
             onTap: () {
               setState(() {
@@ -1139,8 +1100,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
             ),
           ),
           SizedBox(height: 10.h),
-
-          // Ayat Awal / Ayat Akhir
           Row(
             children: [
               Expanded(
@@ -1235,7 +1194,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
     );
   }
 
-  // ── Scoring field with icon ──
+  // ── Scoring field ──────────────────────────────────────────────────────────
   Widget _buildScoringField(
     String label,
     String scaleLabel,
@@ -1262,7 +1221,6 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
               scaleLabel,
               style: TextStyle(
                 fontSize: 11.sp,
-                fontWeight: FontWeight.w400,
                 color: colors.textSecondary,
                 fontFamily: 'Poppins',
               ),
@@ -1298,7 +1256,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen> {
     );
   }
 
-  // ── Simple text field ──
+  // ── Simple text field ──────────────────────────────────────────────────────
   Widget _buildTextField(
     String hint,
     TextEditingController controller,

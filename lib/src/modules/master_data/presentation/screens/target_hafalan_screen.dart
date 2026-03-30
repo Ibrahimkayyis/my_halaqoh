@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/edit_target_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/target_kelas_card.dart';
 
@@ -9,10 +10,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/target_k
 class TargetHafalanScreen extends StatefulWidget {
   final bool showBackButton;
 
-  const TargetHafalanScreen({
-    super.key,
-    this.showBackButton = false,
-  });
+  const TargetHafalanScreen({super.key, this.showBackButton = false});
 
   @override
   State<TargetHafalanScreen> createState() => _TargetHafalanScreenState();
@@ -80,8 +78,12 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
       body: Column(
         children: [
           SizedBox(height: 8.h),
+
           // Tab bar
-          _buildTabBar(colors),
+          AppTabSelector(
+            controller: _tabController,
+            tabs: [t.targetHafalan.reguler, t.targetHafalan.takhassus],
+          ),
           SizedBox(height: 16.h),
 
           // Info banner
@@ -103,53 +105,6 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
     );
   }
 
-  Widget _buildTabBar(AppColorSet colors) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Container(
-        height: 42.h,
-        decoration: BoxDecoration(
-          color: colors.border.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(10.r),
-        ),
-        child: TabBar(
-          controller: _tabController,
-          indicatorSize: TabBarIndicatorSize.tab,
-          dividerColor: Colors.transparent,
-          indicator: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(8.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          labelColor: colors.primary,
-          unselectedLabelColor: colors.textSecondary,
-          labelStyle: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w700,
-            fontFamily: 'Poppins',
-          ),
-          unselectedLabelStyle: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Poppins',
-          ),
-          labelPadding: EdgeInsets.zero,
-          padding: EdgeInsets.all(3.w),
-          tabs: [
-            Tab(text: t.targetHafalan.reguler),
-            Tab(text: t.targetHafalan.takhassus),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildInfoBanner(AppColorSet colors) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -158,18 +113,12 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
         decoration: BoxDecoration(
           color: colors.primary.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(
-            color: colors.primary.withValues(alpha: 0.15),
-          ),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              Icons.info_outline,
-              size: 18.sp,
-              color: colors.primary,
-            ),
+            Icon(Icons.info_outline, size: 18.sp, color: colors.primary),
             SizedBox(width: 10.w),
             Expanded(
               child: Text(
@@ -207,7 +156,6 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
   }
 
   void _showEditDialog(Map<String, String> item) {
-    // Parse juz range to initial selection
     final juzStr = item['juz']!;
     final parts = juzStr.split(' - ');
     final Set<int> initialJuz = {};
@@ -219,7 +167,6 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
           initialJuz.add(i);
         }
       } else {
-        // wrapping case like 30 - 29
         for (int i = start; i <= 30; i++) {
           initialJuz.add(i);
         }
@@ -238,6 +185,12 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
       kelasTitle: item['title']!,
       programLabel: programLabel,
       initialSelectedJuz: initialJuz,
+      onSave: (target, juzRange) {
+        setState(() {
+          item['target'] = target.toString();
+          item['juz'] = juzRange;
+        });
+      },
     );
   }
 }

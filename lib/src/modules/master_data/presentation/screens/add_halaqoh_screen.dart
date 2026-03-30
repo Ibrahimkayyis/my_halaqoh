@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Screen for creating a new Halaqoh group
 @RoutePage()
@@ -35,7 +36,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
   ];
 
   // Selected santri for this halaqoh
-  List<Map<String, String>> _selectedSantri = [];
+  final List<Map<String, String>> _selectedSantri = [];
 
   @override
   void dispose() {
@@ -59,7 +60,14 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
     }
   }
 
-  void _removeSantri(int index) {
+  Future<void> _removeSantri(int index) async {
+    final confirmed = await ConfirmDeleteDialog.show(
+      context,
+      title: 'Hapus Santri?',
+      message: 'Apakah Anda yakin ingin menghapus santri ini dari halaqoh?',
+    );
+    if (!confirmed) return;
+
     setState(() {
       _selectedSantri.removeAt(index);
     });
@@ -121,8 +129,12 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                               hintText: t.addHalaqoh.kelasHint,
                               items: _kelasList,
                               initialItem: _selectedKelas,
-                              onChanged: (v) => setState(() => _selectedKelas = v),
-                              closedHeaderPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                              onChanged: (v) =>
+                                  setState(() => _selectedKelas = v),
+                              closedHeaderPadding: EdgeInsets.symmetric(
+                                horizontal: 14.w,
+                                vertical: 12.h,
+                              ),
                               decoration: _dropdownDecoration(colors),
                             ),
                           ],
@@ -139,8 +151,12 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                               hintText: t.addHalaqoh.programHint,
                               items: _programList,
                               initialItem: _selectedProgram,
-                              onChanged: (v) => setState(() => _selectedProgram = v),
-                              closedHeaderPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                              onChanged: (v) =>
+                                  setState(() => _selectedProgram = v),
+                              closedHeaderPadding: EdgeInsets.symmetric(
+                                horizontal: 14.w,
+                                vertical: 12.h,
+                              ),
                               decoration: _dropdownDecoration(colors),
                             ),
                           ],
@@ -159,7 +175,10 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                     initialItem: _selectedGuru,
                     excludeSelected: false,
                     onChanged: (v) => setState(() => _selectedGuru = v),
-                    closedHeaderPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                    closedHeaderPadding: EdgeInsets.symmetric(
+                      horizontal: 14.w,
+                      vertical: 12.h,
+                    ),
                     decoration: _dropdownDecoration(colors),
                   ),
                   SizedBox(height: 24.h),
@@ -187,10 +206,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                           decoration: BoxDecoration(
                             color: colors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(
-                              color: colors.primary,
-                              width: 1,
-                            ),
+                            border: Border.all(color: colors.primary, width: 1),
                           ),
                           child: Text(
                             t.addHalaqoh.tambahSantri,
@@ -245,29 +261,37 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
               child: SizedBox(
                 width: double.infinity,
                 height: 50.h,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Save halaqoh
-                    context.router.maybePop();
+                child: PrimaryButton(
+                  onPressed: () async {
+                    if (_namaController.text.isEmpty || _selectedGuru == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Lengkapi nama dan pengampu halaqoh'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    final confirmed = await ConfirmSaveDialog.show(context);
+                    if (!confirmed) return;
+
+                    if (context.mounted) {
+                      context.router.maybePop<Map<String, dynamic>>({
+                        'name': _namaController.text,
+                        'kelas': _selectedSantri.isNotEmpty
+                            ? _selectedSantri.first['kelas']
+                            : '7',
+                        'program': _selectedSantri.isNotEmpty
+                            ? _selectedSantri.first['program']
+                            : 'R',
+                        'guru': _selectedGuru,
+                        'santri': _selectedSantri.length,
+                      });
+                    }
                   },
-                  icon: Icon(Icons.save, size: 20.sp),
-                  label: Text(
-                    t.addHalaqoh.simpanHalaqoh,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Poppins',
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primary,
-                    foregroundColor: colors.textOnButton,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.r),
-                    ),
-                    elevation: 0,
-                  ),
+                  icon: Icons.save,
+                  label: t.addHalaqoh.simpanHalaqoh,
+                  borderRadius: 25.r,
                 ),
               ),
             ),
@@ -334,10 +358,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
           color: colors.textSecondary.withValues(alpha: 0.5),
           fontFamily: 'Poppins',
         ),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 14.h,
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
           borderSide: BorderSide(color: colors.border),
@@ -430,10 +451,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
             ...List.generate(_selectedSantri.length, (index) {
               final santri = _selectedSantri[index];
               return Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 14.w,
-                  vertical: 12.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(

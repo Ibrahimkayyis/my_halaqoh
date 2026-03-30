@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Dialog for starting an attendance session — date picker + session chips + action buttons.
 /// Adapts session chips based on [programType]: 'reguler' (2) or 'takhassus' (5).
@@ -161,70 +162,28 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
               SizedBox(height: 24.h),
 
               // ── Scan Barcode button ──
-              SizedBox(
+              PrimaryButton(
                 width: double.infinity,
                 height: 48.h,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    widget.onScanBarcode();
-                  },
-                  icon: Icon(
-                    Icons.qr_code_scanner,
-                    size: 20.sp,
-                    color: colors.textOnButton,
-                  ),
-                  label: Text(
-                    t.absensi.scanBarcode,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textOnButton,
-                      fontFamily: 'Poppins',
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  widget.onScanBarcode();
+                },
+                icon: Icons.qr_code_scanner,
+                label: t.absensi.scanBarcode,
               ),
               SizedBox(height: 10.h),
 
               // ── Tandai Semua Hadir button ──
-              SizedBox(
+              CustomOutlinedButton(
                 width: double.infinity,
                 height: 48.h,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    widget.onTandaiSemuaHadir?.call();
-                  },
-                  icon: Icon(
-                    Icons.checklist,
-                    size: 20.sp,
-                    color: colors.primary,
-                  ),
-                  label: Text(
-                    'Tandai Semua Hadir',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.primary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: colors.primary, width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                  ),
-                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  widget.onTandaiSemuaHadir?.call();
+                },
+                icon: Icons.checklist,
+                label: 'Tandai Semua Hadir',
               ),
             ],
           ),

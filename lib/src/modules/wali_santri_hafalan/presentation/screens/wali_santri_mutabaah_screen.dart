@@ -1,8 +1,9 @@
-﻿import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Mutaba'ah Santri â€” daily memorization log split into Hafalan Baru & Murajaah tables
 @RoutePage()
@@ -24,20 +25,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
   int _currentMonth = 11; // November
   int _currentYear = 2025;
 
-  final List<String> _monthNames = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
+
 
   // Dummy hafalan baru records
   final List<Map<String, dynamic>> _hafalanBaruRecords = [
@@ -247,46 +235,28 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Month navigator
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 10.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(24.r),
-                        border: Border.all(color: colors.border, width: 1),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: _prevMonth,
-                            child: Icon(
-                              Icons.chevron_left,
-                              color: colors.primary,
-                              size: 24.sp,
-                            ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppMonthSelector(
+                            month: _currentMonth,
+                            year: _currentYear,
+                            onPrev: _prevMonth,
+                            onNext: _nextMonth,
                           ),
-                          Text(
-                            '${_monthNames[_currentMonth - 1]} $_currentYear',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color: colors.textPrimary,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: _nextMonth,
-                            child: Icon(
-                              Icons.chevron_right,
-                              color: colors.primary,
-                              size: 24.sp,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                        SizedBox(width: 8.w),
+                        AppCalendarPickerButton(
+                          currentMonth: _currentMonth,
+                          currentYear: _currentYear,
+                          onSelected: (month, year) {
+                            setState(() {
+                              _currentMonth = month;
+                              _currentYear = year;
+                            });
+                          },
+                        ),
+                      ],
                     ),
                     SizedBox(height: 20.h),
 

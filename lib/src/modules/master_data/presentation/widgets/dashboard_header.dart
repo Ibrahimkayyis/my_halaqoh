@@ -6,11 +6,13 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 class DashboardHeader extends StatelessWidget {
   final String greeting;
   final String name;
+  final VoidCallback? onSettingsTap;
 
   const DashboardHeader({
     super.key,
     required this.greeting,
     required this.name,
+    this.onSettingsTap,
   });
 
   @override
@@ -29,10 +31,7 @@ class DashboardHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            colors.primary,
-            colors.primary.withValues(alpha: 0.85),
-          ],
+          colors: [colors.primary, colors.primary.withValues(alpha: 0.85)],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30.r),
@@ -65,23 +64,38 @@ class DashboardHeader extends StatelessWidget {
               ),
             ],
           ),
-          // Avatar circle
-          Container(
-            width: 50.w,
-            height: 50.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: colors.textOnButton.withValues(alpha: 0.2),
-              border: Border.all(
-                color: colors.textOnButton.withValues(alpha: 0.4),
-                width: 2,
+          Row(
+            children: [
+              if (onSettingsTap != null) ...[
+                IconButton(
+                  onPressed: onSettingsTap,
+                  icon: Icon(
+                    Icons.settings,
+                    color: colors.textOnButton,
+                    size: 26.sp,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+              ],
+              // Avatar circle
+              Container(
+                width: 50.w,
+                height: 50.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colors.textOnButton.withValues(alpha: 0.2),
+                  border: Border.all(
+                    color: colors.textOnButton.withValues(alpha: 0.4),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.person,
+                  color: colors.textOnButton,
+                  size: 28.sp,
+                ),
               ),
-            ),
-            child: Icon(
-              Icons.person,
-              color: colors.textOnButton,
-              size: 28.sp,
-            ),
+            ],
           ),
         ],
       ),

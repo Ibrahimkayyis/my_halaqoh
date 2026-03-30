@@ -8,15 +8,13 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_lis
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_data_method_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_manual_santri_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/bulk_upload_dialog.dart';
+import 'package:my_halaqoh/src/core/widget/dialog/confirm_delete_dialog.dart';
 
 /// Santri list screen (Tab 1 & Menu Card)
 class SantriListScreen extends StatefulWidget {
   final bool showBackButton;
 
-  const SantriListScreen({
-    super.key,
-    this.showBackButton = false,
-  });
+  const SantriListScreen({super.key, this.showBackButton = false});
 
   @override
   State<SantriListScreen> createState() => _SantriListScreenState();
@@ -34,18 +32,78 @@ class _SantriListScreenState extends State<SantriListScreen> {
 
   // Dummy data with R/T program classes
   final List<Map<String, String>> _santriData = [
-    {'nis': '202512340001', 'name': 'Agha Adli Putrathandie', 'kelas': '7', 'program': 'R'},
-    {'nis': '202512340002', 'name': 'Akmal Satria Wiryawan', 'kelas': '7', 'program': 'R'},
-    {'nis': '202512340003', 'name': 'Daffa Zein Pratama', 'kelas': '7', 'program': 'T'},
-    {'nis': '202512340004', 'name': 'Humam Rasyid Ramadhan', 'kelas': '8', 'program': 'R'},
-    {'nis': '202512340005', 'name': 'Muh. Abhirama Arsanta', 'kelas': '8', 'program': 'R'},
-    {'nis': '202512340006', 'name': 'Radanar Athaullah Henka', 'kelas': '8', 'program': 'T'},
-    {'nis': '202512340007', 'name': 'Raihan Abdul Malik', 'kelas': '9', 'program': 'R'},
-    {'nis': '202512340008', 'name': 'Faris Abdurrahman', 'kelas': '9', 'program': 'T'},
-    {'nis': '202512340009', 'name': 'Azka Maulana Ibrahim', 'kelas': '10', 'program': 'R'},
-    {'nis': '202512340010', 'name': 'Zidane Putra Pratama', 'kelas': '10', 'program': 'T'},
-    {'nis': '202512340011', 'name': 'Haikal Putra Ramadhan', 'kelas': '11', 'program': 'R'},
-    {'nis': '202512340012', 'name': 'Farrel Athallah Putra', 'kelas': '12', 'program': 'T'},
+    {
+      'nis': '202512340001',
+      'name': 'Agha Adli Putrathandie',
+      'kelas': '7',
+      'program': 'R',
+    },
+    {
+      'nis': '202512340002',
+      'name': 'Akmal Satria Wiryawan',
+      'kelas': '7',
+      'program': 'R',
+    },
+    {
+      'nis': '202512340003',
+      'name': 'Daffa Zein Pratama',
+      'kelas': '7',
+      'program': 'T',
+    },
+    {
+      'nis': '202512340004',
+      'name': 'Humam Rasyid Ramadhan',
+      'kelas': '8',
+      'program': 'R',
+    },
+    {
+      'nis': '202512340005',
+      'name': 'Muh. Abhirama Arsanta',
+      'kelas': '8',
+      'program': 'R',
+    },
+    {
+      'nis': '202512340006',
+      'name': 'Radanar Athaullah Henka',
+      'kelas': '8',
+      'program': 'T',
+    },
+    {
+      'nis': '202512340007',
+      'name': 'Raihan Abdul Malik',
+      'kelas': '9',
+      'program': 'R',
+    },
+    {
+      'nis': '202512340008',
+      'name': 'Faris Abdurrahman',
+      'kelas': '9',
+      'program': 'T',
+    },
+    {
+      'nis': '202512340009',
+      'name': 'Azka Maulana Ibrahim',
+      'kelas': '10',
+      'program': 'R',
+    },
+    {
+      'nis': '202512340010',
+      'name': 'Zidane Putra Pratama',
+      'kelas': '10',
+      'program': 'T',
+    },
+    {
+      'nis': '202512340011',
+      'name': 'Haikal Putra Ramadhan',
+      'kelas': '11',
+      'program': 'R',
+    },
+    {
+      'nis': '202512340012',
+      'name': 'Farrel Athallah Putra',
+      'kelas': '12',
+      'program': 'T',
+    },
   ];
 
   List<Map<String, String>> _filteredData = [];
@@ -66,12 +124,14 @@ class _SantriListScreenState extends State<SantriListScreen> {
     setState(() {
       _filteredData = _santriData.where((s) {
         final query = _searchController.text.toLowerCase();
-        final matchesSearch = query.isEmpty ||
+        final matchesSearch =
+            query.isEmpty ||
             s['name']!.toLowerCase().contains(query) ||
             s['nis']!.contains(query);
 
         final matchesKelas = _filterKelas == null || s['kelas'] == _filterKelas;
-        final matchesProgram = _filterProgram == null ||
+        final matchesProgram =
+            _filterProgram == null ||
             (_filterProgram == 'Reguler' && s['program'] == 'R') ||
             (_filterProgram == 'Takhassus' && s['program'] == 'T');
 
@@ -123,8 +183,11 @@ class _SantriListScreenState extends State<SantriListScreen> {
     );
   }
 
-  void _onDelete(int index) {
+  Future<void> _onDelete(int index) async {
     final item = _filteredData[index];
+    final confirmed = await ConfirmDeleteDialog.show(context);
+    if (!confirmed) return;
+
     setState(() {
       _santriData.removeWhere((s) => s['nis'] == item['nis']);
       _applyFilters();
@@ -160,7 +223,9 @@ class _SantriListScreenState extends State<SantriListScreen> {
           // Search
           DataSearchBar(
             searchHint: t.santri.searchHint,
-            countText: t.santri.showCount(count: _filteredData.length.toString()),
+            countText: t.santri.showCount(
+              count: _filteredData.length.toString(),
+            ),
             filterLabel: t.santri.filter,
             controller: _searchController,
             onChanged: _onSearch,
@@ -201,7 +266,22 @@ class _SantriListScreenState extends State<SantriListScreen> {
           onPressed: () {
             AddDataMethodDialog.show(
               context,
-              onManualTap: () => AddManualSantriDialog.show(context),
+              onManualTap: () => AddManualSantriDialog.show(
+                context,
+                onSave: (nis, nama, kelas) {
+                  setState(() {
+                    final k = kelas?.replaceAll(RegExp(r'[RT]'), '') ?? '7';
+                    final p = kelas != null && kelas.endsWith('T') ? 'T' : 'R';
+                    _santriData.add({
+                      'nis': nis ?? '',
+                      'name': nama ?? '',
+                      'kelas': k,
+                      'program': p,
+                    });
+                    _applyFilters();
+                  });
+                },
+              ),
               onBulkUploadTap: () => BulkUploadDialog.show(context),
             );
           },
@@ -226,7 +306,10 @@ class _SantriListScreenState extends State<SantriListScreen> {
                 _filterKelas = value;
                 _applyFilters();
               },
-              closedHeaderPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              closedHeaderPadding: EdgeInsets.symmetric(
+                horizontal: 12.w,
+                vertical: 10.h,
+              ),
               decoration: CustomDropdownDecoration(
                 closedBorderRadius: BorderRadius.circular(10.r),
                 closedBorder: Border.all(color: colors.border),
@@ -262,7 +345,10 @@ class _SantriListScreenState extends State<SantriListScreen> {
                 _filterProgram = value;
                 _applyFilters();
               },
-              closedHeaderPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              closedHeaderPadding: EdgeInsets.symmetric(
+                horizontal: 12.w,
+                vertical: 10.h,
+              ),
               decoration: CustomDropdownDecoration(
                 closedBorderRadius: BorderRadius.circular(10.r),
                 closedBorder: Border.all(color: colors.border),

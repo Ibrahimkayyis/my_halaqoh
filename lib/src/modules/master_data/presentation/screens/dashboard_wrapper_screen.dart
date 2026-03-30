@@ -20,7 +20,9 @@ class DashboardWrapperScreen extends StatefulWidget {
 
 class _DashboardWrapperScreenState extends State<DashboardWrapperScreen> {
   final _pageController = PageController(initialPage: 0);
-  final NotchBottomBarController _controller = NotchBottomBarController(index: 0);
+  final NotchBottomBarController _controller = NotchBottomBarController(
+    index: 0,
+  );
 
   @override
   void dispose() {
@@ -39,9 +41,7 @@ class _DashboardWrapperScreenState extends State<DashboardWrapperScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final pages = <Widget>[
-      DashboardScreen(
-        onNavigateToTab: _navigateToTab,
-      ),
+      DashboardScreen(onNavigateToTab: _navigateToTab),
       const SantriListScreen(),
       const GuruListScreen(),
       const HalaqohListScreen(),
@@ -76,47 +76,23 @@ class _DashboardWrapperScreenState extends State<DashboardWrapperScreen> {
         elevation: 2,
         bottomBarItems: [
           BottomBarItem(
-            inActiveItem: Icon(
-              Icons.dashboard,
-              color: colors.textSecondary,
-            ),
-            activeItem: Icon(
-              Icons.dashboard,
-              color: colors.textOnButton,
-            ),
+            inActiveItem: Icon(Icons.dashboard, color: colors.textSecondary),
+            activeItem: Icon(Icons.dashboard, color: colors.textOnButton),
             itemLabel: t.nav.dashboard,
           ),
           BottomBarItem(
-            inActiveItem: Icon(
-              Icons.groups,
-              color: colors.textSecondary,
-            ),
-            activeItem: Icon(
-              Icons.groups,
-              color: colors.textOnButton,
-            ),
+            inActiveItem: Icon(Icons.groups, color: colors.textSecondary),
+            activeItem: Icon(Icons.groups, color: colors.textOnButton),
             itemLabel: t.nav.santri,
           ),
           BottomBarItem(
-            inActiveItem: Icon(
-              Icons.school,
-              color: colors.textSecondary,
-            ),
-            activeItem: Icon(
-              Icons.school,
-              color: colors.textOnButton,
-            ),
+            inActiveItem: Icon(Icons.school, color: colors.textSecondary),
+            activeItem: Icon(Icons.school, color: colors.textOnButton),
             itemLabel: t.nav.guru,
           ),
           BottomBarItem(
-            inActiveItem: Icon(
-              Icons.auto_stories,
-              color: colors.textSecondary,
-            ),
-            activeItem: Icon(
-              Icons.auto_stories,
-              color: colors.textOnButton,
-            ),
+            inActiveItem: Icon(Icons.auto_stories, color: colors.textSecondary),
+            activeItem: Icon(Icons.auto_stories, color: colors.textOnButton),
             itemLabel: t.nav.halaqoh,
           ),
           BottomBarItem(
@@ -124,10 +100,7 @@ class _DashboardWrapperScreenState extends State<DashboardWrapperScreen> {
               Icons.track_changes,
               color: colors.textSecondary,
             ),
-            activeItem: Icon(
-              Icons.track_changes,
-              color: colors.textOnButton,
-            ),
+            activeItem: Icon(Icons.track_changes, color: colors.textOnButton),
             itemLabel: t.nav.target,
           ),
         ],

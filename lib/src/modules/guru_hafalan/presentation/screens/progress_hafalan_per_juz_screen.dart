@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Juz data model for the list
 class _JuzInfo {
@@ -328,23 +329,11 @@ class _ProgressHafalanPerJuzScreenState
                     child: SizedBox(
                       width: double.infinity,
                       height: 50.h,
-                      child: OutlinedButton(
+                      child: CustomOutlinedButton(
+                        height: 50.h,
                         onPressed: () => Navigator.pop(ctx),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colors.textPrimary,
-                          side: BorderSide(color: colors.border, width: 1.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                        ),
-                        child: Text(
-                          'Tutup',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
+                        label: 'Tutup',
+                        borderRadius: 14.r,
                       ),
                     ),
                   ),

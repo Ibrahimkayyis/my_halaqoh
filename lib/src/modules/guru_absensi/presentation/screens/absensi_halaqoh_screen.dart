@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Absensi Halaqoh — split-panel attendance grid.
 /// Names stick on the left, dates+sessions scroll horizontally.
@@ -25,43 +26,19 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
   int _currentYear = 2026;
 
   final List<String> _monthNames = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
   ];
 
   final List<String> _dayAbbr = [
-    'SEN',
-    'SEL',
-    'RAB',
-    'KAM',
-    'JUM',
-    'SAB',
-    'AHA',
+    'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'AHA',
   ];
 
-  // Santri names
   final List<String> _santriNames = [
-    'Ach. Fikrie',
-    'Ahmad Khairul',
-    'Ghatfhan M.',
-    'Ghulam A.',
-    'Haikal Mustafa',
-    'M. Syahril',
-    'M. Ali Candra',
-    'Robi Haisy',
+    'Ach. Fikrie', 'Ahmad Khairul', 'Ghatfhan M.', 'Ghulam A.',
+    'Haikal Mustafa', 'M. Syahril', 'M. Ali Candra', 'Robi Haisy',
   ];
 
-  /// Session labels based on program type
   List<String> get _sessions {
     if (widget.programType == 'takhassus') {
       return ['P', 'D1', 'D2', 'S', 'M'];
@@ -69,22 +46,16 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     return ['P', 'M'];
   }
 
-  // Linked vertical scroll controllers
   final ScrollController _namesVerticalCtrl = ScrollController();
   final ScrollController _gridVerticalCtrl = ScrollController();
-
-  // Horizontal scroll for date grid
   final ScrollController _gridHorizontalCtrl = ScrollController();
 
-  // Data: santriIndex -> {day -> {session -> status}}
   late Map<int, Map<int, Map<String, String>>> _data;
 
   @override
   void initState() {
     super.initState();
     _generateDummyData();
-
-    // Link vertical scrolls
     _namesVerticalCtrl.addListener(() {
       if (_gridVerticalCtrl.hasClients &&
           _gridVerticalCtrl.offset != _namesVerticalCtrl.offset) {
@@ -112,17 +83,15 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     final sessions = _sessions;
     final daysInMonth = _daysInMonth(_currentYear, _currentMonth);
     final statuses = ['H', 'S', 'I', 'A'];
-
     for (int s = 0; s < _santriNames.length; s++) {
       _data[s] = {};
       for (int d = 1; d <= daysInMonth; d++) {
         _data[s]![d] = {};
         for (final session in sessions) {
-          // Mostly hadir, some variety
           String status = 'H';
           final hash = (s * 31 + d * 7 + session.hashCode) % 20;
           if (hash < 2) {
-            status = statuses[hash + 1]; // S or I
+            status = statuses[hash + 1];
           } else if (hash == 3 && s % 3 == 0) {
             status = 'A';
           }
@@ -136,7 +105,7 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
 
   String _getDayAbbr(int day) {
     final date = DateTime(_currentYear, _currentMonth, day);
-    return _dayAbbr[date.weekday - 1]; // weekday: 1=Mon
+    return _dayAbbr[date.weekday - 1];
   }
 
   void _prevMonth() {
@@ -161,10 +130,7 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     });
   }
 
-  Future<void> _selectMonthYear(
-    BuildContext context,
-    AppColorSet colors,
-  ) async {
+  Future<void> _selectMonthYear(BuildContext context, AppColorSet colors) async {
     int pickerYear = _currentYear;
 
     await showDialog<void>(
@@ -174,19 +140,16 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
           builder: (ctx, setDialogState) {
             return AlertDialog(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              contentPadding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
+                  borderRadius: BorderRadius.circular(20.r)),
+              contentPadding:
+                  EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
                     onPressed: () => setDialogState(() => pickerYear--),
-                    icon: Icon(
-                      Icons.chevron_left,
-                      color: colors.primary,
-                      size: 24.sp,
-                    ),
+                    icon: Icon(Icons.chevron_left,
+                        color: colors.primary, size: 24.sp),
                   ),
                   Text(
                     '$pickerYear',
@@ -199,11 +162,8 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                   ),
                   IconButton(
                     onPressed: () => setDialogState(() => pickerYear++),
-                    icon: Icon(
-                      Icons.chevron_right,
-                      color: colors.primary,
-                      size: 24.sp,
-                    ),
+                    icon: Icon(Icons.chevron_right,
+                        color: colors.primary, size: 24.sp),
                   ),
                 ],
               ),
@@ -212,7 +172,8 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                 child: GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
@@ -280,66 +241,89 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Month navigator ──
+            // ── Top bar: back + month selector + calendar picker ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: BorderRadius.circular(24.r),
-                  border: Border.all(color: colors.border, width: 1),
-                ),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: _prevMonth,
+              child: Row(
+                children: [
+                  // Back button
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 40.w,
+                      height: 40.w,
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: colors.border, width: 1),
+                      ),
                       child: Icon(
-                        Icons.chevron_left,
-                        color: colors.primary,
-                        size: 24.sp,
+                        Icons.arrow_back,
+                        size: 20.sp,
+                        color: colors.textPrimary,
                       ),
                     ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          '${_monthNames[_currentMonth - 1]} $_currentYear',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: colors.textPrimary,
-                            fontFamily: 'Poppins',
+                  ),
+                  SizedBox(width: 10.w),
+
+                  // Month selector (prev/next arrows + label)
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 12.w, vertical: 8.h),
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border:
+                            Border.all(color: colors.border, width: 1),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: _prevMonth,
+                            child: Icon(Icons.chevron_left,
+                                color: colors.primary, size: 24.sp),
                           ),
-                        ),
+                          Text(
+                            '${_monthNames[_currentMonth - 1]} $_currentYear',
+                            style: TextStyle(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _nextMonth,
+                            child: Icon(Icons.chevron_right,
+                                color: colors.primary, size: 24.sp),
+                          ),
+                        ],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: _nextMonth,
+                  ),
+                  SizedBox(width: 10.w),
+
+                  // Calendar picker button (separate container)
+                  GestureDetector(
+                    onTap: () => _selectMonthYear(context, colors),
+                    child: Container(
+                      width: 40.w,
+                      height: 40.w,
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: colors.border, width: 1),
+                      ),
                       child: Icon(
-                        Icons.chevron_right,
+                        Icons.calendar_month,
+                        size: 20.sp,
                         color: colors.primary,
-                        size: 24.sp,
                       ),
                     ),
-                    SizedBox(width: 8.w),
-                    GestureDetector(
-                      onTap: () => _selectMonthYear(context, colors),
-                      child: Container(
-                        width: 36.w,
-                        height: 36.w,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: colors.border, width: 1),
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: Icon(
-                          Icons.calendar_month,
-                          size: 20.sp,
-                          color: colors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
@@ -353,20 +337,15 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                     width: nameColWidth,
                     child: Column(
                       children: [
-                        // Header cell
                         Container(
                           height: headerHeight,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: colors.border,
-                                width: 0.5,
-                              ),
+                                  color: colors.border, width: 0.5),
                               right: BorderSide(
-                                color: colors.border,
-                                width: 0.5,
-                              ),
+                                  color: colors.border, width: 0.5),
                             ),
                           ),
                           child: Text(
@@ -379,7 +358,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                             ),
                           ),
                         ),
-                        // Name rows
                         Expanded(
                           child: ListView.builder(
                             controller: _namesVerticalCtrl,
@@ -392,15 +370,12 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                                 decoration: BoxDecoration(
                                   border: Border(
                                     bottom: BorderSide(
-                                      color: colors.border.withValues(
-                                        alpha: 0.3,
-                                      ),
+                                      color: colors.border
+                                          .withValues(alpha: 0.3),
                                       width: 0.5,
                                     ),
                                     right: BorderSide(
-                                      color: colors.border,
-                                      width: 0.5,
-                                    ),
+                                        color: colors.border, width: 0.5),
                                   ),
                                 ),
                                 child: Text(
@@ -435,24 +410,25 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                             SizedBox(
                               height: headerHeight,
                               child: Row(
-                                children: List.generate(daysInMonth, (dayIdx) {
+                                children:
+                                    List.generate(daysInMonth, (dayIdx) {
                                   final day = dayIdx + 1;
-                                  final dayStr = day.toString().padLeft(2, '0');
+                                  final dayStr =
+                                      day.toString().padLeft(2, '0');
                                   final dayAbbr = _getDayAbbr(day);
-                                  final groupWidth = sessionCount * colWidth;
+                                  final groupWidth =
+                                      sessionCount * colWidth;
 
                                   return Container(
                                     width: groupWidth,
                                     decoration: BoxDecoration(
                                       border: Border(
                                         bottom: BorderSide(
-                                          color: colors.border,
-                                          width: 0.5,
-                                        ),
+                                            color: colors.border,
+                                            width: 0.5),
                                         right: BorderSide(
-                                          color: colors.border.withValues(
-                                            alpha: 0.2,
-                                          ),
+                                          color: colors.border
+                                              .withValues(alpha: 0.2),
                                           width: 0.5,
                                         ),
                                       ),
@@ -461,7 +437,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        // Date label: "01 SEN"
                                         Text(
                                           '$dayStr $dayAbbr',
                                           style: TextStyle(
@@ -471,7 +446,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                                             fontFamily: 'Poppins',
                                           ),
                                         ),
-                                        // Session labels row
                                         Row(
                                           children: sessions.map((s) {
                                             return Expanded(
@@ -480,8 +454,10 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                                                   s,
                                                   style: TextStyle(
                                                     fontSize: 9.sp,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: colors.textSecondary,
+                                                    fontWeight:
+                                                        FontWeight.w600,
+                                                    color:
+                                                        colors.textSecondary,
                                                     fontFamily: 'Poppins',
                                                   ),
                                                 ),
@@ -505,15 +481,15 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                                   return SizedBox(
                                     height: rowHeight,
                                     child: Row(
-                                      children: List.generate(daysInMonth, (
-                                        dayIdx,
-                                      ) {
+                                      children: List.generate(
+                                          daysInMonth, (dayIdx) {
                                         final day = dayIdx + 1;
                                         return Row(
                                           children: sessions.map((session) {
                                             final status =
-                                                _data[santriIdx]?[day]?[session] ??
-                                                'H';
+                                                _data[santriIdx]?[day]
+                                                    ?[session] ??
+                                                    'H';
                                             return Container(
                                               width: colWidth,
                                               height: rowHeight,
@@ -521,16 +497,15 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                                                 border: Border(
                                                   bottom: BorderSide(
                                                     color: colors.border
-                                                        .withValues(alpha: 0.3),
+                                                        .withValues(
+                                                            alpha: 0.3),
                                                     width: 0.5,
                                                   ),
                                                 ),
                                               ),
                                               child: Center(
                                                 child: _buildDot(
-                                                  status,
-                                                  colors,
-                                                ),
+                                                    status, colors),
                                               ),
                                             );
                                           }).toList(),
@@ -555,33 +530,29 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
               padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
               decoration: BoxDecoration(
                 color: colors.surface,
-                border: Border(
-                  top: BorderSide(color: colors.border, width: 0.5),
-                ),
+                border:
+                    Border(top: BorderSide(color: colors.border, width: 0.5)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Status legend
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _legendDot(
-                        colors.primary,
-                        t.absensiHalaqoh.hadir,
-                        colors,
-                      ),
+                          colors.primary, t.absensiHalaqoh.hadir, colors),
                       SizedBox(width: 16.w),
-                      _legendDot(colors.yellow, t.absensiHalaqoh.sakit, colors),
+                      _legendDot(
+                          colors.yellow, t.absensiHalaqoh.sakit, colors),
                       SizedBox(width: 16.w),
-                      _legendDot(colors.blue, t.absensiHalaqoh.izin, colors),
+                      _legendDot(
+                          colors.blue, t.absensiHalaqoh.izin, colors),
                       SizedBox(width: 16.w),
-                      _legendDot(colors.red, t.absensiHalaqoh.alfa, colors),
+                      _legendDot(
+                          colors.red, t.absensiHalaqoh.alfa, colors),
                     ],
                   ),
                   SizedBox(height: 10.h),
-
-                  // Session label legend
                   Wrap(
                     spacing: 12.w,
                     runSpacing: 6.h,
@@ -589,32 +560,14 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                     children: _buildSessionLegend(colors),
                   ),
                   SizedBox(height: 14.h),
-
-                  // Download button
-                  SizedBox(
+                  PrimaryButton(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        // TODO: download attendance report
-                      },
-                      icon: Icon(Icons.download, size: 18.sp),
-                      label: Text(
-                        t.absensiHalaqoh.downloadLaporan,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.primary,
-                        foregroundColor: colors.textOnButton,
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24.r),
-                        ),
-                      ),
-                    ),
+                    onPressed: () {
+                      // TODO: download attendance report
+                    },
+                    icon: Icons.download,
+                    label: t.absensiHalaqoh.downloadLaporan,
+                    borderRadius: 24.r,
                   ),
                   SizedBox(height: 4.h),
                 ],
@@ -626,10 +579,8 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     );
   }
 
-  // ── Session legend items ──
   List<Widget> _buildSessionLegend(AppColorSet colors) {
     final labels = <Map<String, String>>[];
-
     if (widget.programType == 'takhassus') {
       labels.addAll([
         {'code': 'P', 'label': t.absensiHalaqoh.pagi},
@@ -644,7 +595,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
         {'code': 'M', 'label': t.absensiHalaqoh.malam},
       ]);
     }
-
     return labels.map((item) {
       return Row(
         mainAxisSize: MainAxisSize.min,
@@ -673,7 +623,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
             item['label']!,
             style: TextStyle(
               fontSize: 11.sp,
-              fontWeight: FontWeight.w400,
               color: colors.textPrimary,
               fontFamily: 'Poppins',
             ),
@@ -683,24 +632,14 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     }).toList();
   }
 
-  // ── Status dot ──
   Widget _buildDot(String status, AppColorSet colors) {
     Color dotColor;
     switch (status) {
-      case 'H':
-        dotColor = colors.primary;
-        break;
-      case 'S':
-        dotColor = colors.yellow;
-        break;
-      case 'A':
-        dotColor = colors.red;
-        break;
-      case 'I':
-        dotColor = colors.blue;
-        break;
-      default:
-        dotColor = colors.border;
+      case 'H': dotColor = colors.primary; break;
+      case 'S': dotColor = colors.yellow; break;
+      case 'A': dotColor = colors.red; break;
+      case 'I': dotColor = colors.blue; break;
+      default:  dotColor = colors.border;
     }
     return Container(
       width: 12.w,
@@ -709,7 +648,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     );
   }
 
-  // ── Legend dot + label ──
   Widget _legendDot(Color color, String label, AppColorSet colors) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -724,7 +662,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
           label,
           style: TextStyle(
             fontSize: 11.sp,
-            fontWeight: FontWeight.w400,
             color: colors.textPrimary,
             fontFamily: 'Poppins',
           ),

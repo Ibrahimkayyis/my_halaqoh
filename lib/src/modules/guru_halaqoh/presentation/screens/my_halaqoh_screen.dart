@@ -111,29 +111,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Back arrow + title
-            Padding(
-              padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 24.w),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: colors.textPrimary),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    t.myHalaqohScreen.title,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 12.h),
+           
 
             // Halaqoh info card
             HalaqohInfoCard(

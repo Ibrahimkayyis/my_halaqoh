@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 
 /// Riwayat Absensi screen — individual student attendance history
@@ -24,35 +25,13 @@ class RiwayatAbsensiScreen extends StatefulWidget {
 }
 
 class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
-  int _currentMonth = 11; // November
+  int _currentMonth = 11;
   int _currentYear = 2025;
 
-  final List<String> _monthNames = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
-
   final List<String> _dayNames = [
-    'AHA',
-    'SEN',
-    'SEL',
-    'RAB',
-    'KAM',
-    'JUM',
-    'SAB',
+    'AHA', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB',
   ];
 
-  /// Session keys based on program type
   List<String> get _sessionKeys {
     if (widget.programType == 'takhassus') {
       return ['shubuh', 'dhuha1', 'dhuha2', 'ashar', 'maghrib'];
@@ -60,7 +39,6 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
     return ['pagi', 'mlm'];
   }
 
-  /// Session labels for day card display
   List<String> get _sessionLabels {
     if (widget.programType == 'takhassus') {
       return ['P', 'D1', 'D2', 'S', 'M'];
@@ -68,7 +46,6 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
     return ['P', 'M'];
   }
 
-  // Dummy attendance data — generated based on program type
   late Map<int, Map<String, String>> _attendanceData;
 
   @override
@@ -96,24 +73,15 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
     }
   }
 
-  // Count stats
   Map<String, int> get _stats {
     int hadir = 0, sakit = 0, izin = 0, alfa = 0;
     for (final data in _attendanceData.values) {
       for (final status in data.values) {
         switch (status) {
-          case 'H':
-            hadir++;
-            break;
-          case 'S':
-            sakit++;
-            break;
-          case 'I':
-            izin++;
-            break;
-          case 'A':
-            alfa++;
-            break;
+          case 'H': hadir++; break;
+          case 'S': sakit++; break;
+          case 'I': izin++; break;
+          case 'A': alfa++; break;
         }
       }
     }
@@ -140,7 +108,6 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
     });
   }
 
-  // Get day of week for a date (0 = Sunday)
   String _getDayName(int day) {
     final date = DateTime(_currentYear, _currentMonth, day);
     return _dayNames[date.weekday % 7];
@@ -177,7 +144,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
           children: [
             SizedBox(height: 8.h),
 
-            // Profile card
+            // ── Profile card ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Container(
@@ -203,11 +170,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                         shape: BoxShape.circle,
                         color: Colors.white.withValues(alpha: 0.2),
                       ),
-                      child: Icon(
-                        Icons.person,
-                        size: 26.sp,
-                        color: Colors.white,
-                      ),
+                      child: Icon(Icons.person, size: 26.sp, color: Colors.white),
                     ),
                     SizedBox(width: 14.w),
                     Column(
@@ -227,20 +190,15 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                           'NIS: ${widget.nis}',
                           style: TextStyle(
                             fontSize: 13.sp,
-                            fontWeight: FontWeight.w400,
                             color: Colors.white.withValues(alpha: 0.85),
                             fontFamily: 'Poppins',
                           ),
                         ),
                         SizedBox(height: 1.h),
                         Text(
-                          t.riwayatAbsensi.halaqohKelas(
-                            halaqoh: 'A',
-                            kelas: '7',
-                          ),
+                          t.riwayatAbsensi.halaqohKelas(halaqoh: 'A', kelas: '7'),
                           style: TextStyle(
                             fontSize: 13.sp,
-                            fontWeight: FontWeight.w400,
                             color: Colors.white.withValues(alpha: 0.85),
                             fontFamily: 'Poppins',
                           ),
@@ -253,96 +211,54 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
             ),
             SizedBox(height: 20.h),
 
-            // Month navigator
+            // ── Month navigator (global widgets) ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: _prevMonth,
-                    child: Container(
-                      width: 36.w,
-                      height: 36.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colors.primary.withValues(alpha: 0.1),
-                      ),
-                      child: Icon(
-                        Icons.chevron_left,
-                        color: colors.primary,
-                        size: 22.sp,
-                      ),
+                  Expanded(
+                    child: AppMonthSelector(
+                      month: _currentMonth,
+                      year: _currentYear,
+                      onPrev: _prevMonth,
+                      onNext: _nextMonth,
                     ),
                   ),
-                  Text(
-                    '${_monthNames[_currentMonth - 1]} $_currentYear',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: _nextMonth,
-                    child: Container(
-                      width: 36.w,
-                      height: 36.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colors.primary.withValues(alpha: 0.1),
-                      ),
-                      child: Icon(
-                        Icons.chevron_right,
-                        color: colors.primary,
-                        size: 22.sp,
-                      ),
-                    ),
+                  SizedBox(width: 10.w),
+                  AppCalendarPickerButton(
+                    currentMonth: _currentMonth,
+                    currentYear: _currentYear,
+                    onSelected: (month, year) {
+                      setState(() {
+                        _currentMonth = month;
+                        _currentYear = year;
+                        _generateDummyData();
+                      });
+                    },
                   ),
                 ],
               ),
             ),
             SizedBox(height: 16.h),
 
-            // Summary stats
+            // ── Summary stats ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
-                  _buildStat(
-                    '${stats['hadir']}',
-                    t.riwayatAbsensi.hadir,
-                    colors.primary,
-                    colors,
-                  ),
+                  _buildStat('${stats['hadir']}', t.riwayatAbsensi.hadir, colors.primary, colors),
                   SizedBox(width: 10.w),
-                  _buildStat(
-                    '${stats['sakit']}',
-                    t.riwayatAbsensi.sakit,
-                    colors.yellow,
-                    colors,
-                  ),
+                  _buildStat('${stats['sakit']}', t.riwayatAbsensi.sakit, colors.yellow, colors),
                   SizedBox(width: 10.w),
-                  _buildStat(
-                    '${stats['izin']}',
-                    t.riwayatAbsensi.izin,
-                    colors.blue,
-                    colors,
-                  ),
+                  _buildStat('${stats['izin']}', t.riwayatAbsensi.izin, colors.blue, colors),
                   SizedBox(width: 10.w),
-                  _buildStat(
-                    '${stats['alfa']}',
-                    t.riwayatAbsensi.alfa,
-                    colors.red,
-                    colors,
-                  ),
+                  _buildStat('${stats['alfa']}', t.riwayatAbsensi.alfa, colors.red, colors),
                 ],
               ),
             ),
             SizedBox(height: 20.h),
 
-            // Day cards (horizontal scroll)
+            // ── Day cards ──
             SizedBox(
               height: widget.programType == 'takhassus' ? 280.h : 180.h,
               child: ListView.builder(
@@ -358,36 +274,29 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
             ),
             SizedBox(height: 8.h),
 
-            // Swipe hint
+            // ── Swipe hint ──
             Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.chevron_left,
-                    size: 16.sp,
-                    color: colors.textSecondary.withValues(alpha: 0.5),
-                  ),
+                  Icon(Icons.chevron_left, size: 16.sp,
+                      color: colors.textSecondary.withValues(alpha: 0.5)),
                   Text(
                     t.riwayatAbsensi.geserHint,
                     style: TextStyle(
                       fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
                       color: colors.textSecondary.withValues(alpha: 0.5),
                       fontFamily: 'Poppins',
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 16.sp,
-                    color: colors.textSecondary.withValues(alpha: 0.5),
-                  ),
+                  Icon(Icons.chevron_right, size: 16.sp,
+                      color: colors.textSecondary.withValues(alpha: 0.5)),
                 ],
               ),
             ),
             SizedBox(height: 16.h),
 
-            // Lihat Kalender button
+            // ── Lihat Kalender button ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: GestureDetector(
@@ -422,11 +331,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                         ),
                       ),
                       SizedBox(width: 8.w),
-                      Icon(
-                        Icons.calendar_month,
-                        size: 20.sp,
-                        color: colors.primary,
-                      ),
+                      Icon(Icons.calendar_month, size: 20.sp, color: colors.primary),
                     ],
                   ),
                 ),
@@ -434,7 +339,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
             ),
             SizedBox(height: 16.h),
 
-            // Keterangan (legend) card
+            // ── Keterangan card ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Container(
@@ -466,42 +371,22 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                     SizedBox(height: 12.h),
                     Row(
                       children: [
-                        _buildLegendItem(
-                          colors.primary,
-                          t.riwayatAbsensi.hadirLabel,
-                          colors,
-                        ),
+                        _buildLegendItem(colors.primary, t.riwayatAbsensi.hadirLabel, colors),
                         SizedBox(width: 40.w),
-                        _buildLegendItem(
-                          colors.yellow,
-                          t.riwayatAbsensi.sakitLabel,
-                          colors,
-                        ),
+                        _buildLegendItem(colors.yellow, t.riwayatAbsensi.sakitLabel, colors),
                       ],
                     ),
                     SizedBox(height: 8.h),
                     Row(
                       children: [
-                        _buildLegendItem(
-                          colors.red,
-                          t.riwayatAbsensi.alphaLabel,
-                          colors,
-                        ),
+                        _buildLegendItem(colors.red, t.riwayatAbsensi.alphaLabel, colors),
                         SizedBox(width: 40.w),
-                        _buildLegendItem(
-                          colors.blue,
-                          t.riwayatAbsensi.izinLabel,
-                          colors,
-                        ),
+                        _buildLegendItem(colors.blue, t.riwayatAbsensi.izinLabel, colors),
                       ],
                     ),
                     SizedBox(height: 14.h),
-                    Divider(
-                      color: colors.border.withValues(alpha: 0.5),
-                      height: 1,
-                    ),
+                    Divider(color: colors.border.withValues(alpha: 0.5), height: 1),
                     SizedBox(height: 14.h),
-                    // Session label legend
                     Text(
                       'Keterangan Sesi',
                       style: TextStyle(
@@ -521,19 +406,11 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                               _buildSessionLabel('D1', 'Dhuha 1', colors),
                               _buildSessionLabel('D2', 'Dhuha 2', colors),
                               _buildSessionLabel('S', 'Sore (Ashar)', colors),
-                              _buildSessionLabel(
-                                'M',
-                                'Malam (Maghrib)',
-                                colors,
-                              ),
+                              _buildSessionLabel('M', 'Malam (Maghrib)', colors),
                             ]
                           : [
                               _buildSessionLabel('P', 'Pagi (Shubuh)', colors),
-                              _buildSessionLabel(
-                                'M',
-                                'Malam (Maghrib)',
-                                colors,
-                              ),
+                              _buildSessionLabel('M', 'Malam (Maghrib)', colors),
                             ],
                     ),
                   ],
@@ -542,39 +419,17 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
             ),
             SizedBox(height: 16.h),
 
-            // Download button
+            // ── Download button ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: SizedBox(
+              child: PrimaryButton(
                 width: double.infinity,
                 height: 52.h,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: download report
-                  },
-                  icon: Icon(
-                    Icons.download,
-                    size: 20.sp,
-                    color: colors.textOnButton,
-                  ),
-                  label: Text(
-                    t.riwayatAbsensi.downloadLaporan,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textOnButton,
-                      fontFamily: 'Poppins',
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+                onPressed: () {
+                  // TODO: download report
+                },
+                icon: Icons.download,
+                label: t.riwayatAbsensi.downloadLaporan,
               ),
             ),
             SizedBox(height: 24.h),
@@ -584,12 +439,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
     );
   }
 
-  Widget _buildStat(
-    String value,
-    String label,
-    Color color,
-    AppColorSet colors,
-  ) {
+  Widget _buildStat(String value, String label, Color color, AppColorSet colors) {
     return Expanded(
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -632,12 +482,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
     );
   }
 
-  Widget _buildDayCard(
-    int day,
-    String dayName,
-    Map<String, String> data,
-    AppColorSet colors,
-  ) {
+  Widget _buildDayCard(int day, String dayName, Map<String, String> data, AppColorSet colors) {
     final keys = _sessionKeys;
     final labels = _sessionLabels;
 
@@ -659,7 +504,6 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Day name
           Text(
             dayName,
             style: TextStyle(
@@ -670,7 +514,6 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
             ),
           ),
           SizedBox(height: 2.h),
-          // Day number
           Text(
             day.toString().padLeft(2, '0'),
             style: TextStyle(
@@ -681,7 +524,6 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
             ),
           ),
           SizedBox(height: 8.h),
-          // Session badges
           ...List.generate(keys.length, (i) {
             return Column(
               children: [
@@ -708,29 +550,13 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
   Widget _buildStatusBadge(String status, AppColorSet colors) {
     Color bgColor;
     String label;
-
     switch (status) {
-      case 'H':
-        bgColor = colors.primary;
-        label = 'H';
-        break;
-      case 'S':
-        bgColor = colors.yellow;
-        label = 'S';
-        break;
-      case 'I':
-        bgColor = colors.blue;
-        label = 'I';
-        break;
-      case 'A':
-        bgColor = colors.red;
-        label = 'A';
-        break;
-      default:
-        bgColor = colors.border;
-        label = '-';
+      case 'H': bgColor = colors.primary; label = 'H'; break;
+      case 'S': bgColor = colors.yellow;  label = 'S'; break;
+      case 'I': bgColor = colors.blue;    label = 'I'; break;
+      case 'A': bgColor = colors.red;     label = 'A'; break;
+      default:  bgColor = colors.border;  label = '-';
     }
-
     return Container(
       width: 28.w,
       height: 28.w,

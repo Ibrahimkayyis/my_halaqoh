@@ -71,6 +71,8 @@ class TranslationsId implements Translations {
 	@override late final _TranslationsWaliSantriDashboardId waliSantriDashboard = _TranslationsWaliSantriDashboardId._(_root);
 	@override late final _TranslationsWaliSantriNavId waliSantriNav = _TranslationsWaliSantriNavId._(_root);
 	@override late final _TranslationsWaliSantriPengaturanScreenId WaliSantriPengaturanScreen = _TranslationsWaliSantriPengaturanScreenId._(_root);
+	@override late final _TranslationsDialogsId dialogs = _TranslationsDialogsId._(_root);
+	@override late final _TranslationsMasterDataSettingsId masterDataSettings = _TranslationsMasterDataSettingsId._(_root);
 }
 
 // Path: app
@@ -230,6 +232,7 @@ class _TranslationsNavId implements TranslationsNavEn {
 	@override String get guru => 'Guru';
 	@override String get halaqoh => 'Halaqoh';
 	@override String get target => 'Target';
+	@override String get pengaturan => 'Pengaturan';
 }
 
 // Path: addData
@@ -723,6 +726,38 @@ class _TranslationsWaliSantriPengaturanScreenId implements TranslationsWaliSantr
 	@override String get pilihTema => 'Pilih Tema';
 }
 
+// Path: dialogs
+class _TranslationsDialogsId implements TranslationsDialogsEn {
+	_TranslationsDialogsId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get deleteTitle => 'Hapus Data?';
+	@override String get deleteMessage => 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan dan akan hilang secara permanen.';
+	@override String get saveTitle => 'Simpan Perubahan?';
+	@override String get saveMessage => 'Pastikan semua data yang Anda masukkan sudah benar sebelum menyimpan.';
+	@override String get batal => 'Batal';
+	@override String get hapus => 'Hapus';
+	@override String get simpan => 'Simpan';
+	@override String get logoutTitle => 'Keluar Akun?';
+	@override String get logoutMessage => 'Apakah Anda yakin ingin keluar dari akun ini? Anda harus masuk kembali untuk menggunakan aplikasi.';
+	@override String get keluar => 'Keluar';
+}
+
+// Path: masterDataSettings
+class _TranslationsMasterDataSettingsId implements TranslationsMasterDataSettingsEn {
+	_TranslationsMasterDataSettingsId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Pengaturan';
+	@override String get tentangAplikasi => 'Tentang Aplikasi';
+	@override String get keluar => 'Keluar';
+	@override String get appVersion => 'Versi {version}';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on TranslationsId {
@@ -797,6 +832,7 @@ extension on TranslationsId {
 			case 'nav.guru': return 'Guru';
 			case 'nav.halaqoh': return 'Halaqoh';
 			case 'nav.target': return 'Target';
+			case 'nav.pengaturan': return 'Pengaturan';
 			case 'addData.title': return 'Tambah Data';
 			case 'addData.subtitle': return 'Pilih metode input data yang diinginkan';
 			case 'addData.inputManual': return 'Input Manual';
@@ -1063,6 +1099,20 @@ extension on TranslationsId {
 			case 'WaliSantriPengaturanScreen.terangLight': return 'Terang / Light';
 			case 'WaliSantriPengaturanScreen.gelapDark': return 'Gelap / Dark';
 			case 'WaliSantriPengaturanScreen.pilihTema': return 'Pilih Tema';
+			case 'dialogs.deleteTitle': return 'Hapus Data?';
+			case 'dialogs.deleteMessage': return 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan dan akan hilang secara permanen.';
+			case 'dialogs.saveTitle': return 'Simpan Perubahan?';
+			case 'dialogs.saveMessage': return 'Pastikan semua data yang Anda masukkan sudah benar sebelum menyimpan.';
+			case 'dialogs.batal': return 'Batal';
+			case 'dialogs.hapus': return 'Hapus';
+			case 'dialogs.simpan': return 'Simpan';
+			case 'dialogs.logoutTitle': return 'Keluar Akun?';
+			case 'dialogs.logoutMessage': return 'Apakah Anda yakin ingin keluar dari akun ini? Anda harus masuk kembali untuk menggunakan aplikasi.';
+			case 'dialogs.keluar': return 'Keluar';
+			case 'masterDataSettings.title': return 'Pengaturan';
+			case 'masterDataSettings.tentangAplikasi': return 'Tentang Aplikasi';
+			case 'masterDataSettings.keluar': return 'Keluar';
+			case 'masterDataSettings.appVersion': return 'Versi {version}';
 			default: return null;
 		}
 	}

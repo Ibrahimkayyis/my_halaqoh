@@ -1,8 +1,9 @@
-﻿import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Edit Profile Screen â€” green header, avatar with camera, form fields
 @RoutePage()
@@ -130,28 +131,16 @@ class _WaliSantriEditProfileScreenState
                   SizedBox(
                     width: double.infinity,
                     height: 52.h,
-                    child: ElevatedButton.icon(
+                    child: PrimaryButton(
+                      width: double.infinity,
+                      height: 52.h,
                       onPressed: () {
                         // TODO: Save profile
                         Navigator.of(context).pop();
                       },
-                      icon: Icon(Icons.save, size: 20.sp),
-                      label: Text(
-                        t.editProfile.simpanPerubahan,
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.primary,
-                        foregroundColor: colors.textOnButton,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(26.r),
-                        ),
-                        elevation: 0,
-                      ),
+                      icon: Icons.save,
+                      label: t.editProfile.simpanPerubahan,
+                      borderRadius: 26.r,
                     ),
                   ),
                   SizedBox(height: 32.h),

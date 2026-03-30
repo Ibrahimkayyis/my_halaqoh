@@ -1,8 +1,9 @@
-﻿import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Ubah Password Screen â€” old password, new password, confirm, security tips
 @RoutePage()
@@ -168,27 +169,15 @@ class _WaliSantriUbahPasswordScreenState extends State<WaliSantriUbahPasswordScr
               child: SizedBox(
                 width: double.infinity,
                 height: 52.h,
-                child: ElevatedButton(
+                child: PrimaryButton(
+                  width: double.infinity,
+                  height: 52.h,
                   onPressed: () {
                     // TODO: Submit password change
                     Navigator.of(context).pop();
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primary,
-                    foregroundColor: colors.textOnButton,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(26.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    t.ubahPassword.ubahKataSandi,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
+                  label: t.ubahPassword.ubahKataSandi,
+                  borderRadius: 26.r,
                 ),
               ),
             ),

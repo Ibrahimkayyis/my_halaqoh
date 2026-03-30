@@ -16,7 +16,7 @@
     "usernameLabel": "NIP / NIS",
     "usernameHint": "Masukkan NIP/NIS anda",
     "passwordLabel": "PASSWORD",
-    "passwordHint": "Masukkan password anda",
+    "passwordHint": "Masukkan password",
     "forgotPassword": "Lupa Password?",
     "loginButton": "MASUK",
     "validationEmpty": "NIP/NIS dan Password tidak boleh kosong",
@@ -86,7 +86,8 @@
     "santri": "Santri",
     "guru": "Guru",
     "halaqoh": "Halaqoh",
-    "target": "Target"
+    "target": "Target",
+    "pengaturan": "Pengaturan"
   },
   "addData": {
     "title": "Tambah Data",
@@ -272,7 +273,7 @@
     "izin": "Izin",
     "alfa": "Alfa",
     "belumAbsen": "Belum Absen",
-    "belumDiabsen": "Belum Diabsen",
+    "belumDiabsen": "Belum absen",
     "daftarKehadiranSantri": "Daftar Kehadiran Santri"
   },
   "hafalan": {
@@ -403,5 +404,23 @@
     "terangLight": "Terang / Light",
     "gelapDark": "Gelap / Dark",
     "pilihTema": "Pilih Tema"
+  },
+  "dialogs": {
+    "deleteTitle": "Hapus Data?",
+    "deleteMessage": "Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan dan akan hilang secara permanen.",
+    "saveTitle": "Simpan Perubahan?",
+    "saveMessage": "Pastikan semua data yang Anda masukkan sudah benar sebelum menyimpan.",
+    "batal": "Batal",
+    "hapus": "Hapus",
+    "simpan": "Simpan",
+    "logoutTitle": "Keluar Akun?",
+    "logoutMessage": "Apakah Anda yakin ingin keluar dari akun ini? Anda harus masuk kembali untuk menggunakan aplikasi.",
+    "keluar": "Keluar"
+  },
+  "masterDataSettings": {
+    "title": "Pengaturan",
+    "tentangAplikasi": "Tentang Aplikasi",
+    "keluar": "Keluar",
+    "appVersion": "Versi {version}"
   }
 }

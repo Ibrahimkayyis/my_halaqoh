@@ -162,18 +162,62 @@ class DashboardWrapperRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [DetailAbsensiHariIniScreen]
-class DetailAbsensiHariIniRoute extends PageRouteInfo<void> {
-  const DetailAbsensiHariIniRoute({List<PageRouteInfo>? children})
-    : super(DetailAbsensiHariIniRoute.name, initialChildren: children);
+class DetailAbsensiHariIniRoute
+    extends PageRouteInfo<DetailAbsensiHariIniRouteArgs> {
+  DetailAbsensiHariIniRoute({
+    Key? key,
+    List<String> scannedNisList = const [],
+    List<PageRouteInfo>? children,
+  }) : super(
+         DetailAbsensiHariIniRoute.name,
+         args: DetailAbsensiHariIniRouteArgs(
+           key: key,
+           scannedNisList: scannedNisList,
+         ),
+         initialChildren: children,
+       );
 
   static const String name = 'DetailAbsensiHariIniRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const DetailAbsensiHariIniScreen();
+      final args = data.argsAs<DetailAbsensiHariIniRouteArgs>(
+        orElse: () => const DetailAbsensiHariIniRouteArgs(),
+      );
+      return DetailAbsensiHariIniScreen(
+        key: args.key,
+        scannedNisList: args.scannedNisList,
+      );
     },
   );
+}
+
+class DetailAbsensiHariIniRouteArgs {
+  const DetailAbsensiHariIniRouteArgs({
+    this.key,
+    this.scannedNisList = const [],
+  });
+
+  final Key? key;
+
+  final List<String> scannedNisList;
+
+  @override
+  String toString() {
+    return 'DetailAbsensiHariIniRouteArgs{key: $key, scannedNisList: $scannedNisList}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! DetailAbsensiHariIniRouteArgs) return false;
+    return key == other.key &&
+        const ListEquality().equals(scannedNisList, other.scannedNisList);
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ const ListEquality().hash(scannedNisList);
 }
 
 /// generated route for
@@ -542,6 +586,22 @@ class MyHalaqohRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const MyHalaqohScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [PengaturanMasterDataScreen]
+class PengaturanMasterDataRoute extends PageRouteInfo<void> {
+  const PengaturanMasterDataRoute({List<PageRouteInfo>? children})
+    : super(PengaturanMasterDataRoute.name, initialChildren: children);
+
+  static const String name = 'PengaturanMasterDataRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const PengaturanMasterDataScreen();
     },
   );
 }

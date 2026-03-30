@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
 
 /// Profile screen for Guru role — avatar, name, role badge, menu items, logout
 class GuruProfileScreen extends StatelessWidget {
@@ -73,7 +74,7 @@ class GuruProfileScreen extends StatelessWidget {
                   SizedBox(height: 14.h),
 
                   // Logout button
-                  _buildLogoutCard(colors),
+                  _buildLogoutCard(colors, context),
                   SizedBox(height: 16.h),
 
                   // Version text
@@ -242,7 +243,7 @@ class GuruProfileScreen extends StatelessWidget {
   }
 
   /// Logout card
-  Widget _buildLogoutCard(AppColorSet colors) {
+  Widget _buildLogoutCard(AppColorSet colors, BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: colors.surface,
@@ -256,8 +257,11 @@ class GuruProfileScreen extends StatelessWidget {
         ],
       ),
       child: InkWell(
-        onTap: () {
-          // TODO: Implement logout
+        onTap: () async {
+          final confirmed = await ConfirmLogoutDialog.show(context);
+          if (confirmed && context.mounted) {
+            context.router.replaceAll([const LoginRoute()]);
+          }
         },
         borderRadius: BorderRadius.circular(16.r),
         child: Padding(

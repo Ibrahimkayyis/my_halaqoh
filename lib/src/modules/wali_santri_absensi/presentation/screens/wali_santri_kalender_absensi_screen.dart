@@ -1,8 +1,9 @@
-﻿import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Kalender Absensi Lengkap â€” full month calendar with pagi/malam dots
 @RoutePage()
@@ -26,20 +27,7 @@ class _WaliSantriKalenderAbsensiScreenState extends State<WaliSantriKalenderAbse
   int _currentMonth = 11; // November
   int _currentYear = 2025;
 
-  final List<String> _monthNames = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
+
 
   /// Session keys based on program type
   List<String> get _sessionKeys {
@@ -75,7 +63,7 @@ class _WaliSantriKalenderAbsensiScreenState extends State<WaliSantriKalenderAbse
   void _generateDummyData() {
     _attendanceData = {};
     final keys = _sessionKeys;
-    final statuses = ['H', 'S', 'A'];
+
     final daysInMonth = _daysInMonth(_currentYear, _currentMonth);
     for (int d = 1; d <= daysInMonth; d++) {
       // Only generate data for some days (simulating partial month)
@@ -233,48 +221,25 @@ class _WaliSantriKalenderAbsensiScreenState extends State<WaliSantriKalenderAbse
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: _prevMonth,
-                    child: Container(
-                      width: 36.w,
-                      height: 36.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colors.primary.withValues(alpha: 0.1),
-                      ),
-                      child: Icon(
-                        Icons.chevron_left,
-                        color: colors.primary,
-                        size: 22.sp,
-                      ),
+                  Expanded(
+                    child: AppMonthSelector(
+                      month: _currentMonth,
+                      year: _currentYear,
+                      onPrev: _prevMonth,
+                      onNext: _nextMonth,
                     ),
                   ),
-                  Text(
-                    '${_monthNames[_currentMonth - 1]} $_currentYear',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: _nextMonth,
-                    child: Container(
-                      width: 36.w,
-                      height: 36.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colors.primary.withValues(alpha: 0.1),
-                      ),
-                      child: Icon(
-                        Icons.chevron_right,
-                        color: colors.primary,
-                        size: 22.sp,
-                      ),
-                    ),
+                  SizedBox(width: 8.w),
+                  AppCalendarPickerButton(
+                    currentMonth: _currentMonth,
+                    currentYear: _currentYear,
+                    onSelected: (month, year) {
+                      setState(() {
+                        _currentMonth = month;
+                        _currentYear = year;
+                      });
+                    },
                   ),
                 ],
               ),
