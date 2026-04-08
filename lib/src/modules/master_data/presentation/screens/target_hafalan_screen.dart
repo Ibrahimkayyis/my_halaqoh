@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/edit_target_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/target_kelas_card.dart';
 
@@ -20,25 +24,7 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Dummy data for reguler (kelas 7 SMP - 12 SMA)
-  final List<Map<String, String>> _regulerData = [
-    {'kelas': '7', 'title': 'Kelas 7 SMP', 'target': '2', 'juz': '30 - 29'},
-    {'kelas': '8', 'title': 'Kelas 8 SMP', 'target': '2', 'juz': '1 - 2'},
-    {'kelas': '9', 'title': 'Kelas 9 SMP', 'target': '2', 'juz': '3 - 4'},
-    {'kelas': '10', 'title': 'Kelas 10 SMA', 'target': '2', 'juz': '5 - 6'},
-    {'kelas': '11', 'title': 'Kelas 11 SMA', 'target': '2', 'juz': '7 - 8'},
-    {'kelas': '12', 'title': 'Kelas 12 SMA', 'target': '2', 'juz': '9 - 10'},
-  ];
-
-  // Dummy data for takhassus (kelas 7 SMP - 12 SMA)
-  final List<Map<String, String>> _takhassusData = [
-    {'kelas': '7', 'title': 'Kelas 7 SMP', 'target': '5', 'juz': '1 - 5'},
-    {'kelas': '8', 'title': 'Kelas 8 SMP', 'target': '5', 'juz': '6 - 10'},
-    {'kelas': '9', 'title': 'Kelas 9 SMP', 'target': '5', 'juz': '11 - 15'},
-    {'kelas': '10', 'title': 'Kelas 10 SMA', 'target': '5', 'juz': '16 - 20'},
-    {'kelas': '11', 'title': 'Kelas 11 SMA', 'target': '5', 'juz': '21 - 25'},
-    {'kelas': '12', 'title': 'Kelas 12 SMA', 'target': '5', 'juz': '26 - 30'},
-  ];
+  final List<String> _kelasLevels = ['7', '8', '9', '10', '11', '12'];
 
   @override
   void initState() {
@@ -50,6 +36,93 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  String _getKelasTitle(String kelas) {
+    final jenjang = int.parse(kelas) <= 9 ? 'SMP' : 'SMA';
+    return 'Kelas $kelas $jenjang';
+  }
+
+  TargetHafalanModel? _findTarget(
+      List<TargetHafalanModel> targets, String kelas, String program) {
+    try {
+      return targets.firstWhere(
+        (t) => t.kelas == kelas && t.program == program,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Format juz list into smart range groups: e.g. [1,2,3,29,30] → "Juz 1-3, 29-30"
+  String _formatJuzRange(List<int> juzList) {
+    if (juzList.isEmpty) return '-';
+    final sorted = List<int>.from(juzList)..sort();
+
+    final List<String> groups = [];
+    int start = sorted.first;
+    int end = sorted.first;
+
+    for (int i = 1; i < sorted.length; i++) {
+      if (sorted[i] == end + 1) {
+        end = sorted[i];
+      } else {
+        groups.add(start == end ? '$start' : '$start-$end');
+        start = sorted[i];
+        end = sorted[i];
+      }
+    }
+    groups.add(start == end ? '$start' : '$start-$end');
+
+    return 'Juz ${groups.join(', ')}';
+  }
+
+  void _showEditDialog(
+      String kelas, String program, TargetHafalanModel? existing) {
+    final programLabel = program == 'Reguler'
+        ? t.targetHafalan.reguler
+        : t.targetHafalan.takhassus;
+
+    final initialJuz = existing != null ? existing.juzList.toSet() : <int>{};
+
+    EditTargetDialog.show(
+      context,
+      kelasTitle: _getKelasTitle(kelas),
+      programLabel: programLabel,
+      initialSelectedJuz: initialJuz,
+      onSave: (target, juzRange, tahunAjaran) {
+        // Parse juz range string back to list of ints
+        // Format from dialog: "Juz 1-3, 29-30" or "Juz 5"
+        final List<int> juzList = [];
+        final cleaned = juzRange.replaceAll('Juz ', '');
+        for (final part in cleaned.split(', ')) {
+          if (part.contains('-')) {
+            final rangeParts = part.split('-');
+            final s = int.tryParse(rangeParts[0].trim()) ?? 0;
+            final e = int.tryParse(rangeParts[1].trim()) ?? 0;
+            for (int i = s; i <= e; i++) {
+              juzList.add(i);
+            }
+          } else {
+            final n = int.tryParse(part.trim());
+            if (n != null) juzList.add(n);
+          }
+        }
+
+        final now = DateTime.now();
+        final model = TargetHafalanModel(
+          id: '${kelas}_$program',
+          kelas: kelas,
+          program: program,
+          targetJuz: target,
+          juzList: juzList,
+          tahunAjaran: tahunAjaran,
+          createdAt: existing?.createdAt ?? now,
+          updatedAt: now,
+        );
+        context.read<TargetHafalanCubit>().saveTarget(model);
+      },
+    );
   }
 
   @override
@@ -75,32 +148,40 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
         ),
         centerTitle: false,
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 8.h),
-
-          // Tab bar
-          AppTabSelector(
-            controller: _tabController,
-            tabs: [t.targetHafalan.reguler, t.targetHafalan.takhassus],
-          ),
-          SizedBox(height: 16.h),
-
-          // Info banner
-          _buildInfoBanner(colors),
-          SizedBox(height: 12.h),
-
-          // Tab content
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildClassList(_regulerData),
-                _buildClassList(_takhassusData),
-              ],
+      body: BlocBuilder<TargetHafalanCubit, TargetHafalanState>(
+        builder: (context, state) {
+          return state.when(
+            initial: () => const SizedBox.shrink(),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (message) => Center(
+              child: Text(message,
+                  style: TextStyle(color: colors.error, fontFamily: 'Poppins')),
             ),
-          ),
-        ],
+            loaded: (targetList) {
+              return Column(
+                children: [
+                  SizedBox(height: 8.h),
+                  AppTabSelector(
+                    controller: _tabController,
+                    tabs: [t.targetHafalan.reguler, t.targetHafalan.takhassus],
+                  ),
+                  SizedBox(height: 16.h),
+                  _buildInfoBanner(colors),
+                  SizedBox(height: 12.h),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildClassList(targetList, 'Reguler'),
+                        _buildClassList(targetList, 'Takhassus'),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -138,58 +219,26 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
     );
   }
 
-  Widget _buildClassList(List<Map<String, String>> data) {
+  Widget _buildClassList(
+      List<TargetHafalanModel> allTargets, String program) {
     return ListView.builder(
       padding: EdgeInsets.only(top: 4.h, bottom: 80.h),
-      itemCount: data.length,
+      itemCount: _kelasLevels.length,
       itemBuilder: (context, index) {
-        final item = data[index];
+        final kelas = _kelasLevels[index];
+        final target = _findTarget(allTargets, kelas, program);
+        final targetCount = target?.targetJuz.toString() ?? '0';
+        final juzRange = target != null
+            ? _formatJuzRange(target.juzList)
+            : '-';
+
         return TargetKelasCard(
-          kelasNumber: item['kelas']!,
-          kelasTitle: item['title']!,
-          targetInfo: t.targetHafalan.targetJuz(count: item['target']!),
-          juzRange: t.targetHafalan.juzRange(range: item['juz']!),
-          onDetailTap: () => _showEditDialog(item),
+          kelasNumber: kelas,
+          kelasTitle: _getKelasTitle(kelas),
+          targetInfo: t.targetHafalan.targetJuz(count: targetCount),
+          juzRange: juzRange,
+          onDetailTap: () => _showEditDialog(kelas, program, target),
         );
-      },
-    );
-  }
-
-  void _showEditDialog(Map<String, String> item) {
-    final juzStr = item['juz']!;
-    final parts = juzStr.split(' - ');
-    final Set<int> initialJuz = {};
-    if (parts.length == 2) {
-      final start = int.tryParse(parts[0].trim()) ?? 1;
-      final end = int.tryParse(parts[1].trim()) ?? 1;
-      if (start <= end) {
-        for (int i = start; i <= end; i++) {
-          initialJuz.add(i);
-        }
-      } else {
-        for (int i = start; i <= 30; i++) {
-          initialJuz.add(i);
-        }
-        for (int i = 1; i <= end; i++) {
-          initialJuz.add(i);
-        }
-      }
-    }
-
-    final programLabel = _tabController.index == 0
-        ? t.targetHafalan.reguler
-        : t.targetHafalan.takhassus;
-
-    EditTargetDialog.show(
-      context,
-      kelasTitle: item['title']!,
-      programLabel: programLabel,
-      initialSelectedJuz: initialJuz,
-      onSave: (target, juzRange) {
-        setState(() {
-          item['target'] = target.toString();
-          item['juz'] = juzRange;
-        });
       },
     );
   }

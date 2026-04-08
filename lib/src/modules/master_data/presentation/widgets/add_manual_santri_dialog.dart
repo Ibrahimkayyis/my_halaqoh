@@ -1,5 +1,6 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
@@ -45,6 +46,7 @@ class AddManualSantriDialog extends StatefulWidget {
 }
 
 class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
+  final _formKey = GlobalKey<FormState>();
   final _nisController = TextEditingController();
   final _namaController = TextEditingController();
   String? _selectedKelas;
@@ -104,7 +106,9 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
         ),
       ),
       child: SingleChildScrollView(
-        child: Column(
+        child: Form(
+          key: _formKey,
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -179,21 +183,30 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
             // NIS field
             _buildLabel(colors, t.addData.nis),
             SizedBox(height: 8.h),
-            _buildTextField(
+            _buildTextFormField(
               colors: colors,
               controller: _nisController,
               hint: t.addData.nisHint,
               keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(12)],
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'NIS wajib diisi';
+                return null;
+              },
             ),
             SizedBox(height: 18.h),
 
             // Nama Lengkap field
             _buildLabel(colors, t.addData.namaLengkap),
             SizedBox(height: 8.h),
-            _buildTextField(
+            _buildTextFormField(
               colors: colors,
               controller: _namaController,
               hint: t.addData.namaSantriHint,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) return 'Nama wajib diisi';
+                return null;
+              },
             ),
             SizedBox(height: 18.h),
 
@@ -241,6 +254,14 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
             PrimaryButton(
               width: double.infinity,
               onPressed: () async {
+                if (!_formKey.currentState!.validate()) return;
+                if (_selectedKelas == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Pilih kelas terlebih dahulu')),
+                  );
+                  return;
+                }
+
                 final confirmed = await ConfirmSaveDialog.show(context);
                 if (!confirmed) return;
 
@@ -260,6 +281,7 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
               borderRadius: 25.r,
             ),
           ],
+          ),
         ),
       ),
     );
@@ -277,15 +299,20 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildTextFormField({
     required AppColorSet colors,
     required TextEditingController controller,
     required String hint,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      validator: validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       style: TextStyle(
         fontSize: 14.sp,
         fontFamily: 'Poppins',
@@ -298,6 +325,10 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
           color: colors.textSecondary.withValues(alpha: 0.5),
           fontFamily: 'Poppins',
         ),
+        errorStyle: TextStyle(
+          fontSize: 11.sp,
+          fontFamily: 'Poppins',
+        ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
@@ -306,6 +337,14 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
           borderSide: BorderSide(color: colors.primary),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: const BorderSide(color: Colors.redAccent),
         ),
       ),
     );

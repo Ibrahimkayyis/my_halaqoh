@@ -65,18 +65,54 @@ class AbsensiHalaqohRouteArgs {
 
 /// generated route for
 /// [AddHalaqohScreen]
-class AddHalaqohRoute extends PageRouteInfo<void> {
-  const AddHalaqohRoute({List<PageRouteInfo>? children})
-    : super(AddHalaqohRoute.name, initialChildren: children);
+class AddHalaqohRoute extends PageRouteInfo<AddHalaqohRouteArgs> {
+  AddHalaqohRoute({
+    Key? key,
+    HalaqohModel? existingHalaqoh,
+    List<PageRouteInfo>? children,
+  }) : super(
+         AddHalaqohRoute.name,
+         args: AddHalaqohRouteArgs(key: key, existingHalaqoh: existingHalaqoh),
+         initialChildren: children,
+       );
 
   static const String name = 'AddHalaqohRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const AddHalaqohScreen();
+      final args = data.argsAs<AddHalaqohRouteArgs>(
+        orElse: () => const AddHalaqohRouteArgs(),
+      );
+      return AddHalaqohScreen(
+        key: args.key,
+        existingHalaqoh: args.existingHalaqoh,
+      );
     },
   );
+}
+
+class AddHalaqohRouteArgs {
+  const AddHalaqohRouteArgs({this.key, this.existingHalaqoh});
+
+  final Key? key;
+
+  final HalaqohModel? existingHalaqoh;
+
+  @override
+  String toString() {
+    return 'AddHalaqohRouteArgs{key: $key, existingHalaqoh: $existingHalaqoh}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! AddHalaqohRouteArgs) return false;
+    return key == other.key && existingHalaqoh == other.existingHalaqoh;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ existingHalaqoh.hashCode;
 }
 
 /// generated route for

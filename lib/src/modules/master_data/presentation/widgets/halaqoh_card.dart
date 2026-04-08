@@ -45,13 +45,17 @@ class HalaqohCard extends StatelessWidget {
           // Row 1: Halaqoh name + Kelas badge
           Row(
             children: [
-              Text(
-                name,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
-                  color: colors.textPrimary,
-                  fontFamily: 'Poppins',
+              Expanded(
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                    fontFamily: 'Poppins',
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               SizedBox(width: 10.w),

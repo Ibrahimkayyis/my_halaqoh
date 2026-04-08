@@ -10,7 +10,7 @@ class EditTargetDialog extends StatefulWidget {
   final String kelasTitle;
   final String programLabel;
   final Set<int> initialSelectedJuz;
-  final void Function(int target, String juzRange)? onSave;
+  final void Function(int target, String juzRange, String tahunAjaran)? onSave;
 
   const EditTargetDialog({
     super.key,
@@ -26,7 +26,7 @@ class EditTargetDialog extends StatefulWidget {
     required String kelasTitle,
     required String programLabel,
     Set<int> initialSelectedJuz = const {},
-    void Function(int target, String juzRange)? onSave,
+    void Function(int target, String juzRange, String tahunAjaran)? onSave,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -231,17 +231,10 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                   if (!confirmed) return;
 
                   if (widget.onSave != null && _selectedJuz.isNotEmpty) {
-                    // Calculate range string
                     final sorted = _selectedJuz.toList()..sort();
-                    String juzRangeStr;
-                    if (sorted.length == 1) {
-                      juzRangeStr = '${sorted.first}';
-                    } else {
-                      // For simplicity, just show first and last.
-                      // It handles wrapping correctly if UI enforces continuous selection.
-                      juzRangeStr = '${sorted.first} - ${sorted.last}';
-                    }
-                    widget.onSave!(sorted.length, juzRangeStr);
+                    // Smart format: group consecutive juz into ranges
+                    final juzStr = _formatJuzList(sorted);
+                    widget.onSave!(sorted.length, juzStr, _selectedTahun);
                   }
 
                   if (context.mounted) {
@@ -377,5 +370,27 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
         ],
       ),
     );
+  }
+  /// Format juz list into smart range groups: e.g. [1,2,3,29,30] → "1-3, 29-30"
+  String _formatJuzList(List<int> sorted) {
+    if (sorted.isEmpty) return '-';
+    if (sorted.length == 1) return 'Juz ${sorted.first}';
+
+    final List<String> groups = [];
+    int start = sorted.first;
+    int end = sorted.first;
+
+    for (int i = 1; i < sorted.length; i++) {
+      if (sorted[i] == end + 1) {
+        end = sorted[i];
+      } else {
+        groups.add(start == end ? '$start' : '$start-$end');
+        start = sorted[i];
+        end = sorted[i];
+      }
+    }
+    groups.add(start == end ? '$start' : '$start-$end');
+
+    return 'Juz ${groups.join(', ')}';
   }
 }

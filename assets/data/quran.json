@@ -1,0 +1,2569 @@
+{
+  "meta": {
+    "total_surahs": 114,
+    "total_juz": 30,
+    "total_ayat": 6236,
+    "source": "Mushaf Uthmani standar",
+    "generated_for": "MyHalaqoh - PP Luqman Al Hakim Surabaya"
+  },
+  "surahs": [
+    {
+      "id": 1,
+      "name": "Al-Fatihah",
+      "name_ar": "الفاتحة",
+      "ayat_count": 7,
+      "juz_start": 1,
+      "juz_mappings": [
+        {
+          "juz": 1,
+          "ayat_start": 1,
+          "ayat_end": 7
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Al-Baqarah",
+      "name_ar": "البقرة",
+      "ayat_count": 286,
+      "juz_start": 1,
+      "juz_mappings": [
+        {
+          "juz": 1,
+          "ayat_start": 1,
+          "ayat_end": 141
+        },
+        {
+          "juz": 2,
+          "ayat_start": 142,
+          "ayat_end": 252
+        },
+        {
+          "juz": 3,
+          "ayat_start": 253,
+          "ayat_end": 286
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Ali Imran",
+      "name_ar": "آل عمران",
+      "ayat_count": 200,
+      "juz_start": 3,
+      "juz_mappings": [
+        {
+          "juz": 3,
+          "ayat_start": 1,
+          "ayat_end": 92
+        },
+        {
+          "juz": 4,
+          "ayat_start": 93,
+          "ayat_end": 200
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "An-Nisa",
+      "name_ar": "النساء",
+      "ayat_count": 176,
+      "juz_start": 4,
+      "juz_mappings": [
+        {
+          "juz": 4,
+          "ayat_start": 1,
+          "ayat_end": 23
+        },
+        {
+          "juz": 5,
+          "ayat_start": 24,
+          "ayat_end": 147
+        },
+        {
+          "juz": 6,
+          "ayat_start": 148,
+          "ayat_end": 176
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Al-Maidah",
+      "name_ar": "المائدة",
+      "ayat_count": 120,
+      "juz_start": 6,
+      "juz_mappings": [
+        {
+          "juz": 6,
+          "ayat_start": 1,
+          "ayat_end": 81
+        },
+        {
+          "juz": 7,
+          "ayat_start": 82,
+          "ayat_end": 120
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Al-An'am",
+      "name_ar": "الأنعام",
+      "ayat_count": 165,
+      "juz_start": 7,
+      "juz_mappings": [
+        {
+          "juz": 7,
+          "ayat_start": 1,
+          "ayat_end": 110
+        },
+        {
+          "juz": 8,
+          "ayat_start": 111,
+          "ayat_end": 165
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Al-A'raf",
+      "name_ar": "الأعراف",
+      "ayat_count": 206,
+      "juz_start": 8,
+      "juz_mappings": [
+        {
+          "juz": 8,
+          "ayat_start": 1,
+          "ayat_end": 87
+        },
+        {
+          "juz": 9,
+          "ayat_start": 88,
+          "ayat_end": 206
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Al-Anfal",
+      "name_ar": "الأنفال",
+      "ayat_count": 75,
+      "juz_start": 9,
+      "juz_mappings": [
+        {
+          "juz": 9,
+          "ayat_start": 1,
+          "ayat_end": 40
+        },
+        {
+          "juz": 10,
+          "ayat_start": 41,
+          "ayat_end": 75
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "At-Taubah",
+      "name_ar": "التوبة",
+      "ayat_count": 129,
+      "juz_start": 10,
+      "juz_mappings": [
+        {
+          "juz": 10,
+          "ayat_start": 1,
+          "ayat_end": 92
+        },
+        {
+          "juz": 11,
+          "ayat_start": 93,
+          "ayat_end": 129
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Yunus",
+      "name_ar": "يونس",
+      "ayat_count": 109,
+      "juz_start": 11,
+      "juz_mappings": [
+        {
+          "juz": 11,
+          "ayat_start": 1,
+          "ayat_end": 109
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Hud",
+      "name_ar": "هود",
+      "ayat_count": 123,
+      "juz_start": 11,
+      "juz_mappings": [
+        {
+          "juz": 11,
+          "ayat_start": 1,
+          "ayat_end": 5
+        },
+        {
+          "juz": 12,
+          "ayat_start": 6,
+          "ayat_end": 123
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Yusuf",
+      "name_ar": "يوسف",
+      "ayat_count": 111,
+      "juz_start": 12,
+      "juz_mappings": [
+        {
+          "juz": 12,
+          "ayat_start": 1,
+          "ayat_end": 52
+        },
+        {
+          "juz": 13,
+          "ayat_start": 53,
+          "ayat_end": 111
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Ar-Ra'd",
+      "name_ar": "الرعد",
+      "ayat_count": 43,
+      "juz_start": 13,
+      "juz_mappings": [
+        {
+          "juz": 13,
+          "ayat_start": 1,
+          "ayat_end": 43
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Ibrahim",
+      "name_ar": "إبراهيم",
+      "ayat_count": 52,
+      "juz_start": 13,
+      "juz_mappings": [
+        {
+          "juz": 13,
+          "ayat_start": 1,
+          "ayat_end": 52
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Al-Hijr",
+      "name_ar": "الحجر",
+      "ayat_count": 99,
+      "juz_start": 14,
+      "juz_mappings": [
+        {
+          "juz": 14,
+          "ayat_start": 1,
+          "ayat_end": 99
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "An-Nahl",
+      "name_ar": "النحل",
+      "ayat_count": 128,
+      "juz_start": 14,
+      "juz_mappings": [
+        {
+          "juz": 14,
+          "ayat_start": 1,
+          "ayat_end": 128
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Al-Isra",
+      "name_ar": "الإسراء",
+      "ayat_count": 111,
+      "juz_start": 15,
+      "juz_mappings": [
+        {
+          "juz": 15,
+          "ayat_start": 1,
+          "ayat_end": 111
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Al-Kahf",
+      "name_ar": "الكهف",
+      "ayat_count": 110,
+      "juz_start": 15,
+      "juz_mappings": [
+        {
+          "juz": 15,
+          "ayat_start": 1,
+          "ayat_end": 74
+        },
+        {
+          "juz": 16,
+          "ayat_start": 75,
+          "ayat_end": 110
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Maryam",
+      "name_ar": "مريم",
+      "ayat_count": 98,
+      "juz_start": 16,
+      "juz_mappings": [
+        {
+          "juz": 16,
+          "ayat_start": 1,
+          "ayat_end": 98
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Ta Ha",
+      "name_ar": "طه",
+      "ayat_count": 135,
+      "juz_start": 16,
+      "juz_mappings": [
+        {
+          "juz": 16,
+          "ayat_start": 1,
+          "ayat_end": 135
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Al-Anbiya",
+      "name_ar": "الأنبياء",
+      "ayat_count": 112,
+      "juz_start": 17,
+      "juz_mappings": [
+        {
+          "juz": 17,
+          "ayat_start": 1,
+          "ayat_end": 112
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Al-Hajj",
+      "name_ar": "الحج",
+      "ayat_count": 78,
+      "juz_start": 17,
+      "juz_mappings": [
+        {
+          "juz": 17,
+          "ayat_start": 1,
+          "ayat_end": 78
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Al-Mu'minun",
+      "name_ar": "المؤمنون",
+      "ayat_count": 118,
+      "juz_start": 18,
+      "juz_mappings": [
+        {
+          "juz": 18,
+          "ayat_start": 1,
+          "ayat_end": 118
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "An-Nur",
+      "name_ar": "النور",
+      "ayat_count": 64,
+      "juz_start": 18,
+      "juz_mappings": [
+        {
+          "juz": 18,
+          "ayat_start": 1,
+          "ayat_end": 64
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Al-Furqan",
+      "name_ar": "الفرقان",
+      "ayat_count": 77,
+      "juz_start": 18,
+      "juz_mappings": [
+        {
+          "juz": 18,
+          "ayat_start": 1,
+          "ayat_end": 20
+        },
+        {
+          "juz": 19,
+          "ayat_start": 21,
+          "ayat_end": 77
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Asy-Syu'ara",
+      "name_ar": "الشعراء",
+      "ayat_count": 227,
+      "juz_start": 19,
+      "juz_mappings": [
+        {
+          "juz": 19,
+          "ayat_start": 1,
+          "ayat_end": 227
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "An-Naml",
+      "name_ar": "النمل",
+      "ayat_count": 93,
+      "juz_start": 19,
+      "juz_mappings": [
+        {
+          "juz": 19,
+          "ayat_start": 1,
+          "ayat_end": 55
+        },
+        {
+          "juz": 20,
+          "ayat_start": 56,
+          "ayat_end": 93
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Al-Qasas",
+      "name_ar": "القصص",
+      "ayat_count": 88,
+      "juz_start": 20,
+      "juz_mappings": [
+        {
+          "juz": 20,
+          "ayat_start": 1,
+          "ayat_end": 88
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Al-Ankabut",
+      "name_ar": "العنكبوت",
+      "ayat_count": 69,
+      "juz_start": 20,
+      "juz_mappings": [
+        {
+          "juz": 20,
+          "ayat_start": 1,
+          "ayat_end": 45
+        },
+        {
+          "juz": 21,
+          "ayat_start": 46,
+          "ayat_end": 69
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Ar-Rum",
+      "name_ar": "الروم",
+      "ayat_count": 60,
+      "juz_start": 21,
+      "juz_mappings": [
+        {
+          "juz": 21,
+          "ayat_start": 1,
+          "ayat_end": 60
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "name": "Luqman",
+      "name_ar": "لقمان",
+      "ayat_count": 34,
+      "juz_start": 21,
+      "juz_mappings": [
+        {
+          "juz": 21,
+          "ayat_start": 1,
+          "ayat_end": 34
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "name": "As-Sajdah",
+      "name_ar": "السجدة",
+      "ayat_count": 30,
+      "juz_start": 21,
+      "juz_mappings": [
+        {
+          "juz": 21,
+          "ayat_start": 1,
+          "ayat_end": 30
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "name": "Al-Ahzab",
+      "name_ar": "الأحزاب",
+      "ayat_count": 73,
+      "juz_start": 21,
+      "juz_mappings": [
+        {
+          "juz": 21,
+          "ayat_start": 1,
+          "ayat_end": 30
+        },
+        {
+          "juz": 22,
+          "ayat_start": 31,
+          "ayat_end": 73
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "name": "Saba",
+      "name_ar": "سبأ",
+      "ayat_count": 54,
+      "juz_start": 22,
+      "juz_mappings": [
+        {
+          "juz": 22,
+          "ayat_start": 1,
+          "ayat_end": 54
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "name": "Fatir",
+      "name_ar": "فاطر",
+      "ayat_count": 45,
+      "juz_start": 22,
+      "juz_mappings": [
+        {
+          "juz": 22,
+          "ayat_start": 1,
+          "ayat_end": 45
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "name": "Yasin",
+      "name_ar": "يس",
+      "ayat_count": 83,
+      "juz_start": 22,
+      "juz_mappings": [
+        {
+          "juz": 22,
+          "ayat_start": 1,
+          "ayat_end": 27
+        },
+        {
+          "juz": 23,
+          "ayat_start": 28,
+          "ayat_end": 83
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "name": "As-Saffat",
+      "name_ar": "الصافات",
+      "ayat_count": 182,
+      "juz_start": 23,
+      "juz_mappings": [
+        {
+          "juz": 23,
+          "ayat_start": 1,
+          "ayat_end": 182
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "name": "Sad",
+      "name_ar": "ص",
+      "ayat_count": 88,
+      "juz_start": 23,
+      "juz_mappings": [
+        {
+          "juz": 23,
+          "ayat_start": 1,
+          "ayat_end": 88
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "name": "Az-Zumar",
+      "name_ar": "الزمر",
+      "ayat_count": 75,
+      "juz_start": 23,
+      "juz_mappings": [
+        {
+          "juz": 23,
+          "ayat_start": 1,
+          "ayat_end": 31
+        },
+        {
+          "juz": 24,
+          "ayat_start": 32,
+          "ayat_end": 75
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "name": "Gafir",
+      "name_ar": "غافر",
+      "ayat_count": 85,
+      "juz_start": 24,
+      "juz_mappings": [
+        {
+          "juz": 24,
+          "ayat_start": 1,
+          "ayat_end": 85
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "name": "Fussilat",
+      "name_ar": "فصلت",
+      "ayat_count": 54,
+      "juz_start": 24,
+      "juz_mappings": [
+        {
+          "juz": 24,
+          "ayat_start": 1,
+          "ayat_end": 46
+        },
+        {
+          "juz": 25,
+          "ayat_start": 47,
+          "ayat_end": 54
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "name": "Asy-Syura",
+      "name_ar": "الشورى",
+      "ayat_count": 53,
+      "juz_start": 25,
+      "juz_mappings": [
+        {
+          "juz": 25,
+          "ayat_start": 1,
+          "ayat_end": 53
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "name": "Az-Zukhruf",
+      "name_ar": "الزخرف",
+      "ayat_count": 89,
+      "juz_start": 25,
+      "juz_mappings": [
+        {
+          "juz": 25,
+          "ayat_start": 1,
+          "ayat_end": 89
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "name": "Ad-Dukhan",
+      "name_ar": "الدخان",
+      "ayat_count": 59,
+      "juz_start": 25,
+      "juz_mappings": [
+        {
+          "juz": 25,
+          "ayat_start": 1,
+          "ayat_end": 59
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "name": "Al-Jasiyah",
+      "name_ar": "الجاثية",
+      "ayat_count": 37,
+      "juz_start": 25,
+      "juz_mappings": [
+        {
+          "juz": 25,
+          "ayat_start": 1,
+          "ayat_end": 37
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "name": "Al-Ahqaf",
+      "name_ar": "الأحقاف",
+      "ayat_count": 35,
+      "juz_start": 26,
+      "juz_mappings": [
+        {
+          "juz": 26,
+          "ayat_start": 1,
+          "ayat_end": 35
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "name": "Muhammad",
+      "name_ar": "محمد",
+      "ayat_count": 38,
+      "juz_start": 26,
+      "juz_mappings": [
+        {
+          "juz": 26,
+          "ayat_start": 1,
+          "ayat_end": 38
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "name": "Al-Fath",
+      "name_ar": "الفتح",
+      "ayat_count": 29,
+      "juz_start": 26,
+      "juz_mappings": [
+        {
+          "juz": 26,
+          "ayat_start": 1,
+          "ayat_end": 29
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "name": "Al-Hujurat",
+      "name_ar": "الحجرات",
+      "ayat_count": 18,
+      "juz_start": 26,
+      "juz_mappings": [
+        {
+          "juz": 26,
+          "ayat_start": 1,
+          "ayat_end": 18
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "name": "Qaf",
+      "name_ar": "ق",
+      "ayat_count": 45,
+      "juz_start": 26,
+      "juz_mappings": [
+        {
+          "juz": 26,
+          "ayat_start": 1,
+          "ayat_end": 45
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "name": "Az-Zariyat",
+      "name_ar": "الذاريات",
+      "ayat_count": 60,
+      "juz_start": 26,
+      "juz_mappings": [
+        {
+          "juz": 26,
+          "ayat_start": 1,
+          "ayat_end": 30
+        },
+        {
+          "juz": 27,
+          "ayat_start": 31,
+          "ayat_end": 60
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "name": "At-Tur",
+      "name_ar": "الطور",
+      "ayat_count": 49,
+      "juz_start": 27,
+      "juz_mappings": [
+        {
+          "juz": 27,
+          "ayat_start": 1,
+          "ayat_end": 49
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "name": "An-Najm",
+      "name_ar": "النجم",
+      "ayat_count": 62,
+      "juz_start": 27,
+      "juz_mappings": [
+        {
+          "juz": 27,
+          "ayat_start": 1,
+          "ayat_end": 62
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "name": "Al-Qamar",
+      "name_ar": "القمر",
+      "ayat_count": 55,
+      "juz_start": 27,
+      "juz_mappings": [
+        {
+          "juz": 27,
+          "ayat_start": 1,
+          "ayat_end": 55
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "name": "Ar-Rahman",
+      "name_ar": "الرحمن",
+      "ayat_count": 78,
+      "juz_start": 27,
+      "juz_mappings": [
+        {
+          "juz": 27,
+          "ayat_start": 1,
+          "ayat_end": 78
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "name": "Al-Waqi'ah",
+      "name_ar": "الواقعة",
+      "ayat_count": 96,
+      "juz_start": 27,
+      "juz_mappings": [
+        {
+          "juz": 27,
+          "ayat_start": 1,
+          "ayat_end": 96
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "name": "Al-Hadid",
+      "name_ar": "الحديد",
+      "ayat_count": 29,
+      "juz_start": 27,
+      "juz_mappings": [
+        {
+          "juz": 27,
+          "ayat_start": 1,
+          "ayat_end": 29
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "name": "Al-Mujadilah",
+      "name_ar": "المجادلة",
+      "ayat_count": 22,
+      "juz_start": 28,
+      "juz_mappings": [
+        {
+          "juz": 28,
+          "ayat_start": 1,
+          "ayat_end": 22
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "name": "Al-Hasyr",
+      "name_ar": "الحشر",
+      "ayat_count": 24,
+      "juz_start": 28,
+      "juz_mappings": [
+        {
+          "juz": 28,
+          "ayat_start": 1,
+          "ayat_end": 24
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "name": "Al-Mumtahanah",
+      "name_ar": "الممتحنة",
+      "ayat_count": 13,
+      "juz_start": 28,
+      "juz_mappings": [
+        {
+          "juz": 28,
+          "ayat_start": 1,
+          "ayat_end": 13
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "name": "As-Saf",
+      "name_ar": "الصف",
+      "ayat_count": 14,
+      "juz_start": 28,
+      "juz_mappings": [
+        {
+          "juz": 28,
+          "ayat_start": 1,
+          "ayat_end": 14
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "name": "Al-Jumu'ah",
+      "name_ar": "الجمعة",
+      "ayat_count": 11,
+      "juz_start": 28,
+      "juz_mappings": [
+        {
+          "juz": 28,
+          "ayat_start": 1,
+          "ayat_end": 11
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "name": "Al-Munafiqun",
+      "name_ar": "المنافقون",
+      "ayat_count": 11,
+      "juz_start": 28,
+      "juz_mappings": [
+        {
+          "juz": 28,
+          "ayat_start": 1,
+          "ayat_end": 11
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "name": "At-Tagabun",
+      "name_ar": "التغابن",
+      "ayat_count": 18,
+      "juz_start": 28,
+      "juz_mappings": [
+        {
+          "juz": 28,
+          "ayat_start": 1,
+          "ayat_end": 18
+        }
+      ]
+    },
+    {
+      "id": 65,
+      "name": "At-Talaq",
+      "name_ar": "الطلاق",
+      "ayat_count": 12,
+      "juz_start": 28,
+      "juz_mappings": [
+        {
+          "juz": 28,
+          "ayat_start": 1,
+          "ayat_end": 12
+        }
+      ]
+    },
+    {
+      "id": 66,
+      "name": "At-Tahrim",
+      "name_ar": "التحريم",
+      "ayat_count": 12,
+      "juz_start": 28,
+      "juz_mappings": [
+        {
+          "juz": 28,
+          "ayat_start": 1,
+          "ayat_end": 12
+        }
+      ]
+    },
+    {
+      "id": 67,
+      "name": "Al-Mulk",
+      "name_ar": "الملك",
+      "ayat_count": 30,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 30
+        }
+      ]
+    },
+    {
+      "id": 68,
+      "name": "Al-Qalam",
+      "name_ar": "القلم",
+      "ayat_count": 52,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 52
+        }
+      ]
+    },
+    {
+      "id": 69,
+      "name": "Al-Haqqah",
+      "name_ar": "الحاقة",
+      "ayat_count": 52,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 52
+        }
+      ]
+    },
+    {
+      "id": 70,
+      "name": "Al-Ma'arij",
+      "name_ar": "المعارج",
+      "ayat_count": 44,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 44
+        }
+      ]
+    },
+    {
+      "id": 71,
+      "name": "Nuh",
+      "name_ar": "نوح",
+      "ayat_count": 28,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 28
+        }
+      ]
+    },
+    {
+      "id": 72,
+      "name": "Al-Jinn",
+      "name_ar": "الجن",
+      "ayat_count": 28,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 28
+        }
+      ]
+    },
+    {
+      "id": 73,
+      "name": "Al-Muzzammil",
+      "name_ar": "المزمل",
+      "ayat_count": 20,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 20
+        }
+      ]
+    },
+    {
+      "id": 74,
+      "name": "Al-Muddassir",
+      "name_ar": "المدثر",
+      "ayat_count": 56,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 56
+        }
+      ]
+    },
+    {
+      "id": 75,
+      "name": "Al-Qiyamah",
+      "name_ar": "القيامة",
+      "ayat_count": 40,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 40
+        }
+      ]
+    },
+    {
+      "id": 76,
+      "name": "Al-Insan",
+      "name_ar": "الإنسان",
+      "ayat_count": 31,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 31
+        }
+      ]
+    },
+    {
+      "id": 77,
+      "name": "Al-Mursalat",
+      "name_ar": "المرسلات",
+      "ayat_count": 50,
+      "juz_start": 29,
+      "juz_mappings": [
+        {
+          "juz": 29,
+          "ayat_start": 1,
+          "ayat_end": 50
+        }
+      ]
+    },
+    {
+      "id": 78,
+      "name": "An-Naba",
+      "name_ar": "النبأ",
+      "ayat_count": 40,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 40
+        }
+      ]
+    },
+    {
+      "id": 79,
+      "name": "An-Nazi'at",
+      "name_ar": "النازعات",
+      "ayat_count": 46,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 46
+        }
+      ]
+    },
+    {
+      "id": 80,
+      "name": "Abasa",
+      "name_ar": "عبس",
+      "ayat_count": 42,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 42
+        }
+      ]
+    },
+    {
+      "id": 81,
+      "name": "At-Takwir",
+      "name_ar": "التكوير",
+      "ayat_count": 29,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 29
+        }
+      ]
+    },
+    {
+      "id": 82,
+      "name": "Al-Infitar",
+      "name_ar": "الانفطار",
+      "ayat_count": 19,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 19
+        }
+      ]
+    },
+    {
+      "id": 83,
+      "name": "Al-Mutaffifin",
+      "name_ar": "المطففين",
+      "ayat_count": 36,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 36
+        }
+      ]
+    },
+    {
+      "id": 84,
+      "name": "Al-Insyiqaq",
+      "name_ar": "الانشقاق",
+      "ayat_count": 25,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 25
+        }
+      ]
+    },
+    {
+      "id": 85,
+      "name": "Al-Buruj",
+      "name_ar": "البروج",
+      "ayat_count": 22,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 22
+        }
+      ]
+    },
+    {
+      "id": 86,
+      "name": "At-Tariq",
+      "name_ar": "الطارق",
+      "ayat_count": 17,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 17
+        }
+      ]
+    },
+    {
+      "id": 87,
+      "name": "Al-A'la",
+      "name_ar": "الأعلى",
+      "ayat_count": 19,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 19
+        }
+      ]
+    },
+    {
+      "id": 88,
+      "name": "Al-Gasyiyah",
+      "name_ar": "الغاشية",
+      "ayat_count": 26,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 26
+        }
+      ]
+    },
+    {
+      "id": 89,
+      "name": "Al-Fajr",
+      "name_ar": "الفجر",
+      "ayat_count": 30,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 30
+        }
+      ]
+    },
+    {
+      "id": 90,
+      "name": "Al-Balad",
+      "name_ar": "البلد",
+      "ayat_count": 20,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 20
+        }
+      ]
+    },
+    {
+      "id": 91,
+      "name": "Asy-Syams",
+      "name_ar": "الشمس",
+      "ayat_count": 15,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 15
+        }
+      ]
+    },
+    {
+      "id": 92,
+      "name": "Al-Lail",
+      "name_ar": "الليل",
+      "ayat_count": 21,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 21
+        }
+      ]
+    },
+    {
+      "id": 93,
+      "name": "Ad-Duha",
+      "name_ar": "الضحى",
+      "ayat_count": 11,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 11
+        }
+      ]
+    },
+    {
+      "id": 94,
+      "name": "Asy-Syarh",
+      "name_ar": "الشرح",
+      "ayat_count": 8,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 8
+        }
+      ]
+    },
+    {
+      "id": 95,
+      "name": "At-Tin",
+      "name_ar": "التين",
+      "ayat_count": 8,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 8
+        }
+      ]
+    },
+    {
+      "id": 96,
+      "name": "Al-Alaq",
+      "name_ar": "العلق",
+      "ayat_count": 19,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 19
+        }
+      ]
+    },
+    {
+      "id": 97,
+      "name": "Al-Qadr",
+      "name_ar": "القدر",
+      "ayat_count": 5,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 5
+        }
+      ]
+    },
+    {
+      "id": 98,
+      "name": "Al-Bayyinah",
+      "name_ar": "البينة",
+      "ayat_count": 8,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 8
+        }
+      ]
+    },
+    {
+      "id": 99,
+      "name": "Az-Zalzalah",
+      "name_ar": "الزلزلة",
+      "ayat_count": 8,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 8
+        }
+      ]
+    },
+    {
+      "id": 100,
+      "name": "Al-Adiyat",
+      "name_ar": "العاديات",
+      "ayat_count": 11,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 11
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "name": "Al-Qari'ah",
+      "name_ar": "القارعة",
+      "ayat_count": 11,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 11
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "name": "At-Takasur",
+      "name_ar": "التكاثر",
+      "ayat_count": 8,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 8
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "name": "Al-Asr",
+      "name_ar": "العصر",
+      "ayat_count": 3,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 3
+        }
+      ]
+    },
+    {
+      "id": 104,
+      "name": "Al-Humazah",
+      "name_ar": "الهمزة",
+      "ayat_count": 9,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 9
+        }
+      ]
+    },
+    {
+      "id": 105,
+      "name": "Al-Fil",
+      "name_ar": "الفيل",
+      "ayat_count": 5,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 5
+        }
+      ]
+    },
+    {
+      "id": 106,
+      "name": "Quraisy",
+      "name_ar": "قريش",
+      "ayat_count": 4,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 4
+        }
+      ]
+    },
+    {
+      "id": 107,
+      "name": "Al-Ma'un",
+      "name_ar": "الماعون",
+      "ayat_count": 7,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 7
+        }
+      ]
+    },
+    {
+      "id": 108,
+      "name": "Al-Kausar",
+      "name_ar": "الكوثر",
+      "ayat_count": 3,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 3
+        }
+      ]
+    },
+    {
+      "id": 109,
+      "name": "Al-Kafirun",
+      "name_ar": "الكافرون",
+      "ayat_count": 6,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 6
+        }
+      ]
+    },
+    {
+      "id": 110,
+      "name": "An-Nasr",
+      "name_ar": "النصر",
+      "ayat_count": 3,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 3
+        }
+      ]
+    },
+    {
+      "id": 111,
+      "name": "Al-Lahab",
+      "name_ar": "المسد",
+      "ayat_count": 5,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 5
+        }
+      ]
+    },
+    {
+      "id": 112,
+      "name": "Al-Ikhlas",
+      "name_ar": "الإخلاص",
+      "ayat_count": 4,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 4
+        }
+      ]
+    },
+    {
+      "id": 113,
+      "name": "Al-Falaq",
+      "name_ar": "الفلق",
+      "ayat_count": 5,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 5
+        }
+      ]
+    },
+    {
+      "id": 114,
+      "name": "An-Nas",
+      "name_ar": "الناس",
+      "ayat_count": 6,
+      "juz_start": 30,
+      "juz_mappings": [
+        {
+          "juz": 30,
+          "ayat_start": 1,
+          "ayat_end": 6
+        }
+      ]
+    }
+  ],
+  "juz": [
+    {
+      "number": 1,
+      "total_ayat": 148,
+      "surahs": [
+        {
+          "surah_id": 1,
+          "ayat_start": 1,
+          "ayat_end": 7
+        },
+        {
+          "surah_id": 2,
+          "ayat_start": 1,
+          "ayat_end": 141
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "total_ayat": 111,
+      "surahs": [
+        {
+          "surah_id": 2,
+          "ayat_start": 142,
+          "ayat_end": 252
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "total_ayat": 126,
+      "surahs": [
+        {
+          "surah_id": 2,
+          "ayat_start": 253,
+          "ayat_end": 286
+        },
+        {
+          "surah_id": 3,
+          "ayat_start": 1,
+          "ayat_end": 92
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "total_ayat": 131,
+      "surahs": [
+        {
+          "surah_id": 3,
+          "ayat_start": 93,
+          "ayat_end": 200
+        },
+        {
+          "surah_id": 4,
+          "ayat_start": 1,
+          "ayat_end": 23
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "total_ayat": 124,
+      "surahs": [
+        {
+          "surah_id": 4,
+          "ayat_start": 24,
+          "ayat_end": 147
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "total_ayat": 110,
+      "surahs": [
+        {
+          "surah_id": 4,
+          "ayat_start": 148,
+          "ayat_end": 176
+        },
+        {
+          "surah_id": 5,
+          "ayat_start": 1,
+          "ayat_end": 81
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "total_ayat": 149,
+      "surahs": [
+        {
+          "surah_id": 5,
+          "ayat_start": 82,
+          "ayat_end": 120
+        },
+        {
+          "surah_id": 6,
+          "ayat_start": 1,
+          "ayat_end": 110
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "total_ayat": 142,
+      "surahs": [
+        {
+          "surah_id": 6,
+          "ayat_start": 111,
+          "ayat_end": 165
+        },
+        {
+          "surah_id": 7,
+          "ayat_start": 1,
+          "ayat_end": 87
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "total_ayat": 159,
+      "surahs": [
+        {
+          "surah_id": 7,
+          "ayat_start": 88,
+          "ayat_end": 206
+        },
+        {
+          "surah_id": 8,
+          "ayat_start": 1,
+          "ayat_end": 40
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "total_ayat": 127,
+      "surahs": [
+        {
+          "surah_id": 8,
+          "ayat_start": 41,
+          "ayat_end": 75
+        },
+        {
+          "surah_id": 9,
+          "ayat_start": 1,
+          "ayat_end": 92
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "total_ayat": 151,
+      "surahs": [
+        {
+          "surah_id": 9,
+          "ayat_start": 93,
+          "ayat_end": 129
+        },
+        {
+          "surah_id": 10,
+          "ayat_start": 1,
+          "ayat_end": 109
+        },
+        {
+          "surah_id": 11,
+          "ayat_start": 1,
+          "ayat_end": 5
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "total_ayat": 170,
+      "surahs": [
+        {
+          "surah_id": 11,
+          "ayat_start": 6,
+          "ayat_end": 123
+        },
+        {
+          "surah_id": 12,
+          "ayat_start": 1,
+          "ayat_end": 52
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "total_ayat": 154,
+      "surahs": [
+        {
+          "surah_id": 12,
+          "ayat_start": 53,
+          "ayat_end": 111
+        },
+        {
+          "surah_id": 13,
+          "ayat_start": 1,
+          "ayat_end": 43
+        },
+        {
+          "surah_id": 14,
+          "ayat_start": 1,
+          "ayat_end": 52
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "total_ayat": 227,
+      "surahs": [
+        {
+          "surah_id": 15,
+          "ayat_start": 1,
+          "ayat_end": 99
+        },
+        {
+          "surah_id": 16,
+          "ayat_start": 1,
+          "ayat_end": 128
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "total_ayat": 185,
+      "surahs": [
+        {
+          "surah_id": 17,
+          "ayat_start": 1,
+          "ayat_end": 111
+        },
+        {
+          "surah_id": 18,
+          "ayat_start": 1,
+          "ayat_end": 74
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "total_ayat": 269,
+      "surahs": [
+        {
+          "surah_id": 18,
+          "ayat_start": 75,
+          "ayat_end": 110
+        },
+        {
+          "surah_id": 19,
+          "ayat_start": 1,
+          "ayat_end": 98
+        },
+        {
+          "surah_id": 20,
+          "ayat_start": 1,
+          "ayat_end": 135
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "total_ayat": 190,
+      "surahs": [
+        {
+          "surah_id": 21,
+          "ayat_start": 1,
+          "ayat_end": 112
+        },
+        {
+          "surah_id": 22,
+          "ayat_start": 1,
+          "ayat_end": 78
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "total_ayat": 202,
+      "surahs": [
+        {
+          "surah_id": 23,
+          "ayat_start": 1,
+          "ayat_end": 118
+        },
+        {
+          "surah_id": 24,
+          "ayat_start": 1,
+          "ayat_end": 64
+        },
+        {
+          "surah_id": 25,
+          "ayat_start": 1,
+          "ayat_end": 20
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "total_ayat": 339,
+      "surahs": [
+        {
+          "surah_id": 25,
+          "ayat_start": 21,
+          "ayat_end": 77
+        },
+        {
+          "surah_id": 26,
+          "ayat_start": 1,
+          "ayat_end": 227
+        },
+        {
+          "surah_id": 27,
+          "ayat_start": 1,
+          "ayat_end": 55
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "total_ayat": 171,
+      "surahs": [
+        {
+          "surah_id": 27,
+          "ayat_start": 56,
+          "ayat_end": 93
+        },
+        {
+          "surah_id": 28,
+          "ayat_start": 1,
+          "ayat_end": 88
+        },
+        {
+          "surah_id": 29,
+          "ayat_start": 1,
+          "ayat_end": 45
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "total_ayat": 178,
+      "surahs": [
+        {
+          "surah_id": 29,
+          "ayat_start": 46,
+          "ayat_end": 69
+        },
+        {
+          "surah_id": 30,
+          "ayat_start": 1,
+          "ayat_end": 60
+        },
+        {
+          "surah_id": 31,
+          "ayat_start": 1,
+          "ayat_end": 34
+        },
+        {
+          "surah_id": 32,
+          "ayat_start": 1,
+          "ayat_end": 30
+        },
+        {
+          "surah_id": 33,
+          "ayat_start": 1,
+          "ayat_end": 30
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "total_ayat": 169,
+      "surahs": [
+        {
+          "surah_id": 33,
+          "ayat_start": 31,
+          "ayat_end": 73
+        },
+        {
+          "surah_id": 34,
+          "ayat_start": 1,
+          "ayat_end": 54
+        },
+        {
+          "surah_id": 35,
+          "ayat_start": 1,
+          "ayat_end": 45
+        },
+        {
+          "surah_id": 36,
+          "ayat_start": 1,
+          "ayat_end": 27
+        }
+      ]
+    },
+    {
+      "number": 23,
+      "total_ayat": 357,
+      "surahs": [
+        {
+          "surah_id": 36,
+          "ayat_start": 28,
+          "ayat_end": 83
+        },
+        {
+          "surah_id": 37,
+          "ayat_start": 1,
+          "ayat_end": 182
+        },
+        {
+          "surah_id": 38,
+          "ayat_start": 1,
+          "ayat_end": 88
+        },
+        {
+          "surah_id": 39,
+          "ayat_start": 1,
+          "ayat_end": 31
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "total_ayat": 175,
+      "surahs": [
+        {
+          "surah_id": 39,
+          "ayat_start": 32,
+          "ayat_end": 75
+        },
+        {
+          "surah_id": 40,
+          "ayat_start": 1,
+          "ayat_end": 85
+        },
+        {
+          "surah_id": 41,
+          "ayat_start": 1,
+          "ayat_end": 46
+        }
+      ]
+    },
+    {
+      "number": 25,
+      "total_ayat": 246,
+      "surahs": [
+        {
+          "surah_id": 41,
+          "ayat_start": 47,
+          "ayat_end": 54
+        },
+        {
+          "surah_id": 42,
+          "ayat_start": 1,
+          "ayat_end": 53
+        },
+        {
+          "surah_id": 43,
+          "ayat_start": 1,
+          "ayat_end": 89
+        },
+        {
+          "surah_id": 44,
+          "ayat_start": 1,
+          "ayat_end": 59
+        },
+        {
+          "surah_id": 45,
+          "ayat_start": 1,
+          "ayat_end": 37
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "total_ayat": 195,
+      "surahs": [
+        {
+          "surah_id": 46,
+          "ayat_start": 1,
+          "ayat_end": 35
+        },
+        {
+          "surah_id": 47,
+          "ayat_start": 1,
+          "ayat_end": 38
+        },
+        {
+          "surah_id": 48,
+          "ayat_start": 1,
+          "ayat_end": 29
+        },
+        {
+          "surah_id": 49,
+          "ayat_start": 1,
+          "ayat_end": 18
+        },
+        {
+          "surah_id": 50,
+          "ayat_start": 1,
+          "ayat_end": 45
+        },
+        {
+          "surah_id": 51,
+          "ayat_start": 1,
+          "ayat_end": 30
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "total_ayat": 399,
+      "surahs": [
+        {
+          "surah_id": 51,
+          "ayat_start": 31,
+          "ayat_end": 60
+        },
+        {
+          "surah_id": 52,
+          "ayat_start": 1,
+          "ayat_end": 49
+        },
+        {
+          "surah_id": 53,
+          "ayat_start": 1,
+          "ayat_end": 62
+        },
+        {
+          "surah_id": 54,
+          "ayat_start": 1,
+          "ayat_end": 55
+        },
+        {
+          "surah_id": 55,
+          "ayat_start": 1,
+          "ayat_end": 78
+        },
+        {
+          "surah_id": 56,
+          "ayat_start": 1,
+          "ayat_end": 96
+        },
+        {
+          "surah_id": 57,
+          "ayat_start": 1,
+          "ayat_end": 29
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "total_ayat": 137,
+      "surahs": [
+        {
+          "surah_id": 58,
+          "ayat_start": 1,
+          "ayat_end": 22
+        },
+        {
+          "surah_id": 59,
+          "ayat_start": 1,
+          "ayat_end": 24
+        },
+        {
+          "surah_id": 60,
+          "ayat_start": 1,
+          "ayat_end": 13
+        },
+        {
+          "surah_id": 61,
+          "ayat_start": 1,
+          "ayat_end": 14
+        },
+        {
+          "surah_id": 62,
+          "ayat_start": 1,
+          "ayat_end": 11
+        },
+        {
+          "surah_id": 63,
+          "ayat_start": 1,
+          "ayat_end": 11
+        },
+        {
+          "surah_id": 64,
+          "ayat_start": 1,
+          "ayat_end": 18
+        },
+        {
+          "surah_id": 65,
+          "ayat_start": 1,
+          "ayat_end": 12
+        },
+        {
+          "surah_id": 66,
+          "ayat_start": 1,
+          "ayat_end": 12
+        }
+      ]
+    },
+    {
+      "number": 29,
+      "total_ayat": 431,
+      "surahs": [
+        {
+          "surah_id": 67,
+          "ayat_start": 1,
+          "ayat_end": 30
+        },
+        {
+          "surah_id": 68,
+          "ayat_start": 1,
+          "ayat_end": 52
+        },
+        {
+          "surah_id": 69,
+          "ayat_start": 1,
+          "ayat_end": 52
+        },
+        {
+          "surah_id": 70,
+          "ayat_start": 1,
+          "ayat_end": 44
+        },
+        {
+          "surah_id": 71,
+          "ayat_start": 1,
+          "ayat_end": 28
+        },
+        {
+          "surah_id": 72,
+          "ayat_start": 1,
+          "ayat_end": 28
+        },
+        {
+          "surah_id": 73,
+          "ayat_start": 1,
+          "ayat_end": 20
+        },
+        {
+          "surah_id": 74,
+          "ayat_start": 1,
+          "ayat_end": 56
+        },
+        {
+          "surah_id": 75,
+          "ayat_start": 1,
+          "ayat_end": 40
+        },
+        {
+          "surah_id": 76,
+          "ayat_start": 1,
+          "ayat_end": 31
+        },
+        {
+          "surah_id": 77,
+          "ayat_start": 1,
+          "ayat_end": 50
+        }
+      ]
+    },
+    {
+      "number": 30,
+      "total_ayat": 564,
+      "surahs": [
+        {
+          "surah_id": 78,
+          "ayat_start": 1,
+          "ayat_end": 40
+        },
+        {
+          "surah_id": 79,
+          "ayat_start": 1,
+          "ayat_end": 46
+        },
+        {
+          "surah_id": 80,
+          "ayat_start": 1,
+          "ayat_end": 42
+        },
+        {
+          "surah_id": 81,
+          "ayat_start": 1,
+          "ayat_end": 29
+        },
+        {
+          "surah_id": 82,
+          "ayat_start": 1,
+          "ayat_end": 19
+        },
+        {
+          "surah_id": 83,
+          "ayat_start": 1,
+          "ayat_end": 36
+        },
+        {
+          "surah_id": 84,
+          "ayat_start": 1,
+          "ayat_end": 25
+        },
+        {
+          "surah_id": 85,
+          "ayat_start": 1,
+          "ayat_end": 22
+        },
+        {
+          "surah_id": 86,
+          "ayat_start": 1,
+          "ayat_end": 17
+        },
+        {
+          "surah_id": 87,
+          "ayat_start": 1,
+          "ayat_end": 19
+        },
+        {
+          "surah_id": 88,
+          "ayat_start": 1,
+          "ayat_end": 26
+        },
+        {
+          "surah_id": 89,
+          "ayat_start": 1,
+          "ayat_end": 30
+        },
+        {
+          "surah_id": 90,
+          "ayat_start": 1,
+          "ayat_end": 20
+        },
+        {
+          "surah_id": 91,
+          "ayat_start": 1,
+          "ayat_end": 15
+        },
+        {
+          "surah_id": 92,
+          "ayat_start": 1,
+          "ayat_end": 21
+        },
+        {
+          "surah_id": 93,
+          "ayat_start": 1,
+          "ayat_end": 11
+        },
+        {
+          "surah_id": 94,
+          "ayat_start": 1,
+          "ayat_end": 8
+        },
+        {
+          "surah_id": 95,
+          "ayat_start": 1,
+          "ayat_end": 8
+        },
+        {
+          "surah_id": 96,
+          "ayat_start": 1,
+          "ayat_end": 19
+        },
+        {
+          "surah_id": 97,
+          "ayat_start": 1,
+          "ayat_end": 5
+        },
+        {
+          "surah_id": 98,
+          "ayat_start": 1,
+          "ayat_end": 8
+        },
+        {
+          "surah_id": 99,
+          "ayat_start": 1,
+          "ayat_end": 8
+        },
+        {
+          "surah_id": 100,
+          "ayat_start": 1,
+          "ayat_end": 11
+        },
+        {
+          "surah_id": 101,
+          "ayat_start": 1,
+          "ayat_end": 11
+        },
+        {
+          "surah_id": 102,
+          "ayat_start": 1,
+          "ayat_end": 8
+        },
+        {
+          "surah_id": 103,
+          "ayat_start": 1,
+          "ayat_end": 3
+        },
+        {
+          "surah_id": 104,
+          "ayat_start": 1,
+          "ayat_end": 9
+        },
+        {
+          "surah_id": 105,
+          "ayat_start": 1,
+          "ayat_end": 5
+        },
+        {
+          "surah_id": 106,
+          "ayat_start": 1,
+          "ayat_end": 4
+        },
+        {
+          "surah_id": 107,
+          "ayat_start": 1,
+          "ayat_end": 7
+        },
+        {
+          "surah_id": 108,
+          "ayat_start": 1,
+          "ayat_end": 3
+        },
+        {
+          "surah_id": 109,
+          "ayat_start": 1,
+          "ayat_end": 6
+        },
+        {
+          "surah_id": 110,
+          "ayat_start": 1,
+          "ayat_end": 3
+        },
+        {
+          "surah_id": 111,
+          "ayat_start": 1,
+          "ayat_end": 5
+        },
+        {
+          "surah_id": 112,
+          "ayat_start": 1,
+          "ayat_end": 4
+        },
+        {
+          "surah_id": 113,
+          "ayat_start": 1,
+          "ayat_end": 5
+        },
+        {
+          "surah_id": 114,
+          "ayat_start": 1,
+          "ayat_end": 6
+        }
+      ]
+    }
+  ]
+}

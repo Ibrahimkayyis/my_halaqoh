@@ -11,6 +11,16 @@
 
 import 'package:flutter/widgets.dart';
 
+class $AssetsDataGen {
+  const $AssetsDataGen();
+
+  /// File path: assets/data/quran.json
+  String get quran => 'assets/data/quran.json';
+
+  /// List of all assets
+  List<String> get values => [quran];
+}
+
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
@@ -29,6 +39,7 @@ class $AssetsImagesGen {
 class Assets {
   const Assets._();
 
+  static const $AssetsDataGen data = $AssetsDataGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
 }
 

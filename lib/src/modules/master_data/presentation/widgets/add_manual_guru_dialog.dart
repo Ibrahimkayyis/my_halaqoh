@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
@@ -44,6 +45,7 @@ class AddManualGuruDialog extends StatefulWidget {
 }
 
 class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
+  final _formKey = GlobalKey<FormState>();
   final _nipController = TextEditingController();
   final _namaController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -88,7 +90,9 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
         ),
       ),
       child: SingleChildScrollView(
-        child: Column(
+        child: Form(
+          key: _formKey,
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -163,32 +167,48 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
             // NIP field
             _buildLabel(colors, t.addData.nip),
             SizedBox(height: 8.h),
-            _buildTextField(
+            _buildTextFormField(
               colors: colors,
               controller: _nipController,
               hint: t.addData.nipHint,
               keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(13)],
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'NIP wajib diisi';
+                if (value.length != 13) return 'NIP harus 13 digit';
+                return null;
+              },
             ),
             SizedBox(height: 18.h),
 
             // Nama Lengkap field
             _buildLabel(colors, t.addData.namaLengkap),
             SizedBox(height: 8.h),
-            _buildTextField(
+            _buildTextFormField(
               colors: colors,
               controller: _namaController,
               hint: t.addData.namaGuruHint,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) return 'Nama wajib diisi';
+                return null;
+              },
             ),
             SizedBox(height: 18.h),
 
             // Nomor HP field
             _buildLabel(colors, t.addData.nomorHp),
             SizedBox(height: 8.h),
-            _buildTextField(
+            _buildTextFormField(
               colors: colors,
               controller: _phoneController,
               hint: t.addData.nomorHpHint,
               keyboardType: TextInputType.phone,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(13)],
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Nomor HP wajib diisi';
+                if (value.length < 10 || value.length > 13) return 'Nomor HP harus 10-13 digit';
+                return null;
+              },
             ),
             SizedBox(height: 28.h),
 
@@ -196,6 +216,8 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
             PrimaryButton(
               width: double.infinity,
               onPressed: () async {
+                if (!_formKey.currentState!.validate()) return;
+
                 final confirmed = await ConfirmSaveDialog.show(context);
                 if (!confirmed) return;
 
@@ -215,6 +237,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
               borderRadius: 25.r,
             ),
           ],
+          ),
         ),
       ),
     );
@@ -232,15 +255,20 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildTextFormField({
     required AppColorSet colors,
     required TextEditingController controller,
     required String hint,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      validator: validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       style: TextStyle(
         fontSize: 14.sp,
         fontFamily: 'Poppins',
@@ -253,6 +281,10 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
           color: colors.textSecondary.withValues(alpha: 0.5),
           fontFamily: 'Poppins',
         ),
+        errorStyle: TextStyle(
+          fontSize: 11.sp,
+          fontFamily: 'Poppins',
+        ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
@@ -261,6 +293,14 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
           borderSide: BorderSide(color: colors.primary),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.r),
+          borderSide: const BorderSide(color: Colors.redAccent),
         ),
       ),
     );

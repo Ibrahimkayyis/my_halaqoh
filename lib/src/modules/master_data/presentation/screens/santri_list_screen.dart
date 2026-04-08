@@ -1,8 +1,12 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_search_bar.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_list_item.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_data_method_dialog.dart';
@@ -22,97 +26,14 @@ class SantriListScreen extends StatefulWidget {
 
 class _SantriListScreenState extends State<SantriListScreen> {
   final _searchController = TextEditingController();
+  String _searchQuery = '';
 
   // Filter values
   String? _filterKelas;
   String? _filterProgram;
 
-  final List<String> _kelasOptions = ['7', '8', '9', '10', '11', '12'];
-  final List<String> _programOptions = ['Reguler', 'Takhassus'];
-
-  // Dummy data with R/T program classes
-  final List<Map<String, String>> _santriData = [
-    {
-      'nis': '202512340001',
-      'name': 'Agha Adli Putrathandie',
-      'kelas': '7',
-      'program': 'R',
-    },
-    {
-      'nis': '202512340002',
-      'name': 'Akmal Satria Wiryawan',
-      'kelas': '7',
-      'program': 'R',
-    },
-    {
-      'nis': '202512340003',
-      'name': 'Daffa Zein Pratama',
-      'kelas': '7',
-      'program': 'T',
-    },
-    {
-      'nis': '202512340004',
-      'name': 'Humam Rasyid Ramadhan',
-      'kelas': '8',
-      'program': 'R',
-    },
-    {
-      'nis': '202512340005',
-      'name': 'Muh. Abhirama Arsanta',
-      'kelas': '8',
-      'program': 'R',
-    },
-    {
-      'nis': '202512340006',
-      'name': 'Radanar Athaullah Henka',
-      'kelas': '8',
-      'program': 'T',
-    },
-    {
-      'nis': '202512340007',
-      'name': 'Raihan Abdul Malik',
-      'kelas': '9',
-      'program': 'R',
-    },
-    {
-      'nis': '202512340008',
-      'name': 'Faris Abdurrahman',
-      'kelas': '9',
-      'program': 'T',
-    },
-    {
-      'nis': '202512340009',
-      'name': 'Azka Maulana Ibrahim',
-      'kelas': '10',
-      'program': 'R',
-    },
-    {
-      'nis': '202512340010',
-      'name': 'Zidane Putra Pratama',
-      'kelas': '10',
-      'program': 'T',
-    },
-    {
-      'nis': '202512340011',
-      'name': 'Haikal Putra Ramadhan',
-      'kelas': '11',
-      'program': 'R',
-    },
-    {
-      'nis': '202512340012',
-      'name': 'Farrel Athallah Putra',
-      'kelas': '12',
-      'program': 'T',
-    },
-  ];
-
-  List<Map<String, String>> _filteredData = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _filteredData = List.from(_santriData);
-  }
+  final List<String> _kelasOptions = ['Semua', '7', '8', '9', '10', '11', '12'];
+  final List<String> _programOptions = ['Semua', 'Reguler', 'Takhassus'];
 
   @override
   void dispose() {
@@ -120,28 +41,23 @@ class _SantriListScreenState extends State<SantriListScreen> {
     super.dispose();
   }
 
-  void _applyFilters() {
-    setState(() {
-      _filteredData = _santriData.where((s) {
-        final query = _searchController.text.toLowerCase();
-        final matchesSearch =
-            query.isEmpty ||
-            s['name']!.toLowerCase().contains(query) ||
-            s['nis']!.contains(query);
-
-        final matchesKelas = _filterKelas == null || s['kelas'] == _filterKelas;
-        final matchesProgram =
-            _filterProgram == null ||
-            (_filterProgram == 'Reguler' && s['program'] == 'R') ||
-            (_filterProgram == 'Takhassus' && s['program'] == 'T');
-
-        return matchesSearch && matchesKelas && matchesProgram;
-      }).toList();
-    });
+  void _onSearch(String query) {
+    setState(() => _searchQuery = query.toLowerCase());
   }
 
-  void _onSearch(String query) {
-    _applyFilters();
+  List<SantriModel> _applyFilter(List<SantriModel> allSantri) {
+    return allSantri.where((s) {
+      final matchesSearch = _searchQuery.isEmpty ||
+          s.nama.toLowerCase().contains(_searchQuery) ||
+          s.nis.contains(_searchQuery);
+
+      final matchesKelas = _filterKelas == null || _filterKelas == 'Semua' || s.kelas == _filterKelas;
+      final matchesProgram = _filterProgram == null || _filterProgram == 'Semua' ||
+          (_filterProgram == 'Reguler' && s.program == 'R') ||
+          (_filterProgram == 'Takhassus' && s.program == 'T');
+
+      return matchesSearch && matchesKelas && matchesProgram;
+    }).toList();
   }
 
   Color _getProgramColor(String program) {
@@ -149,49 +65,61 @@ class _SantriListScreenState extends State<SantriListScreen> {
     return program == 'R' ? colors.primary : colors.blue;
   }
 
-  String _getBadgeLabel(Map<String, String> item) {
-    final program = item['program'] == 'R' ? 'R' : 'T';
-    return '${item['kelas']}$program';
+  String _getBadgeLabel(SantriModel santri) {
+    return '${santri.kelas}${santri.program}';
   }
 
-  void _onEdit(int index) {
-    final item = _filteredData[index];
-    // Find actual index in source list
-    final srcIndex = _santriData.indexWhere((s) => s['nis'] == item['nis']);
-
+  void _onEdit(SantriModel santri) {
     AddManualSantriDialog.show(
       context,
-      initialNis: item['nis'],
-      initialNama: item['name'],
-      initialKelas: '${item['kelas']}${item['program']}',
+      initialNis: santri.nis,
+      initialNama: santri.nama,
+      initialKelas: '${santri.kelas}${santri.program}',
       onSave: (nis, nama, kelas) {
-        if (srcIndex >= 0) {
-          setState(() {
-            // Parse kelas back: e.g. "7R" -> kelas:"7", program:"R"
-            final k = kelas?.replaceAll(RegExp(r'[RT]'), '') ?? item['kelas']!;
-            final p = kelas != null && kelas.endsWith('T') ? 'T' : 'R';
-            _santriData[srcIndex] = {
-              'nis': nis ?? item['nis']!,
-              'name': nama ?? item['name']!,
-              'kelas': k,
-              'program': p,
-            };
-            _applyFilters();
-          });
-        }
+        final k = kelas?.replaceAll(RegExp(r'[RT]'), '') ?? santri.kelas;
+        final p = kelas != null && kelas.endsWith('T') ? 'T' : 'R';
+        final updated = santri.copyWith(
+          nis: nis ?? santri.nis,
+          nama: nama ?? santri.nama,
+          kelas: k,
+          program: p,
+          updatedAt: DateTime.now(),
+        );
+        context.read<SantriCubit>().updateSantri(updated);
       },
     );
   }
 
-  Future<void> _onDelete(int index) async {
-    final item = _filteredData[index];
+  Future<void> _onDelete(SantriModel santri) async {
     final confirmed = await ConfirmDeleteDialog.show(context);
     if (!confirmed) return;
+    if (!mounted) return;
+    context.read<SantriCubit>().deleteSantri(santri.id);
+  }
 
-    setState(() {
-      _santriData.removeWhere((s) => s['nis'] == item['nis']);
-      _applyFilters();
-    });
+  void _onAdd() {
+    AddDataMethodDialog.show(
+      context,
+      onManualTap: () => AddManualSantriDialog.show(
+        context,
+        onSave: (nis, nama, kelas) {
+          final k = kelas?.replaceAll(RegExp(r'[RT]'), '') ?? '7';
+          final p = kelas != null && kelas.endsWith('T') ? 'T' : 'R';
+          final now = DateTime.now();
+          final model = SantriModel(
+            id: '', // will be set by Firestore
+            nis: nis ?? '',
+            nama: nama ?? '',
+            kelas: k,
+            program: p,
+            createdAt: now,
+            updatedAt: now,
+          );
+          context.read<SantriCubit>().addSantri(model);
+        },
+      ),
+      onBulkUploadTap: () => BulkUploadDialog.show(context),
+    );
   }
 
   @override
@@ -217,74 +145,71 @@ class _SantriListScreenState extends State<SantriListScreen> {
         ),
         centerTitle: false,
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 8.h),
-          // Search
-          DataSearchBar(
-            searchHint: t.santri.searchHint,
-            countText: t.santri.showCount(
-              count: _filteredData.length.toString(),
+      body: BlocBuilder<SantriCubit, SantriState>(
+        builder: (context, state) {
+          return state.when(
+            initial: () => const SizedBox.shrink(),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (message) => Center(
+              child: Text(message,
+                  style: TextStyle(color: colors.error, fontFamily: 'Poppins')),
             ),
-            filterLabel: t.santri.filter,
-            controller: _searchController,
-            onChanged: _onSearch,
-            showFilterButton: false,
-          ),
-          SizedBox(height: 8.h),
-
-          // Filter dropdowns
-          _buildFilterRow(colors),
-          SizedBox(height: 8.h),
-
-          // Table header
-          _buildTableHeader(colors),
-
-          // List
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(bottom: 80.h),
-              itemCount: _filteredData.length,
-              itemBuilder: (context, index) {
-                final item = _filteredData[index];
-                return DataListItem(
-                  id: item['nis']!,
-                  name: item['name']!,
-                  badge: _getBadgeLabel(item),
-                  badgeColor: _getProgramColor(item['program']!),
-                  onEdit: () => _onEdit(index),
-                  onDelete: () => _onDelete(index),
-                );
-              },
-            ),
-          ),
-        ],
+            loaded: (santriList) {
+              final filtered = _applyFilter(santriList);
+              return Column(
+                children: [
+                  SizedBox(height: 8.h),
+                  DataSearchBar(
+                    searchHint: t.santri.searchHint,
+                    countText: t.santri.showCount(
+                      count: filtered.length.toString(),
+                    ),
+                    filterLabel: t.santri.filter,
+                    controller: _searchController,
+                    onChanged: _onSearch,
+                    showFilterButton: false,
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildFilterRow(colors),
+                  SizedBox(height: 8.h),
+                  _buildTableHeader(colors),
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Belum ada data santri',
+                              style: TextStyle(
+                                color: colors.textSecondary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: EdgeInsets.only(bottom: 80.h),
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) {
+                              final santri = filtered[index];
+                              return DataListItem(
+                                id: santri.nis,
+                                name: santri.nama,
+                                badge: _getBadgeLabel(santri),
+                                badgeColor: _getProgramColor(santri.program),
+                                onEdit: () => _onEdit(santri),
+                                onDelete: () => _onDelete(santri),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
       floatingActionButton: Padding(
         padding: EdgeInsets.only(bottom: 70.h),
         child: FloatingActionButton(
-          onPressed: () {
-            AddDataMethodDialog.show(
-              context,
-              onManualTap: () => AddManualSantriDialog.show(
-                context,
-                onSave: (nis, nama, kelas) {
-                  setState(() {
-                    final k = kelas?.replaceAll(RegExp(r'[RT]'), '') ?? '7';
-                    final p = kelas != null && kelas.endsWith('T') ? 'T' : 'R';
-                    _santriData.add({
-                      'nis': nis ?? '',
-                      'name': nama ?? '',
-                      'kelas': k,
-                      'program': p,
-                    });
-                    _applyFilters();
-                  });
-                },
-              ),
-              onBulkUploadTap: () => BulkUploadDialog.show(context),
-            );
-          },
+          onPressed: _onAdd,
           backgroundColor: colors.primary,
           child: Icon(Icons.add, color: colors.textOnButton),
         ),
@@ -303,8 +228,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
               items: _kelasOptions,
               initialItem: _filterKelas,
               onChanged: (value) {
-                _filterKelas = value;
-                _applyFilters();
+                setState(() => _filterKelas = value);
               },
               closedHeaderPadding: EdgeInsets.symmetric(
                 horizontal: 12.w,
@@ -342,8 +266,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
               items: _programOptions,
               initialItem: _filterProgram,
               onChanged: (value) {
-                _filterProgram = value;
-                _applyFilters();
+                setState(() => _filterProgram = value);
               },
               closedHeaderPadding: EdgeInsets.symmetric(
                 horizontal: 12.w,

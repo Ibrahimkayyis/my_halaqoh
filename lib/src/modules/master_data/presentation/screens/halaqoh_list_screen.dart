@@ -1,10 +1,14 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_search_bar.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/halaqoh_card.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_delete_dialog.dart';
@@ -21,109 +25,14 @@ class HalaqohListScreen extends StatefulWidget {
 
 class _HalaqohListScreenState extends State<HalaqohListScreen> {
   final _searchController = TextEditingController();
+  String _searchQuery = '';
 
   // Filter values
   String? _filterKelas;
   String? _filterProgram;
 
-  final List<String> _kelasOptions = ['7', '8', '9', '10', '11', '12'];
-  final List<String> _programOptions = ['Reguler', 'Takhassus'];
-
-  // Dummy data with R/T program classes
-  final List<Map<String, dynamic>> _halaqohData = [
-    {
-      'name': 'Halaqoh 7R-1',
-      'kelas': '7',
-      'program': 'R',
-      'guru': 'Ust. Ahmad Rofiqi',
-      'santri': 10,
-    },
-    {
-      'name': 'Halaqoh 7R-2',
-      'kelas': '7',
-      'program': 'R',
-      'guru': 'Ust. Farhan Majid',
-      'santri': 9,
-    },
-    {
-      'name': 'Halaqoh 7T',
-      'kelas': '7',
-      'program': 'T',
-      'guru': 'Ust. Maulana Ilyas',
-      'santri': 10,
-    },
-    {
-      'name': 'Halaqoh 8R-1',
-      'kelas': '8',
-      'program': 'R',
-      'guru': 'Ust. Abdullah Faqih',
-      'santri': 11,
-    },
-    {
-      'name': 'Halaqoh 8R-2',
-      'kelas': '8',
-      'program': 'R',
-      'guru': 'Ust. Zainal Abidin',
-      'santri': 10,
-    },
-    {
-      'name': 'Halaqoh 8T',
-      'kelas': '8',
-      'program': 'T',
-      'guru': 'Ustdz. Siti Aminah, Lc.',
-      'santri': 9,
-    },
-    {
-      'name': 'Halaqoh 9R',
-      'kelas': '9',
-      'program': 'R',
-      'guru': 'Ust. Budi Santoso, M.Ag',
-      'santri': 12,
-    },
-    {
-      'name': 'Halaqoh 9T',
-      'kelas': '9',
-      'program': 'T',
-      'guru': 'Ustdz. Dewi Sartika, S.Hum',
-      'santri': 10,
-    },
-    {
-      'name': 'Halaqoh 10R',
-      'kelas': '10',
-      'program': 'R',
-      'guru': 'Ust. Rahmat Hidayat',
-      'santri': 8,
-    },
-    {
-      'name': 'Halaqoh 10T',
-      'kelas': '10',
-      'program': 'T',
-      'guru': 'Ust. Ahmad Fauzi',
-      'santri': 7,
-    },
-    {
-      'name': 'Halaqoh 11R',
-      'kelas': '11',
-      'program': 'R',
-      'guru': 'Ustdz. Nurul Huda',
-      'santri': 9,
-    },
-    {
-      'name': 'Halaqoh 12T',
-      'kelas': '12',
-      'program': 'T',
-      'guru': 'Ust. Zainal Abidin',
-      'santri': 6,
-    },
-  ];
-
-  List<Map<String, dynamic>> _filteredData = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _filteredData = List.from(_halaqohData);
-  }
+  final List<String> _kelasOptions = ['Semua', '7', '8', '9', '10', '11', '12'];
+  final List<String> _programOptions = ['Semua', 'Reguler', 'Takhassus'];
 
   @override
   void dispose() {
@@ -131,60 +40,39 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
     super.dispose();
   }
 
-  void _applyFilters() {
-    setState(() {
-      _filteredData = _halaqohData.where((h) {
-        final query = _searchController.text.toLowerCase();
-        final matchesSearch =
-            query.isEmpty ||
-            h['name']!.toString().toLowerCase().contains(query) ||
-            h['guru']!.toString().toLowerCase().contains(query);
-
-        final matchesKelas = _filterKelas == null || h['kelas'] == _filterKelas;
-        final matchesProgram =
-            _filterProgram == null ||
-            (_filterProgram == 'Reguler' && h['program'] == 'R') ||
-            (_filterProgram == 'Takhassus' && h['program'] == 'T');
-
-        return matchesSearch && matchesKelas && matchesProgram;
-      }).toList();
-    });
-  }
-
   void _onSearch(String query) {
-    _applyFilters();
+    setState(() => _searchQuery = query.toLowerCase());
   }
 
-  String _getKelasLabel(Map<String, dynamic> item) {
-    final program = item['program'] == 'R' ? 'R' : 'T';
-    return 'Kelas ${item['kelas']}$program';
+  List<HalaqohModel> _applyFilter(List<HalaqohModel> allHalaqoh) {
+    return allHalaqoh.where((h) {
+      final matchesSearch = _searchQuery.isEmpty ||
+          h.nama.toLowerCase().contains(_searchQuery) ||
+          h.guruNama.toLowerCase().contains(_searchQuery);
+
+      final matchesKelas = _filterKelas == null || _filterKelas == 'Semua' || h.kelas == _filterKelas;
+      final matchesProgram = _filterProgram == null || _filterProgram == 'Semua' ||
+          (_filterProgram == 'Reguler' && h.program == 'R') ||
+          (_filterProgram == 'Takhassus' && h.program == 'T');
+
+      return matchesSearch && matchesKelas && matchesProgram;
+    }).toList();
   }
 
-  Future<void> _onEdit(int index) async {
-    final item = _filteredData[index];
-    final srcIndex = _halaqohData.indexWhere((h) => h['name'] == item['name']);
-
-    // Navigate to AddHalaqohScreen (in edit mode)
-    // For now, it doesn't prefill data, but it will return the new data.
-    final result = await context.router.push(const AddHalaqohRoute());
-
-    if (result != null && result is Map<String, dynamic> && srcIndex >= 0) {
-      setState(() {
-        _halaqohData[srcIndex] = result;
-        _applyFilters();
-      });
-    }
+  String _getKelasLabel(HalaqohModel halaqoh) {
+    return 'Kelas ${halaqoh.kelas}${halaqoh.program}';
   }
 
-  Future<void> _onDelete(int index) async {
-    final item = _filteredData[index];
+  Future<void> _onEdit(HalaqohModel halaqoh) async {
+    // Navigate to AddHalaqohScreen, passing existing halaqoh
+    await context.router.push(AddHalaqohRoute(existingHalaqoh: halaqoh));
+  }
+
+  Future<void> _onDelete(HalaqohModel halaqoh) async {
     final confirmed = await ConfirmDeleteDialog.show(context);
     if (!confirmed) return;
-
-    setState(() {
-      _halaqohData.removeWhere((h) => h['name'] == item['name']);
-      _applyFilters();
-    });
+    if (!mounted) return;
+    context.read<HalaqohCubit>().deleteHalaqoh(halaqoh.id);
   }
 
   @override
@@ -210,59 +98,73 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
         ),
         centerTitle: false,
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 8.h),
-          // Search
-          DataSearchBar(
-            searchHint: t.halaqoh.searchHint,
-            countText: t.halaqoh.showCount(
-              count: _filteredData.length.toString(),
+      body: BlocBuilder<HalaqohCubit, HalaqohState>(
+        builder: (context, state) {
+          return state.when(
+            initial: () => const SizedBox.shrink(),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (message) => Center(
+              child: Text(message,
+                  style: TextStyle(color: colors.error, fontFamily: 'Poppins')),
             ),
-            filterLabel: t.halaqoh.sort,
-            controller: _searchController,
-            onChanged: _onSearch,
-            showFilterButton: false,
-          ),
-          SizedBox(height: 8.h),
-
-          // Filter dropdowns
-          _buildFilterRow(colors),
-          SizedBox(height: 8.h),
-
-          // Card list
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(bottom: 80.h),
-              itemCount: _filteredData.length,
-              itemBuilder: (context, index) {
-                final item = _filteredData[index];
-                return HalaqohCard(
-                  name: item['name'],
-                  kelasLabel: _getKelasLabel(item),
-                  teacherName: item['guru'],
-                  santriCount: t.halaqoh.santriCount(
-                    count: item['santri'].toString(),
+            loaded: (halaqohList) {
+              final filtered = _applyFilter(halaqohList);
+              return Column(
+                children: [
+                  SizedBox(height: 8.h),
+                  DataSearchBar(
+                    searchHint: t.halaqoh.searchHint,
+                    countText: t.halaqoh.showCount(
+                      count: filtered.length.toString(),
+                    ),
+                    filterLabel: t.halaqoh.sort,
+                    controller: _searchController,
+                    onChanged: _onSearch,
+                    showFilterButton: false,
                   ),
-                  onDetailTap: () => _onEdit(index),
-                  onDeleteTap: () => _onDelete(index),
-                );
-              },
-            ),
-          ),
-        ],
+                  SizedBox(height: 8.h),
+                  _buildFilterRow(colors),
+                  SizedBox(height: 8.h),
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Belum ada data halaqoh',
+                              style: TextStyle(
+                                color: colors.textSecondary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: EdgeInsets.only(bottom: 80.h),
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) {
+                              final halaqoh = filtered[index];
+                              return HalaqohCard(
+                                name: halaqoh.nama,
+                                kelasLabel: _getKelasLabel(halaqoh),
+                                teacherName: halaqoh.guruNama,
+                                santriCount: t.halaqoh.santriCount(
+                                  count: halaqoh.jumlahSantri.toString(),
+                                ),
+                                onDetailTap: () => _onEdit(halaqoh),
+                                onDeleteTap: () => _onDelete(halaqoh),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
       floatingActionButton: Padding(
         padding: EdgeInsets.only(bottom: 70.h),
         child: FloatingActionButton(
           onPressed: () async {
-            final result = await context.router.push(const AddHalaqohRoute());
-            if (result != null && result is Map<String, dynamic>) {
-              setState(() {
-                _halaqohData.add(result);
-                _applyFilters();
-              });
-            }
+            await context.router.push(AddHalaqohRoute());
           },
           backgroundColor: colors.primary,
           child: Icon(Icons.add, color: colors.textOnButton),
@@ -282,8 +184,7 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
               items: _kelasOptions,
               initialItem: _filterKelas,
               onChanged: (value) {
-                _filterKelas = value;
-                _applyFilters();
+                setState(() => _filterKelas = value);
               },
               closedHeaderPadding: EdgeInsets.symmetric(
                 horizontal: 12.w,
@@ -321,8 +222,7 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
               items: _programOptions,
               initialItem: _filterProgram,
               onChanged: (value) {
-                _filterProgram = value;
-                _applyFilters();
+                setState(() => _filterProgram = value);
               },
               closedHeaderPadding: EdgeInsets.symmetric(
                 horizontal: 12.w,
