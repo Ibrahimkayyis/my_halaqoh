@@ -1,7 +1,12 @@
+import 'dart:io';
+import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
+import 'package:my_halaqoh/src/core/services/storage_service.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
@@ -10,13 +15,17 @@ class AddManualGuruDialog extends StatefulWidget {
   final String? initialNip;
   final String? initialNama;
   final String? initialPhone;
-  final void Function(String? nip, String? nama, String? phone)? onSave;
+  final String? initialProgram;
+  final String? initialProfilePicture;
+  final void Function(String? nip, String? nama, String? phone, String? program, String? profilePicture)? onSave;
 
   const AddManualGuruDialog({
     super.key,
     this.initialNip,
     this.initialNama,
     this.initialPhone,
+    this.initialProgram,
+    this.initialProfilePicture,
     this.onSave,
   });
 
@@ -25,7 +34,9 @@ class AddManualGuruDialog extends StatefulWidget {
     String? initialNip,
     String? initialNama,
     String? initialPhone,
-    void Function(String? nip, String? nama, String? phone)? onSave,
+    String? initialProgram,
+    String? initialProfilePicture,
+    void Function(String? nip, String? nama, String? phone, String? program, String? profilePicture)? onSave,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -35,6 +46,8 @@ class AddManualGuruDialog extends StatefulWidget {
         initialNip: initialNip,
         initialNama: initialNama,
         initialPhone: initialPhone,
+        initialProgram: initialProgram,
+        initialProfilePicture: initialProfilePicture,
         onSave: onSave,
       ),
     );
@@ -49,6 +62,13 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
   final _nipController = TextEditingController();
   final _namaController = TextEditingController();
   final _phoneController = TextEditingController();
+  String? _selectedProgram;
+
+  File? _selectedImage;
+  String? _currentProfilePicture;
+  bool _isUploading = false;
+
+  final List<String> _programList = ['Reguler', 'Takhassus'];
 
   bool get _isEditMode => widget.initialNip != null;
 
@@ -59,6 +79,22 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
     if (widget.initialNama != null) _namaController.text = widget.initialNama!;
     if (widget.initialPhone != null) {
       _phoneController.text = widget.initialPhone!;
+    }
+    if (widget.initialProgram != null) {
+      _selectedProgram = widget.initialProgram == 'T' ? 'Takhassus' : 'Reguler';
+    }
+    if (widget.initialProfilePicture != null) {
+      _currentProfilePicture = widget.initialProfilePicture;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
     }
   }
 
@@ -123,43 +159,65 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
 
             // Photo avatar
             Center(
-              child: Stack(
-                children: [
-                  Container(
-                    width: 80.w,
-                    height: 80.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: colors.border, width: 2),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.add_a_photo_outlined,
-                        color: colors.textSecondary,
-                        size: 30.sp,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 28.w,
-                      height: 28.w,
+              child: GestureDetector(
+                onTap: _isUploading ? null : _pickImage,
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 80.w,
+                      height: 80.w,
                       decoration: BoxDecoration(
-                        color: colors.primary,
                         shape: BoxShape.circle,
+                        color: colors.background,
+                        border: Border.all(color: colors.border, width: 2),
                       ),
-                      child: Center(
-                        child: Icon(
-                          Icons.edit,
-                          color: colors.textOnButton,
-                          size: 14.sp,
+                      child: ClipOval(
+                        child: _selectedImage != null
+                            ? Image.file(_selectedImage!, fit: BoxFit.cover)
+                            : (_currentProfilePicture != null && _currentProfilePicture!.isNotEmpty)
+                                ? Image.network(_currentProfilePicture!, fit: BoxFit.cover, errorBuilder: (c, o, s) => Icon(Icons.person, color: colors.textSecondary, size: 40.sp))
+                                : Center(
+                                    child: Icon(
+                                      Icons.add_a_photo_outlined,
+                                      color: colors.textSecondary,
+                                      size: 30.sp,
+                                    ),
+                                  ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        width: 28.w,
+                        height: 28.w,
+                        decoration: BoxDecoration(
+                          color: colors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.edit,
+                            color: colors.textOnButton,
+                            size: 14.sp,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    if (_isUploading)
+                      Positioned.fill(
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black54,
+                          ),
+                          child: const Center(
+                            child: CircularProgressIndicator(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             SizedBox(height: 24.h),
@@ -205,8 +263,51 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
               keyboardType: TextInputType.phone,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(13)],
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Nomor HP wajib diisi';
-                if (value.length < 10 || value.length > 13) return 'Nomor HP harus 10-13 digit';
+                if (value != null && value.isNotEmpty) {
+                  if (value.length < 10 || value.length > 13) return 'Nomor HP harus 10-13 digit (jika diisi)';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 18.h),
+
+            // Program field
+            _buildLabel(colors, 'Program Halaqoh'),
+            SizedBox(height: 8.h),
+            CustomDropdown<String>(
+              hintText: 'Pilih Program',
+              items: _programList,
+              initialItem: _selectedProgram,
+              onChanged: (value) {
+                setState(() {
+                  _selectedProgram = value;
+                });
+              },
+              decoration: CustomDropdownDecoration(
+                closedFillColor: Colors.transparent,
+                expandedFillColor: colors.surface,
+                closedBorder: Border.all(color: colors.border),
+                closedBorderRadius: BorderRadius.circular(10.r),
+                hintStyle: TextStyle(
+                  fontSize: 14.sp,
+                  color: colors.textSecondary.withValues(alpha: 0.5),
+                  fontFamily: 'Poppins',
+                ),
+                headerStyle: TextStyle(
+                  fontSize: 14.sp,
+                  color: colors.textPrimary,
+                  fontFamily: 'Poppins',
+                ),
+                listItemStyle: TextStyle(
+                  fontSize: 14.sp,
+                  color: colors.textPrimary,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Program wajib dipilih';
+                }
                 return null;
               },
             ),
@@ -222,10 +323,32 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
                 if (!confirmed) return;
 
                 if (widget.onSave != null) {
+                  final p = _selectedProgram == 'Takhassus' ? 'T' : 'R';
+                  String? uploadedUrl = _currentProfilePicture;
+
+                  // Upload process
+                  if (_selectedImage != null) {
+                    setState(() => _isUploading = true);
+                    final timestamp = DateTime.now().millisecondsSinceEpoch;
+                    final ext = _selectedImage!.path.split('.').last;
+                    final fileName = 'guru_${_nipController.text}_$timestamp.$ext';
+                    final service = sl<StorageService>();
+                    final url = await service.uploadFile(
+                      file: _selectedImage!,
+                      path: 'profile_pictures/$fileName',
+                    );
+                    if (mounted) setState(() => _isUploading = false);
+                    if (url != null) {
+                      uploadedUrl = url;
+                    }
+                  }
+
                   widget.onSave!(
                     _nipController.text,
                     _namaController.text,
                     _phoneController.text,
+                    p,
+                    uploadedUrl,
                   );
                 }
                 if (context.mounted) {

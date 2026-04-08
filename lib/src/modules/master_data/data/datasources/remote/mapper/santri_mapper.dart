@@ -12,6 +12,7 @@ class SantriMapper {
       id: doc.id,
       nis: data['nis'] as String,
       nama: data['nama'] as String,
+      profilePicture: data['profilePicture'] as String?,
       kelas: data['kelas'] as String,
       program: data['program'] as String,
       halaqohId: data['halaqohId'] as String?,
@@ -29,6 +30,7 @@ class SantriMapper {
     return {
       'nis': model.nis,
       'nama': model.nama,
+      'profilePicture': model.profilePicture,
       'kelas': model.kelas,
       'program': model.program,
       'halaqohId': model.halaqohId,

@@ -3,10 +3,13 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/gen/assets.gen.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
 
 @RoutePage()
 class SplashScreen extends StatefulWidget {
@@ -30,27 +33,25 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    
+
     // Setup animation
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-    
+
     _animationController.forward();
-    
+
     // Setup navigation timer (trigger slightly before to allow for fade-out)
-    final navigationDelay = widget.splashDuration - const Duration(milliseconds: 500);
+    final navigationDelay =
+        widget.splashDuration - const Duration(milliseconds: 500);
     _timer = Timer(
       navigationDelay.isNegative ? widget.splashDuration : navigationDelay,
-      _navigateToLogin,
+      _navigateBasedOnAuth,
     );
   }
 
@@ -61,13 +62,37 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  void _navigateToLogin() {
+  void _navigateBasedOnAuth() {
     if (mounted) {
       // Fade out current screen first
       _animationController.reverse().then((_) {
-        if (mounted) {
-          context.router.replace(const LoginRoute());
-        }
+        if (!mounted) return;
+
+        final authState = context.read<AuthCubit>().state;
+
+        authState.maybeWhen(
+          authenticated: (user) {
+            final String programStr = (user.programType == 'T') ? 'takhassus' : 'reguler';
+            
+            if (user.role == 'admin') {
+              context.router.replace(const DashboardWrapperRoute());
+            } else if (user.role == 'guru') {
+              context.router.replace(
+                GuruDashboardWrapperRoute(programType: programStr),
+              );
+            } else if (user.role == 'santri') {
+              context.router.replace(
+                WaliSantriDashboardWrapperRoute(programType: programStr),
+              );
+            } else {
+              context.router.replace(const LoginRoute());
+            }
+          },
+          orElse: () {
+            // Unauthenticated, error, or still initial/loading -> Login
+            context.router.replace(const LoginRoute());
+          },
+        );
       });
     }
   }
@@ -75,26 +100,34 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    
+
     return Scaffold(
       backgroundColor: colors.surface,
-      body: Center(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Spacer(flex: 2),
-              _buildLogo(),
-              SizedBox(height: 24.h),
-              _buildTitle(),
-              SizedBox(height: 8.h),
-              _buildSubtitle(),
-              const Spacer(flex: 2),
-              _buildVersion(),
-              SizedBox(height: 32.h),
-            ],
+      body: BlocListener<AuthCubit, AuthState>(
+        // We listen just in case AuthCubit takes longer than Splash duration to resolve
+        listener: (context, state) {
+          // If the timer hasn't finished, we just wait for the timer.
+          // If the timer finished and we were waiting for Auth (in ideal setup),
+          // we could route here. But for simplicity, the timer callback uses context.read().
+        },
+        child: Center(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Spacer(flex: 2),
+                _buildLogo(),
+                SizedBox(height: 24.h),
+                _buildTitle(),
+                SizedBox(height: 8.h),
+                _buildSubtitle(),
+                const Spacer(flex: 2),
+                _buildVersion(),
+                SizedBox(height: 32.h),
+              ],
+            ),
           ),
         ),
       ),
@@ -103,16 +136,13 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildLogo() {
     final colors = AppColors.of(context);
-    
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.8, end: 1.0),
       duration: const Duration(milliseconds: 800),
       curve: Curves.elasticOut,
       builder: (context, scale, child) {
-        return Transform.scale(
-          scale: scale,
-          child: child,
-        );
+        return Transform.scale(scale: scale, child: child);
       },
       child: Container(
         width: 120.w,
@@ -135,7 +165,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildTitle() {
     final colors = AppColors.of(context);
-    
+
     return Text(
       t.app.title,
       textAlign: TextAlign.center,
@@ -150,7 +180,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildSubtitle() {
     final colors = AppColors.of(context);
-    
+
     return Text(
       t.splash.subtitle,
       textAlign: TextAlign.center,
@@ -166,7 +196,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildVersion() {
     final colors = AppColors.of(context);
-    
+
     return Text(
       t.splash.version,
       textAlign: TextAlign.center,

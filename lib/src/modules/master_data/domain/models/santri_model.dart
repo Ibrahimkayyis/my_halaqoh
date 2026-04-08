@@ -18,6 +18,9 @@ abstract class SantriModel with _$SantriModel {
     /// Full name
     required String nama,
 
+    /// Profile picture URL (Optional)
+    String? profilePicture,
+
     /// Class level: "7", "8", "9", "10", "11", "12"
     required String kelas,
 

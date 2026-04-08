@@ -31,23 +31,36 @@ class GuruModelAdapter extends TypeAdapter<GuruModel> {
       id: fields[0] as String,
       nip: fields[1] as String,
       nama: fields[2] as String,
-      phone: fields[3] as String,
+      phone: fields[3] as String?,
       authUid: fields[4] as String?,
       createdAt: DateTime.parse(fields[5] as String),
       updatedAt: DateTime.parse(fields[6] as String),
+      program: fields[7] as String? ?? 'R',
+      profilePicture: fields[8] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, GuruModel obj) {
-    writer.writeByte(7); // number of fields
-    writer.writeByte(0); writer.write(obj.id);
-    writer.writeByte(1); writer.write(obj.nip);
-    writer.writeByte(2); writer.write(obj.nama);
-    writer.writeByte(3); writer.write(obj.phone);
-    writer.writeByte(4); writer.write(obj.authUid);
-    writer.writeByte(5); writer.write(obj.createdAt.toIso8601String());
-    writer.writeByte(6); writer.write(obj.updatedAt.toIso8601String());
+    writer.writeByte(9); // number of fields
+    writer.writeByte(0);
+    writer.write(obj.id);
+    writer.writeByte(1);
+    writer.write(obj.nip);
+    writer.writeByte(2);
+    writer.write(obj.nama);
+    writer.writeByte(3);
+    writer.write(obj.phone);
+    writer.writeByte(4);
+    writer.write(obj.authUid);
+    writer.writeByte(5);
+    writer.write(obj.createdAt.toIso8601String());
+    writer.writeByte(6);
+    writer.write(obj.updatedAt.toIso8601String());
+    writer.writeByte(7);
+    writer.write(obj.program);
+    writer.writeByte(8);
+    writer.write(obj.profilePicture);
   }
 }
 
@@ -74,9 +87,12 @@ class WaliSantriModelAdapter extends TypeAdapter<WaliSantriModel> {
   @override
   void write(BinaryWriter writer, WaliSantriModel obj) {
     writer.writeByte(3);
-    writer.writeByte(0); writer.write(obj.nama);
-    writer.writeByte(1); writer.write(obj.phone);
-    writer.writeByte(2); writer.write(obj.hubungan);
+    writer.writeByte(0);
+    writer.write(obj.nama);
+    writer.writeByte(1);
+    writer.write(obj.phone);
+    writer.writeByte(2);
+    writer.write(obj.hubungan);
   }
 }
 
@@ -104,22 +120,35 @@ class SantriModelAdapter extends TypeAdapter<SantriModel> {
       authUid: fields[7] as String?,
       createdAt: DateTime.parse(fields[8] as String),
       updatedAt: DateTime.parse(fields[9] as String),
+      profilePicture: fields[10] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, SantriModel obj) {
+    writer.writeByte(11);
+    writer.writeByte(0);
+    writer.write(obj.id);
+    writer.writeByte(1);
+    writer.write(obj.nis);
+    writer.writeByte(2);
+    writer.write(obj.nama);
+    writer.writeByte(3);
+    writer.write(obj.kelas);
+    writer.writeByte(4);
+    writer.write(obj.program);
+    writer.writeByte(5);
+    writer.write(obj.halaqohId);
+    writer.writeByte(6);
+    writer.write(obj.waliSantri);
+    writer.writeByte(7);
+    writer.write(obj.authUid);
+    writer.writeByte(8);
+    writer.write(obj.createdAt.toIso8601String());
+    writer.writeByte(9);
+    writer.write(obj.updatedAt.toIso8601String());
     writer.writeByte(10);
-    writer.writeByte(0); writer.write(obj.id);
-    writer.writeByte(1); writer.write(obj.nis);
-    writer.writeByte(2); writer.write(obj.nama);
-    writer.writeByte(3); writer.write(obj.kelas);
-    writer.writeByte(4); writer.write(obj.program);
-    writer.writeByte(5); writer.write(obj.halaqohId);
-    writer.writeByte(6); writer.write(obj.waliSantri);
-    writer.writeByte(7); writer.write(obj.authUid);
-    writer.writeByte(8); writer.write(obj.createdAt.toIso8601String());
-    writer.writeByte(9); writer.write(obj.updatedAt.toIso8601String());
+    writer.write(obj.profilePicture);
   }
 }
 
@@ -153,16 +182,26 @@ class HalaqohModelAdapter extends TypeAdapter<HalaqohModel> {
   @override
   void write(BinaryWriter writer, HalaqohModel obj) {
     writer.writeByte(10);
-    writer.writeByte(0); writer.write(obj.id);
-    writer.writeByte(1); writer.write(obj.nama);
-    writer.writeByte(2); writer.write(obj.kelas);
-    writer.writeByte(3); writer.write(obj.program);
-    writer.writeByte(4); writer.write(obj.guruId);
-    writer.writeByte(5); writer.write(obj.guruNama);
-    writer.writeByte(6); writer.write(obj.santriIds);
-    writer.writeByte(7); writer.write(obj.jumlahSantri);
-    writer.writeByte(8); writer.write(obj.createdAt.toIso8601String());
-    writer.writeByte(9); writer.write(obj.updatedAt.toIso8601String());
+    writer.writeByte(0);
+    writer.write(obj.id);
+    writer.writeByte(1);
+    writer.write(obj.nama);
+    writer.writeByte(2);
+    writer.write(obj.kelas);
+    writer.writeByte(3);
+    writer.write(obj.program);
+    writer.writeByte(4);
+    writer.write(obj.guruId);
+    writer.writeByte(5);
+    writer.write(obj.guruNama);
+    writer.writeByte(6);
+    writer.write(obj.santriIds);
+    writer.writeByte(7);
+    writer.write(obj.jumlahSantri);
+    writer.writeByte(8);
+    writer.write(obj.createdAt.toIso8601String());
+    writer.writeByte(9);
+    writer.write(obj.updatedAt.toIso8601String());
   }
 }
 
@@ -194,14 +233,22 @@ class TargetHafalanModelAdapter extends TypeAdapter<TargetHafalanModel> {
   @override
   void write(BinaryWriter writer, TargetHafalanModel obj) {
     writer.writeByte(8);
-    writer.writeByte(0); writer.write(obj.id);
-    writer.writeByte(1); writer.write(obj.kelas);
-    writer.writeByte(2); writer.write(obj.program);
-    writer.writeByte(3); writer.write(obj.targetJuz);
-    writer.writeByte(4); writer.write(obj.juzList);
-    writer.writeByte(5); writer.write(obj.tahunAjaran);
-    writer.writeByte(6); writer.write(obj.createdAt.toIso8601String());
-    writer.writeByte(7); writer.write(obj.updatedAt.toIso8601String());
+    writer.writeByte(0);
+    writer.write(obj.id);
+    writer.writeByte(1);
+    writer.write(obj.kelas);
+    writer.writeByte(2);
+    writer.write(obj.program);
+    writer.writeByte(3);
+    writer.write(obj.targetJuz);
+    writer.writeByte(4);
+    writer.write(obj.juzList);
+    writer.writeByte(5);
+    writer.write(obj.tahunAjaran);
+    writer.writeByte(6);
+    writer.write(obj.createdAt.toIso8601String());
+    writer.writeByte(7);
+    writer.write(obj.updatedAt.toIso8601String());
   }
 }
 

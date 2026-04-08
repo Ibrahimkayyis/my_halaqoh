@@ -75,7 +75,8 @@ class _SantriListScreenState extends State<SantriListScreen> {
       initialNis: santri.nis,
       initialNama: santri.nama,
       initialKelas: '${santri.kelas}${santri.program}',
-      onSave: (nis, nama, kelas) {
+      initialProfilePicture: santri.profilePicture,
+      onSave: (nis, nama, kelas, profilePicture) {
         final k = kelas?.replaceAll(RegExp(r'[RT]'), '') ?? santri.kelas;
         final p = kelas != null && kelas.endsWith('T') ? 'T' : 'R';
         final updated = santri.copyWith(
@@ -83,6 +84,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
           nama: nama ?? santri.nama,
           kelas: k,
           program: p,
+          profilePicture: profilePicture ?? santri.profilePicture,
           updatedAt: DateTime.now(),
         );
         context.read<SantriCubit>().updateSantri(updated);
@@ -102,7 +104,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
       context,
       onManualTap: () => AddManualSantriDialog.show(
         context,
-        onSave: (nis, nama, kelas) {
+        onSave: (nis, nama, kelas, profilePicture) {
           final k = kelas?.replaceAll(RegExp(r'[RT]'), '') ?? '7';
           final p = kelas != null && kelas.endsWith('T') ? 'T' : 'R';
           final now = DateTime.now();
@@ -112,6 +114,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
             nama: nama ?? '',
             kelas: k,
             program: p,
+            profilePicture: profilePicture,
             createdAt: now,
             updatedAt: now,
           );

@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/assets.gen.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -35,32 +38,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Role detection based on credentials
-    if (username == 'admin' && password == 'admin') {
-      // Admin role → admin dashboard
-      context.router.replace(const DashboardWrapperRoute());
-    } else if (RegExp(r'^\d{13}$').hasMatch(username)) {
-      // Guru role → NIP is 13 digits
-      // Determine program type from NIP:
-      // - 1234567890124 → takhassus
-      // - all other NIPs → reguler
-      final programType = username == '1234567890124' ? 'takhassus' : 'reguler';
-      context.router.replace(
-        GuruDashboardWrapperRoute(programType: programType),
-      );
-    } else if (RegExp(r'^\d{12}$').hasMatch(username)) {
-      // Wali Santri role → NIS is 12 digits
-      // Determine program type from NIS:
-      // - 123456789013 → takhassus
-      // - all other NISs → reguler
-      final programType = username == '123456789013' ? 'takhassus' : 'reguler';
-      context.router.replace(
-        WaliSantriDashboardWrapperRoute(programType: programType),
-      );
-    } else {
-      _showError(t.auth.validationInvalid);
-      return;
-    }
+    // Use Cubit to perform native Firebase Authentication
+    context.read<AuthCubit>().login(username, password);
   }
 
   void _showError(String message) {
@@ -80,9 +59,33 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: colors.background,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [_buildHeader(colors), _buildLoginCard(colors)],
+      body: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          state.maybeWhen(
+            error: (message) => _showError(message),
+            authenticated: (user) {
+              final String programStr = (user.programType == 'T') ? 'takhassus' : 'reguler';
+
+              // Redirect based on role from UserMetadata
+              if (user.role == 'admin') {
+                context.router.replace(const DashboardWrapperRoute());
+              } else if (user.role == 'guru') {
+                context.router.replace(
+                  GuruDashboardWrapperRoute(programType: programStr),
+                );
+              } else if (user.role == 'santri') {
+                context.router.replace(
+                  WaliSantriDashboardWrapperRoute(programType: programStr),
+                );
+              }
+            },
+            orElse: () {},
+          );
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            children: [_buildHeader(colors), _buildLoginCard(colors)],
+          ),
         ),
       ),
     );
@@ -327,29 +330,47 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildLoginButton(AppColorSet colors) {
-    return SizedBox(
-      width: double.infinity,
-      height: 50.h,
-      child: ElevatedButton(
-        onPressed: _onLoginPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colors.primary,
-          foregroundColor: colors.textOnButton,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25.r),
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        final isLoading = state.maybeWhen(
+          loading: () => true,
+          orElse: () => false,
+        );
+
+        return SizedBox(
+          width: double.infinity,
+          height: 50.h,
+          child: ElevatedButton(
+            onPressed: isLoading ? null : _onLoginPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primary,
+              foregroundColor: colors.textOnButton,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25.r),
+              ),
+              elevation: 0,
+            ),
+            child: isLoading
+                ? SizedBox(
+                    width: 20.w,
+                    height: 20.w,
+                    child: CircularProgressIndicator(
+                      color: colors.textOnButton,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    t.auth.loginButton,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      letterSpacing: 1.0,
+                    ),
+                  ),
           ),
-          elevation: 0,
-        ),
-        child: Text(
-          t.auth.loginButton,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Poppins',
-            letterSpacing: 1.0,
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

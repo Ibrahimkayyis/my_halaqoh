@@ -1,12 +1,30 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ═══════════════════════════════════════════════════════════════════════
-    // DEVELOPMENT RULES — allow all read/write without authentication
-    // TODO: Replace with proper auth-based rules before production
-    // ═══════════════════════════════════════════════════════════════════════
+
+    // Function to check if user is logged in
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Function to check if user is an admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // By default, authenticated users can read all data.
+    // Only Admin can write/modify the data.
     match /{document=**} {
-      allow read, write: if true;
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Exception: Users can read their own metadata
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId || isAdmin();
+      allow write: if isAdmin();
     }
   }
 }

@@ -17,8 +17,14 @@ abstract class GuruModel with _$GuruModel {
     /// Full name, e.g. "Ustadz Ahmad Fauzi, S.Pd.I"
     required String nama,
 
-    /// Phone number
-    required String phone,
+    /// Phone number (Optional)
+    String? phone,
+
+    /// Profile picture URL (Optional)
+    String? profilePicture,
+
+    /// Program type: "R" (Reguler) or "T" (Takhassus)
+    required String program,
 
     /// Firebase Auth UID (nullable — set after auth account is created)
     String? authUid,

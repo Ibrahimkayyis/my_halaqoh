@@ -1,14 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/remote/mapper/guru_mapper.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/remote/source/abstract/guru_remote_datasource.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/guru_model.dart';
 
 class GuruRemoteDataSourceImpl implements GuruRemoteDataSource {
   final FirebaseFirestore _firestore;
+  final FirebaseFunctions _functions;
+
   CollectionReference<Map<String, dynamic>> get _col =>
       _firestore.collection('guru');
 
-  GuruRemoteDataSourceImpl(this._firestore);
+  GuruRemoteDataSourceImpl(this._firestore, this._functions);
 
   @override
   Stream<List<GuruModel>> watchAll() {
@@ -39,8 +42,38 @@ class GuruRemoteDataSourceImpl implements GuruRemoteDataSource {
 
   @override
   Future<String> add(GuruModel model) async {
-    final docRef = await _col.add(GuruMapper.toFirestore(model));
-    return docRef.id;
+    // 1. Get document reference first to obtain ID
+    final docRef = _col.doc();
+    
+    // 2. Call Cloud Function to create User Account mapped to this ID
+    try {
+      final callable = _functions.httpsCallable('createUserAccount');
+      final response = await callable.call({
+        'identifier': model.nip,
+        'name': model.nama,
+        'role': 'guru',
+        'program': model.program,
+        'linkedDocId': docRef.id,
+      });
+
+      // 3. Extract the created Auth UID from response
+      final String uid = response.data['uid'];
+      
+      // Update model with the Auth UID and explicit generated ID
+      final updatedModel = model.copyWith(
+        id: docRef.id,
+        authUid: uid,
+      );
+
+      // 4. Save to Firestore
+      await docRef.set(GuruMapper.toFirestore(updatedModel));
+      return docRef.id;
+
+    } on FirebaseFunctionsException catch (error) {
+      throw Exception('Gagal membuat akun autentikasi: ${error.message}');
+    } catch (error) {
+      throw Exception('Gagal membuat data guru: $error');
+    }
   }
 
   @override

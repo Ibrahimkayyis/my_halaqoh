@@ -18,7 +18,8 @@ mixin _$SantriModel {
 /// Firestore document ID
  String get id;/// NIS — 12 digit unique identifier, also the barcode value on student card
  String get nis;/// Full name
- String get nama;/// Class level: "7", "8", "9", "10", "11", "12"
+ String get nama;/// Profile picture URL (Optional)
+ String? get profilePicture;/// Class level: "7", "8", "9", "10", "11", "12"
  String get kelas;/// Program type: "R" (Reguler) or "T" (Takhassus)
  String get program;/// Reference to halaqoh document ID (nullable — assigned when halaqoh is created)
  String? get halaqohId;/// Nested wali santri (parent/guardian) information
@@ -36,16 +37,16 @@ $SantriModelCopyWith<SantriModel> get copyWith => _$SantriModelCopyWithImpl<Sant
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SantriModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nis, nis) || other.nis == nis)&&(identical(other.nama, nama) || other.nama == nama)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.waliSantri, waliSantri) || other.waliSantri == waliSantri)&&(identical(other.authUid, authUid) || other.authUid == authUid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SantriModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nis, nis) || other.nis == nis)&&(identical(other.nama, nama) || other.nama == nama)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.waliSantri, waliSantri) || other.waliSantri == waliSantri)&&(identical(other.authUid, authUid) || other.authUid == authUid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,nis,nama,kelas,program,halaqohId,waliSantri,authUid,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,nis,nama,profilePicture,kelas,program,halaqohId,waliSantri,authUid,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'SantriModel(id: $id, nis: $nis, nama: $nama, kelas: $kelas, program: $program, halaqohId: $halaqohId, waliSantri: $waliSantri, authUid: $authUid, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'SantriModel(id: $id, nis: $nis, nama: $nama, profilePicture: $profilePicture, kelas: $kelas, program: $program, halaqohId: $halaqohId, waliSantri: $waliSantri, authUid: $authUid, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -56,7 +57,7 @@ abstract mixin class $SantriModelCopyWith<$Res>  {
   factory $SantriModelCopyWith(SantriModel value, $Res Function(SantriModel) _then) = _$SantriModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String nis, String nama, String kelas, String program, String? halaqohId, WaliSantriModel? waliSantri, String? authUid, DateTime createdAt, DateTime updatedAt
+ String id, String nis, String nama, String? profilePicture, String kelas, String program, String? halaqohId, WaliSantriModel? waliSantri, String? authUid, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -73,12 +74,13 @@ class _$SantriModelCopyWithImpl<$Res>
 
 /// Create a copy of SantriModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? nis = null,Object? nama = null,Object? kelas = null,Object? program = null,Object? halaqohId = freezed,Object? waliSantri = freezed,Object? authUid = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? nis = null,Object? nama = null,Object? profilePicture = freezed,Object? kelas = null,Object? program = null,Object? halaqohId = freezed,Object? waliSantri = freezed,Object? authUid = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,nis: null == nis ? _self.nis : nis // ignore: cast_nullable_to_non_nullable
 as String,nama: null == nama ? _self.nama : nama // ignore: cast_nullable_to_non_nullable
-as String,kelas: null == kelas ? _self.kelas : kelas // ignore: cast_nullable_to_non_nullable
+as String,profilePicture: freezed == profilePicture ? _self.profilePicture : profilePicture // ignore: cast_nullable_to_non_nullable
+as String?,kelas: null == kelas ? _self.kelas : kelas // ignore: cast_nullable_to_non_nullable
 as String,program: null == program ? _self.program : program // ignore: cast_nullable_to_non_nullable
 as String,halaqohId: freezed == halaqohId ? _self.halaqohId : halaqohId // ignore: cast_nullable_to_non_nullable
 as String?,waliSantri: freezed == waliSantri ? _self.waliSantri : waliSantri // ignore: cast_nullable_to_non_nullable
@@ -182,10 +184,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String nis,  String nama,  String kelas,  String program,  String? halaqohId,  WaliSantriModel? waliSantri,  String? authUid,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String nis,  String nama,  String? profilePicture,  String kelas,  String program,  String? halaqohId,  WaliSantriModel? waliSantri,  String? authUid,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SantriModel() when $default != null:
-return $default(_that.id,_that.nis,_that.nama,_that.kelas,_that.program,_that.halaqohId,_that.waliSantri,_that.authUid,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.nis,_that.nama,_that.profilePicture,_that.kelas,_that.program,_that.halaqohId,_that.waliSantri,_that.authUid,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -203,10 +205,10 @@ return $default(_that.id,_that.nis,_that.nama,_that.kelas,_that.program,_that.ha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String nis,  String nama,  String kelas,  String program,  String? halaqohId,  WaliSantriModel? waliSantri,  String? authUid,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String nis,  String nama,  String? profilePicture,  String kelas,  String program,  String? halaqohId,  WaliSantriModel? waliSantri,  String? authUid,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _SantriModel():
-return $default(_that.id,_that.nis,_that.nama,_that.kelas,_that.program,_that.halaqohId,_that.waliSantri,_that.authUid,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.nis,_that.nama,_that.profilePicture,_that.kelas,_that.program,_that.halaqohId,_that.waliSantri,_that.authUid,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -223,10 +225,10 @@ return $default(_that.id,_that.nis,_that.nama,_that.kelas,_that.program,_that.ha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String nis,  String nama,  String kelas,  String program,  String? halaqohId,  WaliSantriModel? waliSantri,  String? authUid,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String nis,  String nama,  String? profilePicture,  String kelas,  String program,  String? halaqohId,  WaliSantriModel? waliSantri,  String? authUid,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _SantriModel() when $default != null:
-return $default(_that.id,_that.nis,_that.nama,_that.kelas,_that.program,_that.halaqohId,_that.waliSantri,_that.authUid,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.nis,_that.nama,_that.profilePicture,_that.kelas,_that.program,_that.halaqohId,_that.waliSantri,_that.authUid,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -238,7 +240,7 @@ return $default(_that.id,_that.nis,_that.nama,_that.kelas,_that.program,_that.ha
 @JsonSerializable()
 
 class _SantriModel implements SantriModel {
-  const _SantriModel({required this.id, required this.nis, required this.nama, required this.kelas, required this.program, this.halaqohId, this.waliSantri, this.authUid, required this.createdAt, required this.updatedAt});
+  const _SantriModel({required this.id, required this.nis, required this.nama, this.profilePicture, required this.kelas, required this.program, this.halaqohId, this.waliSantri, this.authUid, required this.createdAt, required this.updatedAt});
   factory _SantriModel.fromJson(Map<String, dynamic> json) => _$SantriModelFromJson(json);
 
 /// Firestore document ID
@@ -247,6 +249,8 @@ class _SantriModel implements SantriModel {
 @override final  String nis;
 /// Full name
 @override final  String nama;
+/// Profile picture URL (Optional)
+@override final  String? profilePicture;
 /// Class level: "7", "8", "9", "10", "11", "12"
 @override final  String kelas;
 /// Program type: "R" (Reguler) or "T" (Takhassus)
@@ -273,16 +277,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SantriModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nis, nis) || other.nis == nis)&&(identical(other.nama, nama) || other.nama == nama)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.waliSantri, waliSantri) || other.waliSantri == waliSantri)&&(identical(other.authUid, authUid) || other.authUid == authUid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SantriModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nis, nis) || other.nis == nis)&&(identical(other.nama, nama) || other.nama == nama)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.waliSantri, waliSantri) || other.waliSantri == waliSantri)&&(identical(other.authUid, authUid) || other.authUid == authUid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,nis,nama,kelas,program,halaqohId,waliSantri,authUid,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,nis,nama,profilePicture,kelas,program,halaqohId,waliSantri,authUid,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'SantriModel(id: $id, nis: $nis, nama: $nama, kelas: $kelas, program: $program, halaqohId: $halaqohId, waliSantri: $waliSantri, authUid: $authUid, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'SantriModel(id: $id, nis: $nis, nama: $nama, profilePicture: $profilePicture, kelas: $kelas, program: $program, halaqohId: $halaqohId, waliSantri: $waliSantri, authUid: $authUid, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -293,7 +297,7 @@ abstract mixin class _$SantriModelCopyWith<$Res> implements $SantriModelCopyWith
   factory _$SantriModelCopyWith(_SantriModel value, $Res Function(_SantriModel) _then) = __$SantriModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String nis, String nama, String kelas, String program, String? halaqohId, WaliSantriModel? waliSantri, String? authUid, DateTime createdAt, DateTime updatedAt
+ String id, String nis, String nama, String? profilePicture, String kelas, String program, String? halaqohId, WaliSantriModel? waliSantri, String? authUid, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -310,12 +314,13 @@ class __$SantriModelCopyWithImpl<$Res>
 
 /// Create a copy of SantriModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? nis = null,Object? nama = null,Object? kelas = null,Object? program = null,Object? halaqohId = freezed,Object? waliSantri = freezed,Object? authUid = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? nis = null,Object? nama = null,Object? profilePicture = freezed,Object? kelas = null,Object? program = null,Object? halaqohId = freezed,Object? waliSantri = freezed,Object? authUid = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_SantriModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,nis: null == nis ? _self.nis : nis // ignore: cast_nullable_to_non_nullable
 as String,nama: null == nama ? _self.nama : nama // ignore: cast_nullable_to_non_nullable
-as String,kelas: null == kelas ? _self.kelas : kelas // ignore: cast_nullable_to_non_nullable
+as String,profilePicture: freezed == profilePicture ? _self.profilePicture : profilePicture // ignore: cast_nullable_to_non_nullable
+as String?,kelas: null == kelas ? _self.kelas : kelas // ignore: cast_nullable_to_non_nullable
 as String,program: null == program ? _self.program : program // ignore: cast_nullable_to_non_nullable
 as String,halaqohId: freezed == halaqohId ? _self.halaqohId : halaqohId // ignore: cast_nullable_to_non_nullable
 as String?,waliSantri: freezed == waliSantri ? _self.waliSantri : waliSantri // ignore: cast_nullable_to_non_nullable

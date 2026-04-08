@@ -23,6 +23,9 @@ import 'src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 
+// Auth
+import 'src/modules/auth/presentation/cubits/auth_cubit.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -62,6 +65,8 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider.value(value: sl<ThemeCubit>()),
         BlocProvider.value(value: sl<LocaleCubit>()),
+        // Auth Cubit
+        BlocProvider.value(value: sl<AuthCubit>()..checkAuthStatus()),
         // Master Data Cubits
         BlocProvider(create: (_) => sl<GuruCubit>()..watchAll()),
         BlocProvider(create: (_) => sl<SantriCubit>()..watchAll()),

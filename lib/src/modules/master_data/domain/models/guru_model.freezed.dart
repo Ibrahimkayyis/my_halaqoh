@@ -18,8 +18,10 @@ mixin _$GuruModel {
 /// Firestore document ID
  String get id;/// NIP — 13 digit unique identifier, also used for login
  String get nip;/// Full name, e.g. "Ustadz Ahmad Fauzi, S.Pd.I"
- String get nama;/// Phone number
- String get phone;/// Firebase Auth UID (nullable — set after auth account is created)
+ String get nama;/// Phone number (Optional)
+ String? get phone;/// Profile picture URL (Optional)
+ String? get profilePicture;/// Program type: "R" (Reguler) or "T" (Takhassus)
+ String get program;/// Firebase Auth UID (nullable — set after auth account is created)
  String? get authUid; DateTime get createdAt; DateTime get updatedAt;
 /// Create a copy of GuruModel
 /// with the given fields replaced by the non-null parameter values.
@@ -33,16 +35,16 @@ $GuruModelCopyWith<GuruModel> get copyWith => _$GuruModelCopyWithImpl<GuruModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GuruModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nip, nip) || other.nip == nip)&&(identical(other.nama, nama) || other.nama == nama)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.authUid, authUid) || other.authUid == authUid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GuruModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nip, nip) || other.nip == nip)&&(identical(other.nama, nama) || other.nama == nama)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.program, program) || other.program == program)&&(identical(other.authUid, authUid) || other.authUid == authUid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,nip,nama,phone,authUid,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,nip,nama,phone,profilePicture,program,authUid,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'GuruModel(id: $id, nip: $nip, nama: $nama, phone: $phone, authUid: $authUid, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'GuruModel(id: $id, nip: $nip, nama: $nama, phone: $phone, profilePicture: $profilePicture, program: $program, authUid: $authUid, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -53,7 +55,7 @@ abstract mixin class $GuruModelCopyWith<$Res>  {
   factory $GuruModelCopyWith(GuruModel value, $Res Function(GuruModel) _then) = _$GuruModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String nip, String nama, String phone, String? authUid, DateTime createdAt, DateTime updatedAt
+ String id, String nip, String nama, String? phone, String? profilePicture, String program, String? authUid, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -70,12 +72,14 @@ class _$GuruModelCopyWithImpl<$Res>
 
 /// Create a copy of GuruModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? nip = null,Object? nama = null,Object? phone = null,Object? authUid = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? nip = null,Object? nama = null,Object? phone = freezed,Object? profilePicture = freezed,Object? program = null,Object? authUid = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,nip: null == nip ? _self.nip : nip // ignore: cast_nullable_to_non_nullable
 as String,nama: null == nama ? _self.nama : nama // ignore: cast_nullable_to_non_nullable
-as String,phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String?,profilePicture: freezed == profilePicture ? _self.profilePicture : profilePicture // ignore: cast_nullable_to_non_nullable
+as String?,program: null == program ? _self.program : program // ignore: cast_nullable_to_non_nullable
 as String,authUid: freezed == authUid ? _self.authUid : authUid // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -164,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String nip,  String nama,  String phone,  String? authUid,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String nip,  String nama,  String? phone,  String? profilePicture,  String program,  String? authUid,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GuruModel() when $default != null:
-return $default(_that.id,_that.nip,_that.nama,_that.phone,_that.authUid,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.nip,_that.nama,_that.phone,_that.profilePicture,_that.program,_that.authUid,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -185,10 +189,10 @@ return $default(_that.id,_that.nip,_that.nama,_that.phone,_that.authUid,_that.cr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String nip,  String nama,  String phone,  String? authUid,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String nip,  String nama,  String? phone,  String? profilePicture,  String program,  String? authUid,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _GuruModel():
-return $default(_that.id,_that.nip,_that.nama,_that.phone,_that.authUid,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.nip,_that.nama,_that.phone,_that.profilePicture,_that.program,_that.authUid,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +209,10 @@ return $default(_that.id,_that.nip,_that.nama,_that.phone,_that.authUid,_that.cr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String nip,  String nama,  String phone,  String? authUid,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String nip,  String nama,  String? phone,  String? profilePicture,  String program,  String? authUid,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _GuruModel() when $default != null:
-return $default(_that.id,_that.nip,_that.nama,_that.phone,_that.authUid,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.nip,_that.nama,_that.phone,_that.profilePicture,_that.program,_that.authUid,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -220,7 +224,7 @@ return $default(_that.id,_that.nip,_that.nama,_that.phone,_that.authUid,_that.cr
 @JsonSerializable()
 
 class _GuruModel implements GuruModel {
-  const _GuruModel({required this.id, required this.nip, required this.nama, required this.phone, this.authUid, required this.createdAt, required this.updatedAt});
+  const _GuruModel({required this.id, required this.nip, required this.nama, this.phone, this.profilePicture, required this.program, this.authUid, required this.createdAt, required this.updatedAt});
   factory _GuruModel.fromJson(Map<String, dynamic> json) => _$GuruModelFromJson(json);
 
 /// Firestore document ID
@@ -229,8 +233,12 @@ class _GuruModel implements GuruModel {
 @override final  String nip;
 /// Full name, e.g. "Ustadz Ahmad Fauzi, S.Pd.I"
 @override final  String nama;
-/// Phone number
-@override final  String phone;
+/// Phone number (Optional)
+@override final  String? phone;
+/// Profile picture URL (Optional)
+@override final  String? profilePicture;
+/// Program type: "R" (Reguler) or "T" (Takhassus)
+@override final  String program;
 /// Firebase Auth UID (nullable — set after auth account is created)
 @override final  String? authUid;
 @override final  DateTime createdAt;
@@ -249,16 +257,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GuruModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nip, nip) || other.nip == nip)&&(identical(other.nama, nama) || other.nama == nama)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.authUid, authUid) || other.authUid == authUid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GuruModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nip, nip) || other.nip == nip)&&(identical(other.nama, nama) || other.nama == nama)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.program, program) || other.program == program)&&(identical(other.authUid, authUid) || other.authUid == authUid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,nip,nama,phone,authUid,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,nip,nama,phone,profilePicture,program,authUid,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'GuruModel(id: $id, nip: $nip, nama: $nama, phone: $phone, authUid: $authUid, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'GuruModel(id: $id, nip: $nip, nama: $nama, phone: $phone, profilePicture: $profilePicture, program: $program, authUid: $authUid, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -269,7 +277,7 @@ abstract mixin class _$GuruModelCopyWith<$Res> implements $GuruModelCopyWith<$Re
   factory _$GuruModelCopyWith(_GuruModel value, $Res Function(_GuruModel) _then) = __$GuruModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String nip, String nama, String phone, String? authUid, DateTime createdAt, DateTime updatedAt
+ String id, String nip, String nama, String? phone, String? profilePicture, String program, String? authUid, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -286,12 +294,14 @@ class __$GuruModelCopyWithImpl<$Res>
 
 /// Create a copy of GuruModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? nip = null,Object? nama = null,Object? phone = null,Object? authUid = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? nip = null,Object? nama = null,Object? phone = freezed,Object? profilePicture = freezed,Object? program = null,Object? authUid = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_GuruModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,nip: null == nip ? _self.nip : nip // ignore: cast_nullable_to_non_nullable
 as String,nama: null == nama ? _self.nama : nama // ignore: cast_nullable_to_non_nullable
-as String,phone: null == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String?,profilePicture: freezed == profilePicture ? _self.profilePicture : profilePicture // ignore: cast_nullable_to_non_nullable
+as String?,program: null == program ? _self.program : program // ignore: cast_nullable_to_non_nullable
 as String,authUid: freezed == authUid ? _self.authUid : authUid // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable

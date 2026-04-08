@@ -1,10 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_halaqoh/src/core/theme/data/theme_repository.dart';
 import 'package:my_halaqoh/src/core/theme/cubit/theme_cubit.dart';
 import 'package:my_halaqoh/src/core/locale/data/locale_repository.dart';
 import 'package:my_halaqoh/src/core/locale/cubit/locale_cubit.dart';
+
+// Auth Layer
+import 'package:my_halaqoh/src/modules/auth/data/datasources/remote/auth_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/auth/domain/repositories/auth_repository.dart';
+import 'package:my_halaqoh/src/modules/auth/data/repositories_impl/auth_repository_impl.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/core/services/storage_service.dart';
 
 // Master Data — Data Layer
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/local/master_data_local_datasource.dart';
@@ -49,10 +58,28 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<LocaleRepository>(() => LocaleRepository(sl()));
   sl.registerSingleton<LocaleCubit>(LocaleCubit(sl()));
 
+  // Core Services
+  sl.registerLazySingleton<StorageService>(() => StorageService());
+
   // ── Firebase ──────────────────────────────────────────────────────────────
   sl.registerLazySingleton<FirebaseFirestore>(
     () => FirebaseFirestore.instance,
   );
+  sl.registerLazySingleton<FirebaseAuth>(
+    () => FirebaseAuth.instance,
+  );
+  sl.registerLazySingleton<FirebaseFunctions>(
+    () => FirebaseFunctions.instance,
+  );
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  sl.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSourceImpl(sl(), sl()),
+  );
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(sl()),
+  );
+  sl.registerSingleton<AuthCubit>(AuthCubit(sl()));
 
   // ── Master Data — Local DataSource ────────────────────────────────────────
   sl.registerSingleton<MasterDataLocalDataSource>(
@@ -61,10 +88,10 @@ Future<void> initDependencies() async {
 
   // ── Master Data — Remote DataSources ──────────────────────────────────────
   sl.registerLazySingleton<GuruRemoteDataSource>(
-    () => GuruRemoteDataSourceImpl(sl()),
+    () => GuruRemoteDataSourceImpl(sl(), sl()),
   );
   sl.registerLazySingleton<SantriRemoteDataSource>(
-    () => SantriRemoteDataSourceImpl(sl()),
+    () => SantriRemoteDataSourceImpl(sl(), sl()),
   );
   sl.registerLazySingleton<HalaqohRemoteDataSource>(
     () => HalaqohRemoteDataSourceImpl(sl()),

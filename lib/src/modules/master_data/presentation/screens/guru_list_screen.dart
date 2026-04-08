@@ -52,11 +52,15 @@ class _GuruListScreenState extends State<GuruListScreen> {
       initialNip: guru.nip,
       initialNama: guru.nama,
       initialPhone: guru.phone,
-      onSave: (nip, nama, phone) {
+      initialProgram: guru.program,
+      initialProfilePicture: guru.profilePicture,
+      onSave: (nip, nama, phone, program, profilePicture) {
         final updated = guru.copyWith(
           nip: nip ?? guru.nip,
           nama: nama ?? guru.nama,
-          phone: phone ?? guru.phone,
+          phone: phone, // Null is allowed for phone
+          program: program ?? guru.program,
+          profilePicture: profilePicture ?? guru.profilePicture,
           updatedAt: DateTime.now(),
         );
         context.read<GuruCubit>().updateGuru(updated);
@@ -76,13 +80,15 @@ class _GuruListScreenState extends State<GuruListScreen> {
       context,
       onManualTap: () => AddManualGuruDialog.show(
         context,
-        onSave: (nip, nama, phone) {
+        onSave: (nip, nama, phone, program, profilePicture) {
           final now = DateTime.now();
           final model = GuruModel(
             id: '', // will be set by Firestore
             nip: nip ?? '',
             nama: nama ?? '',
-            phone: phone ?? '',
+            phone: phone, // null allowed
+            program: program ?? 'R',
+            profilePicture: profilePicture,
             createdAt: now,
             updatedAt: now,
           );
