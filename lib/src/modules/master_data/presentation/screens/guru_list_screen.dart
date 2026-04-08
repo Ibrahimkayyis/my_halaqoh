@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/guru_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_search_bar.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_list_item.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_data_method_dialog.dart';
@@ -21,57 +25,7 @@ class GuruListScreen extends StatefulWidget {
 
 class _GuruListScreenState extends State<GuruListScreen> {
   final _searchController = TextEditingController();
-  List<Map<String, String>> _filteredData = [];
-
-  // Dummy data
-  final List<Map<String, String>> _guruData = [
-    {
-      'nip': '198501012010011001',
-      'name': 'Ustadz Ahmad Fauzi, S.Pd.I',
-      'phone': '081234567890',
-    },
-    {
-      'nip': '198805122011012003',
-      'name': 'Ustadzah Siti Aminah, Lc.',
-      'phone': '081234567891',
-    },
-    {
-      'nip': '199003152015021005',
-      'name': 'Ustadz Budi Santoso, M.Ag',
-      'phone': '081234567892',
-    },
-    {
-      'nip': '199207202018012002',
-      'name': 'Ustadzah Dewi Sartika, S.Hum',
-      'phone': '081234567893',
-    },
-    {
-      'nip': '198711102012011004',
-      'name': 'Ustadz Rahmat Hidayat, Al-Hafizh',
-      'phone': '081234567894',
-    },
-    {
-      'nip': '199502282019022001',
-      'name': 'Ustadzah Nurul Huda',
-      'phone': '081234567895',
-    },
-    {
-      'nip': '198909092014011002',
-      'name': 'Ustadz Zainal Abidin',
-      'phone': '081234567896',
-    },
-    {
-      'nip': '199304142017011003',
-      'name': 'Ustadz Abdullah Faqih',
-      'phone': '081234567897',
-    },
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _filteredData = List.from(_guruData);
-  }
+  String _searchQuery = '';
 
   @override
   void dispose() {
@@ -80,54 +34,63 @@ class _GuruListScreenState extends State<GuruListScreen> {
   }
 
   void _onSearch(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filteredData = List.from(_guruData);
-      } else {
-        _filteredData = _guruData
-            .where(
-              (g) =>
-                  g['name']!.toLowerCase().contains(query.toLowerCase()) ||
-                  g['nip']!.contains(query),
-            )
-            .toList();
-      }
-    });
+    setState(() => _searchQuery = query.toLowerCase());
   }
 
-  void _onEdit(int index) {
-    final item = _filteredData[index];
-    final srcIndex = _guruData.indexWhere((g) => g['nip'] == item['nip']);
+  List<GuruModel> _applyFilter(List<GuruModel> allGuru) {
+    if (_searchQuery.isEmpty) return allGuru;
+    return allGuru
+        .where((g) =>
+            g.nama.toLowerCase().contains(_searchQuery) ||
+            g.nip.contains(_searchQuery))
+        .toList();
+  }
 
+  void _onEdit(GuruModel guru) {
     AddManualGuruDialog.show(
       context,
-      initialNip: item['nip'],
-      initialNama: item['name'],
-      initialPhone: item['phone'],
+      initialNip: guru.nip,
+      initialNama: guru.nama,
+      initialPhone: guru.phone,
       onSave: (nip, nama, phone) {
-        if (srcIndex >= 0) {
-          setState(() {
-            _guruData[srcIndex] = {
-              'nip': nip ?? item['nip']!,
-              'name': nama ?? item['name']!,
-              'phone': phone ?? item['phone'] ?? '',
-            };
-            _onSearch(_searchController.text);
-          });
-        }
+        final updated = guru.copyWith(
+          nip: nip ?? guru.nip,
+          nama: nama ?? guru.nama,
+          phone: phone ?? guru.phone,
+          updatedAt: DateTime.now(),
+        );
+        context.read<GuruCubit>().updateGuru(updated);
       },
     );
   }
 
-  Future<void> _onDelete(int index) async {
-    final item = _filteredData[index];
+  Future<void> _onDelete(GuruModel guru) async {
     final confirmed = await ConfirmDeleteDialog.show(context);
     if (!confirmed) return;
+    if (!mounted) return;
+    context.read<GuruCubit>().deleteGuru(guru.id);
+  }
 
-    setState(() {
-      _guruData.removeWhere((g) => g['nip'] == item['nip']);
-      _onSearch(_searchController.text);
-    });
+  void _onAdd() {
+    AddDataMethodDialog.show(
+      context,
+      onManualTap: () => AddManualGuruDialog.show(
+        context,
+        onSave: (nip, nama, phone) {
+          final now = DateTime.now();
+          final model = GuruModel(
+            id: '', // will be set by Firestore
+            nip: nip ?? '',
+            nama: nama ?? '',
+            phone: phone ?? '',
+            createdAt: now,
+            updatedAt: now,
+          );
+          context.read<GuruCubit>().addGuru(model);
+        },
+      ),
+      onBulkUploadTap: () => BulkUploadDialog.show(context),
+    );
   }
 
   @override
@@ -153,63 +116,66 @@ class _GuruListScreenState extends State<GuruListScreen> {
         ),
         centerTitle: false,
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 8.h),
-          // Search (no filter button)
-          DataSearchBar(
-            searchHint: t.guru.searchHint,
-            countText: t.guru.showCount(count: _filteredData.length.toString()),
-            filterLabel: t.guru.filter,
-            controller: _searchController,
-            onChanged: _onSearch,
-            showFilterButton: false,
-          ),
-          SizedBox(height: 12.h),
-
-          // Table header
-          _buildTableHeader(colors),
-
-          // List
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(bottom: 80.h),
-              itemCount: _filteredData.length,
-              itemBuilder: (context, index) {
-                final item = _filteredData[index];
-                return DataListItem(
-                  id: item['nip']!,
-                  name: item['name']!,
-                  onEdit: () => _onEdit(index),
-                  onDelete: () => _onDelete(index),
-                );
-              },
+      body: BlocBuilder<GuruCubit, GuruState>(
+        builder: (context, state) {
+          return state.when(
+            initial: () => const SizedBox.shrink(),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (message) => Center(
+              child: Text(message,
+                  style: TextStyle(color: colors.error, fontFamily: 'Poppins')),
             ),
-          ),
-        ],
+            loaded: (guruList) {
+              final filtered = _applyFilter(guruList);
+              return Column(
+                children: [
+                  SizedBox(height: 8.h),
+                  DataSearchBar(
+                    searchHint: t.guru.searchHint,
+                    countText:
+                        t.guru.showCount(count: filtered.length.toString()),
+                    filterLabel: t.guru.filter,
+                    controller: _searchController,
+                    onChanged: _onSearch,
+                    showFilterButton: false,
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildTableHeader(colors),
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Belum ada data guru',
+                              style: TextStyle(
+                                color: colors.textSecondary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: EdgeInsets.only(bottom: 80.h),
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) {
+                              final guru = filtered[index];
+                              return DataListItem(
+                                id: guru.nip,
+                                name: guru.nama,
+                                onEdit: () => _onEdit(guru),
+                                onDelete: () => _onDelete(guru),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
       floatingActionButton: Padding(
         padding: EdgeInsets.only(bottom: 70.h),
         child: FloatingActionButton(
-          onPressed: () {
-            AddDataMethodDialog.show(
-              context,
-              onManualTap: () => AddManualGuruDialog.show(
-                context,
-                onSave: (nip, nama, phone) {
-                  setState(() {
-                    _guruData.add({
-                      'nip': nip ?? '',
-                      'name': nama ?? '',
-                      'phone': phone ?? '',
-                    });
-                    _onSearch(_searchController.text);
-                  });
-                },
-              ),
-              onBulkUploadTap: () => BulkUploadDialog.show(context),
-            );
-          },
+          onPressed: _onAdd,
           backgroundColor: colors.primary,
           child: Icon(Icons.add, color: colors.textOnButton),
         ),

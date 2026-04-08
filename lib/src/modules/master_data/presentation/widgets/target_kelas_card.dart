@@ -115,6 +115,7 @@ class TargetKelasCard extends StatelessWidget {
                 SizedBox(height: 2.h),
                 // Juz range row
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(
                       Icons.menu_book,
@@ -122,13 +123,17 @@ class TargetKelasCard extends StatelessWidget {
                       color: colors.primary,
                     ),
                     SizedBox(width: 6.w),
-                    Text(
-                      juzRange,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: colors.textSecondary,
-                        fontFamily: 'Poppins',
+                    Flexible(
+                      child: Text(
+                        juzRange,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                          color: colors.textSecondary,
+                          fontFamily: 'Poppins',
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

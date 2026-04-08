@@ -1,16 +1,27 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/guru_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
-/// Screen for creating a new Halaqoh group
+/// Screen for creating or editing a Halaqoh group
 @RoutePage()
 class AddHalaqohScreen extends StatefulWidget {
-  const AddHalaqohScreen({super.key});
+  final HalaqohModel? existingHalaqoh;
+
+  const AddHalaqohScreen({super.key, this.existingHalaqoh});
 
   @override
   State<AddHalaqohScreen> createState() => _AddHalaqohScreenState();
@@ -20,23 +31,42 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
   final _namaController = TextEditingController();
   String? _selectedKelas;
   String? _selectedProgram;
-  String? _selectedGuru;
+  GuruModel? _selectedGuru;
 
   final List<String> _kelasList = ['7', '8', '9', '10', '11', '12'];
   final List<String> _programList = ['Reguler', 'Takhassus'];
-  final List<String> _guruList = [
-    'Ust. Ahmad Rofiqi',
-    'Ust. Farhan Majid',
-    'Ust. Maulana Ilyas',
-    'Ust. Abdullah Faqih',
-    'Ust. Zainal Abidin',
-    'Ustdz. Siti Aminah, Lc.',
-    'Ust. Budi Santoso, M.Ag',
-    'Ustdz. Dewi Sartika, S.Hum',
-  ];
 
-  // Selected santri for this halaqoh
-  final List<Map<String, String>> _selectedSantri = [];
+  // Selected santri for this halaqoh (now using SantriModel)
+  final List<SantriModel> _selectedSantri = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingHalaqoh != null) {
+      final existing = widget.existingHalaqoh!;
+      _namaController.text = existing.nama;
+      _selectedKelas = existing.kelas;
+      _selectedProgram = existing.program == 'T' ? 'Takhassus' : 'Reguler';
+      
+      final guruList = context.read<GuruCubit>().state.maybeWhen(
+        loaded: (list) => list,
+        orElse: () => <GuruModel>[],
+      );
+      try {
+        _selectedGuru = guruList.firstWhere((g) => g.id == existing.guruId);
+      } catch (_) {}
+
+      final santriList = context.read<SantriCubit>().state.maybeWhen(
+        loaded: (list) => list,
+        orElse: () => <SantriModel>[],
+      );
+      for (final sId in existing.santriIds) {
+        try {
+          _selectedSantri.add(santriList.firstWhere((s) => s.id == sId));
+        } catch (_) {}
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -45,14 +75,14 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
   }
 
   Future<void> _navigateToSelectSantri() async {
-    final result = await context.router.push<List<Map<String, String>>>(
+    final result = await context.router.push<List<SantriModel>>(
       const SelectSantriRoute(),
     );
     if (result != null && result.isNotEmpty) {
       setState(() {
-        // Merge with existing, avoid duplicates
+        // Merge with existing, avoid duplicates by ID
         for (final santri in result) {
-          if (!_selectedSantri.any((s) => s['nis'] == santri['nis'])) {
+          if (!_selectedSantri.any((s) => s.id == santri.id)) {
             _selectedSantri.add(santri);
           }
         }
@@ -71,6 +101,48 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
     setState(() {
       _selectedSantri.removeAt(index);
     });
+  }
+
+  Future<void> _saveHalaqoh() async {
+    if (_namaController.text.isEmpty || _selectedGuru == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lengkapi nama dan pengampu halaqoh'),
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await ConfirmSaveDialog.show(context);
+    if (!confirmed) return;
+
+    final now = DateTime.now();
+    final programCode =
+        _selectedProgram == 'Takhassus' ? 'T' : 'R';
+
+    final isEdit = widget.existingHalaqoh != null;
+
+    final model = HalaqohModel(
+      id: isEdit ? widget.existingHalaqoh!.id : '', // will be set by Firestore if empty
+      nama: _namaController.text,
+      kelas: _selectedKelas ?? '7',
+      program: programCode,
+      guruId: _selectedGuru!.id,
+      guruNama: _selectedGuru!.nama,
+      santriIds: _selectedSantri.map((s) => s.id).toList(),
+      jumlahSantri: _selectedSantri.length,
+      createdAt: isEdit ? widget.existingHalaqoh!.createdAt : now,
+      updatedAt: now,
+    );
+
+    if (mounted) {
+      if (isEdit) {
+        await context.read<HalaqohCubit>().updateHalaqoh(model);
+      } else {
+        await context.read<HalaqohCubit>().addHalaqoh(model);
+      }
+      if (mounted) context.router.maybePop();
+    }
   }
 
   @override
@@ -166,20 +238,39 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                   ),
                   SizedBox(height: 20.h),
 
-                  // Pengampu (Guru) - searchable dropdown
+                  // Pengampu (Guru) - searchable dropdown with real data
                   _buildLabel(colors, t.addHalaqoh.pengampu),
                   SizedBox(height: 8.h),
-                  CustomDropdown<String>.search(
-                    hintText: t.addHalaqoh.pengampuHint,
-                    items: _guruList,
-                    initialItem: _selectedGuru,
-                    excludeSelected: false,
-                    onChanged: (v) => setState(() => _selectedGuru = v),
-                    closedHeaderPadding: EdgeInsets.symmetric(
-                      horizontal: 14.w,
-                      vertical: 12.h,
-                    ),
-                    decoration: _dropdownDecoration(colors),
+                  BlocBuilder<GuruCubit, GuruState>(
+                    builder: (context, state) {
+                      final guruList = state.maybeWhen(
+                        loaded: (list) => list,
+                        orElse: () => <GuruModel>[],
+                      );
+                      final guruNames =
+                          guruList.map((g) => g.nama).toList();
+                      return CustomDropdown<String>.search(
+                        hintText: t.addHalaqoh.pengampuHint,
+                        items: guruNames,
+                        initialItem: _selectedGuru?.nama,
+                        excludeSelected: false,
+                        onChanged: (name) {
+                          setState(() {
+                            try {
+                              _selectedGuru =
+                                  guruList.firstWhere((g) => g.nama == name);
+                            } catch (_) {
+                              _selectedGuru = null;
+                            }
+                          });
+                        },
+                        closedHeaderPadding: EdgeInsets.symmetric(
+                          horizontal: 14.w,
+                          vertical: 12.h,
+                        ),
+                        decoration: _dropdownDecoration(colors),
+                      );
+                    },
                   ),
                   SizedBox(height: 24.h),
 
@@ -206,7 +297,8 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                           decoration: BoxDecoration(
                             color: colors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(color: colors.primary, width: 1),
+                            border:
+                                Border.all(color: colors.primary, width: 1),
                           ),
                           child: Text(
                             t.addHalaqoh.tambahSantri,
@@ -262,33 +354,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                 width: double.infinity,
                 height: 50.h,
                 child: PrimaryButton(
-                  onPressed: () async {
-                    if (_namaController.text.isEmpty || _selectedGuru == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Lengkapi nama dan pengampu halaqoh'),
-                        ),
-                      );
-                      return;
-                    }
-
-                    final confirmed = await ConfirmSaveDialog.show(context);
-                    if (!confirmed) return;
-
-                    if (context.mounted) {
-                      context.router.maybePop<Map<String, dynamic>>({
-                        'name': _namaController.text,
-                        'kelas': _selectedSantri.isNotEmpty
-                            ? _selectedSantri.first['kelas']
-                            : '7',
-                        'program': _selectedSantri.isNotEmpty
-                            ? _selectedSantri.first['program']
-                            : 'R',
-                        'guru': _selectedGuru,
-                        'santri': _selectedSantri.length,
-                      });
-                    }
-                  },
+                  onPressed: _saveHalaqoh,
                   icon: Icons.save,
                   label: t.addHalaqoh.simpanHalaqoh,
                   borderRadius: 25.r,
@@ -451,7 +517,8 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
             ...List.generate(_selectedSantri.length, (index) {
               final santri = _selectedSantri[index];
               return Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                padding:
+                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
@@ -464,7 +531,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                     SizedBox(
                       width: 50.w,
                       child: Text(
-                        santri['nis'] ?? '',
+                        santri.nis,
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w400,
@@ -475,7 +542,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                     ),
                     Expanded(
                       child: Text(
-                        santri['name'] ?? '',
+                        santri.nama,
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,

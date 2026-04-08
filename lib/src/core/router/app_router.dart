@@ -18,6 +18,7 @@ import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/screens/mutabaa
 import 'package:my_halaqoh/src/modules/guru_profile/presentation/screens/edit_profile_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_profile/presentation/screens/ubah_password_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_profile/presentation/screens/pengaturan_screen.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/dashboard_wrapper_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/add_halaqoh_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/pengaturan_master_data_screen.dart';

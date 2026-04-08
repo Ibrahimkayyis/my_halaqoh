@@ -112,7 +112,7 @@ class _TranslationsAuthId implements TranslationsAuthEn {
 	@override String get usernameLabel => 'NIP / NIS';
 	@override String get usernameHint => 'Masukkan NIP/NIS anda';
 	@override String get passwordLabel => 'PASSWORD';
-	@override String get passwordHint => 'Masukkan password anda';
+	@override String get passwordHint => 'Masukkan password';
 	@override String get forgotPassword => 'Lupa Password?';
 	@override String get loginButton => 'MASUK';
 	@override String get validationEmpty => 'NIP/NIS dan Password tidak boleh kosong';
@@ -502,7 +502,7 @@ class _TranslationsDetailAbsensiHariIniId implements TranslationsDetailAbsensiHa
 	@override String get izin => 'Izin';
 	@override String get alfa => 'Alfa';
 	@override String get belumAbsen => 'Belum Absen';
-	@override String get belumDiabsen => 'Belum Diabsen';
+	@override String get belumDiabsen => 'Belum absen';
 	@override String get daftarKehadiranSantri => 'Daftar Kehadiran Santri';
 }
 
@@ -775,7 +775,7 @@ extension on TranslationsId {
 			case 'auth.usernameLabel': return 'NIP / NIS';
 			case 'auth.usernameHint': return 'Masukkan NIP/NIS anda';
 			case 'auth.passwordLabel': return 'PASSWORD';
-			case 'auth.passwordHint': return 'Masukkan password anda';
+			case 'auth.passwordHint': return 'Masukkan password';
 			case 'auth.forgotPassword': return 'Lupa Password?';
 			case 'auth.loginButton': return 'MASUK';
 			case 'auth.validationEmpty': return 'NIP/NIS dan Password tidak boleh kosong';
@@ -994,7 +994,7 @@ extension on TranslationsId {
 			case 'detailAbsensiHariIni.izin': return 'Izin';
 			case 'detailAbsensiHariIni.alfa': return 'Alfa';
 			case 'detailAbsensiHariIni.belumAbsen': return 'Belum Absen';
-			case 'detailAbsensiHariIni.belumDiabsen': return 'Belum Diabsen';
+			case 'detailAbsensiHariIni.belumDiabsen': return 'Belum absen';
 			case 'detailAbsensiHariIni.daftarKehadiranSantri': return 'Daftar Kehadiran Santri';
 			case 'hafalan.cariSantri': return 'Cari Santri';
 			case 'hafalan.daftarSantri': return 'Daftar Santri';

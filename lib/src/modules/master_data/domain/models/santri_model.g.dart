@@ -1,0 +1,36 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'santri_model.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_SantriModel _$SantriModelFromJson(Map<String, dynamic> json) => _SantriModel(
+  id: json['id'] as String,
+  nis: json['nis'] as String,
+  nama: json['nama'] as String,
+  kelas: json['kelas'] as String,
+  program: json['program'] as String,
+  halaqohId: json['halaqohId'] as String?,
+  waliSantri: json['waliSantri'] == null
+      ? null
+      : WaliSantriModel.fromJson(json['waliSantri'] as Map<String, dynamic>),
+  authUid: json['authUid'] as String?,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  updatedAt: DateTime.parse(json['updatedAt'] as String),
+);
+
+Map<String, dynamic> _$SantriModelToJson(_SantriModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'nis': instance.nis,
+      'nama': instance.nama,
+      'kelas': instance.kelas,
+      'program': instance.program,
+      'halaqohId': instance.halaqohId,
+      'waliSantri': instance.waliSantri,
+      'authUid': instance.authUid,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'updatedAt': instance.updatedAt.toIso8601String(),
+    };

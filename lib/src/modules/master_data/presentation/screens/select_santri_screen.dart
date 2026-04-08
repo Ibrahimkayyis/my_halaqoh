@@ -1,9 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
 /// Screen for selecting santri to add to a halaqoh
 @RoutePage()
@@ -16,28 +20,8 @@ class SelectSantriScreen extends StatefulWidget {
 
 class _SelectSantriScreenState extends State<SelectSantriScreen> {
   final _searchController = TextEditingController();
-  List<Map<String, String>> _filteredData = [];
-  final Set<String> _selectedNis = {};
-
-  // Dummy data
-  final List<Map<String, String>> _allSantri = [
-    {'nis': '12345', 'name': 'Abdullah Azzam', 'kelas': '7A'},
-    {'nis': '12346', 'name': 'Muhammad Fatih', 'kelas': '7A'},
-    {'nis': '12347', 'name': 'Umar bin Khattab', 'kelas': '8B'},
-    {'nis': '12348', 'name': 'Ali bin Abi Thalib', 'kelas': '8B'},
-    {'nis': '12349', 'name': 'Usman bin Affan', 'kelas': '7A'},
-    {'nis': '12350', 'name': 'Abdurrahman bin Auf', 'kelas': '9C'},
-    {'nis': '12351', 'name': 'Sa\'ad bin Abi Waqqash', 'kelas': '8A'},
-    {'nis': '12352', 'name': 'Zubair bin Awwam', 'kelas': '10B'},
-    {'nis': '12353', 'name': 'Talhah bin Ubaidillah', 'kelas': '7C'},
-    {'nis': '12354', 'name': 'Abu Ubaidah bin Jarrah', 'kelas': '9A'},
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _filteredData = _allSantri;
-  }
+  String _searchQuery = '';
+  final Set<String> _selectedIds = {};
 
   @override
   void dispose() {
@@ -46,32 +30,31 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
   }
 
   void _onSearch(String query) {
+    setState(() => _searchQuery = query.toLowerCase());
+  }
+
+  List<SantriModel> _applyFilter(List<SantriModel> allSantri) {
+    if (_searchQuery.isEmpty) return allSantri;
+    return allSantri
+        .where((s) =>
+            s.nama.toLowerCase().contains(_searchQuery) ||
+            s.nis.contains(_searchQuery))
+        .toList();
+  }
+
+  void _toggleSelect(String id) {
     setState(() {
-      if (query.isEmpty) {
-        _filteredData = _allSantri;
+      if (_selectedIds.contains(id)) {
+        _selectedIds.remove(id);
       } else {
-        _filteredData = _allSantri
-            .where((s) =>
-                s['name']!.toLowerCase().contains(query.toLowerCase()) ||
-                s['nis']!.contains(query))
-            .toList();
+        _selectedIds.add(id);
       }
     });
   }
 
-  void _toggleSelect(String nis) {
-    setState(() {
-      if (_selectedNis.contains(nis)) {
-        _selectedNis.remove(nis);
-      } else {
-        _selectedNis.add(nis);
-      }
-    });
-  }
-
-  void _confirmSelection() {
-    final selected = _allSantri
-        .where((s) => _selectedNis.contains(s['nis']))
+  void _confirmSelection(List<SantriModel> allSantri) {
+    final selected = allSantri
+        .where((s) => _selectedIds.contains(s.id))
         .toList();
     context.router.maybePop(selected);
   }
@@ -98,141 +81,172 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
         ),
         centerTitle: false,
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 8.h),
-          // Search field
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearch,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontFamily: 'Poppins',
-                color: colors.textPrimary,
-              ),
-              decoration: InputDecoration(
-                hintText: t.selectSantri.searchHint,
-                hintStyle: TextStyle(
-                  fontSize: 14.sp,
-                  color: colors.textSecondary.withValues(alpha: 0.5),
-                  fontFamily: 'Poppins',
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: colors.textSecondary,
-                  size: 20.sp,
-                ),
-                contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-                filled: true,
-                fillColor: colors.surface,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: colors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: colors.primary),
-                ),
-              ),
+      body: BlocBuilder<SantriCubit, SantriState>(
+        builder: (context, state) {
+          return state.when(
+            initial: () => const SizedBox.shrink(),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (message) => Center(
+              child: Text(message,
+                  style: TextStyle(color: colors.error, fontFamily: 'Poppins')),
             ),
-          ),
-          SizedBox(height: 10.h),
-
-          // Filter + count
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 6.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(color: colors.border),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.tune, size: 16.sp, color: colors.textSecondary),
-                      SizedBox(width: 6.w),
-                      Text(
-                        t.selectSantri.filter,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colors.textPrimary,
+            loaded: (santriList) {
+              final filtered = _applyFilter(santriList);
+              return Column(
+                children: [
+                  SizedBox(height: 8.h),
+                  // Search field
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: _onSearch,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontFamily: 'Poppins',
+                        color: colors.textPrimary,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: t.selectSantri.searchHint,
+                        hintStyle: TextStyle(
+                          fontSize: 14.sp,
+                          color: colors.textSecondary.withValues(alpha: 0.5),
                           fontFamily: 'Poppins',
                         ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: colors.textSecondary,
+                          size: 20.sp,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                        filled: true,
+                        fillColor: colors.surface,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(color: colors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(color: colors.primary),
+                        ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                const Spacer(),
-                Text(
-                  t.selectSantri.countLabel(count: _allSantri.length.toString()),
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w500,
-                    color: colors.textSecondary,
-                    fontFamily: 'Poppins',
+                  SizedBox(height: 10.h),
+
+                  // Filter + count
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 6.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.surface,
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(color: colors.border),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.tune,
+                                  size: 16.sp, color: colors.textSecondary),
+                              SizedBox(width: 6.w),
+                              Text(
+                                t.selectSantri.filter,
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.textPrimary,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          t.selectSantri.countLabel(
+                              count: santriList.length.toString()),
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w500,
+                            color: colors.textSecondary,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 12.h),
+                  SizedBox(height: 12.h),
 
-          // Table header
-          _buildTableHeader(colors),
-          SizedBox(height: 4.h),
+                  // Table header
+                  _buildTableHeader(colors),
+                  SizedBox(height: 4.h),
 
-          // List
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(bottom: 16.h),
-              itemCount: _filteredData.length,
-              itemBuilder: (context, index) {
-                final item = _filteredData[index];
-                final isSelected = _selectedNis.contains(item['nis']);
-                return _buildRow(colors, item, isSelected);
-              },
-            ),
-          ),
-
-          // Bottom bar
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -3),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: SizedBox(
-                width: double.infinity,
-                height: 50.h,
-                child: PrimaryButton(
-                  onPressed: _selectedNis.isEmpty ? null : _confirmSelection,
-                  icon: Icons.check,
-                  label: t.selectSantri.tambahkanButton(
-                    count: _selectedNis.length.toString(),
+                  // List
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Tidak ada santri',
+                              style: TextStyle(
+                                color: colors.textSecondary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: EdgeInsets.only(bottom: 16.h),
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) {
+                              final santri = filtered[index];
+                              final isSelected =
+                                  _selectedIds.contains(santri.id);
+                              return _buildRow(colors, santri, isSelected);
+                            },
+                          ),
                   ),
-                  borderRadius: 25.r,
-                ),
-              ),
-            ),
-          ),
-        ],
+
+                  // Bottom bar
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, -3),
+                        ),
+                      ],
+                    ),
+                    child: SafeArea(
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 50.h,
+                        child: PrimaryButton(
+                          onPressed: _selectedIds.isEmpty
+                              ? null
+                              : () => _confirmSelection(santriList),
+                          icon: Icons.check,
+                          label: t.selectSantri.tambahkanButton(
+                            count: _selectedIds.length.toString(),
+                          ),
+                          borderRadius: 25.r,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -287,9 +301,9 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
     );
   }
 
-  Widget _buildRow(AppColorSet colors, Map<String, String> item, bool isSelected) {
+  Widget _buildRow(AppColorSet colors, SantriModel santri, bool isSelected) {
     return InkWell(
-      onTap: () => _toggleSelect(item['nis']!),
+      onTap: () => _toggleSelect(santri.id),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         child: Row(
@@ -298,7 +312,7 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
             SizedBox(
               width: 55.w,
               child: Text(
-                item['nis']!,
+                santri.nis,
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w400,
@@ -310,7 +324,7 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
             // Name
             Expanded(
               child: Text(
-                item['name']!,
+                santri.nama,
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w500,
@@ -335,7 +349,7 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
-                    item['kelas']!,
+                    '${santri.kelas}${santri.program}',
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
