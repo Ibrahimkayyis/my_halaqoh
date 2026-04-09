@@ -398,8 +398,8 @@ class TranslationsAddDataEn {
 	/// en: 'Fill in the form one by one in detail'
 	String get inputManualDesc => 'Fill in the form one by one in detail';
 
-	/// en: 'Upload Excel/CSV File'
-	String get uploadExcel => 'Upload Excel/CSV File';
+	/// en: 'Upload CSV File'
+	String get uploadExcel => 'Upload CSV File';
 
 	/// en: 'Import large amounts of data from a file'
 	String get uploadExcelDesc => 'Import large amounts of data from a file';
@@ -452,11 +452,11 @@ class TranslationsAddDataEn {
 	/// en: 'Import data automatically using an Excel file.'
 	String get bulkSubtitle => 'Import data automatically using an Excel file.';
 
-	/// en: 'Tap to upload Excel file'
-	String get bulkTapUpload => 'Tap to upload Excel file';
+	/// en: 'Tap to upload CSV file'
+	String get bulkTapUpload => 'Tap to upload CSV file';
 
-	/// en: 'Format .xlsx or .csv (Max. 5MB)'
-	String get bulkFormat => 'Format .xlsx or .csv (Max. 5MB)';
+	/// en: 'Format .csv (Max. 5MB)'
+	String get bulkFormat => 'Format .csv (Max. 5MB)';
 
 	/// en: 'Upload Now'
 	String get bulkUploadButton => 'Upload Now';
@@ -1540,7 +1540,7 @@ extension on Translations {
 			case 'addData.subtitle': return 'Choose your preferred data input method';
 			case 'addData.inputManual': return 'Manual Input';
 			case 'addData.inputManualDesc': return 'Fill in the form one by one in detail';
-			case 'addData.uploadExcel': return 'Upload Excel/CSV File';
+			case 'addData.uploadExcel': return 'Upload CSV File';
 			case 'addData.uploadExcelDesc': return 'Import large amounts of data from a file';
 			case 'addData.addSantriManual': return 'Add Santri Manual';
 			case 'addData.addGuruManual': return 'Add Guru Manual';
@@ -1558,8 +1558,8 @@ extension on Translations {
 			case 'addData.simpan': return 'Simpan';
 			case 'addData.bulkTitle': return 'Bulk Add Data';
 			case 'addData.bulkSubtitle': return 'Import data automatically using an Excel file.';
-			case 'addData.bulkTapUpload': return 'Tap to upload Excel file';
-			case 'addData.bulkFormat': return 'Format .xlsx or .csv (Max. 5MB)';
+			case 'addData.bulkTapUpload': return 'Tap to upload CSV file';
+			case 'addData.bulkFormat': return 'Format .csv (Max. 5MB)';
 			case 'addData.bulkUploadButton': return 'Upload Now';
 			case 'addHalaqoh.title': return 'Add New Halaqoh';
 			case 'addHalaqoh.namaHalaqoh': return 'Halaqoh Name';

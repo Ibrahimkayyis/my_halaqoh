@@ -248,7 +248,7 @@ class _TranslationsAddDataId extends TranslationsAddDataEn {
 	@override String get subtitle => 'Pilih metode input data yang diinginkan';
 	@override String get inputManual => 'Input Manual';
 	@override String get inputManualDesc => 'Isi form data satu per satu secara detail';
-	@override String get uploadExcel => 'Upload File Excel/CSV';
+	@override String get uploadExcel => 'Upload File CSV';
 	@override String get uploadExcelDesc => 'Impor banyak data sekaligus dari file';
 	@override String get addSantriManual => 'Tambah Santri Manual';
 	@override String get addGuruManual => 'Tambah Guru Manual';
@@ -266,8 +266,8 @@ class _TranslationsAddDataId extends TranslationsAddDataEn {
 	@override String get simpan => 'Simpan';
 	@override String get bulkTitle => 'Tambah Data Massal';
 	@override String get bulkSubtitle => 'Import Data secara otomatis menggunakan file excel.';
-	@override String get bulkTapUpload => 'Tap untuk upload file Excel';
-	@override String get bulkFormat => 'Format .xlsx atau .csv (Maks. 5MB)';
+	@override String get bulkTapUpload => 'Tap untuk upload file CSV';
+	@override String get bulkFormat => 'Format .csv (Maks. 5MB)';
 	@override String get bulkUploadButton => 'Upload Sekarang';
 }
 
@@ -839,7 +839,7 @@ extension on TranslationsId {
 			case 'addData.subtitle': return 'Pilih metode input data yang diinginkan';
 			case 'addData.inputManual': return 'Input Manual';
 			case 'addData.inputManualDesc': return 'Isi form data satu per satu secara detail';
-			case 'addData.uploadExcel': return 'Upload File Excel/CSV';
+			case 'addData.uploadExcel': return 'Upload File CSV';
 			case 'addData.uploadExcelDesc': return 'Impor banyak data sekaligus dari file';
 			case 'addData.addSantriManual': return 'Tambah Santri Manual';
 			case 'addData.addGuruManual': return 'Tambah Guru Manual';
@@ -857,8 +857,8 @@ extension on TranslationsId {
 			case 'addData.simpan': return 'Simpan';
 			case 'addData.bulkTitle': return 'Tambah Data Massal';
 			case 'addData.bulkSubtitle': return 'Import Data secara otomatis menggunakan file excel.';
-			case 'addData.bulkTapUpload': return 'Tap untuk upload file Excel';
-			case 'addData.bulkFormat': return 'Format .xlsx atau .csv (Maks. 5MB)';
+			case 'addData.bulkTapUpload': return 'Tap untuk upload file CSV';
+			case 'addData.bulkFormat': return 'Format .csv (Maks. 5MB)';
 			case 'addData.bulkUploadButton': return 'Upload Sekarang';
 			case 'addHalaqoh.title': return 'Tambah Halaqoh Baru';
 			case 'addHalaqoh.namaHalaqoh': return 'Nama Halaqoh';

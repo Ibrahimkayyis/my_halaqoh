@@ -94,7 +94,7 @@
     "subtitle": "Choose your preferred data input method",
     "inputManual": "Manual Input",
     "inputManualDesc": "Fill in the form one by one in detail",
-    "uploadExcel": "Upload Excel/CSV File",
+    "uploadExcel": "Upload CSV File",
     "uploadExcelDesc": "Import large amounts of data from a file",
     "addSantriManual": "Add Santri Manual",
     "addGuruManual": "Add Guru Manual",
@@ -112,8 +112,8 @@
     "simpan": "Simpan",
     "bulkTitle": "Bulk Add Data",
     "bulkSubtitle": "Import data automatically using an Excel file.",
-    "bulkTapUpload": "Tap to upload Excel file",
-    "bulkFormat": "Format .xlsx or .csv (Max. 5MB)",
+    "bulkTapUpload": "Tap to upload CSV file",
+    "bulkFormat": "Format .csv (Max. 5MB)",
     "bulkUploadButton": "Upload Now"
   },
   "addHalaqoh": {

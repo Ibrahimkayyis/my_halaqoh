@@ -121,7 +121,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
           context.read<SantriCubit>().addSantri(model);
         },
       ),
-      onBulkUploadTap: () => BulkUploadDialog.show(context),
+      onBulkUploadTap: () => BulkUploadDialog.show(context, importType: BulkImportType.santri),
     );
   }
 

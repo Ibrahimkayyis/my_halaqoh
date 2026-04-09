@@ -94,7 +94,7 @@
     "subtitle": "Pilih metode input data yang diinginkan",
     "inputManual": "Input Manual",
     "inputManualDesc": "Isi form data satu per satu secara detail",
-    "uploadExcel": "Upload File Excel/CSV",
+    "uploadExcel": "Upload File CSV",
     "uploadExcelDesc": "Impor banyak data sekaligus dari file",
     "addSantriManual": "Tambah Santri Manual",
     "addGuruManual": "Tambah Guru Manual",
@@ -112,8 +112,8 @@
     "simpan": "Simpan",
     "bulkTitle": "Tambah Data Massal",
     "bulkSubtitle": "Import Data secara otomatis menggunakan file excel.",
-    "bulkTapUpload": "Tap untuk upload file Excel",
-    "bulkFormat": "Format .xlsx atau .csv (Maks. 5MB)",
+    "bulkTapUpload": "Tap untuk upload file CSV",
+    "bulkFormat": "Format .csv (Maks. 5MB)",
     "bulkUploadButton": "Upload Sekarang"
   },
   "addHalaqoh": {

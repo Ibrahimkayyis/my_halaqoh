@@ -95,7 +95,7 @@ class _GuruListScreenState extends State<GuruListScreen> {
           context.read<GuruCubit>().addGuru(model);
         },
       ),
-      onBulkUploadTap: () => BulkUploadDialog.show(context),
+      onBulkUploadTap: () => BulkUploadDialog.show(context, importType: BulkImportType.guru),
     );
   }
 

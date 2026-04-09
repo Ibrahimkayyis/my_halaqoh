@@ -23,6 +23,8 @@ dependencies:
   firebase_storage: ^13.2.0
   flutter:
     sdk: flutter
+  file_picker: ^8.1.2
+  csv: ^6.0.0
   flutter_bloc: ^9.1.1
   flutter_gen: ^5.12.0
   flutter_localization: ^0.3.3
@@ -47,7 +49,7 @@ dependencies:
   shared_preferences: ^2.5.4
   slang: ^4.8.1
   slang_flutter: ^4.8.0
-
+  
 dev_dependencies:
   auto_route_generator: ^10.2.4
   build_runner: ^2.7.1
@@ -62,15 +64,18 @@ dev_dependencies:
 
 flutter_gen:
   output: lib/gen/
-  colors:
-    inputs:
-      - assets/color/colors.xml
+  integrations:
+    flutter_svg: true
+    lottie: true
+    flare: true
+    rive: true
 
 flutter:
   uses-material-design: true
-
   assets:
     - assets/images/
+    - assets/icons/
+    - assets/lottie/
     - assets/data/
 
   fonts:
