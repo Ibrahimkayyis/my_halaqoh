@@ -5,6 +5,12 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 
 /// Profile screen for Guru role — avatar, name, role badge, menu items, logout
 class GuruProfileScreen extends StatelessWidget {
@@ -14,12 +20,41 @@ class GuruProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
+    final authState = context.watch<AuthCubit>().state;
+    final halaqohState = context.watch<HalaqohCubit>().state;
+
+    String guruName = '';
+    String linkedDocId = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        guruName = userMeta.displayName;
+        linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
     return Scaffold(
       backgroundColor: colors.background,
       body: Column(
         children: [
           // ── Green header with avatar + name + role badge ──
-          _buildHeader(colors),
+          _buildHeader(
+            colors: colors,
+            name: guruName.isNotEmpty ? guruName : 'Memuat...',
+            role: myHalaqoh != null
+                ? 'Pengampu ${myHalaqoh!.nama}'
+                : t.guruProfile.guruHalaqoh,
+          ),
 
           // ── Menu sections ──
           Expanded(
@@ -98,7 +133,11 @@ class GuruProfileScreen extends StatelessWidget {
   }
 
   /// Green gradient header with avatar, name, and "Guru Halaqoh" badge
-  Widget _buildHeader(AppColorSet colors) {
+  Widget _buildHeader({
+    required AppColorSet colors,
+    required String name,
+    required String role,
+  }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -136,13 +175,14 @@ class GuruProfileScreen extends StatelessWidget {
 
               // Name
               Text(
-                'Ustadz Kayyis', // Dummy name
+                name,
                 style: TextStyle(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                   fontFamily: 'Poppins',
                 ),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 6.h),
 
@@ -154,7 +194,7 @@ class GuruProfileScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
-                  t.guruProfile.guruHalaqoh,
+                  role,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,

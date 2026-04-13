@@ -5,8 +5,14 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 
-/// Riwayat Absensi screen â€” individual student attendance history
+/// Riwayat Absensi screen — individual student attendance history
 @RoutePage()
 class WaliSantriRiwayatAbsensiScreen extends StatefulWidget {
   final String name;
@@ -29,8 +35,6 @@ class _WaliSantriRiwayatAbsensiScreenState
     extends State<WaliSantriRiwayatAbsensiScreen> {
   int _currentMonth = 11; // November
   int _currentYear = 2025;
-
-
 
   final List<String> _dayNames = [
     'AHA',
@@ -58,7 +62,7 @@ class _WaliSantriRiwayatAbsensiScreenState
     return ['P', 'M'];
   }
 
-  // Dummy attendance data â€” generated based on program type
+  // Dummy attendance data — generated based on program type
   late Map<int, Map<String, String>> _attendanceData;
 
   @override
@@ -141,6 +145,27 @@ class _WaliSantriRiwayatAbsensiScreenState
     final colors = AppColors.of(context);
     final stats = _stats;
 
+    final authState = context.watch<AuthCubit>().state;
+    final halaqohState = context.watch<HalaqohCubit>().state;
+
+    String linkedDocId = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere((h) => h.santriIds.contains(linkedDocId));
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
     return Scaffold(
       backgroundColor: colors.background,
       body: SingleChildScrollView(
@@ -167,7 +192,9 @@ class _WaliSantriRiwayatAbsensiScreenState
                   borderRadius: BorderRadius.circular(16.r),
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    // Avatar — fixed size, never shrinks
                     Container(
                       width: 48.w,
                       height: 48.w,
@@ -182,42 +209,54 @@ class _WaliSantriRiwayatAbsensiScreenState
                       ),
                     ),
                     SizedBox(width: 14.w),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.name,
-                          style: TextStyle(
-                            fontSize: 17.sp,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
+                    // Text info — Expanded so it takes remaining width
+                    // and never overflows outside the card
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 17.sp,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              fontFamily: 'Poppins',
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          'NIS: ${widget.nis}',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white.withValues(alpha: 0.85),
-                            fontFamily: 'Poppins',
+                          SizedBox(height: 2.h),
+                          Text(
+                            'NIS: ${widget.nis}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white.withValues(alpha: 0.85),
+                              fontFamily: 'Poppins',
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 1.h),
-                        Text(
-                          t.riwayatAbsensi.halaqohKelas(
-                            halaqoh: 'A',
-                            kelas: '7',
+                          SizedBox(height: 1.h),
+                          Text(
+                            myHalaqoh != null
+                                ? t.riwayatAbsensi.halaqohKelas(
+                                    halaqoh: myHalaqoh!.nama,
+                                    kelas: myHalaqoh!.kelas,
+                                  )
+                                : 'Belum Terdaftar Halaqoh',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white.withValues(alpha: 0.85),
+                              fontFamily: 'Poppins',
+                            ),
                           ),
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white.withValues(alpha: 0.85),
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

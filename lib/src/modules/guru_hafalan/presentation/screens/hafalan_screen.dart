@@ -4,7 +4,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/widgets/hafalan_santri_item.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
 /// Hafalan Santri Screen — search bar, count badge, and santri card list with actions
 @RoutePage()
@@ -18,34 +27,53 @@ class HafalanScreen extends StatefulWidget {
 class _HafalanScreenState extends State<HafalanScreen> {
   String _searchQuery = '';
 
-  final List<Map<String, String>> _santriList = [
-    {'name': 'Ahmad', 'nis': '123456'},
-    {'name': 'Fauzan', 'nis': '123457'},
-    {'name': 'Yusuf', 'nis': '123458'},
-    {'name': 'Ibrahim', 'nis': '123459'},
-    {'name': 'Khalid', 'nis': '123460'},
-    {'name': 'Usman', 'nis': '123461'},
-    {'name': 'Ghulam', 'nis': '123462'},
-    {'name': 'Haikal', 'nis': '123463'},
-    {'name': 'Fikrie', 'nis': '123464'},
-    {'name': 'Ghatfhan', 'nis': '123465'},
-  ];
-
-  List<Map<String, String>> get _filteredSantri {
-    if (_searchQuery.isEmpty) return _santriList;
-    return _santriList
-        .where(
-          (s) =>
-              s['name']!.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              s['nis']!.contains(_searchQuery),
-        )
-        .toList();
-  }
+  // Filter logic is now handled in build method dynamically based on Cubits
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final filtered = _filteredSantri;
+
+    // Retrieve Auth Context
+    final authState = context.watch<AuthCubit>().state;
+    final halaqohState = context.watch<HalaqohCubit>().state;
+    final santriState = context.watch<SantriCubit>().state;
+
+    String linkedDocId = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    List<SantriModel> mySantriList = [];
+    if (myHalaqoh != null) {
+      santriState.maybeWhen(
+        loaded: (sList) {
+          mySantriList = sList
+              .where((s) => myHalaqoh!.santriIds.contains(s.id))
+              .toList();
+        },
+        orElse: () {},
+      );
+    }
+
+    final filtered = mySantriList.where((sanitize) {
+      if (_searchQuery.isEmpty) return true;
+      final q = _searchQuery.toLowerCase();
+      return sanitize.nama.toLowerCase().contains(q) ||
+          sanitize.nis.contains(q);
+    }).toList();
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -148,24 +176,21 @@ class _HafalanScreenState extends State<HafalanScreen> {
                 itemBuilder: (context, index) {
                   final santri = filtered[index];
                   return HafalanSantriItem(
-                    name: santri['name']!,
-                    nis: santri['nis']!,
+                    name: santri.nama,
+                    nis: santri.nis,
                     riwayatLabel: t.hafalan.riwayatHafalan,
                     inputLabel: t.hafalan.inputHafalan,
                     onRiwayatTap: () {
                       context.router.push(
                         RiwayatHafalanSantriRoute(
-                          name: santri['name']!,
-                          nis: santri['nis']!,
+                          name: santri.nama,
+                          nis: santri.nis,
                         ),
                       );
                     },
                     onInputTap: () async {
                       final result = await context.router.push(
-                        InputHafalanRoute(
-                          name: santri['name']!,
-                          nis: santri['nis']!,
-                        ),
+                        InputHafalanRoute(name: santri.nama, nis: santri.nis),
                       );
                       if (result != null && result is Map<String, dynamic>) {
                         if (context.mounted) {

@@ -13,6 +13,7 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.da
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
@@ -47,7 +48,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
       _namaController.text = existing.nama;
       _selectedKelas = existing.kelas;
       _selectedProgram = existing.program == 'T' ? 'Takhassus' : 'Reguler';
-      
+
       final guruList = context.read<GuruCubit>().state.maybeWhen(
         loaded: (list) => list,
         orElse: () => <GuruModel>[],
@@ -74,9 +75,9 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
     super.dispose();
   }
 
-  Future<void> _navigateToSelectSantri() async {
+  Future<void> _navigateToSelectSantri(Set<String> assignedSantris) async {
     final result = await context.router.push<List<SantriModel>>(
-      const SelectSantriRoute(),
+      SelectSantriRoute(assignedSantriIds: assignedSantris),
     );
     if (result != null && result.isNotEmpty) {
       setState(() {
@@ -106,9 +107,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
   Future<void> _saveHalaqoh() async {
     if (_namaController.text.isEmpty || _selectedGuru == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lengkapi nama dan pengampu halaqoh'),
-        ),
+        const SnackBar(content: Text('Lengkapi nama dan pengampu halaqoh')),
       );
       return;
     }
@@ -117,13 +116,14 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
     if (!confirmed) return;
 
     final now = DateTime.now();
-    final programCode =
-        _selectedProgram == 'Takhassus' ? 'T' : 'R';
+    final programCode = _selectedProgram == 'Takhassus' ? 'T' : 'R';
 
     final isEdit = widget.existingHalaqoh != null;
 
     final model = HalaqohModel(
-      id: isEdit ? widget.existingHalaqoh!.id : '', // will be set by Firestore if empty
+      id: isEdit
+          ? widget.existingHalaqoh!.id
+          : '', // will be set by Firestore if empty
       nama: _namaController.text,
       kelas: _selectedKelas ?? '7',
       program: programCode,
@@ -148,6 +148,25 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+
+    // Track assigned Halqoh
+    final halaqohState = context.watch<HalaqohCubit>().state;
+    final allHalaqoh = halaqohState.maybeWhen(
+      loaded: (list) => list,
+      orElse: () => <HalaqohModel>[],
+    );
+
+    final assignedGuruIds = <String>{};
+    final assignedSantriIds = <String>{};
+
+    for (final h in allHalaqoh) {
+      if (widget.existingHalaqoh != null &&
+          h.id == widget.existingHalaqoh!.id) {
+        continue;
+      }
+      assignedGuruIds.add(h.guruId);
+      assignedSantriIds.addAll(h.santriIds);
+    }
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -247,28 +266,62 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                         loaded: (list) => list,
                         orElse: () => <GuruModel>[],
                       );
-                      final guruNames =
-                          guruList.map((g) => g.nama).toList();
-                      return CustomDropdown<String>.search(
-                        hintText: t.addHalaqoh.pengampuHint,
-                        items: guruNames,
-                        initialItem: _selectedGuru?.nama,
-                        excludeSelected: false,
-                        onChanged: (name) {
-                          setState(() {
-                            try {
-                              _selectedGuru =
-                                  guruList.firstWhere((g) => g.nama == name);
-                            } catch (_) {
-                              _selectedGuru = null;
-                            }
-                          });
-                        },
-                        closedHeaderPadding: EdgeInsets.symmetric(
-                          horizontal: 14.w,
-                          vertical: 12.h,
-                        ),
-                        decoration: _dropdownDecoration(colors),
+
+                      final availableGurus = guruList
+                          .where((g) => !assignedGuruIds.contains(g.id))
+                          .toList();
+                      final filteredCount =
+                          guruList.length - availableGurus.length;
+
+                      final guruNames = availableGurus
+                          .map((g) => g.nama)
+                          .toList();
+
+                      // Cegah crash pada library CustomDropdown:
+                      // Jika kita (atau sistem) sudah men-select seorang guru, pastikan namanya SELALU ADA di list dropdown
+                      // Hal ini mencegah error saat halaqoh disimpan dan state me-refresh UI secara reaktif.
+                      if (_selectedGuru != null && !guruNames.contains(_selectedGuru!.nama)) {
+                        guruNames.add(_selectedGuru!.nama);
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomDropdown<String>.search(
+                            hintText: t.addHalaqoh.pengampuHint,
+                            items: guruNames,
+                            initialItem: _selectedGuru?.nama,
+                            excludeSelected: false,
+                            onChanged: (name) {
+                              setState(() {
+                                try {
+                                  _selectedGuru = availableGurus.firstWhere(
+                                    (g) => g.nama == name,
+                                  );
+                                } catch (_) {
+                                  _selectedGuru = null;
+                                }
+                              });
+                            },
+                            closedHeaderPadding: EdgeInsets.symmetric(
+                              horizontal: 14.w,
+                              vertical: 12.h,
+                            ),
+                            decoration: _dropdownDecoration(colors),
+                          ),
+                          if (filteredCount > 0) ...[
+                            SizedBox(height: 6.h),
+                            Text(
+                              '* $filteredCount guru disembunyikan karena telah mengampu halaqoh lain.',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: colors.primary,
+                                fontStyle: FontStyle.italic,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ],
                       );
                     },
                   ),
@@ -288,7 +341,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: _navigateToSelectSantri,
+                        onTap: () => _navigateToSelectSantri(assignedSantriIds),
                         child: Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 14.w,
@@ -297,8 +350,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                           decoration: BoxDecoration(
                             color: colors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8.r),
-                            border:
-                                Border.all(color: colors.primary, width: 1),
+                            border: Border.all(color: colors.primary, width: 1),
                           ),
                           child: Text(
                             t.addHalaqoh.tambahSantri,
@@ -517,8 +569,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
             ...List.generate(_selectedSantri.length, (index) {
               final santri = _selectedSantri[index];
               return Container(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(

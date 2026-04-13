@@ -3,12 +3,19 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_mutabaah_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_progress_per_juz_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 
-/// Riwayat Hafalan Santri â€” individual student memorization history
+/// Riwayat Hafalan Santri — individual student memorization history
 @RoutePage()
 class WaliSantriRiwayatHafalanScreen extends StatefulWidget {
   final String name;
@@ -29,8 +36,6 @@ class _WaliSantriRiwayatHafalanScreenState
     extends State<WaliSantriRiwayatHafalanScreen> {
   int _currentMonth = 11; // November
   int _currentYear = 2025;
-
-
 
   final List<String> _dayNames = [
     'AHA',
@@ -225,6 +230,27 @@ class _WaliSantriRiwayatHafalanScreenState
     final colors = AppColors.of(context);
     final filtered = _filteredRecords;
 
+    final authState = context.watch<AuthCubit>().state;
+    final halaqohState = context.watch<HalaqohCubit>().state;
+
+    String linkedDocId = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere((h) => h.santriIds.contains(linkedDocId));
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
@@ -253,7 +279,9 @@ class _WaliSantriRiwayatHafalanScreenState
                         borderRadius: BorderRadius.circular(16.r),
                       ),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          // Avatar — fixed size, never shrinks
                           Container(
                             width: 50.w,
                             height: 50.w,
@@ -268,41 +296,53 @@ class _WaliSantriRiwayatHafalanScreenState
                             ),
                           ),
                           SizedBox(width: 14.w),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.name,
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
+                          // Text info — Expanded so it takes remaining width
+                          // and never overflows outside the card
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                'NIS: ${widget.nis}',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white.withValues(alpha: 0.85),
-                                  fontFamily: 'Poppins',
+                                SizedBox(height: 2.h),
+                                Text(
+                                  'NIS: ${widget.nis}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                    fontFamily: 'Poppins',
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                t.riwayatHafalanSantri.halaqohKelas(
-                                  halaqoh: 'A',
-                                  kelas: '7',
+                                Text(
+                                  myHalaqoh != null
+                                      ? t.riwayatHafalanSantri.halaqohKelas(
+                                          halaqoh: myHalaqoh!.nama,
+                                          kelas: myHalaqoh!.kelas,
+                                        )
+                                      : 'Belum Terdaftar Halaqoh',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                    fontFamily: 'Poppins',
+                                  ),
                                 ),
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white.withValues(alpha: 0.85),
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ],
                       ),

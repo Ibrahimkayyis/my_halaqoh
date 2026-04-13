@@ -4,8 +4,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/halaqoh_info_card.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/santri_list_item.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
 /// My Halaqoh screen showing halaqoh info card, search bar, and santri list.
 @RoutePage()
@@ -20,79 +29,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // Dummy data with progress
-  final List<Map<String, dynamic>> _allSantri = [
-    {
-      'name': 'Ahmad',
-      'nis': '22051214060',
-      'completedJuz': 1.5,
-      'targetJuz': 5.0,
-    },
-    {
-      'name': 'Bima Sakti',
-      'nis': '22051214061',
-      'completedJuz': 3.5,
-      'targetJuz': 5.0,
-    },
-    {
-      'name': 'Candra Wijaya',
-      'nis': '22051214062',
-      'completedJuz': 0.5,
-      'targetJuz': 5.0,
-    },
-    {
-      'name': 'Dimas Pratama',
-      'nis': '22051214063',
-      'completedJuz': 4.5,
-      'targetJuz': 5.0,
-    },
-    {
-      'name': 'Faris Abdullah',
-      'nis': '22051214064',
-      'completedJuz': 2.0,
-      'targetJuz': 5.0,
-    },
-    {
-      'name': 'Gilang Ramadhan',
-      'nis': '22051214065',
-      'completedJuz': 5.0,
-      'targetJuz': 5.0,
-    },
-    {
-      'name': 'Haris Maulana',
-      'nis': '22051214066',
-      'completedJuz': 1.0,
-      'targetJuz': 5.0,
-    },
-    {
-      'name': 'Irfan Hakim',
-      'nis': '22051214067',
-      'completedJuz': 3.0,
-      'targetJuz': 5.0,
-    },
-    {
-      'name': 'Joko Prasetyo',
-      'nis': '22051214068',
-      'completedJuz': 2.5,
-      'targetJuz': 5.0,
-    },
-    {
-      'name': 'Kurniawan',
-      'nis': '22051214069',
-      'completedJuz': 4.0,
-      'targetJuz': 5.0,
-    },
-  ];
-
-  List<Map<String, dynamic>> get _filteredSantri {
-    if (_searchQuery.isEmpty) return _allSantri;
-    return _allSantri.where((s) {
-      final name = (s['name'] as String).toLowerCase();
-      final nis = s['nis'] as String;
-      final query = _searchQuery.toLowerCase();
-      return name.contains(query) || nis.contains(query);
-    }).toList();
-  }
+  // Filter logic is now handled in build method dynamically based on Cubits
 
   @override
   void dispose() {
@@ -103,7 +40,48 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final filtered = _filteredSantri;
+
+    // Retrieve Auth Context
+    final authState = context.watch<AuthCubit>().state;
+    final halaqohState = context.watch<HalaqohCubit>().state;
+    final santriState = context.watch<SantriCubit>().state;
+
+    String linkedDocId = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    List<SantriModel> mySantriList = [];
+    if (myHalaqoh != null) {
+      santriState.maybeWhen(
+        loaded: (sList) {
+          mySantriList = sList
+              .where((s) => myHalaqoh!.santriIds.contains(s.id))
+              .toList();
+        },
+        orElse: () {},
+      );
+    }
+
+    final filtered = mySantriList.where((sanitize) {
+      if (_searchQuery.isEmpty) return true;
+      final q = _searchQuery.toLowerCase();
+      return sanitize.nama.toLowerCase().contains(q) ||
+          sanitize.nis.contains(q);
+    }).toList();
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -111,17 +89,36 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-           
-
             // Halaqoh info card
-            HalaqohInfoCard(
-              kelas: t.myHalaqohScreen.kelas(kelas: '7'),
-              program: t.myHalaqohScreen.program(program: 'Reguler'),
-              halaqohName: 'Halaqoh Al-Kahfi',
-              pengampu: t.myHalaqohScreen.pengampu,
-              target: t.myHalaqohScreen.target(count: '2', range: 'Juz 30-29'),
-              totalSantri: t.myHalaqohScreen.total(count: '10'),
-            ),
+            if (myHalaqoh != null)
+              HalaqohInfoCard(
+                kelas: t.myHalaqohScreen.kelas(kelas: myHalaqoh!.kelas),
+                program: t.myHalaqohScreen.program(
+                  program: myHalaqoh!.program == 'T' ? 'Takhassus' : 'Reguler',
+                ),
+                halaqohName: myHalaqoh!.nama,
+                pengampu: myHalaqoh!.guruNama.isNotEmpty
+                    ? myHalaqoh!.guruNama
+                    : t.myHalaqohScreen.pengampu,
+                target: t.myHalaqohScreen.target(
+                  count: myHalaqoh!.program == 'T' ? '5' : '1',
+                  range: myHalaqoh!.program == 'T' ? 'Juz 30-26' : 'Juz 30',
+                ),
+                totalSantri: t.myHalaqohScreen.total(
+                  count: mySantriList.length.toString(),
+                ),
+              )
+            else
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                child: Text(
+                  'Anda belum ditugaskan ke Halaqoh manapun.',
+                  style: TextStyle(
+                    color: colors.textSecondary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
             SizedBox(height: 20.h),
 
             // Search bar
@@ -222,8 +219,8 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
                   final santri = filtered[index];
-                  final completed = santri['completedJuz'] as double;
-                  final target = santri['targetJuz'] as double;
+                  final completed = 0.0; // TODO: Pull real progress
+                  final target = myHalaqoh?.program == 'T' ? 5.0 : 1.0;
                   final pct = ((completed / target) * 100).round();
 
                   // Format: remove .0 for whole numbers
@@ -234,7 +231,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                   }
 
                   return SantriListItem(
-                    name: santri['name'] as String,
+                    name: santri.nama,
                     progressText: t.myHalaqohScreen.progressText(
                       completed: formatJuz(completed),
                       target: formatJuz(target),
@@ -243,10 +240,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                     progress: completed / target,
                     onTap: () {
                       context.router.push(
-                        DetailSantriRoute(
-                          name: santri['name'] as String,
-                          nis: santri['nis'] as String,
-                        ),
+                        DetailSantriRoute(name: santri.nama, nis: santri.nis),
                       );
                     },
                   );

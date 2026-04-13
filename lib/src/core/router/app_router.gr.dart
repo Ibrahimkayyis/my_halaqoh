@@ -931,18 +931,59 @@ class RiwayatHafalanSantriRouteArgs {
 
 /// generated route for
 /// [SelectSantriScreen]
-class SelectSantriRoute extends PageRouteInfo<void> {
-  const SelectSantriRoute({List<PageRouteInfo>? children})
-    : super(SelectSantriRoute.name, initialChildren: children);
+class SelectSantriRoute extends PageRouteInfo<SelectSantriRouteArgs> {
+  SelectSantriRoute({
+    Key? key,
+    Set<String> assignedSantriIds = const {},
+    List<PageRouteInfo>? children,
+  }) : super(
+         SelectSantriRoute.name,
+         args: SelectSantriRouteArgs(
+           key: key,
+           assignedSantriIds: assignedSantriIds,
+         ),
+         initialChildren: children,
+       );
 
   static const String name = 'SelectSantriRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const SelectSantriScreen();
+      final args = data.argsAs<SelectSantriRouteArgs>(
+        orElse: () => const SelectSantriRouteArgs(),
+      );
+      return SelectSantriScreen(
+        key: args.key,
+        assignedSantriIds: args.assignedSantriIds,
+      );
     },
   );
+}
+
+class SelectSantriRouteArgs {
+  const SelectSantriRouteArgs({this.key, this.assignedSantriIds = const {}});
+
+  final Key? key;
+
+  final Set<String> assignedSantriIds;
+
+  @override
+  String toString() {
+    return 'SelectSantriRouteArgs{key: $key, assignedSantriIds: $assignedSantriIds}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! SelectSantriRouteArgs) return false;
+    return key == other.key &&
+        const SetEquality().equals(assignedSantriIds, other.assignedSantriIds);
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^ const SetEquality().hash(assignedSantriIds);
 }
 
 /// generated route for

@@ -65,19 +65,25 @@ class SantriListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name row — name left, percentage right
+                  // Name row — name left (flexible), percentage right (fixed)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colors.primary,
-                          fontFamily: 'Poppins',
+                      Expanded(
+                        child: Text(
+                          name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: colors.primary,
+                            fontFamily: 'Poppins',
+                          ),
                         ),
                       ),
+                      SizedBox(width: 8.w),
                       Text(
                         percentage,
                         style: TextStyle(
@@ -95,6 +101,7 @@ class SantriListItem extends StatelessWidget {
                   Text(
                     progressText,
                     maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w400,

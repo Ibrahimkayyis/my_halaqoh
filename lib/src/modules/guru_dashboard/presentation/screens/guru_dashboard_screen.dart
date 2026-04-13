@@ -2,23 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/widgets/guru_dashboard_header.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/widgets/capaian_card.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/widgets/guru_menu_card.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/widgets/setoran_item.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 
 /// Main dashboard content page for Guru role
 class GuruDashboardScreen extends StatelessWidget {
   final void Function(int index)? onNavigateToTab;
 
-  const GuruDashboardScreen({
-    super.key,
-    this.onNavigateToTab,
-  });
+  const GuruDashboardScreen({super.key, this.onNavigateToTab});
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+
+    // Retrieve contextual states
+    final authState = context.watch<AuthCubit>().state;
+    final halaqohState = context.watch<HalaqohCubit>().state;
+
+    String guruName = '';
+    String linkedDocId = '';
+
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        guruName = userMeta.displayName;
+        linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    final santriCount = myHalaqoh?.jumlahSantri ?? 0;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -29,8 +59,10 @@ class GuruDashboardScreen extends StatelessWidget {
             // Header
             GuruDashboardHeader(
               greeting: t.guruDashboard.greeting,
-              name: 'Ustadz Kayyis',
-              subtitle: t.guruDashboard.subtitle,
+              name: guruName.isNotEmpty ? guruName : 'Loading...',
+              subtitle: myHalaqoh != null
+                  ? 'Pengampu Halaqoh ${myHalaqoh!.nama}'
+                  : t.guruDashboard.subtitle,
             ),
             SizedBox(height: 24.h),
 
@@ -56,20 +88,20 @@ class GuruDashboardScreen extends StatelessWidget {
                 children: [
                   CapaianCard(
                     title: t.guruDashboard.kehadiranHariIni,
-                    percent: 0.8,
+                    percent: santriCount == 0 ? 0 : 1.0, // Placeholder
                     bottomLabel: t.guruDashboard.santriCount(
-                      current: '8',
-                      total: '10',
+                      current: santriCount.toString(),
+                      total: santriCount.toString(),
                     ),
                     progressColor: colors.primary,
                   ),
                   SizedBox(width: 12.w),
                   CapaianCard(
                     title: t.guruDashboard.setoranHafalan,
-                    percent: 0.5,
+                    percent: santriCount == 0 ? 0 : 0.0, // Placeholder
                     bottomLabel: t.guruDashboard.santriCount(
-                      current: '5',
-                      total: '10',
+                      current: '0',
+                      total: santriCount.toString(),
                     ),
                     progressColor: colors.primary,
                   ),

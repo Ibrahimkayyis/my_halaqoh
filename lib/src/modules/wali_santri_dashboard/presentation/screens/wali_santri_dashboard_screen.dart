@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 
 /// Dashboard content page for Wali Santri role
 class WaliSantriDashboardScreen extends StatelessWidget {
@@ -13,13 +19,48 @@ class WaliSantriDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
+    // Retrieve contextual states
+    final authState = context.watch<AuthCubit>().state;
+    final halaqohState = context.watch<HalaqohCubit>().state;
+
+    String santriName = '';
+    String linkedDocId = '';
+    String nis = '';
+
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        santriName = userMeta.displayName;
+        linkedDocId = userMeta.linkedDocId;
+        nis = userMeta.identifier;
+      },
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere((h) => h.santriIds.contains(linkedDocId));
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
     return Scaffold(
       backgroundColor: colors.background,
       body: SingleChildScrollView(
         child: Column(
           children: [
             // ── Green gradient profile header ──
-            _buildProfileHeader(colors),
+            _buildProfileHeader(
+              colors: colors,
+              santriName: santriName.isNotEmpty ? santriName : 'Memuat...',
+              nis: nis,
+              halaqohInfo: myHalaqoh != null
+                  ? 'Kelas ${myHalaqoh!.kelas}${myHalaqoh!.program} | Halaqoh ${myHalaqoh!.nama}'
+                  : 'Belum terdaftar di Halaqoh mana pun',
+              guruName: myHalaqoh?.guruNama,
+            ),
             SizedBox(height: 24.h),
 
             // ── Progress Hafalan card ──
@@ -47,7 +88,13 @@ class WaliSantriDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(AppColorSet colors) {
+  Widget _buildProfileHeader({
+    required AppColorSet colors,
+    required String santriName,
+    required String nis,
+    required String halaqohInfo,
+    String? guruName,
+  }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -85,50 +132,54 @@ class WaliSantriDashboardScreen extends StatelessWidget {
 
               // Name
               Text(
-                'Ahmad',
+                santriName,
                 style: TextStyle(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                   fontFamily: 'Poppins',
                 ),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 4.h),
 
               // NIS
-              Text(
-                'NIS: 123456',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontFamily: 'Poppins',
+              if (nis.isNotEmpty)
+                Text(
+                  'NIS: $nis',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
               SizedBox(height: 8.h),
 
               // Kelas & Halaqoh
               Text(
-                'Kelas 7 | Halaqoh 1',
+                halaqohInfo,
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w400,
                   color: Colors.white.withValues(alpha: 0.85),
                   fontFamily: 'Poppins',
                 ),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 2.h),
 
               // Guru
-              Text(
-                'Guru: Ustadz Kayyis',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontFamily: 'Poppins',
+              if (guruName != null)
+                Text(
+                  'Guru: $guruName',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
             ],
           ),
         ),

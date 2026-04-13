@@ -64,10 +64,12 @@ dev_dependencies:
 
 flutter_gen:
   output: lib/gen/
+  colors:
+    inputs:
+      - assets/color/colors.xml
   integrations:
     flutter_svg: true
     lottie: true
-    flare: true
     rive: true
 
 flutter:

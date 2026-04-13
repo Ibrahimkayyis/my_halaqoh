@@ -36,6 +36,7 @@ class AbsensiSantriItem extends StatelessWidget {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Avatar
           Container(
@@ -49,32 +50,31 @@ class AbsensiSantriItem extends StatelessWidget {
                 width: 1.5,
               ),
             ),
-            child: Icon(
-              Icons.person,
-              size: 22.sp,
-              color: colors.primary,
-            ),
+            child: Icon(Icons.person, size: 22.sp, color: colors.primary),
           ),
           SizedBox(width: 12.w),
 
-          // Name and NIS
+          // Name, NIS, and button — stacked vertically, takes remaining width
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
+                // Name — full width, wraps naturally
                 Text(
                   name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: colors.primary,
                     fontFamily: 'Poppins',
-                    height: 1.2,
+                    height: 1.3,
                   ),
                 ),
                 SizedBox(height: 2.h),
+
+                // NIS
                 Text(
                   nis,
                   style: TextStyle(
@@ -84,44 +84,47 @@ class AbsensiSantriItem extends StatelessWidget {
                     fontFamily: 'Poppins',
                   ),
                 ),
-              ],
-            ),
-          ),
-          SizedBox(width: 8.w),
+                SizedBox(height: 8.h),
 
-          // Riwayat Absensi button
-          GestureDetector(
-            onTap: onRiwayatTap,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(
-                  color: colors.primary.withValues(alpha: 0.2),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 12.sp,
-                    color: colors.primary,
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    riwayatLabel,
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w600,
-                      color: colors.primary,
-                      fontFamily: 'Poppins',
+                // Riwayat Absensi button — aligned to left
+                GestureDetector(
+                  onTap: onRiwayatTap,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(
+                        color: colors.primary.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 12.sp,
+                          color: colors.primary,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          riwayatLabel,
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w600,
+                            color: colors.primary,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

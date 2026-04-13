@@ -12,7 +12,12 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_st
 /// Screen for selecting santri to add to a halaqoh
 @RoutePage()
 class SelectSantriScreen extends StatefulWidget {
-  const SelectSantriScreen({super.key});
+  final Set<String> assignedSantriIds;
+
+  const SelectSantriScreen({
+    super.key,
+    this.assignedSantriIds = const {},
+  });
 
   @override
   State<SelectSantriScreen> createState() => _SelectSantriScreenState();
@@ -34,8 +39,13 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
   }
 
   List<SantriModel> _applyFilter(List<SantriModel> allSantri) {
-    if (_searchQuery.isEmpty) return allSantri;
-    return allSantri
+    // Filter out those already assigned
+    final available = allSantri
+        .where((s) => !widget.assignedSantriIds.contains(s.id))
+        .toList();
+
+    if (_searchQuery.isEmpty) return available;
+    return available
         .where((s) =>
             s.nama.toLowerCase().contains(_searchQuery) ||
             s.nis.contains(_searchQuery))
@@ -182,6 +192,23 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                     ),
                   ),
                   SizedBox(height: 12.h),
+
+                  // Info Text if any hidden
+                  if (widget.assignedSantriIds.isNotEmpty) ...[
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: Text(
+                        '* ${widget.assignedSantriIds.length} santri disembunyikan karena sudah berada di halaqoh lain.',
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: colors.primary,
+                          fontStyle: FontStyle.italic,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                  ],
 
                   // Table header
                   _buildTableHeader(colors),

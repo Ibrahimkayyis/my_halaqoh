@@ -1,10 +1,16 @@
-﻿import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 
 /// Profile screen for Guru role â€” avatar, name, role badge, menu items, logout
 @RoutePage()
@@ -15,13 +21,44 @@ class WaliSantriProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
+    final authState = context.watch<AuthCubit>().state;
+    final halaqohState = context.watch<HalaqohCubit>().state;
+
+    String santriName = '';
+    String linkedDocId = '';
+    String nis = '';
+
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        santriName = userMeta.displayName;
+        linkedDocId = userMeta.linkedDocId;
+        nis = userMeta.identifier;
+      },
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere((h) => h.santriIds.contains(linkedDocId));
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
     return Scaffold(
       backgroundColor: colors.background,
       body: Column(
         children: [
-          // â”€â”€ Green header with avatar + name + role badge â”€â”€
-          _buildHeader(colors),
-
+          _buildHeader(
+            colors: colors,
+            name: santriName.isNotEmpty ? santriName : 'Memuat...',
+            nis: nis,
+            badge: myHalaqoh != null
+                ? 'Kelas ${myHalaqoh!.kelas} | ${myHalaqoh!.program == 'T' ? 'Takhassus' : 'Reguler'}'
+                : 'Kelas ? | ?',
+          ),
           // â”€â”€ Menu sections â”€â”€
           Expanded(
             child: SingleChildScrollView(
@@ -105,7 +142,12 @@ class WaliSantriProfileScreen extends StatelessWidget {
   }
 
   /// Green gradient header with avatar, santri name, and class badge
-  Widget _buildHeader(AppColorSet colors) {
+  Widget _buildHeader({
+    required AppColorSet colors,
+    required String name,
+    required String nis,
+    required String badge,
+  }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -143,26 +185,28 @@ class WaliSantriProfileScreen extends StatelessWidget {
 
               // Name
               Text(
-                'Ahmad', // Dummy santri name
+                name,
                 style: TextStyle(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                   fontFamily: 'Poppins',
                 ),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 4.h),
 
               // NIS
-              Text(
-                'NIS: 123456',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontFamily: 'Poppins',
+              if (nis.isNotEmpty)
+                Text(
+                  'NIS: $nis',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
               SizedBox(height: 6.h),
 
               // Class badge
@@ -173,7 +217,7 @@ class WaliSantriProfileScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
-                  'Kelas 7 | Reguler',
+                  badge,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,

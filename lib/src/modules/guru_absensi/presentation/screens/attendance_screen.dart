@@ -5,8 +5,17 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/widgets/absensi_santri_item.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/widgets/mulai_absensi_dialog.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
 /// Main attendance screen — start session button, search, action buttons, santri list
 @RoutePage()
@@ -23,28 +32,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  final List<Map<String, String>> _allSantri = [
-    {'name': 'Ahmad', 'nis': '220512140601'},
-    {'name': 'Fauzan', 'nis': '220512140602'},
-    {'name': 'Yusuf', 'nis': '220512140603'},
-    {'name': 'Ibrahim', 'nis': '220512140604'},
-    {'name': 'Khalid', 'nis': '220512140605'},
-    {'name': 'Usman', 'nis': '220512140606'},
-    {'name': 'Ghulam', 'nis': '220512140607'},
-    {'name': 'Haikal', 'nis': '220512140608'},
-    {'name': 'Fikrie', 'nis': '220512140609'},
-    {'name': 'Ghatfhan', 'nis': '220512140610'},
-  ];
-
-  List<Map<String, String>> get _filteredSantri {
-    if (_searchQuery.isEmpty) return _allSantri;
-    return _allSantri.where((s) {
-      final name = s['name']!.toLowerCase();
-      final nis = s['nis']!;
-      final query = _searchQuery.toLowerCase();
-      return name.contains(query) || nis.contains(query);
-    }).toList();
-  }
+  // Filter logic is now handled in build method dynamically based on Cubits
 
   @override
   void dispose() {
@@ -52,7 +40,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     super.dispose();
   }
 
-  void _showMulaiAbsensiDialog() {
+  void _showMulaiAbsensiDialog(List<SantriModel> mySantriList) {
     showDialog(
       context: context,
       builder: (ctx) => MulaiAbsensiDialog(
@@ -60,24 +48,61 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         onScanBarcode: () {
           context.router.push(const BarcodeScannerRoute());
         },
-        onTandaiSemuaHadir: _handleTandaiSemuaHadir,
+        onTandaiSemuaHadir: () => _handleTandaiSemuaHadir(mySantriList),
       ),
     );
   }
 
-  /// Tandai semua hadir — pass semua NIS sebagai scannedNisList
-  /// sehingga DetailAbsensiHariIniScreen akan pre-fill semua status ke "hadir"
-  void _handleTandaiSemuaHadir() {
-    final allNisList = _allSantri.map((s) => s['nis']!).toList();
-    context.router.push(
-      DetailAbsensiHariIniRoute(scannedNisList: allNisList),
-    );
+  void _handleTandaiSemuaHadir(List<SantriModel> mySantriList) {
+    final allNisList = mySantriList.map((s) => s.nis).toList();
+    context.router.push(DetailAbsensiHariIniRoute(scannedNisList: allNisList));
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final filtered = _filteredSantri;
+
+    // Retrieve Auth Context
+    final authState = context.watch<AuthCubit>().state;
+    final halaqohState = context.watch<HalaqohCubit>().state;
+    final santriState = context.watch<SantriCubit>().state;
+
+    String linkedDocId = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    List<SantriModel> mySantriList = [];
+    if (myHalaqoh != null) {
+      santriState.maybeWhen(
+        loaded: (sList) {
+          mySantriList = sList
+              .where((s) => myHalaqoh!.santriIds.contains(s.id))
+              .toList();
+        },
+        orElse: () {},
+      );
+    }
+
+    final filtered = mySantriList.where((sanitize) {
+      if (_searchQuery.isEmpty) return true;
+      final q = _searchQuery.toLowerCase();
+      return sanitize.nama.toLowerCase().contains(q) ||
+          sanitize.nis.contains(q);
+    }).toList();
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -96,7 +121,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 child: PrimaryButton(
                   width: double.infinity,
                   height: 52.h,
-                  onPressed: _showMulaiAbsensiDialog,
+                  onPressed: () => _showMulaiAbsensiDialog(mySantriList),
                   icon: Icons.qr_code_scanner,
                   label: t.absensi.mulaiSesi,
                 ),
@@ -172,9 +197,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     colors,
                     () {
                       // Buka tanpa data scan — semua santri mulai dari "belum"
-                      context.router.push(
-                         DetailAbsensiHariIniRoute(),
-                      );
+                      context.router.push(DetailAbsensiHariIniRoute());
                     },
                   ),
                 ],
@@ -233,14 +256,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 itemBuilder: (context, index) {
                   final santri = filtered[index];
                   return AbsensiSantriItem(
-                    name: santri['name']!,
-                    nis: santri['nis']!,
+                    name: santri.nama,
+                    nis: santri.nis,
                     riwayatLabel: t.absensi.riwayatAbsensi,
                     onRiwayatTap: () {
                       context.router.push(
                         RiwayatAbsensiRoute(
-                          name: santri['name']!,
-                          nis: santri['nis']!,
+                          name: santri.nama,
+                          nis: santri.nis,
                           programType: widget.programType,
                         ),
                       );
