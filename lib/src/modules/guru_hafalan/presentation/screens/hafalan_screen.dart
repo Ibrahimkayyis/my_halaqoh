@@ -12,6 +12,10 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_s
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/widgets/hafalan_santri_item.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
@@ -37,6 +41,14 @@ class _HafalanScreenState extends State<HafalanScreen> {
     final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
     final santriState = context.watch<SantriCubit>().state;
+    final targetHafalanState = context.watch<TargetHafalanCubit>().state;
+
+    // Collect all targets for lookup
+    List<TargetHafalanModel> allTargets = [];
+    targetHafalanState.maybeWhen(
+      loaded: (targets) => allTargets = targets,
+      orElse: () {},
+    );
 
     String linkedDocId = '';
     authState.maybeWhen(
@@ -175,9 +187,21 @@ class _HafalanScreenState extends State<HafalanScreen> {
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
                   final santri = filtered[index];
+
+                  // Look up this santri's target
+                  final santriTarget = TargetHafalanHelper.findTarget(
+                    allTargets,
+                    santri.kelas,
+                    santri.program,
+                  );
+                  final targetInfoText = santriTarget != null
+                      ? 'Target: ${santriTarget.targetJuz} Juz (${TargetHafalanHelper.formatJuzRange(santriTarget.juzList)})'
+                      : null;
+
                   return HafalanSantriItem(
                     name: santri.nama,
                     nis: santri.nis,
+                    targetInfo: targetInfoText,
                     riwayatLabel: t.hafalan.riwayatHafalan,
                     inputLabel: t.hafalan.inputHafalan,
                     onRiwayatTap: () {

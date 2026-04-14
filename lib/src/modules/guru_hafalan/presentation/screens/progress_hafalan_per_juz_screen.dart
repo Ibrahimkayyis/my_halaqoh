@@ -1,18 +1,19 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/quran/quran_service.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
-
-/// Juz data model for the list
-class _JuzInfo {
-  final int juz;
-  final int suratCount;
-
-  const _JuzInfo({required this.juz, required this.suratCount});
-}
+import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 
 /// Progress Hafalan Per Juz — shows juz-level progress cards for a santri
 @RoutePage()
@@ -33,57 +34,24 @@ class ProgressHafalanPerJuzScreen extends StatefulWidget {
 
 class _ProgressHafalanPerJuzScreenState
     extends State<ProgressHafalanPerJuzScreen> {
-  // Juz data: juz number, total surahs, completed surahs (dummy)
-  final List<Map<String, dynamic>> _juzData = [
-    {'juz': 30, 'total': 37, 'completed': 37},
-    {'juz': 29, 'total': 11, 'completed': 11},
-    {'juz': 28, 'total': 9, 'completed': 9},
-  ];
+  /// Juz numbers added by the teacher beyond the admin-defined target.
+  final Set<int> _teacherAddedJuz = {};
 
-  // All 30 juz with approximate surah counts
-  static const List<_JuzInfo> _allJuz = [
-    _JuzInfo(juz: 1, suratCount: 2),
-    _JuzInfo(juz: 2, suratCount: 1),
-    _JuzInfo(juz: 3, suratCount: 2),
-    _JuzInfo(juz: 4, suratCount: 2),
-    _JuzInfo(juz: 5, suratCount: 2),
-    _JuzInfo(juz: 6, suratCount: 2),
-    _JuzInfo(juz: 7, suratCount: 1),
-    _JuzInfo(juz: 8, suratCount: 2),
-    _JuzInfo(juz: 9, suratCount: 1),
-    _JuzInfo(juz: 10, suratCount: 2),
-    _JuzInfo(juz: 11, suratCount: 2),
-    _JuzInfo(juz: 12, suratCount: 2),
-    _JuzInfo(juz: 13, suratCount: 2),
-    _JuzInfo(juz: 14, suratCount: 2),
-    _JuzInfo(juz: 15, suratCount: 1),
-    _JuzInfo(juz: 16, suratCount: 2),
-    _JuzInfo(juz: 17, suratCount: 2),
-    _JuzInfo(juz: 18, suratCount: 2),
-    _JuzInfo(juz: 19, suratCount: 3),
-    _JuzInfo(juz: 20, suratCount: 2),
-    _JuzInfo(juz: 21, suratCount: 2),
-    _JuzInfo(juz: 22, suratCount: 2),
-    _JuzInfo(juz: 23, suratCount: 3),
-    _JuzInfo(juz: 24, suratCount: 3),
-    _JuzInfo(juz: 25, suratCount: 2),
-    _JuzInfo(juz: 26, suratCount: 3),
-    _JuzInfo(juz: 27, suratCount: 3),
-    _JuzInfo(juz: 28, suratCount: 9),
-    _JuzInfo(juz: 29, suratCount: 11),
-    _JuzInfo(juz: 30, suratCount: 37),
-  ];
-
-  bool get _allTargetsCompleted {
-    if (_juzData.isEmpty) return true;
-    return _juzData.every((juz) {
+  /// Check if all currently shown targets are 100% completed.
+  /// Required before teacher can add new targets via FAB.
+  bool _allTargetsCompleted(List<Map<String, dynamic>> juzData) {
+    if (juzData.isEmpty) return true;
+    return juzData.every((juz) {
       final total = juz['total'] as int;
       final completed = juz['completed'] as int;
       return total > 0 && completed >= total;
     });
   }
 
-  void _showTambahTargetBottomSheet() {
+  void _showTambahTargetBottomSheet(
+    List<Map<String, dynamic>> currentJuzData,
+    Set<int> allTargetJuzNums,
+  ) {
     final colors = AppColors.of(context);
     final searchController = TextEditingController();
     String searchQuery = '';
@@ -95,21 +63,22 @@ class _ProgressHafalanPerJuzScreenState
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
-            // Filter out already-targeted juz and apply search
-            final available = _allJuz.where((j) {
-              final isAlreadyTarget = _juzData.any((d) => d['juz'] == j.juz);
-              if (isAlreadyTarget) return false;
+            // Get all 30 juz from QuranService, filter out already-targeted ones
+            final allJuz = QuranService.instance.getAllJuz();
+            final available = allJuz.where((j) {
+              if (allTargetJuzNums.contains(j.number)) return false;
               if (searchQuery.isEmpty) return true;
-              return 'Juz ${j.juz}'.toLowerCase().contains(
-                searchQuery.toLowerCase(),
-              );
+              return 'Juz ${j.number}'.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  );
             }).toList();
 
             return Container(
               height: MediaQuery.of(context).size.height * 0.75,
               decoration: BoxDecoration(
                 color: colors.surface,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+                borderRadius:
+                    BorderRadius.vertical(top: Radius.circular(24.r)),
               ),
               child: Column(
                 children: [
@@ -181,7 +150,8 @@ class _ProgressHafalanPerJuzScreenState
                       ),
                       child: TextField(
                         controller: searchController,
-                        onChanged: (v) => setSheetState(() => searchQuery = v),
+                        onChanged: (v) =>
+                            setSheetState(() => searchQuery = v),
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontFamily: 'Poppins',
@@ -192,7 +162,8 @@ class _ProgressHafalanPerJuzScreenState
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
                             fontFamily: 'Poppins',
-                            color: colors.textSecondary.withValues(alpha: 0.5),
+                            color:
+                                colors.textSecondary.withValues(alpha: 0.5),
                           ),
                           prefixIcon: Icon(
                             Icons.search,
@@ -216,8 +187,9 @@ class _ProgressHafalanPerJuzScreenState
                       padding: EdgeInsets.symmetric(horizontal: 24.w),
                       itemCount: available.length,
                       itemBuilder: (_, idx) {
-                        final juzInfo = available[idx];
-                        final canAdd = _allTargetsCompleted;
+                        final juzModel = available[idx];
+                        final canAdd =
+                            _allTargetsCompleted(currentJuzData);
 
                         return Container(
                           margin: EdgeInsets.only(bottom: 10.h),
@@ -229,7 +201,8 @@ class _ProgressHafalanPerJuzScreenState
                             color: colors.surface,
                             borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
-                              color: colors.border.withValues(alpha: 0.5),
+                              color:
+                                  colors.border.withValues(alpha: 0.5),
                               width: 1,
                             ),
                           ),
@@ -237,10 +210,11 @@ class _ProgressHafalanPerJuzScreenState
                             children: [
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Juz ${juzInfo.juz}',
+                                      'Juz ${juzModel.number}',
                                       style: TextStyle(
                                         fontSize: 15.sp,
                                         fontWeight: FontWeight.w700,
@@ -250,7 +224,7 @@ class _ProgressHafalanPerJuzScreenState
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
-                                      '${juzInfo.suratCount} Surat',
+                                      '${juzModel.surahs.length} Surat',
                                       style: TextStyle(
                                         fontSize: 12.sp,
                                         fontWeight: FontWeight.w400,
@@ -265,16 +239,8 @@ class _ProgressHafalanPerJuzScreenState
                                 onTap: canAdd
                                     ? () {
                                         setState(() {
-                                          _juzData.add({
-                                            'juz': juzInfo.juz,
-                                            'total': juzInfo.suratCount,
-                                            'completed': 0,
-                                          });
-                                          // Sort by juz descending
-                                          _juzData.sort(
-                                            (a, b) => (b['juz'] as int)
-                                                .compareTo(a['juz'] as int),
-                                          );
+                                          _teacherAddedJuz
+                                              .add(juzModel.number);
                                         });
                                         setSheetState(() {});
 
@@ -283,12 +249,13 @@ class _ProgressHafalanPerJuzScreenState
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              'Juz ${juzInfo.juz} ditambahkan sebagai target',
+                                              'Juz ${juzModel.number} ditambahkan sebagai target',
                                               style: const TextStyle(
                                                 fontFamily: 'Poppins',
                                               ),
                                             ),
-                                            backgroundColor: colors.primary,
+                                            backgroundColor:
+                                                colors.primary,
                                             duration: const Duration(
                                               seconds: 2,
                                             ),
@@ -302,15 +269,18 @@ class _ProgressHafalanPerJuzScreenState
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: canAdd
-                                        ? colors.primary.withValues(alpha: 0.1)
-                                        : colors.border.withValues(alpha: 0.3),
+                                        ? colors.primary
+                                            .withValues(alpha: 0.1)
+                                        : colors.border
+                                            .withValues(alpha: 0.3),
                                   ),
                                   child: Icon(
                                     Icons.add,
                                     size: 20.sp,
                                     color: canAdd
                                         ? colors.primary
-                                        : colors.textSecondary.withValues(
+                                        : colors.textSecondary
+                                            .withValues(
                                             alpha: 0.4,
                                           ),
                                   ),
@@ -350,10 +320,55 @@ class _ProgressHafalanPerJuzScreenState
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
+    // Look up the santri by NIS to get their kelas and program
+    final santriState = context.watch<SantriCubit>().state;
+    final targetHafalanState = context.watch<TargetHafalanCubit>().state;
+
+    SantriModel? santri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          santri = list.firstWhere((s) => s.nis == widget.nis);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    // Find the admin-defined target for this santri's kelas + program
+    TargetHafalanModel? target;
+    targetHafalanState.maybeWhen(
+      loaded: (targets) {
+        if (santri != null) {
+          target = TargetHafalanHelper.findTarget(
+            targets,
+            santri!.kelas,
+            santri!.program,
+          );
+        }
+      },
+      orElse: () {},
+    );
+
+    // Combine admin juz + teacher-added juz (filter out invalid juz numbers)
+    final adminJuzList = (target?.juzList ?? []).where((j) => j >= 1 && j <= 30).toList();
+    final allTargetJuzNums = <int>{...adminJuzList, ..._teacherAddedJuz};
+
+    // Build display data using QuranService
+    final juzDisplayData = allTargetJuzNums.map((juzNum) {
+      final juzModel = QuranService.instance.getJuzByNumber(juzNum);
+      return {
+        'juz': juzNum,
+        'total': juzModel?.surahs.length ?? 0,
+        'completed': 0, // Real hafalan progress — will be integrated when hafalan recording data is available
+      };
+    }).toList()
+      ..sort((a, b) => (b['juz'] as int).compareTo(a['juz'] as int));
+
     return Scaffold(
       backgroundColor: colors.background,
       floatingActionButton: FloatingActionButton(
-        onPressed: _showTambahTargetBottomSheet,
+        onPressed: () =>
+            _showTambahTargetBottomSheet(juzDisplayData, allTargetJuzNums),
         backgroundColor: colors.primary,
         child: Icon(Icons.add, color: colors.textOnButton),
       ),
@@ -391,7 +406,7 @@ class _ProgressHafalanPerJuzScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Green gradient profile card
-                    _buildProfileCard(colors),
+                    _buildProfileCard(colors, santri),
                     SizedBox(height: 20.h),
 
                     // Target Hafalan header
@@ -416,10 +431,26 @@ class _ProgressHafalanPerJuzScreenState
                     ),
                     SizedBox(height: 14.h),
 
-                    // Juz cards
-                    ..._juzData.map(
-                      (juz) => _buildJuzCard(context, juz, colors),
-                    ),
+                    // Juz cards — empty state if no targets
+                    if (juzDisplayData.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40.h),
+                          child: Text(
+                            'Belum ada target hafalan yang ditetapkan.',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    else
+                      ...juzDisplayData.map(
+                        (juz) => _buildJuzCard(context, juz, colors),
+                      ),
                     SizedBox(height: 80.h), // Extra space for FAB
                   ],
                 ),
@@ -431,7 +462,12 @@ class _ProgressHafalanPerJuzScreenState
     );
   }
 
-  Widget _buildProfileCard(AppColorSet colors) {
+  Widget _buildProfileCard(AppColorSet colors, SantriModel? santri) {
+    final kelasInfo = santri != null
+        ? t.riwayatHafalanSantri.halaqohKelas(
+            halaqoh: '', kelas: santri.kelas)
+        : '';
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(18.w),
@@ -455,38 +491,41 @@ class _ProgressHafalanPerJuzScreenState
             child: Icon(Icons.person, size: 26.sp, color: Colors.white),
           ),
           SizedBox(width: 14.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.name,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  fontFamily: 'Poppins',
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.name,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
-              SizedBox(height: 2.h),
-              Text(
-                'NIS: ${widget.nis}',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontFamily: 'Poppins',
+                SizedBox(height: 2.h),
+                Text(
+                  'NIS: ${widget.nis}',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
-              Text(
-                t.riwayatHafalanSantri.halaqohKelas(halaqoh: 'A', kelas: '7'),
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ],
+                if (kelasInfo.isNotEmpty)
+                  Text(
+                    kelasInfo,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -581,7 +620,8 @@ class _ProgressHafalanPerJuzScreenState
                       value: progress,
                       minHeight: 6.h,
                       backgroundColor: colors.border,
-                      valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(colors.primary),
                     ),
                   ),
                 ),

@@ -3,7 +3,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
-import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
@@ -14,6 +13,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
 /// Riwayat Hafalan Santri — individual student memorization history
 @RoutePage()
@@ -232,6 +234,7 @@ class _WaliSantriRiwayatHafalanScreenState
 
     final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
+    final santriState = context.watch<SantriCubit>().state;
 
     String linkedDocId = '';
     authState.maybeWhen(
@@ -240,6 +243,25 @@ class _WaliSantriRiwayatHafalanScreenState
       },
       orElse: () {},
     );
+
+    // Look up the real santri data
+    SantriModel? mySantri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          mySantri = list.firstWhere((s) => s.id == linkedDocId);
+        } catch (_) {
+          try {
+            mySantri = list.firstWhere((s) => s.nis == widget.nis);
+          } catch (_) {}
+        }
+      },
+      orElse: () {},
+    );
+
+    // Use real santri data, fall back to route params
+    final displayName = mySantri?.nama ?? widget.name;
+    final displayNis = mySantri?.nis ?? widget.nis;
 
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(
@@ -303,7 +325,7 @@ class _WaliSantriRiwayatHafalanScreenState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.name,
+                                  displayName,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -315,7 +337,7 @@ class _WaliSantriRiwayatHafalanScreenState
                                 ),
                                 SizedBox(height: 2.h),
                                 Text(
-                                  'NIS: ${widget.nis}',
+                                  'NIS: $displayNis',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(

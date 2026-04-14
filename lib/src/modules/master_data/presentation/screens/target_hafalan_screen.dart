@@ -90,22 +90,27 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
       kelasTitle: _getKelasTitle(kelas),
       programLabel: programLabel,
       initialSelectedJuz: initialJuz,
+      initialTahunAjaran: existing?.tahunAjaran,
       onSave: (target, juzRange, tahunAjaran) {
         // Parse juz range string back to list of ints
-        // Format from dialog: "Juz 1-3, 29-30" or "Juz 5"
+        // Format from dialog: "Juz 1-3, 29-30" or "Juz 5" or "-" (reset)
         final List<int> juzList = [];
-        final cleaned = juzRange.replaceAll('Juz ', '');
-        for (final part in cleaned.split(', ')) {
-          if (part.contains('-')) {
-            final rangeParts = part.split('-');
-            final s = int.tryParse(rangeParts[0].trim()) ?? 0;
-            final e = int.tryParse(rangeParts[1].trim()) ?? 0;
-            for (int i = s; i <= e; i++) {
-              juzList.add(i);
+        if (target > 0 && juzRange != '-') {
+          final cleaned = juzRange.replaceAll('Juz ', '');
+          for (final part in cleaned.split(', ')) {
+            if (part.contains('-')) {
+              final rangeParts = part.split('-');
+              final s = int.tryParse(rangeParts[0].trim()) ?? 0;
+              final e = int.tryParse(rangeParts[1].trim()) ?? 0;
+              if (s > 0 && e > 0) {
+                for (int i = s; i <= e; i++) {
+                  juzList.add(i);
+                }
+              }
+            } else {
+              final n = int.tryParse(part.trim());
+              if (n != null && n > 0) juzList.add(n);
             }
-          } else {
-            final n = int.tryParse(part.trim());
-            if (n != null) juzList.add(n);
           }
         }
 
@@ -228,15 +233,18 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
         final kelas = _kelasLevels[index];
         final target = _findTarget(allTargets, kelas, program);
         final targetCount = target?.targetJuz.toString() ?? '0';
-        final juzRange = target != null
+        final isReset = target != null && target.targetJuz == 0;
+        final juzRange = target != null && target.juzList.isNotEmpty
             ? _formatJuzRange(target.juzList)
-            : '-';
+            : isReset ? 'Belum ditetapkan' : '-';
 
         return TargetKelasCard(
           kelasNumber: kelas,
           kelasTitle: _getKelasTitle(kelas),
           targetInfo: t.targetHafalan.targetJuz(count: targetCount),
           juzRange: juzRange,
+          tahunAjaran: target?.tahunAjaran,
+          isReset: isReset,
           onDetailTap: () => _showEditDialog(kelas, program, target),
         );
       },
