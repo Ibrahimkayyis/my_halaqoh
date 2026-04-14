@@ -10,6 +10,7 @@ class EditTargetDialog extends StatefulWidget {
   final String kelasTitle;
   final String programLabel;
   final Set<int> initialSelectedJuz;
+  final String? initialTahunAjaran;
   final void Function(int target, String juzRange, String tahunAjaran)? onSave;
 
   const EditTargetDialog({
@@ -17,6 +18,7 @@ class EditTargetDialog extends StatefulWidget {
     required this.kelasTitle,
     required this.programLabel,
     this.initialSelectedJuz = const {},
+    this.initialTahunAjaran,
     this.onSave,
   });
 
@@ -26,6 +28,7 @@ class EditTargetDialog extends StatefulWidget {
     required String kelasTitle,
     required String programLabel,
     Set<int> initialSelectedJuz = const {},
+    String? initialTahunAjaran,
     void Function(int target, String juzRange, String tahunAjaran)? onSave,
   }) {
     return showModalBottomSheet(
@@ -36,6 +39,7 @@ class EditTargetDialog extends StatefulWidget {
         kelasTitle: kelasTitle,
         programLabel: programLabel,
         initialSelectedJuz: initialSelectedJuz,
+        initialTahunAjaran: initialTahunAjaran,
         onSave: onSave,
       ),
     );
@@ -47,19 +51,40 @@ class EditTargetDialog extends StatefulWidget {
 
 class _EditTargetDialogState extends State<EditTargetDialog> {
   late Set<int> _selectedJuz;
-  String _selectedTahun = '2023 / 2024';
+  late String _selectedTahun;
+  late List<String> _tahunList;
 
-  final List<String> _tahunList = [
-    '2022 / 2023',
-    '2023 / 2024',
-    '2024 / 2025',
-    '2025 / 2026',
-  ];
+  /// Auto-compute academic year list based on current date.
+  /// July–December → "{year} / {year+1}" is current.
+  /// January–June  → "{year-1} / {year}" is current.
+  static List<String> _buildTahunList() {
+    final now = DateTime.now();
+    // Academic year starts in July
+    final baseYear = now.month >= 7 ? now.year : now.year - 1;
+    return [
+      for (int y = baseYear - 2; y <= baseYear + 2; y++)
+        '$y / ${y + 1}',
+    ];
+  }
+
+  static String _currentTahunAjaran() {
+    final now = DateTime.now();
+    final baseYear = now.month >= 7 ? now.year : now.year - 1;
+    return '$baseYear / ${baseYear + 1}';
+  }
 
   @override
   void initState() {
     super.initState();
     _selectedJuz = Set<int>.from(widget.initialSelectedJuz);
+    _tahunList = _buildTahunList();
+    // Pre-fill with existing target's tahun, or fall back to current
+    final initial = widget.initialTahunAjaran;
+    if (initial != null && initial.isNotEmpty && _tahunList.contains(initial)) {
+      _selectedTahun = initial;
+    } else {
+      _selectedTahun = _currentTahunAjaran();
+    }
   }
 
   void _toggleJuz(int juz) {
@@ -210,7 +235,28 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                   ),
                   SizedBox(height: 10.h),
                   _buildJuzGrid(colors),
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 12.h),
+
+                  // Reset button
+                  if (_selectedJuz.isNotEmpty)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () => setState(() => _selectedJuz.clear()),
+                        icon: Icon(Icons.restart_alt,
+                            size: 16.sp, color: colors.red),
+                        label: Text(
+                          'Reset Target',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: colors.red,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                    ),
+                  SizedBox(height: 8.h),
 
                   // Total target card
                   _buildTotalCard(colors),
@@ -230,11 +276,14 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                   final confirmed = await ConfirmSaveDialog.show(context);
                   if (!confirmed) return;
 
-                  if (widget.onSave != null && _selectedJuz.isNotEmpty) {
+                  if (widget.onSave != null) {
                     final sorted = _selectedJuz.toList()..sort();
                     // Smart format: group consecutive juz into ranges
-                    final juzStr = _formatJuzList(sorted);
-                    widget.onSave!(sorted.length, juzStr, _selectedTahun);
+                    final juzStr = sorted.isEmpty
+                        ? '-'
+                        : _formatJuzList(sorted);
+                    widget.onSave!(
+                        sorted.length, juzStr, _selectedTahun);
                   }
 
                   if (context.mounted) {

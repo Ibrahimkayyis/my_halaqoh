@@ -8,6 +8,13 @@ import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart'
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 
 /// Dashboard content page for Wali Santri role
 class WaliSantriDashboardScreen extends StatelessWidget {
@@ -22,6 +29,8 @@ class WaliSantriDashboardScreen extends StatelessWidget {
     // Retrieve contextual states
     final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
+    final santriState = context.watch<SantriCubit>().state;
+    final targetHafalanState = context.watch<TargetHafalanCubit>().state;
 
     String santriName = '';
     String linkedDocId = '';
@@ -46,6 +55,32 @@ class WaliSantriDashboardScreen extends StatelessWidget {
       orElse: () {},
     );
 
+    // Look up the linked santri to get kelas and program
+    SantriModel? mySantri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          mySantri = list.firstWhere((s) => s.id == linkedDocId);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    // Look up the admin-defined target for this santri's kelas + program
+    TargetHafalanModel? myTarget;
+    if (mySantri != null) {
+      targetHafalanState.maybeWhen(
+        loaded: (targets) {
+          myTarget = TargetHafalanHelper.findTarget(
+            targets,
+            mySantri!.kelas,
+            mySantri!.program,
+          );
+        },
+        orElse: () {},
+      );
+    }
+
     return Scaffold(
       backgroundColor: colors.background,
       body: SingleChildScrollView(
@@ -68,7 +103,7 @@ class WaliSantriDashboardScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: GestureDetector(
                 onTap: () => onNavigateToTab?.call(1),
-                child: _buildProgressHafalanCard(context, colors),
+                child: _buildProgressHafalanCard(context, colors, myTarget),
               ),
             ),
             SizedBox(height: 16.h),
@@ -187,10 +222,12 @@ class WaliSantriDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressHafalanCard(BuildContext context, AppColorSet colors) {
-    const int juzCompleted = 3;
-    const int juzTarget = 5;
-    const double progress = juzCompleted / juzTarget;
+  Widget _buildProgressHafalanCard(
+      BuildContext context, AppColorSet colors, TargetHafalanModel? target) {
+    final int juzTarget = target?.targetJuz ?? 0;
+    const int juzCompleted = 0; // Real hafalan progress — will be integrated when hafalan recording data is available
+    final double progress =
+        juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
     final int percent = (progress * 100).round();
 
     return Container(

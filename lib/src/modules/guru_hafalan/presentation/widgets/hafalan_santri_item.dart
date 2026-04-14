@@ -8,6 +8,7 @@ class HafalanSantriItem extends StatelessWidget {
   final String nis;
   final String riwayatLabel;
   final String inputLabel;
+  final String? targetInfo;
   final VoidCallback? onRiwayatTap;
   final VoidCallback? onInputTap;
 
@@ -17,6 +18,7 @@ class HafalanSantriItem extends StatelessWidget {
     required this.nis,
     required this.riwayatLabel,
     required this.inputLabel,
+    this.targetInfo,
     this.onRiwayatTap,
     this.onInputTap,
   });
@@ -85,6 +87,18 @@ class HafalanSantriItem extends StatelessWidget {
                         fontFamily: 'Poppins',
                       ),
                     ),
+                    if (targetInfo != null && targetInfo!.isNotEmpty) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        targetInfo!,
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                          color: colors.primary.withValues(alpha: 0.8),
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/quran/quran_service.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 
 /// Progress Hafalan Per Surat — shows surah-level progress for a specific juz
@@ -18,210 +19,26 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget {
     required this.juzNumber,
   });
 
-  // Complete mapping of surahs per juz (juz 1-30)
-  static final Map<int, List<Map<String, dynamic>>> _juzSurahMap = {
-    1: [
-      {'name': 'Al-Fatihah', 'totalAyat': 7, 'memorized': 7},
-      {'name': 'Al-Baqarah', 'totalAyat': 141, 'memorized': 100},
-    ],
-    2: [
-      {'name': 'Al-Baqarah', 'totalAyat': 145, 'memorized': 80},
-    ],
-    3: [
-      {'name': 'Al-Baqarah', 'totalAyat': 0, 'memorized': 0},
-      {'name': 'Ali Imran', 'totalAyat': 91, 'memorized': 45},
-    ],
-    4: [
-      {'name': 'Ali Imran', 'totalAyat': 109, 'memorized': 30},
-      {'name': 'An-Nisa', 'totalAyat': 23, 'memorized': 0},
-    ],
-    5: [
-      {'name': 'An-Nisa', 'totalAyat': 124, 'memorized': 0},
-      {'name': 'Al-Maidah', 'totalAyat': 22, 'memorized': 0},
-    ],
-    6: [
-      {'name': 'Al-Maidah', 'totalAyat': 98, 'memorized': 0},
-      {'name': "Al-An'am", 'totalAyat': 110, 'memorized': 0},
-    ],
-    7: [
-      {'name': "Al-An'am", 'totalAyat': 55, 'memorized': 0},
-      {'name': "Al-A'raf", 'totalAyat': 87, 'memorized': 0},
-    ],
-    8: [
-      {'name': "Al-A'raf", 'totalAyat': 119, 'memorized': 0},
-    ],
-    9: [
-      {'name': "Al-A'raf", 'totalAyat': 0, 'memorized': 0},
-      {'name': 'Al-Anfal', 'totalAyat': 75, 'memorized': 0},
-    ],
-    10: [
-      {'name': 'Al-Anfal', 'totalAyat': 0, 'memorized': 0},
-      {'name': 'At-Taubah', 'totalAyat': 93, 'memorized': 0},
-    ],
-    11: [
-      {'name': 'At-Taubah', 'totalAyat': 36, 'memorized': 0},
-      {'name': 'Yunus', 'totalAyat': 109, 'memorized': 0},
-      {'name': 'Hud', 'totalAyat': 5, 'memorized': 0},
-    ],
-    12: [
-      {'name': 'Hud', 'totalAyat': 118, 'memorized': 0},
-      {'name': 'Yusuf', 'totalAyat': 52, 'memorized': 0},
-    ],
-    13: [
-      {'name': 'Yusuf', 'totalAyat': 59, 'memorized': 0},
-      {'name': "Ar-Ra'd", 'totalAyat': 43, 'memorized': 0},
-      {'name': 'Ibrahim', 'totalAyat': 52, 'memorized': 0},
-    ],
-    14: [
-      {'name': 'Al-Hijr', 'totalAyat': 99, 'memorized': 0},
-      {'name': 'An-Nahl', 'totalAyat': 128, 'memorized': 0},
-    ],
-    15: [
-      {'name': 'Al-Isra', 'totalAyat': 111, 'memorized': 0},
-      {'name': 'Al-Kahf', 'totalAyat': 74, 'memorized': 0},
-    ],
-    16: [
-      {'name': 'Al-Kahf', 'totalAyat': 36, 'memorized': 0},
-      {'name': 'Maryam', 'totalAyat': 98, 'memorized': 0},
-      {'name': 'Taha', 'totalAyat': 135, 'memorized': 0},
-    ],
-    17: [
-      {'name': 'Al-Anbiya', 'totalAyat': 112, 'memorized': 0},
-      {'name': 'Al-Hajj', 'totalAyat': 78, 'memorized': 0},
-    ],
-    18: [
-      {'name': "Al-Mu'minun", 'totalAyat': 118, 'memorized': 0},
-      {'name': 'An-Nur', 'totalAyat': 64, 'memorized': 0},
-      {'name': 'Al-Furqan', 'totalAyat': 20, 'memorized': 0},
-    ],
-    19: [
-      {'name': 'Al-Furqan', 'totalAyat': 57, 'memorized': 0},
-      {'name': "Asy-Syu'ara", 'totalAyat': 227, 'memorized': 0},
-      {'name': 'An-Naml', 'totalAyat': 55, 'memorized': 0},
-    ],
-    20: [
-      {'name': 'An-Naml', 'totalAyat': 38, 'memorized': 0},
-      {'name': 'Al-Qasas', 'totalAyat': 88, 'memorized': 0},
-      {'name': 'Al-Ankabut', 'totalAyat': 45, 'memorized': 0},
-    ],
-    21: [
-      {'name': 'Al-Ankabut', 'totalAyat': 24, 'memorized': 0},
-      {'name': 'Ar-Rum', 'totalAyat': 60, 'memorized': 0},
-      {'name': 'Luqman', 'totalAyat': 34, 'memorized': 0},
-      {'name': 'As-Sajdah', 'totalAyat': 30, 'memorized': 0},
-      {'name': 'Al-Ahzab', 'totalAyat': 30, 'memorized': 0},
-    ],
-    22: [
-      {'name': 'Al-Ahzab', 'totalAyat': 43, 'memorized': 0},
-      {'name': 'Saba', 'totalAyat': 54, 'memorized': 0},
-      {'name': 'Fatir', 'totalAyat': 45, 'memorized': 0},
-      {'name': 'Yasin', 'totalAyat': 83, 'memorized': 0},
-    ],
-    23: [
-      {'name': 'Yasin', 'totalAyat': 0, 'memorized': 0},
-      {'name': 'As-Saffat', 'totalAyat': 182, 'memorized': 0},
-      {'name': 'Sad', 'totalAyat': 88, 'memorized': 0},
-      {'name': 'Az-Zumar', 'totalAyat': 31, 'memorized': 0},
-    ],
-    24: [
-      {'name': 'Az-Zumar', 'totalAyat': 44, 'memorized': 0},
-      {'name': 'Ghafir', 'totalAyat': 85, 'memorized': 0},
-      {'name': 'Fussilat', 'totalAyat': 46, 'memorized': 0},
-    ],
-    25: [
-      {'name': 'Fussilat', 'totalAyat': 8, 'memorized': 0},
-      {'name': 'Asy-Syura', 'totalAyat': 53, 'memorized': 0},
-      {'name': 'Az-Zukhruf', 'totalAyat': 89, 'memorized': 0},
-      {'name': 'Ad-Dukhan', 'totalAyat': 59, 'memorized': 0},
-      {'name': 'Al-Jasiyah', 'totalAyat': 37, 'memorized': 0},
-    ],
-    26: [
-      {'name': 'Al-Ahqaf', 'totalAyat': 35, 'memorized': 0},
-      {'name': 'Muhammad', 'totalAyat': 38, 'memorized': 0},
-      {'name': 'Al-Fath', 'totalAyat': 29, 'memorized': 0},
-      {'name': 'Al-Hujurat', 'totalAyat': 18, 'memorized': 0},
-      {'name': 'Qaf', 'totalAyat': 45, 'memorized': 0},
-      {'name': 'Az-Zariyat', 'totalAyat': 60, 'memorized': 0},
-    ],
-    27: [
-      {'name': 'At-Tur', 'totalAyat': 49, 'memorized': 0},
-      {'name': 'An-Najm', 'totalAyat': 62, 'memorized': 0},
-      {'name': 'Al-Qamar', 'totalAyat': 55, 'memorized': 0},
-      {'name': 'Ar-Rahman', 'totalAyat': 78, 'memorized': 0},
-      {'name': "Al-Waqi'ah", 'totalAyat': 96, 'memorized': 0},
-      {'name': 'Al-Hadid', 'totalAyat': 29, 'memorized': 0},
-    ],
-    28: [
-      {'name': 'Al-Mujadalah', 'totalAyat': 22, 'memorized': 0},
-      {'name': 'Al-Hasyr', 'totalAyat': 24, 'memorized': 0},
-      {'name': 'Al-Mumtahanah', 'totalAyat': 13, 'memorized': 0},
-      {'name': 'As-Saff', 'totalAyat': 14, 'memorized': 0},
-      {'name': "Al-Jumu'ah", 'totalAyat': 11, 'memorized': 0},
-      {'name': 'Al-Munafiqun', 'totalAyat': 11, 'memorized': 0},
-      {'name': 'At-Tagabun', 'totalAyat': 18, 'memorized': 0},
-      {'name': 'At-Talaq', 'totalAyat': 12, 'memorized': 0},
-      {'name': 'At-Tahrim', 'totalAyat': 12, 'memorized': 0},
-    ],
-    29: [
-      {'name': 'Al-Mulk', 'totalAyat': 30, 'memorized': 30},
-      {'name': 'Al-Qalam', 'totalAyat': 52, 'memorized': 52},
-      {'name': 'Al-Haqqah', 'totalAyat': 52, 'memorized': 30},
-      {'name': "Al-Ma'arij", 'totalAyat': 44, 'memorized': 20},
-      {'name': 'Nuh', 'totalAyat': 28, 'memorized': 28},
-      {'name': 'Al-Jinn', 'totalAyat': 28, 'memorized': 0},
-      {'name': 'Al-Muzzammil', 'totalAyat': 20, 'memorized': 0},
-      {'name': 'Al-Muddassir', 'totalAyat': 56, 'memorized': 0},
-      {'name': 'Al-Qiyamah', 'totalAyat': 40, 'memorized': 0},
-      {'name': 'Al-Insan', 'totalAyat': 31, 'memorized': 0},
-      {'name': 'Al-Mursalat', 'totalAyat': 50, 'memorized': 0},
-    ],
-    30: [
-      {'name': 'An-Naba', 'totalAyat': 40, 'memorized': 40},
-      {'name': "An-Nazi'at", 'totalAyat': 46, 'memorized': 25},
-      {'name': 'Abasa', 'totalAyat': 42, 'memorized': 0},
-      {'name': 'At-Takwir', 'totalAyat': 29, 'memorized': 0},
-      {'name': 'Al-Infitar', 'totalAyat': 19, 'memorized': 19},
-      {'name': 'Al-Mutaffifin', 'totalAyat': 36, 'memorized': 36},
-      {'name': 'Al-Insyiqaq', 'totalAyat': 25, 'memorized': 25},
-      {'name': 'Al-Buruj', 'totalAyat': 22, 'memorized': 22},
-      {'name': 'At-Tariq', 'totalAyat': 17, 'memorized': 17},
-      {'name': "Al-A'la", 'totalAyat': 19, 'memorized': 19},
-      {'name': 'Al-Gasyiyah', 'totalAyat': 26, 'memorized': 0},
-      {'name': 'Al-Fajr', 'totalAyat': 30, 'memorized': 0},
-      {'name': 'Al-Balad', 'totalAyat': 20, 'memorized': 0},
-      {'name': 'Asy-Syams', 'totalAyat': 15, 'memorized': 0},
-      {'name': 'Al-Lail', 'totalAyat': 21, 'memorized': 0},
-      {'name': 'Ad-Duha', 'totalAyat': 11, 'memorized': 0},
-      {'name': 'Asy-Syarh', 'totalAyat': 8, 'memorized': 0},
-      {'name': 'At-Tin', 'totalAyat': 8, 'memorized': 0},
-      {'name': 'Al-Alaq', 'totalAyat': 19, 'memorized': 0},
-      {'name': 'Al-Qadr', 'totalAyat': 5, 'memorized': 0},
-      {'name': 'Al-Bayyinah', 'totalAyat': 8, 'memorized': 0},
-      {'name': 'Az-Zalzalah', 'totalAyat': 8, 'memorized': 0},
-      {'name': 'Al-Adiyat', 'totalAyat': 11, 'memorized': 0},
-      {'name': "Al-Qari'ah", 'totalAyat': 11, 'memorized': 0},
-      {'name': 'At-Takasur', 'totalAyat': 8, 'memorized': 0},
-      {'name': 'Al-Asr', 'totalAyat': 3, 'memorized': 0},
-      {'name': 'Al-Humazah', 'totalAyat': 9, 'memorized': 0},
-      {'name': 'Al-Fil', 'totalAyat': 5, 'memorized': 0},
-      {'name': 'Quraisy', 'totalAyat': 4, 'memorized': 0},
-      {'name': "Al-Ma'un", 'totalAyat': 7, 'memorized': 0},
-      {'name': 'Al-Kausar', 'totalAyat': 3, 'memorized': 0},
-      {'name': 'Al-Kafirun', 'totalAyat': 6, 'memorized': 0},
-      {'name': 'An-Nasr', 'totalAyat': 3, 'memorized': 0},
-      {'name': 'Al-Lahab', 'totalAyat': 5, 'memorized': 0},
-      {'name': 'Al-Ikhlas', 'totalAyat': 4, 'memorized': 0},
-      {'name': 'Al-Falaq', 'totalAyat': 5, 'memorized': 0},
-      {'name': 'An-Nas', 'totalAyat': 6, 'memorized': 0},
-    ],
-  };
+  /// Build surah data for this juz from QuranService.
+  List<Map<String, dynamic>> _buildSurahData() {
+    final juz = QuranService.instance.getJuzByNumber(juzNumber);
+    if (juz == null) return [];
 
-  List<Map<String, dynamic>> get _surahs => _juzSurahMap[juzNumber] ?? [];
+    return juz.surahs.map((seg) {
+      final surah = QuranService.instance.getSurahById(seg.surahId);
+      final totalAyat = seg.ayatEnd - seg.ayatStart + 1;
+      return {
+        'name': surah?.name ?? 'Unknown',
+        'totalAyat': totalAyat,
+        'memorized': 0, // Real hafalan progress — will be integrated when hafalan recording data is available
+      };
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final surahs = _surahs;
+    final surahs = _buildSurahData();
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -321,38 +138,31 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget {
             child: Icon(Icons.person, size: 26.sp, color: Colors.white),
           ),
           SizedBox(width: 14.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  fontFamily: 'Poppins',
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
-              SizedBox(height: 2.h),
-              Text(
-                'NIS: $nis',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontFamily: 'Poppins',
+                SizedBox(height: 2.h),
+                Text(
+                  'NIS: $nis',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
-              Text(
-                t.riwayatHafalanSantri.halaqohKelas(halaqoh: 'A', kelas: '7'),
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

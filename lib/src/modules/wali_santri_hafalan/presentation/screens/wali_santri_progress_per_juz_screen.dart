@@ -1,9 +1,23 @@
-﻿import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/quran/quran_service.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 
 /// Progress Hafalan Per Juz — shows juz-level progress cards for a santri (Wali Santri view)
 @RoutePage()
@@ -17,16 +31,66 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
     required this.nis,
   });
 
-  // Juz data: juz number, total surahs, completed surahs (dummy)
-  static final List<Map<String, dynamic>> _juzData = [
-    {'juz': 30, 'total': 37, 'completed': 37},
-    {'juz': 29, 'total': 11, 'completed': 11},
-    {'juz': 28, 'total': 9, 'completed': 9},
-  ];
-
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+
+    // Look up the santri — try by linkedDocId first (most reliable for wali),
+    // then fall back to NIS lookup
+    final authState = context.watch<AuthCubit>().state;
+    final santriState = context.watch<SantriCubit>().state;
+    final targetHafalanState = context.watch<TargetHafalanCubit>().state;
+
+    String linkedDocId = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+
+    SantriModel? santri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          // Primary: find by linked document ID (wali's linkedDocId → santri.id)
+          santri = list.firstWhere((s) => s.id == linkedDocId);
+        } catch (_) {
+          try {
+            // Fallback: find by NIS
+            santri = list.firstWhere((s) => s.nis == nis);
+          } catch (_) {}
+        }
+      },
+      orElse: () {},
+    );
+
+    // Find the admin-defined target for this santri's kelas + program
+    TargetHafalanModel? target;
+    targetHafalanState.maybeWhen(
+      loaded: (targets) {
+        if (santri != null) {
+          target = TargetHafalanHelper.findTarget(
+            targets,
+            santri!.kelas,
+            santri!.program,
+          );
+        }
+      },
+      orElse: () {},
+    );
+
+    // Build juz display data from target's juzList + QuranService (filter out invalid juz numbers)
+    final juzList = (target?.juzList ?? []).where((j) => j >= 1 && j <= 30).toList();
+    final juzDisplayData = juzList.map((juzNum) {
+      final juzModel = QuranService.instance.getJuzByNumber(juzNum);
+      return {
+        'juz': juzNum,
+        'total': juzModel?.surahs.length ?? 0,
+        'completed': 0, // Real hafalan progress — will be integrated when hafalan recording data is available
+      };
+    }).toList()
+      ..sort((a, b) => (b['juz'] as int).compareTo(a['juz'] as int));
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -64,7 +128,7 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Green gradient profile card
-                    _buildProfileCard(colors),
+                    _buildProfileCard(context, colors, santri),
                     SizedBox(height: 20.h),
 
                     // Target Hafalan header
@@ -89,10 +153,26 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 14.h),
 
-                    // Juz cards
-                    ..._juzData.map(
-                      (juz) => _buildJuzCard(context, juz, colors),
-                    ),
+                    // Juz cards — empty state if no targets
+                    if (juzDisplayData.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40.h),
+                          child: Text(
+                            'Belum ada target hafalan yang ditetapkan.',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    else
+                      ...juzDisplayData.map(
+                        (juz) => _buildJuzCard(context, juz, colors),
+                      ),
                     SizedBox(height: 24.h),
                   ],
                 ),
@@ -104,7 +184,32 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileCard(AppColorSet colors) {
+  Widget _buildProfileCard(
+      BuildContext context, AppColorSet colors, SantriModel? santri) {
+    // Use real santri data, fall back to route params
+    final displayName = santri?.nama ?? name;
+    final displayNis = santri?.nis ?? nis;
+
+    // Look up halaqoh for kelas info
+    final halaqohState = context.watch<HalaqohCubit>().state;
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          if (santri != null) {
+            myHalaqoh = list.firstWhere(
+                (h) => h.santriIds.contains(santri.id));
+          }
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    final halaqohInfo = myHalaqoh != null
+        ? t.riwayatHafalanSantri.halaqohKelas(
+            halaqoh: myHalaqoh!.nama, kelas: myHalaqoh!.kelas)
+        : (santri != null ? 'Kelas ${santri.kelas}' : '');
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(18.w),
@@ -128,38 +233,41 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
             child: Icon(Icons.person, size: 26.sp, color: Colors.white),
           ),
           SizedBox(width: 14.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  fontFamily: 'Poppins',
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
-              SizedBox(height: 2.h),
-              Text(
-                'NIS: $nis',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontFamily: 'Poppins',
+                SizedBox(height: 2.h),
+                Text(
+                  'NIS: $displayNis',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
-              Text(
-                t.riwayatHafalanSantri.halaqohKelas(halaqoh: 'A', kelas: '7'),
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ],
+                if (halaqohInfo.isNotEmpty)
+                  Text(
+                    halaqohInfo,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -254,7 +362,8 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
                       value: progress,
                       minHeight: 6.h,
                       backgroundColor: colors.border,
-                      valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(colors.primary),
                     ),
                   ),
                 ),

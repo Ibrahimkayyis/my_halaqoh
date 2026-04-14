@@ -11,6 +11,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
 /// Riwayat Absensi screen — individual student attendance history
 @RoutePage()
@@ -147,6 +150,7 @@ class _WaliSantriRiwayatAbsensiScreenState
 
     final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
+    final santriState = context.watch<SantriCubit>().state;
 
     String linkedDocId = '';
     authState.maybeWhen(
@@ -155,6 +159,25 @@ class _WaliSantriRiwayatAbsensiScreenState
       },
       orElse: () {},
     );
+
+    // Look up real santri data
+    SantriModel? mySantri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          mySantri = list.firstWhere((s) => s.id == linkedDocId);
+        } catch (_) {
+          try {
+            mySantri = list.firstWhere((s) => s.nis == widget.nis);
+          } catch (_) {}
+        }
+      },
+      orElse: () {},
+    );
+
+    // Use real data, fall back to route params
+    final displayName = mySantri?.nama ?? widget.name;
+    final displayNis = mySantri?.nis ?? widget.nis;
 
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(
@@ -216,7 +239,7 @@ class _WaliSantriRiwayatAbsensiScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.name,
+                            displayName,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -228,7 +251,7 @@ class _WaliSantriRiwayatAbsensiScreenState
                           ),
                           SizedBox(height: 2.h),
                           Text(
-                            'NIS: ${widget.nis}',
+                            'NIS: $displayNis',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(

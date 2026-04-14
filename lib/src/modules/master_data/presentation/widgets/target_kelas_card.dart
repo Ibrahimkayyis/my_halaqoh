@@ -8,6 +8,8 @@ class TargetKelasCard extends StatelessWidget {
   final String kelasTitle;
   final String targetInfo;
   final String juzRange;
+  final String? tahunAjaran;
+  final bool isReset;
   final VoidCallback? onDetailTap;
 
   const TargetKelasCard({
@@ -16,6 +18,8 @@ class TargetKelasCard extends StatelessWidget {
     required this.kelasTitle,
     required this.targetInfo,
     required this.juzRange,
+    this.tahunAjaran,
+    this.isReset = false,
     this.onDetailTap,
   });
 
@@ -120,7 +124,9 @@ class TargetKelasCard extends StatelessWidget {
                     Icon(
                       Icons.menu_book,
                       size: 15.sp,
-                      color: colors.primary,
+                      color: isReset
+                          ? colors.textSecondary.withValues(alpha: 0.4)
+                          : colors.primary,
                     ),
                     SizedBox(width: 6.w),
                     Flexible(
@@ -129,8 +135,12 @@ class TargetKelasCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
-                          color: colors.textSecondary,
+                          color: isReset
+                              ? colors.textSecondary.withValues(alpha: 0.5)
+                              : colors.textSecondary,
                           fontFamily: 'Poppins',
+                          fontStyle:
+                              isReset ? FontStyle.italic : FontStyle.normal,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -138,6 +148,29 @@ class TargetKelasCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                // Tahun ajaran row
+                if (tahunAjaran != null && tahunAjaran!.isNotEmpty) ...[
+                  SizedBox(height: 2.h),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        size: 13.sp,
+                        color: colors.textSecondary.withValues(alpha: 0.5),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'TA $tahunAjaran',
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w400,
+                          color: colors.textSecondary.withValues(alpha: 0.6),
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

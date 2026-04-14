@@ -12,6 +12,10 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_s
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/halaqoh_info_card.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/santri_list_item.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
@@ -45,6 +49,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
     final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
     final santriState = context.watch<SantriCubit>().state;
+    final targetHafalanState = context.watch<TargetHafalanCubit>().state;
 
     String linkedDocId = '';
     authState.maybeWhen(
@@ -63,6 +68,21 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
       },
       orElse: () {},
     );
+
+    // Look up the admin-defined target for this halaqoh's kelas + program
+    TargetHafalanModel? myTarget;
+    if (myHalaqoh != null) {
+      targetHafalanState.maybeWhen(
+        loaded: (targets) {
+          myTarget = TargetHafalanHelper.findTarget(
+            targets,
+            myHalaqoh!.kelas,
+            myHalaqoh!.program,
+          );
+        },
+        orElse: () {},
+      );
+    }
 
     List<SantriModel> mySantriList = [];
     if (myHalaqoh != null) {
@@ -101,8 +121,12 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                     ? myHalaqoh!.guruNama
                     : t.myHalaqohScreen.pengampu,
                 target: t.myHalaqohScreen.target(
-                  count: myHalaqoh!.program == 'T' ? '5' : '1',
-                  range: myHalaqoh!.program == 'T' ? 'Juz 30-26' : 'Juz 30',
+                  count: myTarget != null
+                      ? '${myTarget!.targetJuz}'
+                      : '0',
+                  range: myTarget != null
+                      ? TargetHafalanHelper.formatJuzRange(myTarget!.juzList)
+                      : '-',
                 ),
                 totalSantri: t.myHalaqohScreen.total(
                   count: mySantriList.length.toString(),
@@ -219,9 +243,11 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
                   final santri = filtered[index];
-                  final completed = 0.0; // TODO: Pull real progress
-                  final target = myHalaqoh?.program == 'T' ? 5.0 : 1.0;
-                  final pct = ((completed / target) * 100).round();
+                  final completed = 0.0; // Real hafalan progress — will be integrated when hafalan recording data is available
+                  final targetJuz = myTarget?.targetJuz.toDouble() ?? 0.0;
+                  final pct = targetJuz > 0
+                      ? ((completed / targetJuz) * 100).round()
+                      : 0;
 
                   // Format: remove .0 for whole numbers
                   String formatJuz(double v) {
@@ -234,10 +260,10 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                     name: santri.nama,
                     progressText: t.myHalaqohScreen.progressText(
                       completed: formatJuz(completed),
-                      target: formatJuz(target),
+                      target: formatJuz(targetJuz),
                     ),
                     percentage: '$pct%',
-                    progress: completed / target,
+                    progress: targetJuz > 0 ? completed / targetJuz : 0.0,
                     onTap: () {
                       context.router.push(
                         DetailSantriRoute(name: santri.nama, nis: santri.nis),
