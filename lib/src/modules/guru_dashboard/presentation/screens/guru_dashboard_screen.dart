@@ -9,6 +9,9 @@ import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/widgets/guru_
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/widgets/setoran_item.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/guru_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
@@ -26,6 +29,7 @@ class GuruDashboardScreen extends StatelessWidget {
     // Retrieve contextual states
     final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
+    final guruState = context.watch<GuruCubit>().state;
 
     String guruName = '';
     String linkedDocId = '';
@@ -37,6 +41,21 @@ class GuruDashboardScreen extends StatelessWidget {
       },
       orElse: () {},
     );
+
+    // Look up real guru data for name and profile picture
+    GuruModel? myGuru;
+    guruState.maybeWhen(
+      loaded: (list) {
+        try {
+          myGuru = list.firstWhere((g) => g.id == linkedDocId);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    // Use real guru name from database, fall back to auth displayName
+    final displayName = myGuru?.nama ?? guruName;
+    final profilePictureUrl = myGuru?.profilePicture;
 
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(
@@ -59,10 +78,9 @@ class GuruDashboardScreen extends StatelessWidget {
             // Header
             GuruDashboardHeader(
               greeting: t.guruDashboard.greeting,
-              name: guruName.isNotEmpty ? guruName : 'Loading...',
-              subtitle: myHalaqoh != null
-                  ? 'Pengampu Halaqoh ${myHalaqoh!.nama}'
-                  : t.guruDashboard.subtitle,
+              name: displayName.isNotEmpty ? displayName : 'Loading...',
+              subtitle: 'Awali Halaqoh dengan Do\'a Agar Selalu Diberkahi Allah SWT',
+              profilePictureUrl: profilePictureUrl,
             ),
             SizedBox(height: 24.h),
 
@@ -88,9 +106,9 @@ class GuruDashboardScreen extends StatelessWidget {
                 children: [
                   CapaianCard(
                     title: t.guruDashboard.kehadiranHariIni,
-                    percent: santriCount == 0 ? 0 : 1.0, // Placeholder
+                    percent: 0.0, // Attendance feature not yet implemented
                     bottomLabel: t.guruDashboard.santriCount(
-                      current: santriCount.toString(),
+                      current: '0',
                       total: santriCount.toString(),
                     ),
                     progressColor: colors.primary,

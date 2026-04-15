@@ -7,12 +7,14 @@ class GuruDashboardHeader extends StatelessWidget {
   final String greeting;
   final String name;
   final String subtitle;
+  final String? profilePictureUrl;
 
   const GuruDashboardHeader({
     super.key,
     required this.greeting,
     required this.name,
     required this.subtitle,
+    this.profilePictureUrl,
   });
 
   @override
@@ -108,12 +110,21 @@ class GuruDashboardHeader extends StatelessWidget {
                 color: colors.textOnButton.withValues(alpha: 0.4),
                 width: 2.5,
               ),
+              image: profilePictureUrl != null &&
+                      profilePictureUrl!.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(profilePictureUrl!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: Icon(
-              Icons.person,
-              color: colors.textOnButton,
-              size: 30.sp,
-            ),
+            child: profilePictureUrl == null || profilePictureUrl!.isEmpty
+                ? Icon(
+                    Icons.person,
+                    color: colors.textOnButton,
+                    size: 30.sp,
+                  )
+                : null,
           ),
         ],
       ),
