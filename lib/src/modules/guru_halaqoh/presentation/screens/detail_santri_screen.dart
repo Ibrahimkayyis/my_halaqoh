@@ -1,9 +1,20 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/academic_info_row.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 
 /// Detail santri screen showing profile header, academic info, and progress hafalan
 @RoutePage()
@@ -16,6 +27,60 @@ class DetailSantriScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+
+    // Look up real santri data by NIS
+    final santriState = context.watch<SantriCubit>().state;
+    final halaqohState = context.watch<HalaqohCubit>().state;
+    final targetHafalanState = context.watch<TargetHafalanCubit>().state;
+
+    SantriModel? santri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          santri = list.firstWhere((s) => s.nis == nis);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    // Look up halaqoh for this santri
+    HalaqohModel? halaqoh;
+    if (santri?.halaqohId != null) {
+      halaqohState.maybeWhen(
+        loaded: (list) {
+          try {
+            halaqoh = list.firstWhere((h) => h.id == santri!.halaqohId);
+          } catch (_) {}
+        },
+        orElse: () {},
+      );
+    }
+
+    // Look up memorization target for this santri's kelas + program
+    TargetHafalanModel? target;
+    if (santri != null) {
+      targetHafalanState.maybeWhen(
+        loaded: (targets) {
+          target = TargetHafalanHelper.findTarget(
+            targets,
+            santri!.kelas,
+            santri!.program,
+          );
+        },
+        orElse: () {},
+      );
+    }
+
+    // Use real data with fallbacks to route params
+    final displayName = santri?.nama ?? name;
+    final displayNis = santri?.nis ?? nis;
+    final displayKelas = santri != null ? 'Kelas ${santri!.kelas}' : '-';
+    final displayProgram = santri != null
+        ? TargetHafalanHelper.programCodeToFullName(santri!.program)
+        : '-';
+    final displayHalaqoh = halaqoh?.nama ?? '-';
+    final displayPembimbing = halaqoh?.guruNama ?? '-';
+    final profilePictureUrl = santri?.profilePicture;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -54,7 +119,12 @@ class DetailSantriScreen extends StatelessWidget {
                     SizedBox(height: 8.h),
 
                     // Profile header card
-                    _buildProfileHeader(colors),
+                    _buildProfileHeader(
+                      colors,
+                      displayName,
+                      displayNis,
+                      profilePictureUrl,
+                    ),
                     SizedBox(height: 28.h),
 
                     // INFORMASI AKADEMIK section
@@ -94,28 +164,28 @@ class DetailSantriScreen extends StatelessWidget {
                             iconColor: colors.primary,
                             iconBgColor: colors.primary.withValues(alpha: 0.1),
                             label: t.detailSantri.kelas,
-                            value: 'Kelas 7',
+                            value: displayKelas,
                           ),
                           AcademicInfoRow(
                             icon: Icons.menu_book,
                             iconColor: colors.blue,
                             iconBgColor: colors.blue.withValues(alpha: 0.1),
                             label: t.detailSantri.program,
-                            value: 'Reguler',
+                            value: displayProgram,
                           ),
                           AcademicInfoRow(
                             icon: Icons.auto_stories,
                             iconColor: colors.primary,
                             iconBgColor: colors.primary.withValues(alpha: 0.1),
                             label: t.detailSantri.halaqoh,
-                            value: 'Al-Kahfi',
+                            value: displayHalaqoh,
                           ),
                           AcademicInfoRow(
                             icon: Icons.groups,
                             iconColor: colors.red,
                             iconBgColor: colors.red.withValues(alpha: 0.1),
                             label: t.detailSantri.pembimbing,
-                            value: 'Ustadz Kayyis',
+                            value: displayPembimbing,
                             showDivider: false,
                           ),
                         ],
@@ -139,8 +209,8 @@ class DetailSantriScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 12.h),
 
-                    // Progress card
-                    _buildProgressCard(colors),
+                    // Progress card (driven by admin target)
+                    _buildProgressCard(colors, target),
                     SizedBox(height: 40.h),
                   ],
                 ),
@@ -153,7 +223,12 @@ class DetailSantriScreen extends StatelessWidget {
   }
 
   /// Green gradient profile header with avatar, name, NIS
-  Widget _buildProfileHeader(AppColorSet colors) {
+  Widget _buildProfileHeader(
+    AppColorSet colors,
+    String displayName,
+    String displayNis,
+    String? profilePictureUrl,
+  ) {
     return Container(
       width: double.infinity,
       margin: EdgeInsets.symmetric(horizontal: 24.w),
@@ -179,13 +254,22 @@ class DetailSantriScreen extends StatelessWidget {
                 color: colors.textOnButton.withValues(alpha: 0.4),
                 width: 3,
               ),
+              image: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(profilePictureUrl),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: Icon(Icons.person, size: 40.sp, color: colors.textOnButton),
+            child: profilePictureUrl == null || profilePictureUrl.isEmpty
+                ? Icon(Icons.person, size: 40.sp, color: colors.textOnButton)
+                : null,
           ),
           SizedBox(height: 14.h),
           // Name
           Text(
-            name,
+            displayName,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
@@ -196,7 +280,7 @@ class DetailSantriScreen extends StatelessWidget {
           SizedBox(height: 4.h),
           // NIS
           Text(
-            'NIS: $nis',
+            'NIS: $displayNis',
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w400,
@@ -209,14 +293,13 @@ class DetailSantriScreen extends StatelessWidget {
     );
   }
 
-  /// Progress Hafalan card with total, sertifikasi info, and progress bar
-  Widget _buildProgressCard(AppColorSet colors) {
-    // Dummy data
-    const int totalHafalan = 12;
-    const int sertifikasiDone = 8;
-    const int sertifikasiTotal = 12;
-    final double sertifikasiPct = sertifikasiDone / sertifikasiTotal;
-    final int sertifikasiPctInt = (sertifikasiPct * 100).round();
+  /// Progress Hafalan card driven by admin-set memorization targets.
+  /// Shows target juz, completion count (0 for now), progress bar.
+  Widget _buildProgressCard(AppColorSet colors, TargetHafalanModel? target) {
+    final int juzTarget = target?.targetJuz ?? 0;
+    const int juzCompleted = 0; // Real hafalan progress — will be integrated when hafalan recording data is available
+    final double progress = juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
+    final int percent = (progress * 100).round();
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 24.w),
@@ -235,92 +318,60 @@ class DetailSantriScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Total Hafalan row
+          // Header row
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left: label + value
+              Icon(Icons.menu_book, size: 20.sp, color: colors.primary),
+              SizedBox(width: 8.w),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.detailSantri.totalHafalan,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w400,
-                        color: colors.textSecondary,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      '$totalHafalan Juz',
-                      style: TextStyle(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.w700,
-                        color: colors.primary,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Right: book icon
-              Container(
-                width: 44.w,
-                height: 44.w,
-                decoration: BoxDecoration(
-                  color: colors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(
-                  Icons.menu_book,
-                  size: 22.sp,
-                  color: colors.primary,
+                child: Text(
+                  t.waliSantriDashboard.progressHafalan,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
               ),
             ],
           ),
           SizedBox(height: 16.h),
 
-          // Sertifikasi label + percentage
+          // Juz completed + percentage
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    t.detailSantri.sertifikasiInfo(
-                      done: '$sertifikasiDone',
-                      total: '$sertifikasiTotal',
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '$juzCompleted ',
+                      style: TextStyle(
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.w800,
+                        color: colors.textPrimary,
+                        fontFamily: 'Poppins',
+                      ),
                     ),
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w400,
-                      color: colors.textSecondary,
-                      fontFamily: 'Poppins',
+                    TextSpan(
+                      text: t.waliSantriDashboard.juzTerselesaikan,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w400,
+                        color: colors.textSecondary,
+                        fontFamily: 'Poppins',
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    t.detailSantri.sertifikasiJuz,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w600,
-                      color: colors.textPrimary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               Text(
-                '$sertifikasiPctInt%',
+                '$percent%',
                 style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
-                  color: colors.textPrimary,
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.w800,
+                  color: colors.primary,
                   fontFamily: 'Poppins',
                 ),
               ),
@@ -332,10 +383,25 @@ class DetailSantriScreen extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(6.r),
             child: LinearProgressIndicator(
-              value: sertifikasiPct,
+              value: progress,
               minHeight: 10.h,
               backgroundColor: colors.border.withValues(alpha: 0.3),
               valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+            ),
+          ),
+          SizedBox(height: 8.h),
+
+          // Target text
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              t.waliSantriDashboard.target(target: '$juzTarget'),
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+                color: colors.textSecondary,
+                fontFamily: 'Poppins',
+              ),
             ),
           ),
         ],

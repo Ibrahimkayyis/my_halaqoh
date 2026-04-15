@@ -47,8 +47,9 @@ class AcademicInfoRow extends StatelessWidget {
               ),
               SizedBox(width: 14.w),
 
-              // Label
-              Expanded(
+              // Label — fixed width so it never wraps
+              SizedBox(
+                width: 100.w,
                 child: Text(
                   label,
                   style: TextStyle(
@@ -60,14 +61,17 @@ class AcademicInfoRow extends StatelessWidget {
                 ),
               ),
 
-              // Value
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: colors.textPrimary,
-                  fontFamily: 'Poppins',
+              // Value — takes remaining space and wraps when long
+              Expanded(
+                child: Text(
+                  value,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
               ),
             ],
