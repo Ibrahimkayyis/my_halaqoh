@@ -9,6 +9,10 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/screens/santri_l
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/guru_list_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/halaqoh_list_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/target_hafalan_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
 
 @RoutePage()
 class DashboardWrapperScreen extends StatefulWidget {
@@ -48,9 +52,18 @@ class _DashboardWrapperScreenState extends State<DashboardWrapperScreen> {
       const TargetHafalanScreen(),
     ];
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: PageView(
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          unauthenticated: () {
+            context.router.replaceAll([const LoginRoute()]);
+          },
+          orElse: () {},
+        );
+      },
+      child: Scaffold(
+        backgroundColor: colors.background,
+        body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
         children: pages,
@@ -108,6 +121,7 @@ class _DashboardWrapperScreenState extends State<DashboardWrapperScreen> {
           _pageController.jumpToPage(index);
         },
         kIconSize: 24.0,
+      ),
       ),
     );
   }

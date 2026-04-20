@@ -9,6 +9,10 @@ import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/screens/my_hala
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/screens/attendance_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/screens/hafalan_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_profile/presentation/screens/guru_profile_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
 
 /// Dashboard wrapper for Guru role with 5-tab bottom navigation
 @RoutePage()
@@ -55,9 +59,18 @@ class _GuruDashboardWrapperScreenState
       const GuruProfileScreen(),
     ];
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: PageView(
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          unauthenticated: () {
+            context.router.replaceAll([const LoginRoute()]);
+          },
+          orElse: () {},
+        );
+      },
+      child: Scaffold(
+        backgroundColor: colors.background,
+        body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
         children: pages,
@@ -115,6 +128,7 @@ class _GuruDashboardWrapperScreenState
           _pageController.jumpToPage(index);
         },
         kIconSize: 24.0,
+      ),
       ),
     );
   }

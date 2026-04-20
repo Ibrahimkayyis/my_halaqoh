@@ -9,8 +9,8 @@ import 'package:my_halaqoh/src/core/widget/widgets.dart';
 /// Adapts session chips based on [programType]: 'reguler' (2) or 'takhassus' (5).
 class MulaiAbsensiDialog extends StatefulWidget {
   final String programType;
-  final VoidCallback onScanBarcode;
-  final VoidCallback? onTandaiSemuaHadir;
+  final void Function(DateTime date, String sesi) onScanBarcode;
+  final void Function(DateTime date, String sesi)? onTandaiSemuaHadir;
 
   const MulaiAbsensiDialog({
     super.key,
@@ -44,9 +44,9 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
     if (widget.programType == 'takhassus') {
       return [
         _SessionDef('shubuh', 'Shubuh', Icons.wb_twilight),
-        _SessionDef('dhuha1', 'Dhuha 1', Icons.wb_sunny_outlined),
-        _SessionDef('dhuha2', 'Dhuha 2', Icons.wb_sunny_outlined),
-        _SessionDef('ashar', 'Ashar', Icons.wb_sunny),
+        _SessionDef('dhuha', 'Dhuha', Icons.wb_sunny_outlined),
+        _SessionDef('siang', 'Siang', Icons.wb_sunny),
+        _SessionDef('ashar', 'Sore/Ashar', Icons.wb_sunny),
         _SessionDef('maghrib', 'Maghrib', Icons.nights_stay_outlined),
       ];
     }
@@ -127,7 +127,7 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        DateFormat('MM/dd/yyyy').format(_selectedDate),
+                        DateFormat('dd/MM/yyyy').format(_selectedDate),
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -167,7 +167,7 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
                 height: 48.h,
                 onPressed: () {
                   Navigator.of(context).pop();
-                  widget.onScanBarcode();
+                  widget.onScanBarcode(_selectedDate, _selectedSesi);
                 },
                 icon: Icons.qr_code_scanner,
                 label: t.absensi.scanBarcode,
@@ -180,7 +180,10 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
                 height: 48.h,
                 onPressed: () {
                   Navigator.of(context).pop();
-                  widget.onTandaiSemuaHadir?.call();
+                  widget.onTandaiSemuaHadir?.call(
+                    _selectedDate,
+                    _selectedSesi,
+                  );
                 },
                 icon: Icons.checklist,
                 label: 'Tandai Semua Hadir',
@@ -200,7 +203,7 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
       // 2-column grid: first 4 in pairs, last one centered
       return Column(
         children: [
-          // Row 1: Shubuh, Dhuha 1
+          // Row 1: Shubuh, Dhuha
           Row(
             children: [
               Expanded(child: _buildSessionChip(defs[0], colors)),
@@ -209,7 +212,7 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
             ],
           ),
           SizedBox(height: 10.h),
-          // Row 2: Dhuha 2, Ashar
+          // Row 2: Siang, Sore/Ashar
           Row(
             children: [
               Expanded(child: _buildSessionChip(defs[2], colors)),

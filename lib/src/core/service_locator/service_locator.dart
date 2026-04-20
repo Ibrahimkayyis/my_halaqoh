@@ -42,6 +42,19 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cu
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 
+// Guru Absensi — Data Layer
+import 'package:my_halaqoh/src/modules/guru_absensi/data/datasources/local/absensi_local_datasource.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/data/datasources/remote/source/abstract/absensi_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/data/datasources/remote/source/implementation/absensi_remote_datasource_impl.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/data/datasources/remote/source/implementation/absensi_sync_service.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/data/repositories_impl/absensi_repository_impl.dart';
+
+// Guru Absensi — Domain Layer
+import 'package:my_halaqoh/src/modules/guru_absensi/domain/repositories/absensi_repository.dart';
+
+// Guru Absensi — Presentation Layer
+import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_cubit.dart';
+
 final sl = GetIt.instance;
 
 /// Call this in main.dart before runApp()
@@ -119,4 +132,25 @@ Future<void> initDependencies() async {
   sl.registerFactory<SantriCubit>(() => SantriCubit(sl()));
   sl.registerFactory<HalaqohCubit>(() => HalaqohCubit(sl()));
   sl.registerFactory<TargetHafalanCubit>(() => TargetHafalanCubit(sl()));
+
+  // ── Guru Absensi — DataSources ─────────────────────────────────────────────
+  sl.registerLazySingleton<AbsensiLocalDataSource>(
+    () => AbsensiLocalDataSource(),
+  );
+  sl.registerLazySingleton<AbsensiRemoteDataSource>(
+    () => AbsensiRemoteDataSourceImpl(sl()),
+  );
+
+  // ── Guru Absensi — Repository ──────────────────────────────────────────────
+  sl.registerLazySingleton<AbsensiRepository>(
+    () => AbsensiRepositoryImpl(sl(), sl()),
+  );
+
+  // ── Guru Absensi — Sync Service ────────────────────────────────────────────
+  sl.registerLazySingleton<AbsensiSyncService>(
+    () => AbsensiSyncService(sl()),
+  );
+
+  // ── Guru Absensi — Cubit (Factory — requires halaqohId scoping) ────────────
+  sl.registerFactory<AbsensiCubit>(() => AbsensiCubit(sl()));
 }

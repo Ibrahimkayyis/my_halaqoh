@@ -17,7 +17,7 @@ class PrimaryButton extends StatelessWidget {
   /// Optional custom width. If null, it can expand entirely inside a SizedBox
   final double? width;
 
-  /// Defaults to 50.h
+  /// Defaults to 50.h minimum
   final double? height;
 
   /// Custom border radius. Defaults to 14.r
@@ -45,27 +45,27 @@ class PrimaryButton extends StatelessWidget {
       childContent = SizedBox(
         width: 24.w,
         height: 24.w,
-        child: CircularProgressIndicator(
-          color: themeFgColor,
-          strokeWidth: 2.5,
-        ),
+        child: CircularProgressIndicator(color: themeFgColor, strokeWidth: 2.5),
       );
     } else {
       childContent = Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (icon != null) ...[
-            Icon(icon, size: 22.sp),
-            SizedBox(width: 8.w),
-          ],
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-              fontFamily: 'Poppins',
-              letterSpacing: 0.5,
+          if (icon != null) ...[Icon(icon, size: 22.sp), SizedBox(width: 8.w)],
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Poppins',
+                letterSpacing: 0.5,
+                height: 1.2, // Spasi antar baris
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              softWrap: true,
             ),
           ),
         ],
@@ -96,25 +96,23 @@ class PrimaryButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(borderRadius ?? 14.r),
           ),
           elevation: 0,
+          // Tambahkan padding vertikal agar teks punya ruang bernapas di atas/bawah
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         ),
         child: childContent,
       ),
     );
 
-    if (width != null || height != null) {
-      button = SizedBox(
-        width: width,
-        height: height ?? 50.h,
-        child: button,
-      );
-    } else {
-      // Default to take available width dynamically via the parent or minimum height
-      button = SizedBox(
-        height: height ?? 50.h,
-        child: button,
-      );
-    }
-
-    return button;
+    // FIX APPLIED HERE: Menggunakan ConstrainedBox alih-alih SizedBox
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: width ?? 0,
+        maxWidth: width ?? double.infinity,
+        minHeight:
+            height ??
+            50.h, // Tombol minimal 50.h, tapi BISA lebih tinggi jika teks 2 baris
+      ),
+      child: button,
+    );
   }
 }

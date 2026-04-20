@@ -8,6 +8,10 @@ import 'package:my_halaqoh/src/modules/wali_santri_dashboard/presentation/screen
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_riwayat_hafalan_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_absensi/presentation/screens/wali_santri_riwayat_absensi_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_profile_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
 
 /// Dashboard wrapper for Wali Santri role with 4-tab bottom navigation
 @RoutePage()
@@ -57,9 +61,18 @@ class _WaliSantriDashboardWrapperScreenState
       const WaliSantriProfileScreen(),
     ];
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: PageView(
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          unauthenticated: () {
+            context.router.replaceAll([const LoginRoute()]);
+          },
+          orElse: () {},
+        );
+      },
+      child: Scaffold(
+        backgroundColor: colors.background,
+        body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
         children: pages,
@@ -109,6 +122,7 @@ class _WaliSantriDashboardWrapperScreenState
           _pageController.jumpToPage(index);
         },
         kIconSize: 24.0,
+      ),
       ),
     );
   }

@@ -26,5 +26,10 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == userId || isAdmin();
       allow write: if isAdmin();
     }
+
+    // Absensi: allow authenticated Gurus to write attendance
+    match /absensi/{documentId} {
+      allow read, write: if isAuthenticated();
+    }
   }
 }

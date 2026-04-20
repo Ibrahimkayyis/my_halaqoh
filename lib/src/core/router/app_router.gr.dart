@@ -166,18 +166,67 @@ class AttendanceRouteArgs {
 
 /// generated route for
 /// [BarcodeScannerScreen]
-class BarcodeScannerRoute extends PageRouteInfo<void> {
-  const BarcodeScannerRoute({List<PageRouteInfo>? children})
-    : super(BarcodeScannerRoute.name, initialChildren: children);
+class BarcodeScannerRoute extends PageRouteInfo<BarcodeScannerRouteArgs> {
+  BarcodeScannerRoute({
+    Key? key,
+    required DateTime selectedDate,
+    required String selectedSesi,
+    List<PageRouteInfo>? children,
+  }) : super(
+         BarcodeScannerRoute.name,
+         args: BarcodeScannerRouteArgs(
+           key: key,
+           selectedDate: selectedDate,
+           selectedSesi: selectedSesi,
+         ),
+         initialChildren: children,
+       );
 
   static const String name = 'BarcodeScannerRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const BarcodeScannerScreen();
+      final args = data.argsAs<BarcodeScannerRouteArgs>();
+      return BarcodeScannerScreen(
+        key: args.key,
+        selectedDate: args.selectedDate,
+        selectedSesi: args.selectedSesi,
+      );
     },
   );
+}
+
+class BarcodeScannerRouteArgs {
+  const BarcodeScannerRouteArgs({
+    this.key,
+    required this.selectedDate,
+    required this.selectedSesi,
+  });
+
+  final Key? key;
+
+  final DateTime selectedDate;
+
+  final String selectedSesi;
+
+  @override
+  String toString() {
+    return 'BarcodeScannerRouteArgs{key: $key, selectedDate: $selectedDate, selectedSesi: $selectedSesi}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! BarcodeScannerRouteArgs) return false;
+    return key == other.key &&
+        selectedDate == other.selectedDate &&
+        selectedSesi == other.selectedSesi;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^ selectedDate.hashCode ^ selectedSesi.hashCode;
 }
 
 /// generated route for
@@ -203,12 +252,16 @@ class DetailAbsensiHariIniRoute
   DetailAbsensiHariIniRoute({
     Key? key,
     List<String> scannedNisList = const [],
+    required DateTime selectedDate,
+    required String selectedSesi,
     List<PageRouteInfo>? children,
   }) : super(
          DetailAbsensiHariIniRoute.name,
          args: DetailAbsensiHariIniRouteArgs(
            key: key,
            scannedNisList: scannedNisList,
+           selectedDate: selectedDate,
+           selectedSesi: selectedSesi,
          ),
          initialChildren: children,
        );
@@ -218,12 +271,12 @@ class DetailAbsensiHariIniRoute
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<DetailAbsensiHariIniRouteArgs>(
-        orElse: () => const DetailAbsensiHariIniRouteArgs(),
-      );
+      final args = data.argsAs<DetailAbsensiHariIniRouteArgs>();
       return DetailAbsensiHariIniScreen(
         key: args.key,
         scannedNisList: args.scannedNisList,
+        selectedDate: args.selectedDate,
+        selectedSesi: args.selectedSesi,
       );
     },
   );
@@ -233,15 +286,21 @@ class DetailAbsensiHariIniRouteArgs {
   const DetailAbsensiHariIniRouteArgs({
     this.key,
     this.scannedNisList = const [],
+    required this.selectedDate,
+    required this.selectedSesi,
   });
 
   final Key? key;
 
   final List<String> scannedNisList;
 
+  final DateTime selectedDate;
+
+  final String selectedSesi;
+
   @override
   String toString() {
-    return 'DetailAbsensiHariIniRouteArgs{key: $key, scannedNisList: $scannedNisList}';
+    return 'DetailAbsensiHariIniRouteArgs{key: $key, scannedNisList: $scannedNisList, selectedDate: $selectedDate, selectedSesi: $selectedSesi}';
   }
 
   @override
@@ -249,11 +308,17 @@ class DetailAbsensiHariIniRouteArgs {
     if (identical(this, other)) return true;
     if (other is! DetailAbsensiHariIniRouteArgs) return false;
     return key == other.key &&
-        const ListEquality().equals(scannedNisList, other.scannedNisList);
+        const ListEquality().equals(scannedNisList, other.scannedNisList) &&
+        selectedDate == other.selectedDate &&
+        selectedSesi == other.selectedSesi;
   }
 
   @override
-  int get hashCode => key.hashCode ^ const ListEquality().hash(scannedNisList);
+  int get hashCode =>
+      key.hashCode ^
+      const ListEquality().hash(scannedNisList) ^
+      selectedDate.hashCode ^
+      selectedSesi.hashCode;
 }
 
 /// generated route for

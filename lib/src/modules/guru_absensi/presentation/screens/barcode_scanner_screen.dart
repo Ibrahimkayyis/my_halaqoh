@@ -1,36 +1,40 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
-import 'package:my_halaqoh/src/core/widget/dialog/confirm_save_dialog.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
-
-// ---------------------------------------------------------------------------
-// Dummy santri model — replace with real domain model later
-// ---------------------------------------------------------------------------
-class _SantriItem {
-  final String nis;
-  final String name;
-  bool isPresent = false;
-
-  _SantriItem({required this.nis, required this.name});
-}
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 
 /// Barcode scanner screen.
 ///
 /// Flow:
 /// 1. Screen opens → draggable bottom sheet shows list of santri in the group.
-/// 2. Guru scans a barcode → matching santri is auto-checked (haptic + green flash).
+/// 2. Guru scans a barcode → matching santri is auto-checked (haptic + green flash + success popup).
 /// 3. Scanning a barcode NOT in the list shows an error banner.
 /// 4. Guru taps SIMPAN → navigates to [DetailAbsensiHariIniScreen] with
 ///    scanned NIS list so those santri start with status "hadir".
 @RoutePage()
 class BarcodeScannerScreen extends StatefulWidget {
-  const BarcodeScannerScreen({super.key});
+  final DateTime selectedDate;
+  final String selectedSesi;
+
+  const BarcodeScannerScreen({
+    super.key,
+    required this.selectedDate,
+    required this.selectedSesi,
+  });
 
   @override
   State<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
@@ -46,25 +50,18 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   late AnimationController _animController;
   late Animation<double> _scanLineAnim;
 
-  // ── Santri list (dummy — swap with real data from Cubit) ───────────────────
-  final List<_SantriItem> _santriList = [
-    _SantriItem(nis: '220512140601', name: 'Ahmad'),
-    _SantriItem(nis: '220512140602', name: 'Fauzan'),
-    _SantriItem(nis: '220512140603', name: 'Yusuf'),
-    _SantriItem(nis: '220512140604', name: 'Ibrahim'),
-    _SantriItem(nis: '220512140605', name: 'Khalid'),
-    _SantriItem(nis: '220512140606', name: 'Usman'),
-    _SantriItem(nis: '220512140607', name: 'Ghulam'),
-    _SantriItem(nis: '220512140608', name: 'Haikal'),
-    _SantriItem(nis: '220512140609', name: 'Fikrie'),
-    _SantriItem(nis: '220512140610', name: 'Ghatfhan'),
-  ];
+  // ── Real santri data ───────────────────────────────────────────────────────
+  List<SantriModel> _santriList = [];
+  final Set<String> _scannedNisSet = {};
 
-  // ── Flash-highlight state (index of last scanned) ─────────────────────────
-  int? _flashIndex;
+  // ── Flash-highlight state (NIS of last scanned) ───────────────────────────
+  String? _flashNis;
 
   // ── Error banner ──────────────────────────────────────────────────────────
   String? _errorMessage;
+
+  // ── Success banner ────────────────────────────────────────────────────────
+  String? _successMessage;
 
   // ── Cooldown to avoid duplicate scans ─────────────────────────────────────
   bool _scanCooldown = false;
@@ -83,6 +80,44 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
     );
     _animController.repeat(reverse: true);
+
+    // Build santri list from cubits after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSantriList());
+  }
+
+  void _loadSantriList() {
+    final authState = context.read<AuthCubit>().state;
+    final halaqohState = context.read<HalaqohCubit>().state;
+    final santriState = context.read<SantriCubit>().state;
+
+    String linkedDocId = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) => linkedDocId = userMeta.linkedDocId,
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    if (myHalaqoh != null) {
+      santriState.maybeWhen(
+        loaded: (sList) {
+          setState(() {
+            _santriList = sList
+                .where((s) => myHalaqoh!.santriIds.contains(s.id))
+                .toList();
+          });
+        },
+        orElse: () {},
+      );
+    }
   }
 
   @override
@@ -108,7 +143,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       setState(() {
         _errorMessage =
             'Santri dengan NIS $rawValue bukan anggota halaqoh Anda';
-        _flashIndex = null;
+        _flashNis = null;
+        _successMessage = null; // reset success if error occurs
       });
       // Auto-dismiss error after 3 s
       Future.delayed(const Duration(seconds: 3), () {
@@ -117,18 +153,28 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       return;
     }
 
-    if (_santriList[index].isPresent) return; // already checked
+    if (_scannedNisSet.contains(rawValue)) return; // already checked
 
     HapticFeedback.mediumImpact();
+
+    // Ambil nama santri berdasarkan index yang ditemukan
+    final scannedSantriName = _santriList[index].nama;
+
     setState(() {
-      _santriList[index].isPresent = true;
-      _flashIndex = index;
+      _scannedNisSet.add(rawValue);
+      _flashNis = rawValue;
       _errorMessage = null;
+      _successMessage = scannedSantriName; // Simpan nama untuk pop-up
     });
 
     // Remove highlight after 800 ms
     Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _flashIndex = null);
+      if (mounted) setState(() => _flashNis = null);
+    });
+
+    // Auto-dismiss success pop-up after 1.5 seconds
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) setState(() => _successMessage = null);
     });
   }
 
@@ -142,20 +188,17 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
   // ── Navigate to detail screen ─────────────────────────────────────────────
   void _onSimpan() {
-    final scannedNisList = _santriList
-        .where((s) => s.isPresent)
-        .map((s) => s.nis)
-        .toList();
-
-    // AutoRoute generates DetailAbsensiHariIniRouteArgs from constructor params.
-    // List<String> is fully supported this way — no @PathParam needed.
     context.router.replace(
-      DetailAbsensiHariIniRoute(scannedNisList: scannedNisList),
+      DetailAbsensiHariIniRoute(
+        scannedNisList: _scannedNisSet.toList(),
+        selectedDate: widget.selectedDate,
+        selectedSesi: widget.selectedSesi,
+      ),
     );
   }
 
   // ── Counts ─────────────────────────────────────────────────────────────────
-  int get _scannedCount => _santriList.where((s) => s.isPresent).length;
+  int get _scannedCount => _scannedNisSet.length;
   int get _totalCount => _santriList.length;
 
   // ── Build ──────────────────────────────────────────────────────────────────
@@ -178,6 +221,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
           // Error banner
           if (_errorMessage != null) _buildErrorBanner(colors),
+
+          // Success banner
+          _buildSuccessBanner(colors),
 
           // Instruction text (only when error is absent)
           if (_errorMessage == null)
@@ -331,7 +377,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                   // Scan line
                   AnimatedBuilder(
                     animation: _scanLineAnim,
-                    builder: (_, __) {
+                    builder: (_, _) {
                       final y = _scanLineAnim.value * (cardHeight - 4);
                       return Positioned(
                         top: y,
@@ -365,6 +411,63 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  // ── Success Pop-up Banner ─────────────────────────────────────────────────
+  Widget _buildSuccessBanner(AppColorSet colors) {
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 70.h,
+      left: 20.w,
+      right: 20.w,
+      child: AnimatedOpacity(
+        opacity: _successMessage != null ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 300),
+        child: Center(
+          child: Container(
+            // Padding vertikal sedikit ditambah agar lega jika teks menjadi 2 baris
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: Colors.green.shade600.withValues(alpha: 0.95),
+              // Menggunakan 16.r (rounded rectangle) agar tetap bagus meski teks multi-line
+              borderRadius: BorderRadius.circular(16.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withValues(alpha: 0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              // Memastikan ikon tetap di tengah secara vertikal jika teks turun ke baris 2
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.white,
+                  size: 20.sp,
+                ),
+                SizedBox(width: 10.w),
+                Flexible(
+                  child: Text(
+                    _successMessage != null ? '$_successMessage hadir' : '',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      fontFamily: 'Poppins',
+                      height: 1.3, // Jarak antar baris teks agar rapi
+                    ),
+                    // maxLines dan overflow dihapus agar teks tampil penuh!
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -463,7 +566,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                 padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 12.h),
                 child: Row(
                   children: [
-                    // Title + counter
+                    // Title + Total Santri (Kiri)
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -478,37 +581,20 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                             ),
                           ),
                           SizedBox(height: 2.h),
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: '$_scannedCount',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: colors.primary,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                                TextSpan(
-                                  text:
-                                      ' / $_totalCount '
-                                      '${t.absensi.santriCount(count: _totalCount.toString())}',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: colors.textSecondary,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            'Total $_totalCount Santri', // Teks dibersihkan agar tidak dobel
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w400,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    // Progress pill
+                    // Progress pill (Kanan)
                     Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: 12.w,
@@ -522,14 +608,25 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                           width: 1,
                         ),
                       ),
-                      child: Text(
-                        '$_scannedCount/$_totalCount',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w700,
-                          color: colors.primary,
-                          fontFamily: 'Poppins',
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.qr_code_scanner,
+                            size: 14.sp,
+                            color: colors.primary,
+                          ),
+                          SizedBox(width: 6.w),
+                          Text(
+                            '$_scannedCount / $_totalCount',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w700,
+                              color: colors.primary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -548,12 +645,20 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                     vertical: 8.h,
                   ),
                   itemCount: _santriList.length,
-                  separatorBuilder: (_, __) =>
-                      Divider(height: 1, color: colors.borderLight),
+                  separatorBuilder: (_, _) => Divider(
+                    height: 1,
+                    color: colors.border.withValues(alpha: 0.3),
+                  ),
                   itemBuilder: (context, index) {
                     final santri = _santriList[index];
-                    final isFlashing = _flashIndex == index;
-                    return _buildSantriRow(santri, isFlashing, colors);
+                    final isPresent = _scannedNisSet.contains(santri.nis);
+                    final isFlashing = _flashNis == santri.nis;
+                    return _buildSantriRow(
+                      santri,
+                      isPresent,
+                      isFlashing,
+                      colors,
+                    );
                   },
                 ),
               ),
@@ -583,7 +688,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
   // ── Single santri row ─────────────────────────────────────────────────────
   Widget _buildSantriRow(
-    _SantriItem santri,
+    SantriModel santri,
+    bool isPresent,
     bool isFlashing,
     AppColorSet colors,
   ) {
@@ -601,14 +707,14 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             height: 38.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: santri.isPresent
+              color: isPresent
                   ? colors.primary.withValues(alpha: 0.15)
                   : colors.border.withValues(alpha: 0.3),
             ),
             child: Icon(
               Icons.person,
               size: 20.sp,
-              color: santri.isPresent ? colors.primary : colors.textSecondary,
+              color: isPresent ? colors.primary : colors.textSecondary,
             ),
           ),
           SizedBox(width: 12.w),
@@ -619,13 +725,11 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  santri.name,
+                  santri.nama,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: santri.isPresent
-                        ? colors.primary
-                        : colors.textPrimary,
+                    color: isPresent ? colors.primary : colors.textPrimary,
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -648,13 +752,13 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             height: 26.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: santri.isPresent ? colors.primary : Colors.transparent,
+              color: isPresent ? colors.primary : Colors.transparent,
               border: Border.all(
-                color: santri.isPresent ? colors.primary : colors.border,
+                color: isPresent ? colors.primary : colors.border,
                 width: 2,
               ),
             ),
-            child: santri.isPresent
+            child: isPresent
                 ? Icon(Icons.check, size: 15.sp, color: Colors.white)
                 : null,
           ),

@@ -23,6 +23,10 @@ import 'src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 
+// Guru Absensi — Hive & Sync
+import 'src/modules/guru_absensi/data/datasources/local/absensi_hive_adapters.dart';
+import 'src/modules/guru_absensi/data/datasources/remote/source/implementation/absensi_sync_service.dart';
+
 // Auth
 import 'src/modules/auth/presentation/cubits/auth_cubit.dart';
 
@@ -37,6 +41,7 @@ void main() async {
   // ── 2. Hive ────────────────────────────────────────────────────────────────
   await Hive.initFlutter();
   registerMasterDataAdapters();
+  registerAbsensiAdapters();
 
   // ── 3. Quran Service ───────────────────────────────────────────────────────
   await QuranService.instance.initialize();
@@ -50,6 +55,9 @@ void main() async {
   // ── 6. Theme & Locale ─────────────────────────────────────────────────────
   await sl<ThemeCubit>().initialize();
   await sl<LocaleCubit>().initialize();
+
+  // ── 7. Absensi Sync Service ─────────────────────────────────────────────
+  sl<AbsensiSyncService>().start();
 
   runApp(TranslationProvider(child: MyApp()));
 }
