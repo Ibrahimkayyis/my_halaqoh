@@ -323,7 +323,10 @@ class WaliSantriProfileScreen extends StatelessWidget {
         onTap: () async {
           final confirmed = await ConfirmLogoutDialog.show(context);
           if (confirmed && context.mounted) {
-            context.router.replaceAll([const LoginRoute()]);
+            await context.read<AuthCubit>().logout();
+            if (context.mounted) {
+              context.router.replaceAll([const LoginRoute()]);
+            }
           }
         },
         borderRadius: BorderRadius.circular(16.r),

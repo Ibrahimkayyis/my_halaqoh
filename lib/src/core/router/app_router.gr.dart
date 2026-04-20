@@ -64,6 +64,73 @@ class AbsensiHalaqohRouteArgs {
 }
 
 /// generated route for
+/// [AccessDeniedScreen]
+class AccessDeniedRoute extends PageRouteInfo<AccessDeniedRouteArgs> {
+  AccessDeniedRoute({
+    Key? key,
+    required String attemptedRole,
+    required List<String> requiredRoles,
+    List<PageRouteInfo>? children,
+  }) : super(
+         AccessDeniedRoute.name,
+         args: AccessDeniedRouteArgs(
+           key: key,
+           attemptedRole: attemptedRole,
+           requiredRoles: requiredRoles,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'AccessDeniedRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<AccessDeniedRouteArgs>();
+      return AccessDeniedScreen(
+        key: args.key,
+        attemptedRole: args.attemptedRole,
+        requiredRoles: args.requiredRoles,
+      );
+    },
+  );
+}
+
+class AccessDeniedRouteArgs {
+  const AccessDeniedRouteArgs({
+    this.key,
+    required this.attemptedRole,
+    required this.requiredRoles,
+  });
+
+  final Key? key;
+
+  final String attemptedRole;
+
+  final List<String> requiredRoles;
+
+  @override
+  String toString() {
+    return 'AccessDeniedRouteArgs{key: $key, attemptedRole: $attemptedRole, requiredRoles: $requiredRoles}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! AccessDeniedRouteArgs) return false;
+    return key == other.key &&
+        attemptedRole == other.attemptedRole &&
+        const ListEquality().equals(requiredRoles, other.requiredRoles);
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^
+      attemptedRole.hashCode ^
+      const ListEquality().hash(requiredRoles);
+}
+
+/// generated route for
 /// [AddHalaqohScreen]
 class AddHalaqohRoute extends PageRouteInfo<AddHalaqohRouteArgs> {
   AddHalaqohRoute({

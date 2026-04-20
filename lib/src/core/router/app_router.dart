@@ -1,6 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:my_halaqoh/src/core/router/guards/auth_guard.dart';
+import 'package:my_halaqoh/src/core/router/guards/role_guard.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/screens/access_denied_screen.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/screens/splash_screen.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/screens/login_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/screens/attendance_screen.dart';
@@ -46,51 +50,160 @@ part 'app_router.gr.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Screen|Page,Route')
 class AppRouter extends RootStackRouter {
+  final AuthCubit _authCubit;
+
+  AppRouter(this._authCubit);
+
   @override
   RouteType get defaultRouteType => RouteType.material();
 
   @override
   List<AutoRoute> get routes => [
+    // ── Public routes (no guards) ──────────────────────────────────────
     AutoRoute(initial: true, page: SplashRoute.page),
     AutoRoute(page: LoginRoute.page),
-    AutoRoute(page: DashboardWrapperRoute.page),
-    AutoRoute(page: GuruDashboardWrapperRoute.page),
-    AutoRoute(page: WaliSantriDashboardWrapperRoute.page),
-    AutoRoute(page: AttendanceRoute.page),
-    AutoRoute(page: HafalanRoute.page),
-    AutoRoute(page: AddHalaqohRoute.page),
-    AutoRoute(page: SelectSantriRoute.page),
-    AutoRoute(page: PengaturanMasterDataRoute.page),
-    AutoRoute(page: MyHalaqohRoute.page),
-    AutoRoute(page: DetailSantriRoute.page),
-    AutoRoute(page: BarcodeScannerRoute.page),
-    AutoRoute(page: RiwayatAbsensiRoute.page),
-    AutoRoute(page: KalenderAbsensiRoute.page),
-    AutoRoute(page: AbsensiHalaqohRoute.page),
-    AutoRoute(page: DetailAbsensiHariIniRoute.page),
-    AutoRoute(page: InputHafalanRoute.page),
-    AutoRoute(page: RiwayatHafalanSantriRoute.page),
-    AutoRoute(page: ProgressHafalanPerJuzRoute.page),
-    AutoRoute(page: ProgressHafalanPerSuratRoute.page),
-    AutoRoute(page: MutabaahSantriRoute.page),
-    AutoRoute(page: EditProfileRoute.page),
-    AutoRoute(page: UbahPasswordRoute.page),
-    AutoRoute(page: PengaturanRoute.page),
-    // Wali Santri Hafalan
-    AutoRoute(page: WaliSantriRiwayatHafalanRoute.page),
-    AutoRoute(page: WaliSantriProgressPerJuzRoute.page),
-    AutoRoute(page: WaliSantriProgressPerSuratRoute.page),
-    AutoRoute(page: WaliSantriMutabaahRoute.page),
-    // Wali Santri Absensi
-    AutoRoute(page: WaliSantriRiwayatAbsensiRoute.page),
-    AutoRoute(page: WaliSantriKalenderAbsensiRoute.page),
-    // Wali Santri Profile
-    AutoRoute(page: WaliSantriProfileRoute.page),
-    AutoRoute(page: WaliSantriEditProfileRoute.page),
-    AutoRoute(page: WaliSantriUbahPasswordRoute.page),
-    AutoRoute(page: WaliSantriPengaturanRoute.page),
+    AutoRoute(page: AccessDeniedRoute.page),
+
+    // ── Admin-only routes ──────────────────────────────────────────────
+    AutoRoute(
+      page: DashboardWrapperRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['admin'])],
+    ),
+    AutoRoute(
+      page: AddHalaqohRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['admin'])],
+    ),
+    AutoRoute(
+      page: SelectSantriRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['admin'])],
+    ),
+    AutoRoute(
+      page: PengaturanMasterDataRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['admin'])],
+    ),
+
+    // ── Guru-only routes ───────────────────────────────────────────────
+    AutoRoute(
+      page: GuruDashboardWrapperRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: AttendanceRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: HafalanRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: MyHalaqohRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: DetailSantriRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: BarcodeScannerRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: RiwayatAbsensiRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: KalenderAbsensiRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: AbsensiHalaqohRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: DetailAbsensiHariIniRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: InputHafalanRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: RiwayatHafalanSantriRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: ProgressHafalanPerJuzRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: ProgressHafalanPerSuratRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: MutabaahSantriRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: EditProfileRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: UbahPasswordRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+    AutoRoute(
+      page: PengaturanRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])],
+    ),
+
+    // ── Wali Santri-only routes ────────────────────────────────────────
+    AutoRoute(
+      page: WaliSantriDashboardWrapperRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
+    AutoRoute(
+      page: WaliSantriRiwayatHafalanRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
+    AutoRoute(
+      page: WaliSantriProgressPerJuzRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
+    AutoRoute(
+      page: WaliSantriProgressPerSuratRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
+    AutoRoute(
+      page: WaliSantriMutabaahRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
+    AutoRoute(
+      page: WaliSantriRiwayatAbsensiRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
+    AutoRoute(
+      page: WaliSantriKalenderAbsensiRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
+    AutoRoute(
+      page: WaliSantriProfileRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
+    AutoRoute(
+      page: WaliSantriEditProfileRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
+    AutoRoute(
+      page: WaliSantriUbahPasswordRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
+    AutoRoute(
+      page: WaliSantriPengaturanRoute.page,
+      guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['santri'])],
+    ),
   ];
 
   @override
-  List<AutoRouteGuard> get guards => [];
+  List<AutoRouteGuard> get guards => []; 
 }
+

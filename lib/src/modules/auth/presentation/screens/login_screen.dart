@@ -8,6 +8,10 @@ import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -33,8 +37,28 @@ class _LoginScreenState extends State<LoginScreen> {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
+    // ── Validation ─────────────────────────────────────────────────────
     if (username.isEmpty || password.isEmpty) {
       _showError(t.auth.validationEmpty);
+      return;
+    }
+
+    // NIP/NIS should be alphanumeric (letters and digits only, no special chars)
+    final identifierRegex = RegExp(r'^[a-zA-Z0-9]+$');
+    if (!identifierRegex.hasMatch(username)) {
+      _showError('NIP/NIS hanya boleh mengandung huruf dan angka.');
+      return;
+    }
+
+    // NIP/NIS should be between 3 and 30 characters
+    if (username.length < 3 || username.length > 30) {
+      _showError('NIP/NIS harus antara 3 sampai 30 karakter.');
+      return;
+    }
+
+    // Password minimum length
+    if (password.length < 6) {
+      _showError('Password minimal 6 karakter.');
       return;
     }
 
@@ -65,6 +89,12 @@ class _LoginScreenState extends State<LoginScreen> {
             error: (message) => _showError(message),
             authenticated: (user) {
               final String programStr = (user.programType == 'T') ? 'takhassus' : 'reguler';
+
+              // Restart the Firestore streams since they failed with Permission Denied on logout
+              context.read<GuruCubit>().watchAll();
+              context.read<SantriCubit>().watchAll();
+              context.read<HalaqohCubit>().watchAll();
+              context.read<TargetHafalanCubit>().watchAll();
 
               // Redirect based on role from UserMetadata
               if (user.role == 'admin') {

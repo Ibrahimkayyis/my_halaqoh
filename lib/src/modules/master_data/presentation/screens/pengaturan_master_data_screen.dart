@@ -1,10 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 
 @RoutePage()
 class PengaturanMasterDataScreen extends StatelessWidget {
@@ -171,7 +173,10 @@ class PengaturanMasterDataScreen extends StatelessWidget {
         onTap: () async {
           final confirmed = await ConfirmLogoutDialog.show(context);
           if (confirmed && context.mounted) {
-            context.router.replaceAll([const LoginRoute()]);
+            await context.read<AuthCubit>().logout();
+            if (context.mounted) {
+              context.router.replaceAll([const LoginRoute()]);
+            }
           }
         },
         borderRadius: BorderRadius.circular(16.r),

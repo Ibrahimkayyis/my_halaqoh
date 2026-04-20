@@ -19,6 +19,7 @@ dependencies:
   dio: ^5.9.0
   equatable: ^2.0.7
   firebase_auth: ^6.3.0
+  firebase_app_check: ^0.4.2
   firebase_core: ^4.6.0
   firebase_storage: ^13.2.0
   flutter:
