@@ -4,12 +4,15 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.da
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
 
+import 'package:my_halaqoh/src/modules/guru_hafalan/domain/models/hafalan_santri_model.dart';
+
 /// Box name constants for master data Hive storage.
 class MasterDataBoxNames {
   static const guru = 'guru_box';
   static const santri = 'santri_box';
   static const halaqoh = 'halaqoh_box';
   static const targetHafalan = 'target_hafalan_box';
+  static const hafalanSantri = 'hafalan_santri_box';
 }
 
 /// Local data source for master data using Hive as cache.
@@ -18,14 +21,29 @@ class MasterDataLocalDataSource {
   late Box<SantriModel> santriBox;
   late Box<HalaqohModel> halaqohBox;
   late Box<TargetHafalanModel> targetHafalanBox;
+  late Box<HafalanSantriModel> hafalanSantriBox;
+
+  Future<Box<T>> _openBoxSafely<T>(String name) async {
+    try {
+      return await Hive.openBox<T>(name);
+    } catch (e) {
+      try {
+        await Hive.deleteBoxFromDisk(name);
+      } catch (_) {}
+      return await Hive.openBox<T>(name);
+    }
+  }
 
   /// Open all Hive boxes. Call after adapter registration.
   Future<void> init() async {
-    guruBox = await Hive.openBox<GuruModel>(MasterDataBoxNames.guru);
-    santriBox = await Hive.openBox<SantriModel>(MasterDataBoxNames.santri);
-    halaqohBox = await Hive.openBox<HalaqohModel>(MasterDataBoxNames.halaqoh);
-    targetHafalanBox = await Hive.openBox<TargetHafalanModel>(
+    guruBox = await _openBoxSafely<GuruModel>(MasterDataBoxNames.guru);
+    santriBox = await _openBoxSafely<SantriModel>(MasterDataBoxNames.santri);
+    halaqohBox = await _openBoxSafely<HalaqohModel>(MasterDataBoxNames.halaqoh);
+    targetHafalanBox = await _openBoxSafely<TargetHafalanModel>(
       MasterDataBoxNames.targetHafalan,
+    );
+    hafalanSantriBox = await _openBoxSafely<HafalanSantriModel>(
+      MasterDataBoxNames.hafalanSantri,
     );
   }
 

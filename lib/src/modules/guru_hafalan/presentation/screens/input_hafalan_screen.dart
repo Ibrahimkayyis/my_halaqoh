@@ -6,35 +6,30 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
-/// Surah data model
-class _SurahData {
-  final int number;
-  final String name;
-  final int juz;
-  final String type;
-  final int ayatCount;
-
-  const _SurahData({
-    required this.number,
-    required this.name,
-    required this.juz,
-    required this.type,
-    required this.ayatCount,
-  });
-}
+import 'package:my_halaqoh/src/core/quran/quran_service.dart';
+import 'package:my_halaqoh/src/core/quran/surah_model.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/input_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/domain/models/hafalan_santri_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Selected surah state
 class _SelectedSurah {
-  final _SurahData surah;
+  final SurahModel surah;
   bool semuaAyat = false;
   final TextEditingController ayatAwalController;
   final TextEditingController ayatAkhirController;
 
-  _SelectedSurah({required this.surah})
+  _SelectedSurah({required this.surah, VoidCallback? onChanged})
     : ayatAwalController = TextEditingController(text: '1'),
       ayatAkhirController = TextEditingController(
         text: surah.ayatCount.toString(),
-      );
+      ) {
+    if (onChanged != null) {
+      ayatAwalController.addListener(onChanged);
+      ayatAkhirController.addListener(onChanged);
+    }
+  }
 
   void dispose() {
     ayatAwalController.dispose();
@@ -44,11 +39,29 @@ class _SelectedSurah {
 
 /// Input Hafalan form screen — Ziyadah/Murajaah tabs, surah picker, ayat fields, scoring
 @RoutePage()
-class InputHafalanScreen extends StatefulWidget {
+class InputHafalanScreen extends StatefulWidget implements AutoRouteWrapper {
+  final String santriId;
   final String name;
   final String nis;
+  final String halaqohId;
+  final String guruId;
 
-  const InputHafalanScreen({super.key, required this.name, required this.nis});
+  const InputHafalanScreen({
+    super.key,
+    required this.santriId,
+    required this.name,
+    required this.nis,
+    required this.halaqohId,
+    required this.guruId,
+  });
+
+  @override
+  Widget wrappedRoute(BuildContext context) {
+    return BlocProvider(
+      create: (context) => sl<InputHafalanCubit>(),
+      child: this,
+    );
+  }
 
   @override
   State<InputHafalanScreen> createState() => _InputHafalanScreenState();
@@ -67,307 +80,12 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
 
   final List<_SelectedSurah> _selectedSurahs = [];
 
-  // Dummy surah data
-  final List<_SurahData> _surahList = const [
-    _SurahData(
-      number: 1,
-      name: 'Al-Fatihah',
-      juz: 1,
-      type: 'Makkiyah',
-      ayatCount: 7,
-    ),
-    _SurahData(
-      number: 2,
-      name: 'Al-Baqarah',
-      juz: 1,
-      type: 'Madaniyah',
-      ayatCount: 286,
-    ),
-    _SurahData(
-      number: 3,
-      name: 'Ali Imran',
-      juz: 3,
-      type: 'Madaniyah',
-      ayatCount: 200,
-    ),
-    _SurahData(
-      number: 36,
-      name: 'Yasin',
-      juz: 22,
-      type: 'Makkiyah',
-      ayatCount: 83,
-    ),
-    _SurahData(
-      number: 67,
-      name: 'Al-Mulk',
-      juz: 29,
-      type: 'Makkiyah',
-      ayatCount: 30,
-    ),
-    _SurahData(
-      number: 78,
-      name: "An-Naba'",
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 40,
-    ),
-    _SurahData(
-      number: 79,
-      name: "An-Nazi'at",
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 46,
-    ),
-    _SurahData(
-      number: 80,
-      name: "'Abasa",
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 42,
-    ),
-    _SurahData(
-      number: 81,
-      name: 'At-Takwir',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 29,
-    ),
-    _SurahData(
-      number: 82,
-      name: 'Al-Infitar',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 19,
-    ),
-    _SurahData(
-      number: 83,
-      name: 'Al-Mutaffifin',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 36,
-    ),
-    _SurahData(
-      number: 84,
-      name: 'Al-Insyiqaq',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 25,
-    ),
-    _SurahData(
-      number: 85,
-      name: 'Al-Buruj',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 22,
-    ),
-    _SurahData(
-      number: 86,
-      name: 'At-Tariq',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 17,
-    ),
-    _SurahData(
-      number: 87,
-      name: "Al-A'la",
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 19,
-    ),
-    _SurahData(
-      number: 88,
-      name: 'Al-Gasyiyah',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 26,
-    ),
-    _SurahData(
-      number: 89,
-      name: 'Al-Fajr',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 30,
-    ),
-    _SurahData(
-      number: 90,
-      name: 'Al-Balad',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 20,
-    ),
-    _SurahData(
-      number: 91,
-      name: 'Asy-Syams',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 15,
-    ),
-    _SurahData(
-      number: 92,
-      name: 'Al-Lail',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 21,
-    ),
-    _SurahData(
-      number: 93,
-      name: 'Ad-Duha',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 11,
-    ),
-    _SurahData(
-      number: 94,
-      name: 'Asy-Syarh',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 8,
-    ),
-    _SurahData(
-      number: 95,
-      name: 'At-Tin',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 8,
-    ),
-    _SurahData(
-      number: 96,
-      name: 'Al-Alaq',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 19,
-    ),
-    _SurahData(
-      number: 97,
-      name: 'Al-Qadr',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 5,
-    ),
-    _SurahData(
-      number: 98,
-      name: 'Al-Bayyinah',
-      juz: 30,
-      type: 'Madaniyah',
-      ayatCount: 8,
-    ),
-    _SurahData(
-      number: 99,
-      name: 'Az-Zalzalah',
-      juz: 30,
-      type: 'Madaniyah',
-      ayatCount: 8,
-    ),
-    _SurahData(
-      number: 100,
-      name: 'Al-Adiyat',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 11,
-    ),
-    _SurahData(
-      number: 101,
-      name: "Al-Qari'ah",
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 11,
-    ),
-    _SurahData(
-      number: 102,
-      name: 'At-Takasur',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 8,
-    ),
-    _SurahData(
-      number: 103,
-      name: 'Al-Asr',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 3,
-    ),
-    _SurahData(
-      number: 104,
-      name: 'Al-Humazah',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 9,
-    ),
-    _SurahData(
-      number: 105,
-      name: 'Al-Fil',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 5,
-    ),
-    _SurahData(
-      number: 106,
-      name: 'Quraisy',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 4,
-    ),
-    _SurahData(
-      number: 107,
-      name: "Al-Ma'un",
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 7,
-    ),
-    _SurahData(
-      number: 108,
-      name: 'Al-Kausar',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 3,
-    ),
-    _SurahData(
-      number: 109,
-      name: 'Al-Kafirun',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 6,
-    ),
-    _SurahData(
-      number: 110,
-      name: 'An-Nasr',
-      juz: 30,
-      type: 'Madaniyah',
-      ayatCount: 3,
-    ),
-    _SurahData(
-      number: 111,
-      name: 'Al-Lahab',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 5,
-    ),
-    _SurahData(
-      number: 112,
-      name: 'Al-Ikhlas',
-      juz: 30,
-      type: 'Makkiyah',
-      ayatCount: 4,
-    ),
-    _SurahData(
-      number: 113,
-      name: 'Al-Falaq',
-      juz: 30,
-      type: 'Madaniyah',
-      ayatCount: 5,
-    ),
-    _SurahData(
-      number: 114,
-      name: 'An-Nas',
-      juz: 30,
-      type: 'Madaniyah',
-      ayatCount: 6,
-    ),
-  ];
+  late final List<SurahModel> _surahList;
 
   @override
   void initState() {
     super.initState();
+    _surahList = QuranService.instance.getAllSurahs();
     _tabController = TabController(length: 2, vsync: this);
   }
 
@@ -384,13 +102,35 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  String get _selectedTab => _tabController.index == 0 ? 'ziyadah' : 'murajaah';
 
+  void _updateJuzDisplay() {
+    if (_selectedSurahs.isEmpty) {
+      _juzController.clear();
+      return;
+    }
+    final Set<int> juzSet = {};
+    for (final sel in _selectedSurahs) {
+      final start = int.tryParse(sel.ayatAwalController.text) ?? 1;
+      final end = int.tryParse(sel.ayatAkhirController.text) ?? sel.surah.ayatCount;
+      
+      final startJuz = sel.surah.juzForAyat(start) ?? sel.surah.juzStart;
+      final endJuz = sel.surah.juzForAyat(end) ?? startJuz;
+      
+      // Determine direction of juz order
+      final minJuz = startJuz < endJuz ? startJuz : endJuz;
+      final maxJuz = startJuz > endJuz ? startJuz : endJuz;
+      for (int i = minJuz; i <= maxJuz; i++) {
+        juzSet.add(i);
+      }
+    }
+    final sortedJuz = juzSet.toList()..sort();
+    _juzController.text = sortedJuz.join(', ');
+  }
   void _showSurahBottomSheet() {
     final colors = AppColors.of(context);
     final searchController = TextEditingController();
     String searchQuery = '';
-    final tempSelected = <int>{..._selectedSurahs.map((s) => s.surah.number)};
+    final tempSelected = <int>{..._selectedSurahs.map((s) => s.surah.id)};
 
     showModalBottomSheet(
       context: context,
@@ -402,7 +142,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
             final filtered = _surahList.where((s) {
               if (searchQuery.isEmpty) return true;
               return s.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
-                  s.number.toString().contains(searchQuery);
+                  s.id.toString().contains(searchQuery);
             }).toList();
 
             final totalCount = tempSelected.length;
@@ -502,14 +242,14 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       itemCount: filtered.length,
                       itemBuilder: (_, idx) {
                         final surah = filtered[idx];
-                        final isSelected = tempSelected.contains(surah.number);
+                        final isSelected = tempSelected.contains(surah.id);
                         return InkWell(
                           onTap: () {
                             setSheetState(() {
                               if (isSelected) {
-                                tempSelected.remove(surah.number);
+                                tempSelected.remove(surah.id);
                               } else {
-                                tempSelected.add(surah.number);
+                                tempSelected.add(surah.id);
                               }
                             });
                           },
@@ -528,7 +268,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    surah.number.toString(),
+                                    surah.id.toString(),
                                     style: TextStyle(
                                       fontSize: 13.sp,
                                       fontWeight: FontWeight.w600,
@@ -573,7 +313,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       onPressed: totalCount > 0
                           ? () {
                               _selectedSurahs.removeWhere((sel) {
-                                if (!tempSelected.contains(sel.surah.number)) {
+                                if (!tempSelected.contains(sel.surah.id)) {
                                   sel.dispose();
                                   return true;
                                 }
@@ -581,16 +321,20 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                               });
                               for (final num in tempSelected) {
                                 if (!_selectedSurahs.any(
-                                  (s) => s.surah.number == num,
+                                  (s) => s.surah.id == num,
                                 )) {
                                   final surah = _surahList.firstWhere(
-                                    (s) => s.number == num,
+                                    (s) => s.id == num,
                                   );
                                   _selectedSurahs.add(
-                                    _SelectedSurah(surah: surah),
+                                    _SelectedSurah(
+                                      surah: surah, 
+                                      onChanged: _updateJuzDisplay,
+                                    ),
                                   );
                                 }
                               }
+                              _updateJuzDisplay();
                               setState(() {});
                               Navigator.pop(ctx);
                             }
@@ -638,28 +382,48 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: AppBar(
-        backgroundColor: colors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          'Input Hafalan',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: colors.textPrimary,
-            fontFamily: 'Poppins',
-          ),
-        ),
-        centerTitle: false,
-      ),
-      body: Column(
-        children: [
+    return BlocConsumer<InputHafalanCubit, InputHafalanState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          error: (msg) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(msg, style: const TextStyle(fontFamily: 'Poppins')),
+                backgroundColor: colors.red,
+              ),
+            );
+          },
+          success: () {
+            Navigator.of(context).pop({'success': true});
+          },
+          orElse: () {},
+        );
+      },
+      builder: (context, state) {
+        return Stack(
+          children: [
+            Scaffold(
+              backgroundColor: colors.background,
+              appBar: AppBar(
+                backgroundColor: colors.background,
+                elevation: 0,
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                title: Text(
+                  'Input Hafalan',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                centerTitle: false,
+              ),
+              body: Column(
+                children: [
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -695,39 +459,42 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                           ),
                         ),
                         SizedBox(width: 14.w),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.name,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w700,
-                                color: colors.textPrimary,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8.w,
-                                vertical: 2.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colors.background,
-                                borderRadius: BorderRadius.circular(6.r),
-                              ),
-                              child: Text(
-                                'NIS: ${widget.nis}',
+                        // FIX: Expanded prevents overflow when name is long
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.name,
                                 style: TextStyle(
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.w500,
-                                  color: colors.textSecondary,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.textPrimary,
                                   fontFamily: 'Poppins',
                                 ),
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 2.h),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8.w,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colors.background,
+                                  borderRadius: BorderRadius.circular(6.r),
+                                ),
+                                child: Text(
+                                  'NIS: ${widget.nis}',
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: colors.textSecondary,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -885,7 +652,8 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     t.inputHafalanForm.juz,
                     _juzController,
                     colors,
-                    keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.text, // Text because it can contain comma-separated values like "29, 30"
+                    readOnly: true,
                   ),
                   SizedBox(height: 24.h),
 
@@ -955,20 +723,39 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                   width: double.infinity,
                   height: 50.h,
                   onPressed: () async {
+                    if (_selectedSurahs.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Pilih minimal satu surah', style: TextStyle(fontFamily: 'Poppins')),
+                          backgroundColor: colors.red,
+                        ),
+                      );
+                      return;
+                    }
                     final confirmed = await ConfirmSaveDialog.show(context);
                     if (confirmed && context.mounted) {
-                      final dummyData = {
-                        'day': DateTime.now().day,
-                        'type': _selectedTab,
-                        'surah': _selectedSurahs.isNotEmpty
-                            ? _selectedSurahs.first.surah.name
-                            : 'Surat Baru',
-                        'ayat': _selectedSurahs.isNotEmpty
-                            ? 'Ayat ${_selectedSurahs.first.ayatAwalController.text} - ${_selectedSurahs.first.ayatAkhirController.text}'
-                            : 'Ayat 1-10',
-                        'score': int.tryParse(_kelancaranController.text) ?? 80,
-                      };
-                      Navigator.of(context).pop(dummyData);
+                      final models = _selectedSurahs.map((sel) {
+                        final typeStr = _tabController.index == 0 ? 'Ziyadah' : 'Murajaah';
+                        final ayatStart = int.tryParse(sel.ayatAwalController.text) ?? 1;
+                        return HafalanSantriModel(
+                          id: DateTime.now().microsecondsSinceEpoch.toString() + sel.surah.id.toString(),
+                          santriId: widget.santriId,
+                          halaqohId: widget.halaqohId,
+                          guruId: widget.guruId,
+                          tanggalSetoran: _tanggalSetoran,
+                          jenis: typeStr,
+                          surahId: sel.surah.id,
+                          surahName: sel.surah.name,
+                          ayatMulai: ayatStart,
+                          ayatSelesai: int.tryParse(sel.ayatAkhirController.text) ?? sel.surah.ayatCount,
+                          juz: int.tryParse(_juzController.text) ?? sel.surah.juzForAyat(ayatStart) ?? sel.surah.juzStart,
+                          nilaiKelancaran: int.tryParse(_kelancaranController.text) ?? 0,
+                          nilaiTajwid: int.tryParse(_tajwidController.text) ?? 0,
+                          createdAt: DateTime.now(),
+                          isSynced: false,
+                        );
+                      }).toList();
+                      context.read<InputHafalanCubit>().submitMultipleHafalan(models);
                     }
                   },
                   label: t.inputHafalanForm.simpan,
@@ -985,11 +772,19 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
               ],
             ),
           ),
-        ],
-      ),
+              ],
+            ),
+            ),
+            if (state.maybeWhen(loading: () => true, orElse: () => false))
+              Container(
+                color: Colors.black.withValues(alpha: 0.3),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+          ],
+        );
+      },
     );
   }
-
   // ── Surah card ─────────────────────────────────────────────────────────────
   Widget _buildSurahCard(int index, _SelectedSurah sel, AppColorSet colors) {
     return Container(
@@ -1041,7 +836,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       ),
                     ),
                     Text(
-                      'Juz ${sel.surah.juz} • ${sel.surah.type}',
+                      'Juz ${sel.surah.juzNumbers.join(", ")}',
                       style: TextStyle(
                         fontSize: 11.sp,
                         color: colors.textSecondary,
@@ -1262,6 +1057,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
     TextEditingController controller,
     AppColorSet colors, {
     TextInputType keyboardType = TextInputType.text,
+    bool readOnly = false,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -1272,10 +1068,11 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
+        readOnly: readOnly,
         style: TextStyle(
           fontSize: 14.sp,
           fontFamily: 'Poppins',
-          color: colors.textPrimary,
+          color: readOnly ? colors.textSecondary : colors.textPrimary,
         ),
         decoration: InputDecoration(
           hintText: hint,

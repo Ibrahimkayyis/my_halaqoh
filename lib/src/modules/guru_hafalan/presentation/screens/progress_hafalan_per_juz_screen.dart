@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
 import 'package:my_halaqoh/src/core/quran/quran_service.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
@@ -17,15 +20,25 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_ha
 
 /// Progress Hafalan Per Juz — shows juz-level progress cards for a santri
 @RoutePage()
-class ProgressHafalanPerJuzScreen extends StatefulWidget {
+class ProgressHafalanPerJuzScreen extends StatefulWidget implements AutoRouteWrapper {
+  final String santriId;
   final String name;
   final String nis;
 
   const ProgressHafalanPerJuzScreen({
     super.key,
+    required this.santriId,
     required this.name,
     required this.nis,
   });
+
+  @override
+  Widget wrappedRoute(BuildContext context) {
+    return BlocProvider(
+      create: (context) => sl<ProgressHafalanCubit>()..watchProgress(santriId),
+      child: this,
+    );
+  }
 
   @override
   State<ProgressHafalanPerJuzScreen> createState() =>
@@ -353,13 +366,34 @@ class _ProgressHafalanPerJuzScreenState
     final adminJuzList = (target?.juzList ?? []).where((j) => j >= 1 && j <= 30).toList();
     final allTargetJuzNums = <int>{...adminJuzList, ..._teacherAddedJuz};
 
-    // Build display data using QuranService
+    // Get progress data from ProgressHafalanCubit
+    final progressState = context.watch<ProgressHafalanCubit>().state;
+    OverallHafalanProgress? progressData;
+    progressState.maybeWhen(
+      loaded: (p) => progressData = p,
+      orElse: () {},
+    );
+
+    // Build display data using QuranService + real progress
     final juzDisplayData = allTargetJuzNums.map((juzNum) {
       final juzModel = QuranService.instance.getJuzByNumber(juzNum);
+      int totalAyat = juzModel?.totalAyat ?? 0;
+      int memorizedAyat = 0;
+
+      if (progressData != null) {
+        final juzProgress = progressData!.juzProgressList
+            .where((jp) => jp.juzNumber == juzNum)
+            .firstOrNull;
+        if (juzProgress != null) {
+          totalAyat = juzProgress.totalAyat;
+          memorizedAyat = juzProgress.memorizedAyat;
+        }
+      }
+
       return {
         'juz': juzNum,
-        'total': juzModel?.surahs.length ?? 0,
-        'completed': 0, // Real hafalan progress — will be integrated when hafalan recording data is available
+        'total': totalAyat,
+        'completed': memorizedAyat,
       };
     }).toList()
       ..sort((a, b) => (b['juz'] as int).compareTo(a['juz'] as int));
@@ -540,13 +574,22 @@ class _ProgressHafalanPerJuzScreenState
     final juzNum = juz['juz'] as int;
     final total = juz['total'] as int;
     final completed = juz['completed'] as int;
-    final percent = total > 0 ? (completed / total * 100).round() : 0;
+    
+    final progressVal = total > 0 ? (completed / total * 100) : 0.0;
+    String percentStr;
+    if (progressVal == 0 || progressVal == 100) {
+      percentStr = progressVal.toInt().toString();
+    } else {
+      percentStr = progressVal.toStringAsFixed(1);
+    }
+    
     final progress = total > 0 ? completed / total : 0.0;
 
     return GestureDetector(
       onTap: () {
         context.router.push(
           ProgressHafalanPerSuratRoute(
+            santriId: widget.santriId,
             name: widget.name,
             nis: widget.nis,
             juzNumber: juzNum,
@@ -586,10 +629,7 @@ class _ProgressHafalanPerJuzScreenState
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      t.progressHafalanPerJuz.suratSelesai(
-                        completed: '$completed',
-                        total: '$total',
-                      ),
+                      '$completed dari $total Ayat Selesai',
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
@@ -600,7 +640,7 @@ class _ProgressHafalanPerJuzScreenState
                   ],
                 ),
                 Text(
-                  '$percent %',
+                  '$percentStr %',
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w800,

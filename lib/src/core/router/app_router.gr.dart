@@ -539,12 +539,22 @@ class HafalanRoute extends PageRouteInfo<void> {
 class InputHafalanRoute extends PageRouteInfo<InputHafalanRouteArgs> {
   InputHafalanRoute({
     Key? key,
+    required String santriId,
     required String name,
     required String nis,
+    required String halaqohId,
+    required String guruId,
     List<PageRouteInfo>? children,
   }) : super(
          InputHafalanRoute.name,
-         args: InputHafalanRouteArgs(key: key, name: name, nis: nis),
+         args: InputHafalanRouteArgs(
+           key: key,
+           santriId: santriId,
+           name: name,
+           nis: nis,
+           halaqohId: halaqohId,
+           guruId: guruId,
+         ),
          initialChildren: children,
        );
 
@@ -554,7 +564,16 @@ class InputHafalanRoute extends PageRouteInfo<InputHafalanRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<InputHafalanRouteArgs>();
-      return InputHafalanScreen(key: args.key, name: args.name, nis: args.nis);
+      return WrappedRoute(
+        child: InputHafalanScreen(
+          key: args.key,
+          santriId: args.santriId,
+          name: args.name,
+          nis: args.nis,
+          halaqohId: args.halaqohId,
+          guruId: args.guruId,
+        ),
+      );
     },
   );
 }
@@ -562,30 +581,50 @@ class InputHafalanRoute extends PageRouteInfo<InputHafalanRouteArgs> {
 class InputHafalanRouteArgs {
   const InputHafalanRouteArgs({
     this.key,
+    required this.santriId,
     required this.name,
     required this.nis,
+    required this.halaqohId,
+    required this.guruId,
   });
 
   final Key? key;
+
+  final String santriId;
 
   final String name;
 
   final String nis;
 
+  final String halaqohId;
+
+  final String guruId;
+
   @override
   String toString() {
-    return 'InputHafalanRouteArgs{key: $key, name: $name, nis: $nis}';
+    return 'InputHafalanRouteArgs{key: $key, santriId: $santriId, name: $name, nis: $nis, halaqohId: $halaqohId, guruId: $guruId}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! InputHafalanRouteArgs) return false;
-    return key == other.key && name == other.name && nis == other.nis;
+    return key == other.key &&
+        santriId == other.santriId &&
+        name == other.name &&
+        nis == other.nis &&
+        halaqohId == other.halaqohId &&
+        guruId == other.guruId;
   }
 
   @override
-  int get hashCode => key.hashCode ^ name.hashCode ^ nis.hashCode;
+  int get hashCode =>
+      key.hashCode ^
+      santriId.hashCode ^
+      name.hashCode ^
+      nis.hashCode ^
+      halaqohId.hashCode ^
+      guruId.hashCode;
 }
 
 /// generated route for
@@ -689,12 +728,18 @@ class LoginRoute extends PageRouteInfo<void> {
 class MutabaahSantriRoute extends PageRouteInfo<MutabaahSantriRouteArgs> {
   MutabaahSantriRoute({
     Key? key,
+    required String santriId,
     required String name,
     required String nis,
     List<PageRouteInfo>? children,
   }) : super(
          MutabaahSantriRoute.name,
-         args: MutabaahSantriRouteArgs(key: key, name: name, nis: nis),
+         args: MutabaahSantriRouteArgs(
+           key: key,
+           santriId: santriId,
+           name: name,
+           nis: nis,
+         ),
          initialChildren: children,
        );
 
@@ -704,10 +749,13 @@ class MutabaahSantriRoute extends PageRouteInfo<MutabaahSantriRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<MutabaahSantriRouteArgs>();
-      return MutabaahSantriScreen(
-        key: args.key,
-        name: args.name,
-        nis: args.nis,
+      return WrappedRoute(
+        child: MutabaahSantriScreen(
+          key: args.key,
+          santriId: args.santriId,
+          name: args.name,
+          nis: args.nis,
+        ),
       );
     },
   );
@@ -716,11 +764,14 @@ class MutabaahSantriRoute extends PageRouteInfo<MutabaahSantriRouteArgs> {
 class MutabaahSantriRouteArgs {
   const MutabaahSantriRouteArgs({
     this.key,
+    required this.santriId,
     required this.name,
     required this.nis,
   });
 
   final Key? key;
+
+  final String santriId;
 
   final String name;
 
@@ -728,18 +779,22 @@ class MutabaahSantriRouteArgs {
 
   @override
   String toString() {
-    return 'MutabaahSantriRouteArgs{key: $key, name: $name, nis: $nis}';
+    return 'MutabaahSantriRouteArgs{key: $key, santriId: $santriId, name: $name, nis: $nis}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! MutabaahSantriRouteArgs) return false;
-    return key == other.key && name == other.name && nis == other.nis;
+    return key == other.key &&
+        santriId == other.santriId &&
+        name == other.name &&
+        nis == other.nis;
   }
 
   @override
-  int get hashCode => key.hashCode ^ name.hashCode ^ nis.hashCode;
+  int get hashCode =>
+      key.hashCode ^ santriId.hashCode ^ name.hashCode ^ nis.hashCode;
 }
 
 /// generated route for
@@ -796,12 +851,18 @@ class ProgressHafalanPerJuzRoute
     extends PageRouteInfo<ProgressHafalanPerJuzRouteArgs> {
   ProgressHafalanPerJuzRoute({
     Key? key,
+    required String santriId,
     required String name,
     required String nis,
     List<PageRouteInfo>? children,
   }) : super(
          ProgressHafalanPerJuzRoute.name,
-         args: ProgressHafalanPerJuzRouteArgs(key: key, name: name, nis: nis),
+         args: ProgressHafalanPerJuzRouteArgs(
+           key: key,
+           santriId: santriId,
+           name: name,
+           nis: nis,
+         ),
          initialChildren: children,
        );
 
@@ -811,10 +872,13 @@ class ProgressHafalanPerJuzRoute
     name,
     builder: (data) {
       final args = data.argsAs<ProgressHafalanPerJuzRouteArgs>();
-      return ProgressHafalanPerJuzScreen(
-        key: args.key,
-        name: args.name,
-        nis: args.nis,
+      return WrappedRoute(
+        child: ProgressHafalanPerJuzScreen(
+          key: args.key,
+          santriId: args.santriId,
+          name: args.name,
+          nis: args.nis,
+        ),
       );
     },
   );
@@ -823,11 +887,14 @@ class ProgressHafalanPerJuzRoute
 class ProgressHafalanPerJuzRouteArgs {
   const ProgressHafalanPerJuzRouteArgs({
     this.key,
+    required this.santriId,
     required this.name,
     required this.nis,
   });
 
   final Key? key;
+
+  final String santriId;
 
   final String name;
 
@@ -835,18 +902,22 @@ class ProgressHafalanPerJuzRouteArgs {
 
   @override
   String toString() {
-    return 'ProgressHafalanPerJuzRouteArgs{key: $key, name: $name, nis: $nis}';
+    return 'ProgressHafalanPerJuzRouteArgs{key: $key, santriId: $santriId, name: $name, nis: $nis}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! ProgressHafalanPerJuzRouteArgs) return false;
-    return key == other.key && name == other.name && nis == other.nis;
+    return key == other.key &&
+        santriId == other.santriId &&
+        name == other.name &&
+        nis == other.nis;
   }
 
   @override
-  int get hashCode => key.hashCode ^ name.hashCode ^ nis.hashCode;
+  int get hashCode =>
+      key.hashCode ^ santriId.hashCode ^ name.hashCode ^ nis.hashCode;
 }
 
 /// generated route for
@@ -855,6 +926,7 @@ class ProgressHafalanPerSuratRoute
     extends PageRouteInfo<ProgressHafalanPerSuratRouteArgs> {
   ProgressHafalanPerSuratRoute({
     Key? key,
+    required String santriId,
     required String name,
     required String nis,
     required int juzNumber,
@@ -863,6 +935,7 @@ class ProgressHafalanPerSuratRoute
          ProgressHafalanPerSuratRoute.name,
          args: ProgressHafalanPerSuratRouteArgs(
            key: key,
+           santriId: santriId,
            name: name,
            nis: nis,
            juzNumber: juzNumber,
@@ -876,11 +949,14 @@ class ProgressHafalanPerSuratRoute
     name,
     builder: (data) {
       final args = data.argsAs<ProgressHafalanPerSuratRouteArgs>();
-      return ProgressHafalanPerSuratScreen(
-        key: args.key,
-        name: args.name,
-        nis: args.nis,
-        juzNumber: args.juzNumber,
+      return WrappedRoute(
+        child: ProgressHafalanPerSuratScreen(
+          key: args.key,
+          santriId: args.santriId,
+          name: args.name,
+          nis: args.nis,
+          juzNumber: args.juzNumber,
+        ),
       );
     },
   );
@@ -889,12 +965,15 @@ class ProgressHafalanPerSuratRoute
 class ProgressHafalanPerSuratRouteArgs {
   const ProgressHafalanPerSuratRouteArgs({
     this.key,
+    required this.santriId,
     required this.name,
     required this.nis,
     required this.juzNumber,
   });
 
   final Key? key;
+
+  final String santriId;
 
   final String name;
 
@@ -904,7 +983,7 @@ class ProgressHafalanPerSuratRouteArgs {
 
   @override
   String toString() {
-    return 'ProgressHafalanPerSuratRouteArgs{key: $key, name: $name, nis: $nis, juzNumber: $juzNumber}';
+    return 'ProgressHafalanPerSuratRouteArgs{key: $key, santriId: $santriId, name: $name, nis: $nis, juzNumber: $juzNumber}';
   }
 
   @override
@@ -912,6 +991,7 @@ class ProgressHafalanPerSuratRouteArgs {
     if (identical(this, other)) return true;
     if (other is! ProgressHafalanPerSuratRouteArgs) return false;
     return key == other.key &&
+        santriId == other.santriId &&
         name == other.name &&
         nis == other.nis &&
         juzNumber == other.juzNumber;
@@ -919,7 +999,11 @@ class ProgressHafalanPerSuratRouteArgs {
 
   @override
   int get hashCode =>
-      key.hashCode ^ name.hashCode ^ nis.hashCode ^ juzNumber.hashCode;
+      key.hashCode ^
+      santriId.hashCode ^
+      name.hashCode ^
+      nis.hashCode ^
+      juzNumber.hashCode;
 }
 
 /// generated route for
@@ -1008,12 +1092,18 @@ class RiwayatHafalanSantriRoute
     extends PageRouteInfo<RiwayatHafalanSantriRouteArgs> {
   RiwayatHafalanSantriRoute({
     Key? key,
+    required String santriId,
     required String name,
     required String nis,
     List<PageRouteInfo>? children,
   }) : super(
          RiwayatHafalanSantriRoute.name,
-         args: RiwayatHafalanSantriRouteArgs(key: key, name: name, nis: nis),
+         args: RiwayatHafalanSantriRouteArgs(
+           key: key,
+           santriId: santriId,
+           name: name,
+           nis: nis,
+         ),
          initialChildren: children,
        );
 
@@ -1023,10 +1113,13 @@ class RiwayatHafalanSantriRoute
     name,
     builder: (data) {
       final args = data.argsAs<RiwayatHafalanSantriRouteArgs>();
-      return RiwayatHafalanSantriScreen(
-        key: args.key,
-        name: args.name,
-        nis: args.nis,
+      return WrappedRoute(
+        child: RiwayatHafalanSantriScreen(
+          key: args.key,
+          santriId: args.santriId,
+          name: args.name,
+          nis: args.nis,
+        ),
       );
     },
   );
@@ -1035,11 +1128,14 @@ class RiwayatHafalanSantriRoute
 class RiwayatHafalanSantriRouteArgs {
   const RiwayatHafalanSantriRouteArgs({
     this.key,
+    required this.santriId,
     required this.name,
     required this.nis,
   });
 
   final Key? key;
+
+  final String santriId;
 
   final String name;
 
@@ -1047,18 +1143,22 @@ class RiwayatHafalanSantriRouteArgs {
 
   @override
   String toString() {
-    return 'RiwayatHafalanSantriRouteArgs{key: $key, name: $name, nis: $nis}';
+    return 'RiwayatHafalanSantriRouteArgs{key: $key, santriId: $santriId, name: $name, nis: $nis}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! RiwayatHafalanSantriRouteArgs) return false;
-    return key == other.key && name == other.name && nis == other.nis;
+    return key == other.key &&
+        santriId == other.santriId &&
+        name == other.name &&
+        nis == other.nis;
   }
 
   @override
-  int get hashCode => key.hashCode ^ name.hashCode ^ nis.hashCode;
+  int get hashCode =>
+      key.hashCode ^ santriId.hashCode ^ name.hashCode ^ nis.hashCode;
 }
 
 /// generated route for

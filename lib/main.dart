@@ -29,6 +29,9 @@ import 'src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'src/modules/guru_absensi/data/datasources/local/absensi_hive_adapters.dart';
 import 'src/modules/guru_absensi/data/datasources/remote/source/implementation/absensi_sync_service.dart';
 
+// Guru Hafalan — Sync
+import 'src/modules/guru_hafalan/domain/services/hafalan_sync_service.dart';
+
 // Auth
 import 'src/modules/auth/presentation/cubits/auth_cubit.dart';
 
@@ -66,8 +69,9 @@ void main() async {
   await sl<ThemeCubit>().initialize();
   await sl<LocaleCubit>().initialize();
 
-  // ── 7. Absensi Sync Service ─────────────────────────────────────────────
+  // ── 7. Offline Sync Services ──────────────────────────────────────────────
   sl<AbsensiSyncService>().start();
+  sl<HafalanSyncService>().start();
 
   runApp(TranslationProvider(child: MyApp()));
 }

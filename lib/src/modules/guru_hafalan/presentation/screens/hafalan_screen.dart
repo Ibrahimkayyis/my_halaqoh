@@ -207,6 +207,7 @@ class _HafalanScreenState extends State<HafalanScreen> {
                     onRiwayatTap: () {
                       context.router.push(
                         RiwayatHafalanSantriRoute(
+                          santriId: santri.id,
                           name: santri.nama,
                           nis: santri.nis,
                         ),
@@ -214,7 +215,13 @@ class _HafalanScreenState extends State<HafalanScreen> {
                     },
                     onInputTap: () async {
                       final result = await context.router.push(
-                        InputHafalanRoute(name: santri.nama, nis: santri.nis),
+                        InputHafalanRoute(
+                          santriId: santri.id,
+                          name: santri.nama,
+                          nis: santri.nis,
+                          halaqohId: myHalaqoh!.id,
+                          guruId: myHalaqoh!.guruId,
+                        ),
                       );
                       if (result != null && result is Map<String, dynamic>) {
                         if (context.mounted) {

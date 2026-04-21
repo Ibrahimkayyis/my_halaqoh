@@ -3,11 +3,11 @@ import '../../../domain/models/absensi_model.dart';
 import '../../../domain/models/absensi_record_entry.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Type ID 6 — AbsensiModel
+// Type ID 8 — AbsensiModel
 // ─────────────────────────────────────────────────────────────────────────────
 class AbsensiModelAdapter extends TypeAdapter<AbsensiModel> {
   @override
-  final int typeId = 6;
+  final int typeId = 8;
 
   @override
   AbsensiModel read(BinaryReader reader) {
@@ -54,11 +54,11 @@ class AbsensiModelAdapter extends TypeAdapter<AbsensiModel> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Type ID 7 — AbsensiRecordEntry
+// Type ID 9 — AbsensiRecordEntry
 // ─────────────────────────────────────────────────────────────────────────────
 class AbsensiRecordEntryAdapter extends TypeAdapter<AbsensiRecordEntry> {
   @override
-  final int typeId = 7;
+  final int typeId = 9;
 
   @override
   AbsensiRecordEntry read(BinaryReader reader) {
@@ -91,10 +91,10 @@ class AbsensiRecordEntryAdapter extends TypeAdapter<AbsensiRecordEntry> {
 
 /// Register all absensi Hive adapters. Call before Hive.openBox.
 void registerAbsensiAdapters() {
-  if (!Hive.isAdapterRegistered(7)) {
+  if (!Hive.isAdapterRegistered(9)) {
     Hive.registerAdapter(AbsensiRecordEntryAdapter());
   }
-  if (!Hive.isAdapterRegistered(6)) {
+  if (!Hive.isAdapterRegistered(8)) {
     Hive.registerAdapter(AbsensiModelAdapter());
   }
 }

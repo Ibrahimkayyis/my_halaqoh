@@ -9,7 +9,15 @@ class AbsensiLocalDataSource {
     if (Hive.isBoxOpen(_boxName)) {
       return Hive.box<AbsensiModel>(_boxName);
     }
-    return Hive.openBox<AbsensiModel>(_boxName);
+    try {
+      return await Hive.openBox<AbsensiModel>(_boxName);
+    } catch (e) {
+      // If there's a type mismatch or corrupted box, delete it and try again
+      try {
+        await Hive.deleteBoxFromDisk(_boxName);
+      } catch (_) {}
+      return await Hive.openBox<AbsensiModel>(_boxName);
+    }
   }
 
   /// Cache a list of records (clear-then-write).

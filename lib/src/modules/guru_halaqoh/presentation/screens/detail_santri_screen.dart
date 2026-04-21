@@ -16,13 +16,43 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_st
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
+
 /// Detail santri screen showing profile header, academic info, and progress hafalan
 @RoutePage()
-class DetailSantriScreen extends StatelessWidget {
+class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
   final String name;
   final String nis;
 
   const DetailSantriScreen({super.key, required this.name, required this.nis});
+
+  @override
+  Widget wrappedRoute(BuildContext context) {
+    // Determine santriId from nis using SantriCubit
+    final santriState = context.read<SantriCubit>().state;
+    String? santriId;
+    santriState.maybeWhen(
+      loaded: (sList) {
+        try {
+          santriId = sList.firstWhere((s) => s.nis == nis).id;
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    return BlocProvider(
+      create: (context) {
+        final cubit = sl<ProgressHafalanCubit>();
+        if (santriId != null) {
+          cubit.watchProgress(santriId!);
+        }
+        return cubit;
+      },
+      child: this,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +240,16 @@ class DetailSantriScreen extends StatelessWidget {
                     SizedBox(height: 12.h),
 
                     // Progress card (driven by admin target)
-                    _buildProgressCard(colors, target),
+                    BlocBuilder<ProgressHafalanCubit, ProgressHafalanState>(
+                      builder: (context, progressState) {
+                        OverallHafalanProgress? progressData;
+                        progressState.maybeWhen(
+                          loaded: (data) => progressData = data,
+                          orElse: () {},
+                        );
+                        return _buildProgressCard(colors, target, progressData);
+                      },
+                    ),
                     SizedBox(height: 40.h),
                   ],
                 ),
@@ -295,11 +334,26 @@ class DetailSantriScreen extends StatelessWidget {
 
   /// Progress Hafalan card driven by admin-set memorization targets.
   /// Shows target juz, completion count (0 for now), progress bar.
-  Widget _buildProgressCard(AppColorSet colors, TargetHafalanModel? target) {
+  Widget _buildProgressCard(AppColorSet colors, TargetHafalanModel? target, OverallHafalanProgress? progressData) {
     final int juzTarget = target?.targetJuz ?? 0;
-    const int juzCompleted = 0; // Real hafalan progress — will be integrated when hafalan recording data is available
+    
+    double juzCompleted = 0.0;
+    if (progressData != null) {
+      for (final jp in progressData.juzProgressList) {
+        if (jp.totalAyat > 0) {
+          juzCompleted += jp.memorizedAyat / jp.totalAyat;
+        }
+      }
+    }
+
     final double progress = juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
     final int percent = (progress * 100).round();
+    
+    // Format juzCompleted to remove .0 if it's a whole number, otherwise show 2 decimals
+    String formatJuz(double v) {
+      if (v == 0) return '0';
+      return v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+    }
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 24.w),
@@ -346,7 +400,7 @@ class DetailSantriScreen extends StatelessWidget {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '$juzCompleted ',
+                      text: '${formatJuz(juzCompleted)} ',
                       style: TextStyle(
                         fontSize: 28.sp,
                         fontWeight: FontWeight.w800,

@@ -19,6 +19,8 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_ha
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/halaqoh_info_card.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/santri_list_item.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
 
 /// My Halaqoh screen showing halaqoh info card, search bar, and santri list.
 @RoutePage()
@@ -243,32 +245,51 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
                   final santri = filtered[index];
-                  final completed = 0.0; // Real hafalan progress — will be integrated when hafalan recording data is available
-                  final targetJuz = myTarget?.targetJuz.toDouble() ?? 0.0;
-                  final pct = targetJuz > 0
-                      ? ((completed / targetJuz) * 100).round()
-                      : 0;
+                  
+                  return BlocProvider(
+                    create: (_) => sl<ProgressHafalanCubit>()..watchProgress(santri.id),
+                    child: BlocBuilder<ProgressHafalanCubit, ProgressHafalanState>(
+                      builder: (context, state) {
+                        double completed = 0.0;
+                        state.maybeWhen(
+                          loaded: (progressData) {
+                            for (final jp in progressData.juzProgressList) {
+                              if (jp.totalAyat > 0) {
+                                completed += jp.memorizedAyat / jp.totalAyat;
+                              }
+                            }
+                          },
+                          orElse: () {},
+                        );
 
-                  // Format: remove .0 for whole numbers
-                  String formatJuz(double v) {
-                    return v == v.roundToDouble()
-                        ? v.toInt().toString()
-                        : v.toString();
-                  }
+                        final targetJuz = myTarget?.targetJuz.toDouble() ?? 0.0;
+                        final progress = targetJuz > 0 ? completed / targetJuz : 0.0;
+                        final pct = (progress * 100).round();
 
-                  return SantriListItem(
-                    name: santri.nama,
-                    progressText: t.myHalaqohScreen.progressText(
-                      completed: formatJuz(completed),
-                      target: formatJuz(targetJuz),
+                        // Format: remove .0 for whole numbers, else show 2 decimals
+                        String formatJuz(double v) {
+                          if (v == 0) return '0';
+                          return v == v.roundToDouble()
+                              ? v.toInt().toString()
+                              : v.toStringAsFixed(2);
+                        }
+
+                        return SantriListItem(
+                          name: santri.nama,
+                          progressText: t.myHalaqohScreen.progressText(
+                            completed: formatJuz(completed),
+                            target: formatJuz(targetJuz),
+                          ),
+                          percentage: '$pct%',
+                          progress: progress,
+                          onTap: () {
+                            context.router.push(
+                              DetailSantriRoute(name: santri.nama, nis: santri.nis),
+                            );
+                          },
+                        );
+                      },
                     ),
-                    percentage: '$pct%',
-                    progress: targetJuz > 0 ? completed / targetJuz : 0.0,
-                    onTap: () {
-                      context.router.push(
-                        DetailSantriRoute(name: santri.nama, nis: santri.nis),
-                      );
-                    },
                   );
                 },
               ),

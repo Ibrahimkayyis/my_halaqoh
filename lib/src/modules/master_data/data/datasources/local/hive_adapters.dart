@@ -1,3 +1,4 @@
+import 'package:my_halaqoh/src/modules/guru_hafalan/domain/models/hafalan_santri_model.dart';
 import 'package:hive/hive.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/guru_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
@@ -252,6 +253,7 @@ class TargetHafalanModelAdapter extends TypeAdapter<TargetHafalanModel> {
   }
 }
 
+
 // ─── Registration helper ────────────────────────────────────────────────────
 
 /// Register all master data Hive adapters.
@@ -262,4 +264,73 @@ void registerMasterDataAdapters() {
   Hive.registerAdapter(WaliSantriModelAdapter());
   Hive.registerAdapter(HalaqohModelAdapter());
   Hive.registerAdapter(TargetHafalanModelAdapter());
+  Hive.registerAdapter(HafalanSantriModelAdapter());
+}
+
+// ─── HafalanSantriModel Adapter ─────────────────────────────────────────────
+
+class HafalanSantriModelAdapter extends TypeAdapter<HafalanSantriModel> {
+  @override
+  final int typeId = 6;
+
+  @override
+  HafalanSantriModel read(BinaryReader reader) {
+    final numFields = reader.readByte();
+    final fields = <int, dynamic>{};
+    for (int i = 0; i < numFields; i++) {
+      fields[reader.readByte()] = reader.read();
+    }
+    return HafalanSantriModel(
+      id: fields[0] as String,
+      santriId: fields[1] as String,
+      guruId: fields[2] as String,
+      halaqohId: fields[3] as String,
+      tanggalSetoran: DateTime.parse(fields[4] as String),
+      jenis: fields[5] as String,
+      surahId: fields[6] as int,
+      surahName: fields[7] as String,
+      ayatMulai: fields[8] as int,
+      ayatSelesai: fields[9] as int,
+      juz: fields[10] as int,
+      nilaiKelancaran: fields[11] as int,
+      nilaiTajwid: fields[12] as int,
+      createdAt: DateTime.parse(fields[13] as String),
+      isSynced: fields[14] as bool? ?? false,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, HafalanSantriModel obj) {
+    writer.writeByte(15);
+    writer.writeByte(0);
+    writer.write(obj.id);
+    writer.writeByte(1);
+    writer.write(obj.santriId);
+    writer.writeByte(2);
+    writer.write(obj.guruId);
+    writer.writeByte(3);
+    writer.write(obj.halaqohId);
+    writer.writeByte(4);
+    writer.write(obj.tanggalSetoran.toIso8601String());
+    writer.writeByte(5);
+    writer.write(obj.jenis);
+    writer.writeByte(6);
+    writer.write(obj.surahId);
+    writer.writeByte(7);
+    writer.write(obj.surahName);
+    writer.writeByte(8);
+    writer.write(obj.ayatMulai);
+    writer.writeByte(9);
+    writer.write(obj.ayatSelesai);
+    writer.writeByte(10);
+    writer.write(obj.juz);
+    writer.writeByte(11);
+    writer.write(obj.nilaiKelancaran);
+    writer.writeByte(12);
+    writer.write(obj.nilaiTajwid);
+    writer.writeByte(13);
+    writer.write(obj.createdAt.toIso8601String());
+    writer.writeByte(14);
+    writer.write(obj.isSynced);
+  }
 }

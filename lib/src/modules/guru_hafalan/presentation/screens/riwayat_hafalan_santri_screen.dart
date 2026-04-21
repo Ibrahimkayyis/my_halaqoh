@@ -1,23 +1,120 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/domain/models/hafalan_santri_model.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/riwayat_hafalan_cubit.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper class: groups multiple HafalanSantriModel records that belong to the
+// same submission (same date + type + scores) into one logical unit.
+// ─────────────────────────────────────────────────────────────────────────────
+class _SubmissionGroup {
+  final DateTime tanggalSetoran;
+  final String jenis;
+  final int nilaiKelancaran;
+  final int nilaiTajwid;
+  final List<HafalanSantriModel> records;
+
+  _SubmissionGroup({
+    required this.tanggalSetoran,
+    required this.jenis,
+    required this.nilaiKelancaran,
+    required this.nilaiTajwid,
+    required this.records,
+  });
+
+  int get avgScore => ((nilaiKelancaran + nilaiTajwid) / 2).round();
+
+  /// Returns a display string for the surah range.
+  /// Single surah: "Al-Mulk (Ayat 1-30)"
+  /// Multiple surahs: "Al-Mulk — An-Nas"
+  String get surahDisplay {
+    if (records.length == 1) {
+      return records.first.surahName;
+    }
+    // Sort by surahId to show range correctly
+    final sorted = List<HafalanSantriModel>.from(records)
+      ..sort((a, b) => a.surahId.compareTo(b.surahId));
+    return '${sorted.first.surahName} — ${sorted.last.surahName}';
+  }
+
+  /// Returns a subtitle with ayat details
+  String get ayatDisplay {
+    if (records.length == 1) {
+      final r = records.first;
+      return 'Ayat ${r.ayatMulai} - ${r.ayatSelesai}';
+    }
+    return '${records.length} surat';
+  }
+
+  /// Returns detailed per-surah lines for expanded view
+  List<String> get detailLines {
+    final sorted = List<HafalanSantriModel>.from(records)
+      ..sort((a, b) => a.surahId.compareTo(b.surahId));
+    return sorted
+        .map((r) => '${r.surahName} (${r.ayatMulai}-${r.ayatSelesai})')
+        .toList();
+  }
+}
+
+/// Groups a flat list of records into submission groups.
+/// Records are considered part of the same submission if they share
+/// the same tanggalSetoran, jenis, nilaiKelancaran, and nilaiTajwid.
+List<_SubmissionGroup> _groupIntoSubmissions(List<HafalanSantriModel> records) {
+  final Map<String, List<HafalanSantriModel>> grouped = {};
+
+  for (final record in records) {
+    // Build a composite key from shared submission attributes
+    final key =
+        '${record.tanggalSetoran.toIso8601String()}_${record.jenis}_${record.nilaiKelancaran}_${record.nilaiTajwid}';
+    grouped.putIfAbsent(key, () => []).add(record);
+  }
+
+  final groups = grouped.entries.map((entry) {
+    final list = entry.value;
+    return _SubmissionGroup(
+      tanggalSetoran: list.first.tanggalSetoran,
+      jenis: list.first.jenis,
+      nilaiKelancaran: list.first.nilaiKelancaran,
+      nilaiTajwid: list.first.nilaiTajwid,
+      records: list,
+    );
+  }).toList();
+
+  // Sort by date descending (newest first)
+  groups.sort((a, b) => b.tanggalSetoran.compareTo(a.tanggalSetoran));
+  return groups;
+}
 
 /// Riwayat Hafalan Santri — individual student memorization history
 @RoutePage()
-class RiwayatHafalanSantriScreen extends StatefulWidget {
+class RiwayatHafalanSantriScreen extends StatefulWidget
+    implements AutoRouteWrapper {
+  final String santriId;
   final String name;
   final String nis;
 
   const RiwayatHafalanSantriScreen({
     super.key,
+    required this.santriId,
     required this.name,
     required this.nis,
   });
+
+  @override
+  Widget wrappedRoute(BuildContext context) {
+    return BlocProvider(
+      create: (context) => sl<RiwayatHafalanCubit>(),
+      child: this,
+    );
+  }
 
   @override
   State<RiwayatHafalanSantriScreen> createState() =>
@@ -26,8 +123,8 @@ class RiwayatHafalanSantriScreen extends StatefulWidget {
 
 class _RiwayatHafalanSantriScreenState
     extends State<RiwayatHafalanSantriScreen> {
-  int _currentMonth = 11;
-  int _currentYear = 2025;
+  late int _currentMonth;
+  late int _currentYear;
 
   final List<String> _dayNames = [
     'AHA',
@@ -39,136 +136,8 @@ class _RiwayatHafalanSantriScreenState
     'SAB',
   ];
 
-  final List<Map<String, dynamic>> _records = [
-    {
-      'day': 1,
-      'type': 'baru',
-      'surah': 'Al - Mulk',
-      'ayat': 'Ayat 1 - 10',
-      'score': 90,
-    },
-    {
-      'day': 1,
-      'type': 'baru',
-      'surah': 'Al - Mulk',
-      'ayat': 'Ayat 1 - 10',
-      'score': 90,
-    },
-    {
-      'day': 2,
-      'type': 'murajaah',
-      'surah': 'An - Naba',
-      'ayat': 'Ayat 1 - 40',
-      'score': 85,
-    },
-    {
-      'day': 3,
-      'type': 'baru',
-      'surah': 'Al - Qalam',
-      'ayat': 'Ayat 1 - 15',
-      'score': 88,
-    },
-    {
-      'day': 5,
-      'type': 'murajaah',
-      'surah': 'Al - Mulk',
-      'ayat': 'Ayat 1 - 30',
-      'score': 92,
-    },
-    {
-      'day': 7,
-      'type': 'baru',
-      'surah': 'Al - Haaqqa',
-      'ayat': 'Ayat 1 - 12',
-      'score': 87,
-    },
-    {
-      'day': 10,
-      'type': 'murajaah',
-      'surah': 'Al - Qalam',
-      'ayat': 'Ayat 1 - 15',
-      'score': 95,
-    },
-    {
-      'day': 12,
-      'type': 'baru',
-      'surah': "Al - Ma'arij",
-      'ayat': 'Ayat 1 - 10',
-      'score': 82,
-    },
-    {
-      'day': 14,
-      'type': 'murajaah',
-      'surah': 'Al - Haaqqa',
-      'ayat': 'Ayat 1 - 12',
-      'score': 90,
-    },
-    {
-      'day': 15,
-      'type': 'baru',
-      'surah': 'Nuh',
-      'ayat': 'Ayat 1 - 28',
-      'score': 88,
-    },
-    {
-      'day': 18,
-      'type': 'baru',
-      'surah': 'Al - Jinn',
-      'ayat': 'Ayat 1 - 10',
-      'score': 85,
-    },
-    {
-      'day': 19,
-      'type': 'murajaah',
-      'surah': 'Al - Mulk',
-      'ayat': 'Ayat 1 - 30',
-      'score': 94,
-    },
-    {
-      'day': 20,
-      'type': 'baru',
-      'surah': 'Al - Muzzammil',
-      'ayat': 'Ayat 1 - 10',
-      'score': 86,
-    },
-    {
-      'day': 22,
-      'type': 'murajaah',
-      'surah': 'Nuh',
-      'ayat': 'Ayat 1 - 28',
-      'score': 91,
-    },
-    {
-      'day': 24,
-      'type': 'baru',
-      'surah': 'Al - Muddathir',
-      'ayat': 'Ayat 1 - 15',
-      'score': 89,
-    },
-    {
-      'day': 25,
-      'type': 'murajaah',
-      'surah': "Al - Ma'arij",
-      'ayat': 'Ayat 1 - 10',
-      'score': 93,
-    },
-    {
-      'day': 27,
-      'type': 'baru',
-      'surah': 'Al - Qiyamah',
-      'ayat': 'Ayat 1 - 20',
-      'score': 87,
-    },
-    {
-      'day': 28,
-      'type': 'murajaah',
-      'surah': 'Al - Jinn',
-      'ayat': 'Ayat 1 - 10',
-      'score': 90,
-    },
-  ];
-
   int? _activeDeleteIndex;
+  int? _expandedIndex;
 
   final List<String> _filterOptions = [
     'Semua Tipe',
@@ -178,29 +147,26 @@ class _RiwayatHafalanSantriScreenState
   String _selectedFilterLabel = 'Semua Tipe';
 
   String get _filterKey {
-    if (_selectedFilterLabel == 'Hafalan Baru') return 'baru';
-    if (_selectedFilterLabel == "Muraja'ah") return 'murajaah';
+    if (_selectedFilterLabel == 'Hafalan Baru') return 'Ziyadah';
+    if (_selectedFilterLabel == "Muraja'ah") return 'Murajaah';
     return 'semua';
   }
 
-  List<Map<String, dynamic>> get _filteredRecords {
-    List<Map<String, dynamic>> list;
-    if (_filterKey == 'semua') {
-      list = List.from(_records);
-    } else {
-      list = _records.where((r) => r['type'] == _filterKey).toList();
-    }
-    list.sort((a, b) => (b['day'] as int).compareTo(a['day'] as int));
-    return list;
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _currentMonth = now.month;
+    _currentYear = now.year;
+    _loadData();
   }
 
-  int get _totalBaru => _records.where((r) => r['type'] == 'baru').length;
-  int get _totalMurajaah =>
-      _records.where((r) => r['type'] == 'murajaah').length;
-
-  String _getDayName(int day) {
-    final date = DateTime(_currentYear, _currentMonth, day);
-    return _dayNames[date.weekday % 7];
+  void _loadData() {
+    context.read<RiwayatHafalanCubit>().watchRiwayat(
+      widget.santriId,
+      _currentMonth,
+      _currentYear,
+    );
   }
 
   void _prevMonth() {
@@ -211,6 +177,7 @@ class _RiwayatHafalanSantriScreenState
         _currentYear--;
       }
     });
+    _loadData();
   }
 
   void _nextMonth() {
@@ -221,12 +188,22 @@ class _RiwayatHafalanSantriScreenState
         _currentYear++;
       }
     });
+    _loadData();
+  }
+
+  String _getDayName(DateTime date) {
+    return _dayNames[date.weekday % 7];
+  }
+
+  /// Filter the loaded data based on filter selection
+  List<HafalanSantriModel> _applyFilter(List<HafalanSantriModel> data) {
+    if (_filterKey == 'semua') return data;
+    return data.where((r) => r.jenis == _filterKey).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final filtered = _filteredRecords;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -259,254 +236,306 @@ class _RiwayatHafalanSantriScreenState
 
             // ── Content ──
             Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Profile card
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(18.w),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            colors.primary,
-                            colors.primary.withValues(alpha: 0.8),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+              child: BlocBuilder<RiwayatHafalanCubit, RiwayatHafalanState>(
+                builder: (context, state) {
+                  return state.when(
+                    initial: () => const SizedBox.shrink(),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (msg) => Center(
+                      child: Text(
+                        msg,
+                        style: TextStyle(
+                          color: colors.red,
+                          fontFamily: 'Poppins',
+                          fontSize: 14.sp,
                         ),
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 50.w,
-                            height: 50.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.2),
-                            ),
-                            child: Icon(
-                              Icons.person,
-                              size: 26.sp,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(width: 14.w),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.name,
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                'NIS: ${widget.nis}',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: Colors.white.withValues(alpha: 0.85),
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
-                              Text(
-                                t.riwayatHafalanSantri.halaqohKelas(
-                                  halaqoh: 'A',
-                                  kelas: '7',
-                                ),
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: Colors.white.withValues(alpha: 0.85),
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
                       ),
                     ),
-                    SizedBox(height: 16.h),
+                    loaded: (allRecords) {
+                      final filtered = _applyFilter(allRecords);
+                      final groups = _groupIntoSubmissions(filtered);
 
-                    // ── Month navigator (global widgets) ──
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppMonthSelector(
-                            month: _currentMonth,
-                            year: _currentYear,
-                            onPrev: _prevMonth,
-                            onNext: _nextMonth,
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        AppCalendarPickerButton(
-                          currentMonth: _currentMonth,
-                          currentYear: _currentYear,
-                          onSelected: (month, year) {
-                            setState(() {
-                              _currentMonth = month;
-                              _currentYear = year;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16.h),
+                      // Count submissions (groups), not individual records
+                      final allGroups = _groupIntoSubmissions(allRecords);
+                      final totalBaru = allGroups
+                          .where((g) => g.jenis == 'Ziyadah')
+                          .length;
+                      final totalMurajaah = allGroups
+                          .where((g) => g.jenis == 'Murajaah')
+                          .length;
 
-                    // Stats cards
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            '$_totalBaru',
-                            t.riwayatHafalanSantri.totalHafalanBaru,
-                            colors,
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: _buildStatCard(
-                            '$_totalMurajaah',
-                            t.riwayatHafalanSantri.totalMurajaah,
-                            colors,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16.h),
+                      return SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Profile card
+                            _buildProfileCard(colors),
+                            SizedBox(height: 16.h),
 
-                    // Filter + Buka Mutaba'ah
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 150.w,
-                          child: CustomDropdown<String>(
-                            items: _filterOptions,
-                            initialItem: _selectedFilterLabel,
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() => _selectedFilterLabel = value);
-                              }
-                            },
-                            decoration: CustomDropdownDecoration(
-                              closedFillColor: colors.surface,
-                              closedBorder: Border.all(
-                                color: colors.border,
-                                width: 1,
-                              ),
-                              closedBorderRadius: BorderRadius.circular(10.r),
-                              expandedFillColor: colors.surface,
-                              expandedBorder: Border.all(
-                                color: colors.border,
-                                width: 1,
-                              ),
-                              expandedBorderRadius: BorderRadius.circular(10.r),
-                              headerStyle: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w600,
-                                color: colors.textPrimary,
-                                fontFamily: 'Poppins',
-                              ),
-                              listItemStyle: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w500,
-                                color: colors.textPrimary,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              context.router.push(
-                                MutabaahSantriRoute(
-                                  name: widget.name,
-                                  nis: widget.nis,
-                                ),
-                              );
-                            },
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 10.h),
-                              decoration: BoxDecoration(
-                                color: colors.primary,
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.menu_book,
-                                    size: 16.sp,
-                                    color: colors.textOnButton,
+                            // ── Month navigator ──
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: AppMonthSelector(
+                                    month: _currentMonth,
+                                    year: _currentYear,
+                                    onPrev: _prevMonth,
+                                    onNext: _nextMonth,
                                   ),
-                                  SizedBox(width: 6.w),
-                                  Text(
-                                    t.riwayatHafalanSantri.bukaMutabaah,
+                                ),
+                                SizedBox(width: 10.w),
+                                AppCalendarPickerButton(
+                                  currentMonth: _currentMonth,
+                                  currentYear: _currentYear,
+                                  onSelected: (month, year) {
+                                    setState(() {
+                                      _currentMonth = month;
+                                      _currentYear = year;
+                                    });
+                                    _loadData();
+                                  },
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+
+                            // Stats cards
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildStatCard(
+                                    '$totalBaru',
+                                    t.riwayatHafalanSantri.totalHafalanBaru,
+                                    colors,
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: _buildStatCard(
+                                    '$totalMurajaah',
+                                    t.riwayatHafalanSantri.totalMurajaah,
+                                    colors,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+
+                            // Filter + Buka Mutaba'ah
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 150.w,
+                                  child: CustomDropdown<String>(
+                                    items: _filterOptions,
+                                    initialItem: _selectedFilterLabel,
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          _selectedFilterLabel = value;
+                                          _expandedIndex = null;
+                                        });
+                                      }
+                                    },
+                                    decoration: CustomDropdownDecoration(
+                                      closedFillColor: colors.surface,
+                                      closedBorder: Border.all(
+                                        color: colors.border,
+                                        width: 1,
+                                      ),
+                                      closedBorderRadius: BorderRadius.circular(
+                                        10.r,
+                                      ),
+                                      expandedFillColor: colors.surface,
+                                      expandedBorder: Border.all(
+                                        color: colors.border,
+                                        width: 1,
+                                      ),
+                                      expandedBorderRadius:
+                                          BorderRadius.circular(10.r),
+                                      headerStyle: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: colors.textPrimary,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                      listItemStyle: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: colors.textPrimary,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 10.w),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      context.router.push(
+                                        MutabaahSantriRoute(
+                                          santriId: widget.santriId,
+                                          name: widget.name,
+                                          nis: widget.nis,
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 10.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colors.primary,
+                                        borderRadius: BorderRadius.circular(
+                                          10.r,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.menu_book,
+                                            size: 16.sp,
+                                            color: colors.textOnButton,
+                                          ),
+                                          SizedBox(width: 6.w),
+                                          Text(
+                                            t.riwayatHafalanSantri.bukaMutabaah,
+                                            style: TextStyle(
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.w700,
+                                              color: colors.textOnButton,
+                                              fontFamily: 'Poppins',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+
+                            // Records list (grouped by submission)
+                            if (groups.isEmpty)
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 40.h),
+                                child: Center(
+                                  child: Text(
+                                    'Belum ada data hafalan bulan ini',
                                     style: TextStyle(
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: colors.textOnButton,
+                                      fontSize: 14.sp,
+                                      color: colors.textSecondary,
                                       fontFamily: 'Poppins',
                                     ),
                                   ),
-                                ],
+                                ),
+                              )
+                            else
+                              ...groups.asMap().entries.map(
+                                (e) => _buildGroupCard(e.value, e.key, colors),
                               ),
+                            SizedBox(height: 16.h),
+
+                            // Lihat Progress button
+                            CustomOutlinedButton(
+                              width: double.infinity,
+                              height: 48.h,
+                              onPressed: () {
+                                context.router.push(
+                                  ProgressHafalanPerJuzRoute(
+                                    santriId: widget.santriId,
+                                    name: widget.name,
+                                    nis: widget.nis,
+                                  ),
+                                );
+                              },
+                              icon: Icons.menu_book,
+                              label: t.riwayatHafalanSantri.lihatProgress,
                             ),
-                          ),
+                            SizedBox(height: 10.h),
+
+                            // Download Laporan button
+                            CustomOutlinedButton(
+                              width: double.infinity,
+                              height: 48.h,
+                              onPressed: () {
+                                // TODO: Download report
+                              },
+                              icon: Icons.download,
+                              label: t.riwayatHafalanSantri.downloadLaporan,
+                            ),
+                            SizedBox(height: 24.h),
+                          ],
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Records list
-                    ...filtered.asMap().entries.map(
-                      (e) => _buildRecordCard(e.value, e.key, colors),
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Lihat Progress button
-                    CustomOutlinedButton(
-                      width: double.infinity,
-                      height: 48.h,
-                      onPressed: () {
-                        context.router.push(
-                          ProgressHafalanPerJuzRoute(
-                            name: widget.name,
-                            nis: widget.nis,
-                          ),
-                        );
-                      },
-                      icon: Icons.menu_book,
-                      label: t.riwayatHafalanSantri.lihatProgress,
-                    ),
-                    SizedBox(height: 10.h),
-
-                    // Download Laporan button
-                    CustomOutlinedButton(
-                      width: double.infinity,
-                      height: 48.h,
-                      onPressed: () {
-                        // TODO: Download report
-                      },
-                      icon: Icons.download,
-                      label: t.riwayatHafalanSantri.downloadLaporan,
-                    ),
-                    SizedBox(height: 24.h),
-                  ],
-                ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ── Profile Card ──
+  Widget _buildProfileCard(AppColorSet colors) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [colors.primary, colors.primary.withValues(alpha: 0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 50.w,
+            height: 50.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.2),
+            ),
+            child: Icon(Icons.person, size: 26.sp, color: Colors.white),
+          ),
+          SizedBox(width: 14.w),
+          // FIX: Expanded prevents overflow when name is long
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.name,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  'NIS: ${widget.nis}',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -546,23 +575,33 @@ class _RiwayatHafalanSantriScreenState
     );
   }
 
-  Widget _buildRecordCard(
-    Map<String, dynamic> record,
+  Widget _buildGroupCard(
+    _SubmissionGroup group,
     int index,
     AppColorSet colors,
   ) {
-    final dayStr = record['day'].toString().padLeft(2, '0');
-    final dayName = _getDayName(record['day']);
-    final isBaru = record['type'] == 'baru';
+    final dayStr = group.tanggalSetoran.day.toString().padLeft(2, '0');
+    final dayName = _getDayName(group.tanggalSetoran);
+    final isZiyadah = group.jenis == 'Ziyadah';
     final isShowingDelete = _activeDeleteIndex == index;
+    final isExpanded = _expandedIndex == index;
+    final hasMultiple = group.records.length > 1;
 
     return GestureDetector(
+      onTap: hasMultiple
+          ? () {
+              setState(() {
+                _expandedIndex = isExpanded ? null : index;
+              });
+            }
+          : null,
       onLongPress: () {
         setState(() {
           _activeDeleteIndex = isShowingDelete ? null : index;
         });
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         margin: EdgeInsets.only(bottom: 10.h),
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         decoration: BoxDecoration(
@@ -576,111 +615,193 @@ class _RiwayatHafalanSantriScreenState
             ),
           ],
         ),
-        child: Row(
+        child: Column(
           children: [
-            // Day info
-            Column(
-              children: [
-                Text(
-                  dayName,
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w500,
-                    color: colors.textSecondary,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                Text(
-                  dayStr,
-                  style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w800,
-                    color: colors.textPrimary,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 16.w),
-
-            // Surah info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isBaru
-                        ? t.riwayatHafalanSantri.hafalanBaru
-                        : t.riwayatHafalanSantri.murajaah,
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w500,
-                      color: colors.textSecondary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  Text(
-                    record['surah'],
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  Text(
-                    record['ayat'],
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: colors.textSecondary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Score & delete
             Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  '${record['score']}',
-                  style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w800,
-                    color: colors.textPrimary,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                if (isShowingDelete) ...[
-                  SizedBox(width: 12.w),
-                  GestureDetector(
-                    onTap: () async {
-                      final confirmed = await ConfirmDeleteDialog.show(context);
-                      if (confirmed && context.mounted) {
-                        setState(() {
-                          _records.remove(record);
-                          _activeDeleteIndex = null;
-                        });
-                      }
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(8.w),
-                      decoration: BoxDecoration(
-                        color: colors.red.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.delete_outline,
-                        size: 20.sp,
-                        color: colors.red,
+                // Day info
+                Column(
+                  children: [
+                    Text(
+                      dayName,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w500,
+                        color: colors.textSecondary,
+                        fontFamily: 'Poppins',
                       ),
                     ),
+                    Text(
+                      dayStr,
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w800,
+                        color: colors.textPrimary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(width: 16.w),
+
+                // Surah info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            isZiyadah
+                                ? t.riwayatHafalanSantri.hafalanBaru
+                                : t.riwayatHafalanSantri.murajaah,
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          if (hasMultiple) ...[
+                            SizedBox(width: 6.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6.w,
+                                vertical: 1.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                              child: Text(
+                                '${group.records.length} surat',
+                                style: TextStyle(
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.primary,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      Text(
+                        group.surahDisplay,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                          color: colors.textPrimary,
+                          fontFamily: 'Poppins',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        group.ayatDisplay,
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: colors.textSecondary,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
+
+                // Score, expand icon & delete
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${group.avgScore}',
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w800,
+                        color: colors.textPrimary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    if (hasMultiple) ...[
+                      SizedBox(width: 4.w),
+                      AnimatedRotation(
+                        turns: isExpanded ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(
+                          Icons.expand_more,
+                          size: 20.sp,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ],
+                    if (isShowingDelete) ...[
+                      SizedBox(width: 12.w),
+                      GestureDetector(
+                        onTap: () async {
+                          final confirmed = await ConfirmDeleteDialog.show(context);
+                          if (confirmed && context.mounted) {
+                            setState(() {
+                              _activeDeleteIndex = null;
+                            });
+                            // TODO: Implement delete via Cubit when ready
+                          }
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(8.w),
+                          decoration: BoxDecoration(
+                            color: colors.red.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.delete_outline,
+                            size: 20.sp,
+                            color: colors.red,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ],
             ),
+
+            // ── Expanded detail: show each surah in the group ──
+            if (isExpanded && hasMultiple) ...[
+              SizedBox(height: 8.h),
+              Divider(
+                color: colors.border.withValues(alpha: 0.5),
+                height: 1,
+              ),
+              SizedBox(height: 8.h),
+              ...group.detailLines.map(
+                (line) => Padding(
+                  padding: EdgeInsets.only(left: 38.w, bottom: 4.h),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 5.w,
+                        height: 5.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colors.primary.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          line,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: colors.textSecondary,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

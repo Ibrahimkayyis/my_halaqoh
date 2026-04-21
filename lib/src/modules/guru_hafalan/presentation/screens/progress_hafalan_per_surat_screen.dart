@@ -1,36 +1,69 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/quran/quran_service.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
 
 /// Progress Hafalan Per Surat — shows surah-level progress for a specific juz
 @RoutePage()
-class ProgressHafalanPerSuratScreen extends StatelessWidget {
+class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRouteWrapper {
+  final String santriId;
   final String name;
   final String nis;
   final int juzNumber;
 
   const ProgressHafalanPerSuratScreen({
     super.key,
+    required this.santriId,
     required this.name,
     required this.nis,
     required this.juzNumber,
   });
 
-  /// Build surah data for this juz from QuranService.
-  List<Map<String, dynamic>> _buildSurahData() {
+  @override
+  Widget wrappedRoute(BuildContext context) {
+    return BlocProvider(
+      create: (context) => sl<ProgressHafalanCubit>()..watchProgress(santriId),
+      child: this,
+    );
+  }
+
+  /// Build surah data for this juz from QuranService with real progress.
+  List<Map<String, dynamic>> _buildSurahData(ProgressHafalanState progressState) {
     final juz = QuranService.instance.getJuzByNumber(juzNumber);
     if (juz == null) return [];
 
     return juz.surahs.map((seg) {
       final surah = QuranService.instance.getSurahById(seg.surahId);
       final totalAyat = seg.ayatEnd - seg.ayatStart + 1;
+
+      // Look up real memorized count from ProgressHafalanCubit
+      int memorized = 0;
+      progressState.maybeWhen(
+        loaded: (progress) {
+          final juzProgress = progress.juzProgressList
+              .where((jp) => jp.juzNumber == juzNumber)
+              .firstOrNull;
+          if (juzProgress != null) {
+            final surahProgress = juzProgress.surahProgressList
+                .where((sp) => sp.surahId == seg.surahId)
+                .firstOrNull;
+            if (surahProgress != null) {
+              memorized = surahProgress.memorizedAyat;
+            }
+          }
+        },
+        orElse: () {},
+      );
+
       return {
         'name': surah?.name ?? 'Unknown',
         'totalAyat': totalAyat,
-        'memorized': 0, // Real hafalan progress — will be integrated when hafalan recording data is available
+        'memorized': memorized,
       };
     }).toList();
   }
@@ -38,7 +71,11 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final surahs = _buildSurahData();
+
+    return BlocBuilder<ProgressHafalanCubit, ProgressHafalanState>(
+      builder: (context, progressState) {
+        // Build surah data with real progress
+        final surahs = _buildSurahData(progressState);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -112,6 +149,8 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget {
         ),
       ),
     );
+      },
+    );
   }
 
   Widget _buildProfileCard(AppColorSet colors) {
@@ -173,15 +212,21 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget {
     final surahName = surah['name'] as String;
     final totalAyat = surah['totalAyat'] as int;
     final memorized = surah['memorized'] as int;
-    final percent = totalAyat > 0 ? (memorized / totalAyat * 100).round() : 0;
+    final progressVal = totalAyat > 0 ? (memorized / totalAyat * 100) : 0.0;
+    String percentStr;
+    if (progressVal == 0 || progressVal == 100) {
+      percentStr = progressVal.toInt().toString();
+    } else {
+      percentStr = progressVal.toStringAsFixed(1);
+    }
     final progress = totalAyat > 0 ? memorized / totalAyat : 0.0;
 
     String statusLabel;
     Color statusColor;
-    if (percent == 100) {
+    if (progressVal == 100) {
       statusLabel = t.progressHafalanPerSurat.selesai;
       statusColor = colors.primary;
-    } else if (percent > 0) {
+    } else if (progressVal > 0) {
       statusLabel = t.progressHafalanPerSurat.dalamProses;
       statusColor = colors.primary;
     } else {
@@ -234,7 +279,7 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget {
                 ],
               ),
               Text(
-                '$percent%',
+                '$percentStr%',
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w800,

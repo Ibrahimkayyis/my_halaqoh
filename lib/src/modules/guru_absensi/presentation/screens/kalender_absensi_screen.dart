@@ -43,7 +43,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
     if (widget.programType == 'takhassus') {
       return ['shubuh', 'dhuha', 'siang', 'ashar', 'maghrib'];
     }
-    return ['pagi', 'malam'];
+    return ['shubuh', 'maghrib'];
   }
 
   List<String> get _sessionLabels {

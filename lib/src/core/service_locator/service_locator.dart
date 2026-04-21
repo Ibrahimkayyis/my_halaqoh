@@ -1,3 +1,12 @@
+import 'package:my_halaqoh/src/modules/guru_hafalan/data/datasources/local/hafalan_santri_local_data_source.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/data/datasources/remote/source/abstract/hafalan_santri_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/data/datasources/remote/source/implementation/hafalan_santri_remote_datasource_impl.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/domain/repositories/hafalan_santri_repository.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/data/repositories_impl/hafalan_santri_repository_impl.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/domain/services/hafalan_sync_service.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/input_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/riwayat_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -153,4 +162,27 @@ Future<void> initDependencies() async {
 
   // ── Guru Absensi — Cubit (Factory — requires halaqohId scoping) ────────────
   sl.registerFactory<AbsensiCubit>(() => AbsensiCubit(sl()));
+
+  // ── Guru Hafalan — DataSources ─────────────────────────────────────────────
+  sl.registerLazySingleton<HafalanSantriLocalDataSource>(
+    () => HafalanSantriLocalDataSource(),
+  );
+  sl.registerLazySingleton<HafalanSantriRemoteDataSource>(
+    () => HafalanSantriRemoteDataSourceImpl(sl()),
+  );
+
+  // ── Guru Hafalan — Repository ──────────────────────────────────────────────
+  sl.registerLazySingleton<HafalanSantriRepository>(
+    () => HafalanSantriRepositoryImpl(sl(), sl()),
+  );
+
+  // ── Guru Hafalan — Sync Service ────────────────────────────────────────────
+  sl.registerLazySingleton<HafalanSyncService>(
+    () => HafalanSyncService(sl()),
+  );
+
+  // ── Guru Hafalan — Cubits ──────────────────────────────────────────────────
+  sl.registerFactory<InputHafalanCubit>(() => InputHafalanCubit(sl()));
+  sl.registerFactory<RiwayatHafalanCubit>(() => RiwayatHafalanCubit(sl()));
+  sl.registerFactory<ProgressHafalanCubit>(() => ProgressHafalanCubit(sl()));
 }

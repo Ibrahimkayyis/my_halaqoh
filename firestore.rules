@@ -31,5 +31,10 @@ service cloud.firestore {
     match /absensi/{documentId} {
       allow read, write: if isAuthenticated();
     }
+
+    // Hafalan Santri: allow authenticated Gurus to write hafalan
+    match /hafalan_santri/{documentId} {
+      allow read, write: if isAuthenticated();
+    }
   }
 }
