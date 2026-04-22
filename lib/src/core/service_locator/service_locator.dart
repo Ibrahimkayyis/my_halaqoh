@@ -64,6 +64,17 @@ import 'package:my_halaqoh/src/modules/guru_absensi/domain/repositories/absensi_
 // Guru Absensi — Presentation Layer
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_cubit.dart';
 
+// Guru Profile — Data Layer
+import 'package:my_halaqoh/src/modules/guru_profile/data/datasources/remote/source/abstract/guru_profile_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/guru_profile/data/datasources/remote/source/implementation/guru_profile_remote_datasource_impl.dart';
+import 'package:my_halaqoh/src/modules/guru_profile/data/repositories_impl/guru_profile_repository_impl.dart';
+
+// Guru Profile — Domain Layer
+import 'package:my_halaqoh/src/modules/guru_profile/domain/repositories/guru_profile_repository.dart';
+
+// Guru Profile — Presentation Layer
+import 'package:my_halaqoh/src/modules/guru_profile/presentation/cubits/guru_profile_cubit.dart';
+
 final sl = GetIt.instance;
 
 /// Call this in main.dart before runApp()
@@ -185,4 +196,17 @@ Future<void> initDependencies() async {
   sl.registerFactory<InputHafalanCubit>(() => InputHafalanCubit(sl()));
   sl.registerFactory<RiwayatHafalanCubit>(() => RiwayatHafalanCubit(sl()));
   sl.registerFactory<ProgressHafalanCubit>(() => ProgressHafalanCubit(sl()));
+
+  // ── Guru Profile — DataSources ──────────────────────────────────────────────
+  sl.registerLazySingleton<GuruProfileRemoteDataSource>(
+    () => GuruProfileRemoteDataSourceImpl(sl(), sl(), sl()),
+  );
+
+  // ── Guru Profile — Repository ──────────────────────────────────────────────
+  sl.registerLazySingleton<GuruProfileRepository>(
+    () => GuruProfileRepositoryImpl(sl()),
+  );
+
+  // ── Guru Profile — Cubit (Factory — scoped per screen) ─────────────────────
+  sl.registerFactory<GuruProfileCubit>(() => GuruProfileCubit(sl()));
 }

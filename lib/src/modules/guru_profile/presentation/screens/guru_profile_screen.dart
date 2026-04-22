@@ -11,8 +11,12 @@ import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart'
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/guru_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_state.dart';
 
-/// Profile screen for Guru role — avatar, name, role badge, menu items, logout
+/// Profile screen for Guru role — avatar, name, role badge, menu items, logout.
+/// Fetches real-time data from GuruCubit (via Firestore stream).
 class GuruProfileScreen extends StatelessWidget {
   const GuruProfileScreen({super.key});
 
@@ -21,18 +25,30 @@ class GuruProfileScreen extends StatelessWidget {
     final colors = AppColors.of(context);
 
     final authState = context.watch<AuthCubit>().state;
+    final guruState = context.watch<GuruCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
 
-    String guruName = '';
+    // Extract linkedDocId from AuthCubit
     String linkedDocId = '';
     authState.maybeWhen(
       authenticated: (userMeta) {
-        guruName = userMeta.displayName;
         linkedDocId = userMeta.linkedDocId;
       },
       orElse: () {},
     );
 
+    // Find the full GuruModel from GuruCubit's streamed list
+    GuruModel? currentGuru;
+    guruState.maybeWhen(
+      loaded: (list) {
+        try {
+          currentGuru = list.firstWhere((g) => g.id == linkedDocId);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    // Find halaqoh assignment for role badge
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(
       loaded: (list) {
@@ -43,6 +59,13 @@ class GuruProfileScreen extends StatelessWidget {
       orElse: () {},
     );
 
+    final guruName = currentGuru?.nama ?? 'Memuat...';
+    final guruNip = currentGuru?.nip ?? '';
+    final profilePictureUrl = currentGuru?.profilePicture;
+    final roleBadge = myHalaqoh != null
+        ? 'Pengampu ${myHalaqoh!.nama}'
+        : t.guruProfile.guruHalaqoh;
+
     return Scaffold(
       backgroundColor: colors.background,
       body: Column(
@@ -50,10 +73,10 @@ class GuruProfileScreen extends StatelessWidget {
           // ── Green header with avatar + name + role badge ──
           _buildHeader(
             colors: colors,
-            name: guruName.isNotEmpty ? guruName : 'Memuat...',
-            role: myHalaqoh != null
-                ? 'Pengampu ${myHalaqoh!.nama}'
-                : t.guruProfile.guruHalaqoh,
+            name: guruName,
+            nip: guruNip,
+            role: roleBadge,
+            profilePictureUrl: profilePictureUrl,
           ),
 
           // ── Menu sections ──
@@ -132,11 +155,13 @@ class GuruProfileScreen extends StatelessWidget {
     );
   }
 
-  /// Green gradient header with avatar, name, and "Guru Halaqoh" badge
+  /// Green gradient header with avatar, name, NIP, and role badge
   Widget _buildHeader({
     required AppColorSet colors,
     required String name,
+    required String nip,
     required String role,
+    String? profilePictureUrl,
   }) {
     return Container(
       width: double.infinity,
@@ -157,7 +182,7 @@ class GuruProfileScreen extends StatelessWidget {
           padding: EdgeInsets.only(top: 24.h, bottom: 32.h),
           child: Column(
             children: [
-              // Avatar circle
+              // Avatar circle with profile picture
               Container(
                 width: 100.w,
                 height: 100.w,
@@ -169,7 +194,22 @@ class GuruProfileScreen extends StatelessWidget {
                     width: 3,
                   ),
                 ),
-                child: Icon(Icons.person, size: 52.sp, color: Colors.white),
+                child: ClipOval(
+                  child: profilePictureUrl != null &&
+                          profilePictureUrl.isNotEmpty
+                      ? Image.network(
+                          profilePictureUrl,
+                          fit: BoxFit.cover,
+                          width: 100.w,
+                          height: 100.w,
+                          errorBuilder: (_, __, ___) => Icon(
+                            Icons.person,
+                            size: 52.sp,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Icon(Icons.person, size: 52.sp, color: Colors.white),
+                ),
               ),
               SizedBox(height: 14.h),
 
@@ -184,6 +224,20 @@ class GuruProfileScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
+
+              // NIP
+              if (nip.isNotEmpty) ...[
+                SizedBox(height: 2.h),
+                Text(
+                  'NIP: $nip',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
               SizedBox(height: 6.h),
 
               // Role badge

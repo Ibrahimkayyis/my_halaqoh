@@ -20,6 +20,14 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
+
+    // Guru Profile: allow guru to update their own document
+    match /guru/{guruId} {
+      allow read: if isAuthenticated();
+      allow update: if isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.linkedDocId == guruId;
+      allow create, delete: if isAdmin();
+    }
     
     // Exception: Users can read their own metadata
     match /users/{userId} {

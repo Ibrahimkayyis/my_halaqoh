@@ -408,7 +408,13 @@ class DetailSantriRoute extends PageRouteInfo<DetailSantriRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<DetailSantriRouteArgs>();
-      return DetailSantriScreen(key: args.key, name: args.name, nis: args.nis);
+      return WrappedRoute(
+        child: DetailSantriScreen(
+          key: args.key,
+          name: args.name,
+          nis: args.nis,
+        ),
+      );
     },
   );
 }

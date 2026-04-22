@@ -13,6 +13,7 @@ class GuruMapper {
       nama: data['nama'] as String,
       phone: data['phone'] as String?,
       profilePicture: data['profilePicture'] as String?,
+      email: data['email'] as String?,
       program: data['program'] as String? ?? 'R', // Default R for backward compatibility
       authUid: data['authUid'] as String?,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
@@ -26,6 +27,7 @@ class GuruMapper {
       'nama': model.nama,
       'phone': model.phone,
       'profilePicture': model.profilePicture,
+      'email': model.email,
       'program': model.program,
       'authUid': model.authUid,
       'createdAt': Timestamp.fromDate(model.createdAt),

@@ -38,12 +38,13 @@ class GuruModelAdapter extends TypeAdapter<GuruModel> {
       updatedAt: DateTime.parse(fields[6] as String),
       program: fields[7] as String? ?? 'R',
       profilePicture: fields[8] as String?,
+      email: fields[9] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, GuruModel obj) {
-    writer.writeByte(9); // number of fields
+    writer.writeByte(10); // number of fields
     writer.writeByte(0);
     writer.write(obj.id);
     writer.writeByte(1);
@@ -62,6 +63,8 @@ class GuruModelAdapter extends TypeAdapter<GuruModel> {
     writer.write(obj.program);
     writer.writeByte(8);
     writer.write(obj.profilePicture);
+    writer.writeByte(9);
+    writer.write(obj.email);
   }
 }
 

@@ -23,6 +23,9 @@ abstract class GuruModel with _$GuruModel {
     /// Profile picture URL (Optional)
     String? profilePicture,
 
+    /// Personal/contact email address (Optional, separate from Auth email)
+    String? email,
+
     /// Program type: "R" (Reguler) or "T" (Takhassus)
     required String program,
 
