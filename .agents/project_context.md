@@ -44,6 +44,8 @@
 | Local Cache       | Hive                                        |
 | Auth              | Firebase Auth (email/password, identifier-based) |
 | Cloud Functions   | Firebase Cloud Functions (user account creation) |
+| App Check         | Firebase App Check (Play Integrity / App Attest) |
+| Offline Sync      | `connectivity_plus` + SyncService pattern         |
 
 ---
 
@@ -76,7 +78,10 @@ lib/
     │   │   └── hafalan_progress.dart
     │   ├── router/                    # auto_route config
     │   │   ├── app_router.dart
-    │   │   └── app_router.gr.dart     # Generated
+    │   │   ├── app_router.gr.dart     # Generated
+    │   │   └── guards/
+    │   │       ├── auth_guard.dart    # Ensures user is authenticated
+    │   │       └── role_guard.dart    # Ensures user has required role
     │   ├── service_locator/           # GetIt DI setup
     │   │   └── service_locator.dart
     │   ├── services/                  # Shared services
@@ -134,7 +139,7 @@ modules/<feature>/
     └── widgets/                       # Feature-specific widgets
 ```
 
-> **Note:** Some leaf feature modules (e.g., `guru_hafalan`, `guru_absensi`) currently have only a `presentation/` layer, meaning they rely on shared cubits/repositories from `master_data` or `auth` modules provided via the global `MultiBlocProvider`.
+> **Note:** All major feature modules (`guru_absensi`, `guru_hafalan`, `guru_profile`, `guru_dashboard`) now have their own full 3-layer architecture (data/domain/presentation). They define their own datasources, repositories, cubits, and models independently. Some presentation-only modules (e.g., `wali_santri_*`) may still rely on shared cubits from other modules.
 
 ### 2.3 Data Flow
 
@@ -199,8 +204,12 @@ All dependencies are registered in `lib/src/core/service_locator/service_locator
 3. **Auth:** `AuthRemoteDataSource` → `AuthRepository` → `AuthCubit`
 4. **Master Data Local:** `MasterDataLocalDataSource` (singleton)
 5. **Master Data Remote:** `GuruRemoteDataSource`, `SantriRemoteDataSource`, `HalaqohRemoteDataSource`, `TargetHafalanRemoteDataSource`
-6. **Repositories:** `GuruRepository`, `SantriRepository`, `HalaqohRepository`, `TargetHafalanRepository`
-7. **Cubits:** `GuruCubit`, `SantriCubit`, `HalaqohCubit`, `TargetHafalanCubit` (registered as `Factory`)
+6. **Master Data Repositories:** `GuruRepository`, `SantriRepository`, `HalaqohRepository`, `TargetHafalanRepository`
+7. **Master Data Cubits:** `GuruCubit`, `SantriCubit`, `HalaqohCubit`, `TargetHafalanCubit` (registered as `Factory`)
+8. **Guru Absensi:** `AbsensiLocalDataSource` → `AbsensiRemoteDataSource` → `AbsensiRepository` → `AbsensiSyncService` → `AbsensiCubit`
+9. **Guru Hafalan:** `HafalanSantriLocalDataSource` → `HafalanSantriRemoteDataSource` → `HafalanSantriRepository` → `HafalanSyncService` → `InputHafalanCubit`, `RiwayatHafalanCubit`, `ProgressHafalanCubit`
+10. **Guru Dashboard:** `DashboardSummaryCubit` (composed from `AbsensiRepository` + `HafalanSantriRepository`)
+11. **Guru Profile:** `GuruProfileRemoteDataSource` → `GuruProfileRepository` → `GuruProfileCubit`
 
 **Conventions:**
 
@@ -209,6 +218,7 @@ All dependencies are registered in `lib/src/core/service_locator/service_locator
 | Firebase instances   | `registerLazySingleton`     | Single instance, created on first use          |
 | DataSources          | `registerLazySingleton`     | Stateless, shared across repos                 |
 | Repositories         | `registerLazySingleton`     | Stateless, shared across cubits                |
+| Sync Services        | `registerLazySingleton`     | Long-lived, listen to connectivity changes     |
 | Global Cubits        | `registerSingleton`         | Auth, Theme, Locale — need to persist          |
 | Feature Cubits       | `registerFactory`           | New instance per widget tree                   |
 
@@ -220,12 +230,14 @@ All dependencies are registered in `lib/src/core/service_locator/service_locator
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // 1. Firebase.initializeApp()
-  // 2. Hive.initFlutter() + registerMasterDataAdapters()
+  // 1b. FirebaseAppCheck.instance.activate() (debug vs production providers)
+  // 2. Hive.initFlutter() + registerMasterDataAdapters() + registerAbsensiAdapters()
   // 3. QuranService.instance.initialize()
   // 4. initDependencies() (GetIt)
   // 5. sl<MasterDataLocalDataSource>().init() (open Hive boxes)
   // 6. sl<ThemeCubit>().initialize() + sl<LocaleCubit>().initialize()
-  // 7. runApp(TranslationProvider(child: MyApp()))
+  // 7. sl<AbsensiSyncService>().start() + sl<HafalanSyncService>().start()
+  // 8. runApp(TranslationProvider(child: MyApp()))
 }
 ```
 
@@ -345,6 +357,8 @@ BlocListener<AuthCubit, AuthState>(
 | `/santri/{id}`    | Auto-generated          | `nis`, `nama`, `profilePicture?`, `kelas` ("7"-"12"), `program` ("R"/"T"), `halaqohId?`, `waliSantri?` (embedded), `authUid?`, `createdAt`, `updatedAt` |
 | `/halaqoh/{id}`   | Auto-generated          | `nama`, `kelas`, `program`, `guruId`, `guruNama` (denormalized), `santriIds[]`, `jumlahSantri`, `createdAt`, `updatedAt` |
 | `/targetHafalan/{id}` | `"{kelas}_{program}"` (e.g., `"7_Reguler"`) | `kelas`, `program` ("Reguler"/"Takhassus"), `targetJuz`, `juzList[]`, `tahunAjaran`, `createdAt`, `updatedAt` |
+| `/absensi/{id}`   | Auto-generated          | `halaqohId`, `guruId`, `tanggal` (date), `sesi` ("shubuh"/"dhuha1"/"dhuha2"/"ashar"/"maghrib"), `records[]` (embedded `AbsensiRecordEntry`), `isSynced`, `createdAt`, `updatedAt` |
+| `/hafalan_santri/{id}` | Auto-generated     | `santriId`, `guruId`, `halaqohId`, `tanggalSetoran`, `jenis` ("Ziyadah"/"Murajaah"), `surahId`, `surahName`, `ayatMulai`, `ayatSelesai`, `juz`, `nilaiKelancaran`, `nilaiTajwid`, `isSynced`, `createdAt` |
 
 #### Schema Design Principles
 
@@ -363,8 +377,11 @@ BlocListener<AuthCubit, AuthState>(
 
 ```
 - Authenticated users can READ all data.
-- Only Admin role can WRITE/MODIFY data.
+- Only Admin role can WRITE/MODIFY data (default rule).
 - Users can read their own /users/{uid} document.
+- Guru can UPDATE their own /guru/{guruId} document (linkedDocId match).
+- /absensi/{id}: Any authenticated user can read/write (guru attendance recording).
+- /hafalan_santri/{id}: Any authenticated user can read/write (guru hafalan recording).
 ```
 
 ### 4.2 Local — Hive (Cache Layer)
@@ -372,31 +389,37 @@ BlocListener<AuthCubit, AuthState>(
 #### Setup
 
 1. **Initialization:** `Hive.initFlutter()` is called in `main()`.
-2. **Adapter Registration:** `registerMasterDataAdapters()` registers all custom `TypeAdapter`s before any boxes are opened. Called in `main()` immediately after Hive init.
-3. **Box Opening:** `MasterDataLocalDataSource.init()` opens all typed boxes.
+2. **Adapter Registration:** Two registration functions are called in `main()` immediately after Hive init:
+   - `registerMasterDataAdapters()` — Registers adapters for Guru, Santri, WaliSantri, Halaqoh, TargetHafalan, and HafalanSantri models.
+   - `registerAbsensiAdapters()` — Registers adapters for AbsensiModel and AbsensiRecordEntry.
+3. **Box Opening:** `MasterDataLocalDataSource.init()` opens boxes for guru, santri, halaqoh, targetHafalan, and hafalanSantri. The `AbsensiLocalDataSource` opens its own box lazily via `_openBox()`.
 
 #### Hive Boxes
 
-| Box Name            | Type                      | Type ID |
-| ------------------- | ------------------------- | ------- |
-| `guru_box`          | `Box<GuruModel>`          | 1       |
-| `santri_box`        | `Box<SantriModel>`        | 2       |
-| `halaqoh_box`       | `Box<HalaqohModel>`       | 4       |
-| `target_hafalan_box`| `Box<TargetHafalanModel>` | 5       |
+| Box Name            | Type                        | Type ID | Managed By                    |
+| ------------------- | --------------------------- | ------- | ----------------------------- |
+| `guru_box`          | `Box<GuruModel>`            | 1       | `MasterDataLocalDataSource`   |
+| `santri_box`        | `Box<SantriModel>`          | 2       | `MasterDataLocalDataSource`   |
+| `halaqoh_box`       | `Box<HalaqohModel>`         | 4       | `MasterDataLocalDataSource`   |
+| `target_hafalan_box`| `Box<TargetHafalanModel>`   | 5       | `MasterDataLocalDataSource`   |
+| `hafalan_santri_box`| `Box<HafalanSantriModel>`   | 6       | `MasterDataLocalDataSource`   |
+| `absensi_box`       | `Box<AbsensiModel>`         | 8       | `AbsensiLocalDataSource`      |
 
 > `WaliSantriModel` has Type ID `3` (embedded inside `SantriModel`).
+> `AbsensiRecordEntry` has Type ID `9` (embedded inside `AbsensiModel`).
 
 #### TypeAdapter Convention
 
 - Adapters are **hand-written** (not generated) in `hive_adapters.dart`.
 - Each adapter reads/writes fields by index (byte-based).
-- `DateTime` fields are serialized as ISO 8601 strings.
-- **Type IDs must never be reused.** The next available Type ID is **6**.
+- `DateTime` fields are serialized as ISO 8601 strings (master data adapters) or millisecondsSinceEpoch (absensi adapters).
+- **Type IDs must never be reused.** The next available Type ID is **10**.
 
 #### Caching Strategy
 
-The repository implementation follows a **write-through cache** pattern:
+Two distinct caching strategies are used:
 
+**Pattern A — Write-through cache (Master Data):**
 ```
 watchAll():
   Firestore stream → on each emission:
@@ -413,6 +436,24 @@ add/update/delete():
   2. Update Hive cache (put/delete)
   3. Return Either result
 ```
+
+**Pattern B — Offline-first with sync (Absensi & Hafalan):**
+```
+saveSession() / addHafalan():
+  1. Save to Hive immediately (isSynced: false)
+  2. Try to push to Firestore
+  3. If online success → mark as synced (isSynced: true)
+  4. If offline → stays in Hive with isSynced: false
+
+SyncService.start():
+  1. Listen to connectivity_plus changes
+  2. On connectivity restored → repository.syncPendingRecords()
+  3. syncPendingRecords() reads all isSynced=false from Hive,
+     pushes to Firestore, marks synced on success
+  4. Also performs an immediate sync attempt on app startup
+```
+
+> **Key difference:** Master data is admin-managed and always online. Absensi and hafalan are guru-recorded and must work offline (e.g., in areas with poor connectivity).
 
 ---
 
@@ -594,7 +635,7 @@ The `SplashScreen` reads `AuthCubit.state` after a timed delay and routes accord
 | `freezed_annotation` | `^3.1.0` | Immutable model annotations. All domain models and states must use `@freezed`. |
 | `json_annotation` | `^4.9.0` | JSON serialization annotations. Use `@JsonKey(name: 'snake_case')` for Firestore field mapping. |
 | `dartz` | `^0.10.1` | Functional programming. Use `Either<String, T>` for repository return types (`Left` = error message, `Right` = success value). |
-| `hive` / `hive_flutter` | `^2.2.3` / `^1.1.0` | Local cache database. Used only in `MasterDataLocalDataSource`. Never use directly in UI. |
+| `hive` / `hive_flutter` | `^2.2.3` / `^1.1.0` | Local cache database. Used in `MasterDataLocalDataSource`, `AbsensiLocalDataSource`, `HafalanSantriLocalDataSource`. Never use directly in UI. |
 | `flutter_screenutil` | `^5.9.3` | Responsive dimensions. Use `.w`, `.h`, `.sp`, `.r` extensions for all sizing. Design size: 360×690. |
 | `slang` / `slang_flutter` | `^4.8.1` / `^4.8.0` | Type-safe i18n. Access translations via `t.section.key`. |
 | `dio` | `^5.9.0` | HTTP client (for any external REST APIs). Wrap with `pretty_dio_logger` for debug logging. |
@@ -615,6 +656,8 @@ The `SplashScreen` reads `AuthCubit.state` after a timed delay and routes accord
 | `intl` | `^0.20.2` | Date/number formatting. |
 | `flutter_gen` | `^5.12.0` | Asset/color/font code generation. Access via `Assets.images.xxx`, `ColorName.xxx`. |
 | `flutter_localization` | `^0.3.3` | Localization delegate support. |
+| `connectivity_plus` | `^7.1.1` | Network connectivity detection. Used by `AbsensiSyncService` and `HafalanSyncService` for offline-first sync. |
+| `firebase_app_check` | `^0.4.2` | Firebase App Check. Activated in `main()` with debug/production providers. |
 
 ### 7.2 Dev Dependencies
 
@@ -758,7 +801,7 @@ Errors bubble up to the Cubit state as `XxxState.error(String message)`, and the
 
 5. **NEVER use raw Firebase instances in Cubits or UI.** Always go through the DataSource → Repository → Cubit chain.
 
-6. **NEVER reuse Hive Type IDs.** Current max is `5`. The next available ID is `6`.
+6. **NEVER reuse Hive Type IDs.** Current max is `9`. The next available ID is **10**. See Section 4.2 for the full registry.
 
 7. **NEVER commit generated files with manual edits.** Files ending in `.freezed.dart`, `.g.dart`, `.gr.dart`, and `gen/` are auto-generated. Only edit source files and re-run `build_runner`.
 
@@ -819,6 +862,17 @@ Errors bubble up to the Cubit state as `XxxState.error(String message)`, and the
 3. **Navigation uses `context.router.push()`, `.replace()`, or `.pop()`** from auto_route.
 4. **Route parameters** use constructor parameters on the screen class.
 5. **After adding a new screen**, re-run `build_runner` and update `app_router.dart` with the new `AutoRoute(page: XxxRoute.page)` entry.
+6. **All protected routes must use guards:** `AuthGuard` (checks authentication) and `RoleGuard` (checks role allowlist).
+7. **Guard pattern:** `guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])]`.
+8. **Unauthorized access** redirects to `AccessDeniedRoute` (not login).
+
+**Route groups by role:**
+| Role | Routes |
+| --- | --- |
+| Public | `SplashRoute`, `LoginRoute`, `AccessDeniedRoute` |
+| Admin | `DashboardWrapperRoute`, `AddHalaqohRoute`, `SelectSantriRoute`, `PengaturanMasterDataRoute` |
+| Guru | `GuruDashboardWrapperRoute`, `AttendanceRoute`, `HafalanRoute`, `MyHalaqohRoute`, `InputHafalanRoute`, `RiwayatHafalanSantriRoute`, `ProgressHafalanPerJuzRoute`, `ProgressHafalanPerSuratRoute`, `MutabaahSantriRoute`, `EditProfileRoute`, `UbahPasswordRoute`, `PengaturanRoute`, etc. |
+| Santri (Wali) | `WaliSantriDashboardWrapperRoute`, `WaliSantriRiwayatHafalanRoute`, `WaliSantriProgressPerJuzRoute`, `WaliSantriMutabaahRoute`, `WaliSantriRiwayatAbsensiRoute`, `WaliSantriProfileRoute`, etc. |
 
 ### 9.8 Theming Rules
 
@@ -872,5 +926,5 @@ When adding a new entity/feature, follow this checklist:
 
 ---
 
-> **Last Updated:** 2026-04-14
+> **Last Updated:** 2026-04-23
 > **Maintained by:** AI System Prompt — Do not edit manually without updating all sections consistently.
