@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_absensi/presentation/screens/wali_santri_riwayat_absensi_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_dashboard/presentation/screens/wali_santri_dashboard_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_riwayat_hafalan_screen.dart';
-import 'package:my_halaqoh/src/modules/wali_santri_absensi/presentation/screens/wali_santri_riwayat_absensi_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_profile_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 
 /// Dashboard wrapper for Wali Santri role with 4-tab bottom navigation
@@ -50,12 +53,44 @@ class _WaliSantriDashboardWrapperScreenState
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
+    final authState = context.watch<AuthCubit>().state;
+    String santriName = '';
+    String nis = '';
+    String linkedDocId = '';
+
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        santriName = userMeta.displayName;
+        nis = userMeta.identifier;
+        linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+
+    // Look up real santri data for more accurate name if available locally
+    final santriState = context.watch<SantriCubit>().state;
+    SantriModel? mySantri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          mySantri = list.firstWhere((s) => s.id == linkedDocId);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    final displayName = mySantri?.nama ?? santriName;
+    final displayNis = mySantri?.nis ?? nis;
+
     final pages = <Widget>[
-      WaliSantriDashboardScreen(onNavigateToTab: _navigateToTab),
-      const WaliSantriRiwayatHafalanScreen(name: 'Ahmad', nis: '123456'),
+      WaliSantriDashboardScreen(
+        onNavigateToTab: _navigateToTab,
+        programType: widget.programType,
+      ),
+      WaliSantriRiwayatHafalanScreen(name: displayName, nis: displayNis),
       WaliSantriRiwayatAbsensiScreen(
-        name: 'Ahmad',
-        nis: '123456',
+        name: displayName,
+        nis: displayNis,
         programType: widget.programType,
       ),
       const WaliSantriProfileScreen(),

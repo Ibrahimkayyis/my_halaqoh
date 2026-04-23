@@ -52,15 +52,15 @@ class _WaliSantriRiwayatAbsensiScreenState
   /// Session keys based on program type
   List<String> get _sessionKeys {
     if (widget.programType == 'takhassus') {
-      return ['shubuh', 'dhuha1', 'dhuha2', 'ashar', 'maghrib'];
+      return ['shubuh', 'dhuha', 'siang', 'ashar', 'maghrib'];
     }
-    return ['pagi', 'mlm'];
+    return ['shubuh', 'maghrib'];
   }
 
   /// Session labels for day card display
   List<String> get _sessionLabels {
     if (widget.programType == 'takhassus') {
-      return ['P', 'D1', 'D2', 'S', 'M'];
+      return ['P', 'D', 'S', 'A', 'M'];
     }
     return ['P', 'M'];
   }
@@ -529,9 +529,9 @@ class _WaliSantriRiwayatAbsensiScreenState
                       children: widget.programType == 'takhassus'
                           ? [
                               _buildSessionLabel('P', 'Pagi (Shubuh)', colors),
-                              _buildSessionLabel('D1', 'Dhuha 1', colors),
-                              _buildSessionLabel('D2', 'Dhuha 2', colors),
-                              _buildSessionLabel('S', 'Sore (Ashar)', colors),
+                              _buildSessionLabel('D', 'Dhuha', colors),
+                              _buildSessionLabel('S', 'Siang', colors),
+                              _buildSessionLabel('A', 'Sore (Ashar)', colors),
                               _buildSessionLabel(
                                 'M',
                                 'Malam (Maghrib)',

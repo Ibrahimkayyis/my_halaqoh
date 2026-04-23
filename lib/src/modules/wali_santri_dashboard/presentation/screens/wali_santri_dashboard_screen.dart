@@ -15,12 +15,95 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_
 import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
+import 'package:intl/intl.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_cubit.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_state.dart';
 
 /// Dashboard content page for Wali Santri role
-class WaliSantriDashboardScreen extends StatelessWidget {
+class WaliSantriDashboardScreen extends StatefulWidget {
   final void Function(int index)? onNavigateToTab;
+  final String programType;
 
-  const WaliSantriDashboardScreen({super.key, this.onNavigateToTab});
+  const WaliSantriDashboardScreen({
+    super.key,
+    this.onNavigateToTab,
+    this.programType = 'reguler',
+  });
+
+  @override
+  State<WaliSantriDashboardScreen> createState() =>
+      _WaliSantriDashboardScreenState();
+}
+
+class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
+  late ProgressHafalanCubit _progressHafalanCubit;
+  late AbsensiCubit _absensiCubit;
+  String? _loadedLinkedDocId;
+  String? _loadedHalaqohId;
+
+  @override
+  void initState() {
+    super.initState();
+    _progressHafalanCubit = sl<ProgressHafalanCubit>();
+    _absensiCubit = sl<AbsensiCubit>();
+  }
+
+  @override
+  void dispose() {
+    _progressHafalanCubit.close();
+    _absensiCubit.close();
+    super.dispose();
+  }
+
+  void _checkAndLoadData(String linkedDocId, String? halaqohId) {
+    if (linkedDocId.isNotEmpty && linkedDocId != _loadedLinkedDocId) {
+      _loadedLinkedDocId = linkedDocId;
+      _progressHafalanCubit.watchProgress(linkedDocId);
+    }
+    if (halaqohId != null && halaqohId != _loadedHalaqohId) {
+      _loadedHalaqohId = halaqohId;
+      _absensiCubit.watchByHalaqoh(halaqohId);
+    }
+  }
+
+  Map<String, int> _computeMonthlyAttendanceStats(
+    List<AbsensiModel> allRecords,
+    String nis,
+    int month,
+    int year,
+  ) {
+    int hadir = 0, sakit = 0, izin = 0, alfa = 0;
+
+    for (final record in allRecords) {
+      if (record.tanggal.month != month || record.tanggal.year != year) {
+        continue;
+      }
+
+      final entry = record.records.where((r) => r.nis == nis);
+      if (entry.isEmpty) continue;
+
+      switch (entry.first.status) {
+        case 'hadir':
+          hadir++;
+          break;
+        case 'sakit':
+          sakit++;
+          break;
+        case 'izin':
+          izin++;
+          break;
+        case 'alfa':
+          alfa++;
+          break;
+      }
+    }
+
+    return {'hadir': hadir, 'sakit': sakit, 'izin': izin, 'alfa': alfa};
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +138,11 @@ class WaliSantriDashboardScreen extends StatelessWidget {
       orElse: () {},
     );
 
+    // Trigger data loading once context is known
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndLoadData(linkedDocId, myHalaqoh?.id);
+    });
+
     // Look up the linked santri to get kelas and program
     SantriModel? mySantri;
     santriState.maybeWhen(
@@ -81,7 +169,12 @@ class WaliSantriDashboardScreen extends StatelessWidget {
       );
     }
 
-    return Scaffold(
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _progressHafalanCubit),
+        BlocProvider.value(value: _absensiCubit),
+      ],
+      child: Scaffold(
       backgroundColor: colors.background,
       body: SingleChildScrollView(
         child: Column(
@@ -102,8 +195,22 @@ class WaliSantriDashboardScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: GestureDetector(
-                onTap: () => onNavigateToTab?.call(1),
-                child: _buildProgressHafalanCard(context, colors, myTarget),
+                onTap: () => widget.onNavigateToTab?.call(1),
+                child: BlocBuilder<ProgressHafalanCubit, ProgressHafalanState>(
+                  builder: (context, state) {
+                    OverallHafalanProgress? progressData;
+                    state.maybeWhen(
+                      loaded: (data) => progressData = data,
+                      orElse: () {},
+                    );
+                    return _buildProgressHafalanCard(
+                      context,
+                      colors,
+                      myTarget,
+                      progressData,
+                    );
+                  },
+                ),
               ),
             ),
             SizedBox(height: 16.h),
@@ -112,14 +219,24 @@ class WaliSantriDashboardScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: GestureDetector(
-                onTap: () => onNavigateToTab?.call(2),
-                child: _buildKehadiranCard(colors),
+                onTap: () => widget.onNavigateToTab?.call(2),
+                child: BlocBuilder<AbsensiCubit, AbsensiState>(
+                  builder: (context, state) {
+                    List<AbsensiModel> allRecords = [];
+                    state.maybeWhen(
+                      loaded: (records) => allRecords = records,
+                      orElse: () {},
+                    );
+                    return _buildKehadiranCard(colors, nis, allRecords);
+                  },
+                ),
               ),
             ),
             SizedBox(height: 100.h), // Space for bottom bar
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -223,11 +340,14 @@ class WaliSantriDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildProgressHafalanCard(
-      BuildContext context, AppColorSet colors, TargetHafalanModel? target) {
+    BuildContext context,
+    AppColorSet colors,
+    TargetHafalanModel? target,
+    OverallHafalanProgress? progressData,
+  ) {
     final int juzTarget = target?.targetJuz ?? 0;
-    const int juzCompleted = 0; // Real hafalan progress — will be integrated when hafalan recording data is available
-    final double progress =
-        juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
+    final int juzCompleted = progressData?.completedJuz ?? 0;
+    final double progress = juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
     final int percent = (progress * 100).round();
 
     return Container(
@@ -343,7 +463,20 @@ class WaliSantriDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildKehadiranCard(AppColorSet colors) {
+  Widget _buildKehadiranCard(
+    AppColorSet colors,
+    String nis,
+    List<AbsensiModel> allRecords,
+  ) {
+    final now = DateTime.now();
+    final stats = _computeMonthlyAttendanceStats(
+      allRecords,
+      nis,
+      now.month,
+      now.year,
+    );
+    final periodName = DateFormat.yMMMM('id').format(now);
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(18.w),
@@ -380,7 +513,7 @@ class WaliSantriDashboardScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      t.waliSantriDashboard.periode(periode: 'Januari 2026'),
+                      t.waliSantriDashboard.periode(periode: periodName),
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
@@ -406,7 +539,7 @@ class WaliSantriDashboardScreen extends StatelessWidget {
               Expanded(
                 child: _buildAttendanceStat(
                   t.waliSantriDashboard.hadir,
-                  '25',
+                  '${stats['hadir']}',
                   colors.primary,
                   colors,
                 ),
@@ -415,7 +548,7 @@ class WaliSantriDashboardScreen extends StatelessWidget {
               Expanded(
                 child: _buildAttendanceStat(
                   t.waliSantriDashboard.sakit,
-                  '4',
+                  '${stats['sakit']}',
                   colors.yellow,
                   colors,
                 ),
@@ -428,7 +561,7 @@ class WaliSantriDashboardScreen extends StatelessWidget {
               Expanded(
                 child: _buildAttendanceStat(
                   t.waliSantriDashboard.izin,
-                  '1',
+                  '${stats['izin']}',
                   colors.blue,
                   colors,
                 ),
@@ -437,7 +570,7 @@ class WaliSantriDashboardScreen extends StatelessWidget {
               Expanded(
                 child: _buildAttendanceStat(
                   t.waliSantriDashboard.alpha,
-                  '0',
+                  '${stats['alfa']}',
                   colors.red,
                   colors,
                 ),
