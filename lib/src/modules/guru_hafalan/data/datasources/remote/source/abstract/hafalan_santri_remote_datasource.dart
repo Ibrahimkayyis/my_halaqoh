@@ -4,6 +4,9 @@ abstract class HafalanSantriRemoteDataSource {
   /// Add or update a hafalan record in Firestore
   Future<HafalanSantriModel> put(HafalanSantriModel model);
 
+  /// Fetch all hafalan records for a specific santri from Firestore
+  Future<List<HafalanSantriModel>> getBySantriId(String santriId);
+
   /// Note: We might not need watchAll or getAll from RemoteDataSource since we 
   /// are relying primarily on the Offline-First Local DataSource for the UI, 
   /// but we could implement it for pulling down existing data if the user reinstalls the app.

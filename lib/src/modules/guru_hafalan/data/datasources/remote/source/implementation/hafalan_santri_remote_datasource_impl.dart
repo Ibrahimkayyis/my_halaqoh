@@ -16,4 +16,14 @@ class HafalanSantriRemoteDataSourceImpl implements HafalanSantriRemoteDataSource
     await docRef.set(HafalanSantriMapper.toFirestore(model));
     return model.copyWith(isSynced: true);
   }
+
+  @override
+  Future<List<HafalanSantriModel>> getBySantriId(String santriId) async {
+    final snapshot = await _collection.where('santriId', isEqualTo: santriId).get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      return HafalanSantriMapper.fromFirestore(data);
+    }).toList();
+  }
 }
