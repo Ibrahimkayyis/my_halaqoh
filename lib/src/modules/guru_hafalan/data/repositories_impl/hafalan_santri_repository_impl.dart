@@ -73,4 +73,21 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
       _log.i('Successfully synced ${syncedIds.length} records.');
     }
   }
+
+  @override
+  List<HafalanSantriModel> getHafalanByHalaqohAndDate(
+      List<String> santriIds, DateTime date) {
+    return _local.getHafalanByHalaqohAndDate(santriIds, date);
+  }
+
+  @override
+  List<HafalanSantriModel> getRecentHafalanBySantriIds(
+      List<String> santriIds, {int limit = 3}) {
+    return _local.getRecentHafalanBySantriIds(santriIds, limit: limit);
+  }
+
+  @override
+  Stream<void> watchAnyChanges() {
+    return _local.watchAnyChanges();
+  }
 }

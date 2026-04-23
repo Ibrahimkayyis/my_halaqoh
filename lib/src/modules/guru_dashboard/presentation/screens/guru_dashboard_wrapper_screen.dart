@@ -52,7 +52,10 @@ class _GuruDashboardWrapperScreenState
     final colors = AppColors.of(context);
 
     final pages = <Widget>[
-      GuruDashboardScreen(onNavigateToTab: _navigateToTab),
+      GuruDashboardScreen(
+        onNavigateToTab: _navigateToTab,
+        programType: widget.programType,
+      ),
       const MyHalaqohScreen(),
       AttendanceScreen(programType: widget.programType),
       const HafalanScreen(),

@@ -15,4 +15,18 @@ abstract class HafalanSantriRepository {
 
   /// Push all pending (isSynced == false) records from Hive to Firestore.
   Future<void> syncPendingRecords();
+
+  /// Get all hafalan records for students in a halaqoh on a specific date.
+  /// Reads from local Hive cache (synchronous).
+  List<HafalanSantriModel> getHafalanByHalaqohAndDate(
+      List<String> santriIds, DateTime date);
+
+  /// Get the N most recent hafalan records for a list of santri IDs.
+  /// Reads from local Hive cache (synchronous).
+  List<HafalanSantriModel> getRecentHafalanBySantriIds(
+      List<String> santriIds, {int limit = 3});
+
+  /// Stream that emits whenever any hafalan record changes in the local cache.
+  /// Used by the dashboard to reactively update setoran data.
+  Stream<void> watchAnyChanges();
 }

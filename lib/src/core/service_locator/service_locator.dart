@@ -7,6 +7,7 @@ import 'package:my_halaqoh/src/modules/guru_hafalan/domain/services/hafalan_sync
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/input_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/riwayat_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/cubits/dashboard_summary_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -196,6 +197,11 @@ Future<void> initDependencies() async {
   sl.registerFactory<InputHafalanCubit>(() => InputHafalanCubit(sl()));
   sl.registerFactory<RiwayatHafalanCubit>(() => RiwayatHafalanCubit(sl()));
   sl.registerFactory<ProgressHafalanCubit>(() => ProgressHafalanCubit(sl()));
+
+  // ── Guru Dashboard — Cubits ─────────────────────────────────────────────────
+  sl.registerFactory<DashboardSummaryCubit>(
+    () => DashboardSummaryCubit(sl(), sl()),
+  );
 
   // ── Guru Profile — DataSources ──────────────────────────────────────────────
   sl.registerLazySingleton<GuruProfileRemoteDataSource>(

@@ -81,4 +81,34 @@ class HafalanSantriLocalDataSource {
       await _box.putAll(mapToUpdate);
     }
   }
+
+  /// Get all hafalan records for students in a halaqoh on a specific date.
+  /// Used by the dashboard to calculate today's setoran percentage.
+  List<HafalanSantriModel> getHafalanByHalaqohAndDate(
+      List<String> santriIds, DateTime date) {
+    return _box.values.where((item) {
+      return santriIds.contains(item.santriId) &&
+             item.tanggalSetoran.year == date.year &&
+             item.tanggalSetoran.month == date.month &&
+             item.tanggalSetoran.day == date.day;
+    }).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+  /// Get the N most recent hafalan records for a list of santri.
+  /// Used by the dashboard for the "Setoran Terakhir" section.
+  List<HafalanSantriModel> getRecentHafalanBySantriIds(
+      List<String> santriIds, {int limit = 3}) {
+    final records = _box.values.where((item) {
+      return santriIds.contains(item.santriId);
+    }).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return records.take(limit).toList();
+  }
+
+  /// Stream that emits whenever any record in the hafalan box changes.
+  /// Used by the dashboard cubit to reactively recompute setoran data.
+  Stream<void> watchAnyChanges() {
+    return _box.watch().map((_) {});
+  }
 }
