@@ -1,17 +1,21 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
-import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
+import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
-import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_cubit.dart';
+import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
@@ -36,8 +40,8 @@ class WaliSantriRiwayatAbsensiScreen extends StatefulWidget {
 
 class _WaliSantriRiwayatAbsensiScreenState
     extends State<WaliSantriRiwayatAbsensiScreen> {
-  int _currentMonth = 11; // November
-  int _currentYear = 2025;
+  int _currentMonth = DateTime.now().month;
+  int _currentYear = DateTime.now().year;
 
   final List<String> _dayNames = [
     'AHA',
@@ -49,7 +53,8 @@ class _WaliSantriRiwayatAbsensiScreenState
     'SAB',
   ];
 
-  /// Session keys based on program type
+  late AbsensiCubit _absensiCubit;
+
   List<String> get _sessionKeys {
     if (widget.programType == 'takhassus') {
       return ['shubuh', 'dhuha', 'siang', 'ashar', 'maghrib'];
@@ -57,7 +62,6 @@ class _WaliSantriRiwayatAbsensiScreenState
     return ['shubuh', 'maghrib'];
   }
 
-  /// Session labels for day card display
   List<String> get _sessionLabels {
     if (widget.programType == 'takhassus') {
       return ['P', 'D', 'S', 'A', 'M'];
@@ -65,38 +69,91 @@ class _WaliSantriRiwayatAbsensiScreenState
     return ['P', 'M'];
   }
 
-  // Dummy attendance data — generated based on program type
-  late Map<int, Map<String, String>> _attendanceData;
-
   @override
   void initState() {
     super.initState();
-    _generateDummyData();
+    _absensiCubit = sl<AbsensiCubit>();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
-  void _generateDummyData() {
-    _attendanceData = {};
-    final keys = _sessionKeys;
-    final statuses = ['H', 'S', 'I', 'A'];
-    for (int d = 1; d <= 30; d++) {
-      _attendanceData[d] = {};
-      for (final key in keys) {
-        final hash = (d * 7 + key.hashCode) % 20;
-        if (hash < 2) {
-          _attendanceData[d]![key] = statuses[hash + 1];
-        } else if (hash == 3 && d % 5 == 0) {
-          _attendanceData[d]![key] = 'A';
-        } else {
-          _attendanceData[d]![key] = 'H';
-        }
-      }
+  @override
+  void dispose() {
+    _absensiCubit.close();
+    super.dispose();
+  }
+
+  void _loadData() {
+    final authState = context.read<AuthCubit>().state;
+    final halaqohState = context.read<HalaqohCubit>().state;
+
+    String linkedDocId = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) => linkedDocId = userMeta.linkedDocId,
+      orElse: () {},
+    );
+
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          myHalaqoh = list.firstWhere(
+            (h) => h.santriIds.contains(linkedDocId),
+          );
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    if (myHalaqoh != null) {
+      _absensiCubit.watchByHalaqoh(myHalaqoh!.id);
     }
   }
 
-  // Count stats
-  Map<String, int> get _stats {
+  Map<int, Map<String, String>> _buildAttendanceData(
+    List<AbsensiModel> allRecords,
+  ) {
+    final data = <int, Map<String, String>>{};
+    final keys = _sessionKeys;
+
+    for (final record in allRecords) {
+      if (record.tanggal.month != _currentMonth ||
+          record.tanggal.year != _currentYear) {
+        continue;
+      }
+      if (!keys.contains(record.sesi)) continue;
+
+      final day = record.tanggal.day;
+      final entry = record.records.where((r) => r.nis == widget.nis);
+      if (entry.isEmpty) continue;
+
+      final status = entry.first.status;
+      final statusCode = _statusToCode(status);
+
+      data.putIfAbsent(day, () => {});
+      data[day]![record.sesi] = statusCode;
+    }
+
+    return data;
+  }
+
+  String _statusToCode(String status) {
+    switch (status) {
+      case 'hadir':
+        return 'H';
+      case 'sakit':
+        return 'S';
+      case 'izin':
+        return 'I';
+      case 'alfa':
+        return 'A';
+      default:
+        return '-';
+    }
+  }
+
+  Map<String, int> _computeStats(Map<int, Map<String, String>> attendanceData) {
     int hadir = 0, sakit = 0, izin = 0, alfa = 0;
-    for (final data in _attendanceData.values) {
+    for (final data in attendanceData.values) {
       for (final status in data.values) {
         switch (status) {
           case 'H':
@@ -137,7 +194,6 @@ class _WaliSantriRiwayatAbsensiScreenState
     });
   }
 
-  // Get day of week for a date (0 = Sunday)
   String _getDayName(int day) {
     final date = DateTime(_currentYear, _currentMonth, day);
     return _dayNames[date.weekday % 7];
@@ -146,7 +202,6 @@ class _WaliSantriRiwayatAbsensiScreenState
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final stats = _stats;
 
     final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
@@ -160,7 +215,6 @@ class _WaliSantriRiwayatAbsensiScreenState
       orElse: () {},
     );
 
-    // Look up real santri data
     SantriModel? mySantri;
     santriState.maybeWhen(
       loaded: (list) {
@@ -175,7 +229,6 @@ class _WaliSantriRiwayatAbsensiScreenState
       orElse: () {},
     );
 
-    // Use real data, fall back to route params
     final displayName = mySantri?.nama ?? widget.name;
     final displayNis = mySantri?.nis ?? widget.nis;
 
@@ -189,371 +242,408 @@ class _WaliSantriRiwayatAbsensiScreenState
       orElse: () {},
     );
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 40.h),
+    return BlocProvider.value(
+      value: _absensiCubit,
+      child: BlocBuilder<AbsensiCubit, AbsensiState>(
+        builder: (context, absensiState) {
+          List<AbsensiModel> allRecords = [];
+          absensiState.maybeWhen(
+            loaded: (data) => allRecords = data,
+            orElse: () {},
+          );
 
-            // Profile card
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(18.w),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      colors.primary,
-                      colors.primary.withValues(alpha: 0.85),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Avatar — fixed size, never shrinks
-                    Container(
-                      width: 48.w,
-                      height: 48.w,
+          final attendanceData = _buildAttendanceData(allRecords);
+          final stats = _computeStats(attendanceData);
+
+          // FIX: always show all days in month, empty map if no data
+          final totalDays = DateUtils.getDaysInMonth(_currentYear, _currentMonth);
+          final allDays = List.generate(totalDays, (i) => i + 1);
+
+          return Scaffold(
+            backgroundColor: colors.background,
+            body: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 40.h),
+
+                  // Profile card
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(18.w),
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.2),
+                        gradient: LinearGradient(
+                          colors: [
+                            colors.primary,
+                            colors.primary.withValues(alpha: 0.85),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16.r),
                       ),
-                      child: Icon(
-                        Icons.person,
-                        size: 26.sp,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(width: 14.w),
-                    // Text info — Expanded so it takes remaining width
-                    // and never overflows outside the card
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            displayName,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 17.sp,
-                              fontWeight: FontWeight.w700,
+                          Container(
+                            width: 48.w,
+                            height: 48.w,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.2),
+                            ),
+                            child: Icon(
+                              Icons.person,
+                              size: 26.sp,
                               color: Colors.white,
-                              fontFamily: 'Poppins',
                             ),
                           ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            'NIS: $displayNis',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.white.withValues(alpha: 0.85),
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          SizedBox(height: 1.h),
-                          Text(
-                            myHalaqoh != null
-                                ? t.riwayatAbsensi.halaqohKelas(
-                                    halaqoh: myHalaqoh!.nama,
-                                    kelas: myHalaqoh!.kelas,
-                                  )
-                                : 'Belum Terdaftar Halaqoh',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.white.withValues(alpha: 0.85),
-                              fontFamily: 'Poppins',
+                          SizedBox(width: 14.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  displayName,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 17.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  'NIS: $displayNis',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                                SizedBox(height: 1.h),
+                                Text(
+                                  myHalaqoh != null
+                                      ? t.riwayatAbsensi.halaqohKelas(
+                                          halaqoh: myHalaqoh!.nama,
+                                          kelas: myHalaqoh!.kelas,
+                                        )
+                                      : 'Belum Terdaftar Halaqoh',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 20.h),
+                  ),
+                  SizedBox(height: 20.h),
 
-            // Month navigator
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: AppMonthSelector(
-                      month: _currentMonth,
-                      year: _currentYear,
-                      onPrev: _prevMonth,
-                      onNext: _nextMonth,
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  AppCalendarPickerButton(
-                    currentMonth: _currentMonth,
-                    currentYear: _currentYear,
-                    onSelected: (month, year) {
-                      setState(() {
-                        _currentMonth = month;
-                        _currentYear = year;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            // Summary stats
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Row(
-                children: [
-                  _buildStat(
-                    '${stats['hadir']}',
-                    t.riwayatAbsensi.hadir,
-                    colors.primary,
-                    colors,
-                  ),
-                  SizedBox(width: 10.w),
-                  _buildStat(
-                    '${stats['sakit']}',
-                    t.riwayatAbsensi.sakit,
-                    colors.yellow,
-                    colors,
-                  ),
-                  SizedBox(width: 10.w),
-                  _buildStat(
-                    '${stats['izin']}',
-                    t.riwayatAbsensi.izin,
-                    colors.blue,
-                    colors,
-                  ),
-                  SizedBox(width: 10.w),
-                  _buildStat(
-                    '${stats['alfa']}',
-                    t.riwayatAbsensi.alfa,
-                    colors.red,
-                    colors,
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 20.h),
-
-            // Day cards (horizontal scroll)
-            SizedBox(
-              height: widget.programType == 'takhassus' ? 280.h : 180.h,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                itemCount: _attendanceData.length,
-                itemBuilder: (context, index) {
-                  final day = index + 1;
-                  final data = _attendanceData[day]!;
-                  return _buildDayCard(day, _getDayName(day), data, colors);
-                },
-              ),
-            ),
-            SizedBox(height: 8.h),
-
-            // Swipe hint
-            Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.chevron_left,
-                    size: 16.sp,
-                    color: colors.textSecondary.withValues(alpha: 0.5),
-                  ),
-                  Text(
-                    t.riwayatAbsensi.geserHint,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: colors.textSecondary.withValues(alpha: 0.5),
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 16.sp,
-                    color: colors.textSecondary.withValues(alpha: 0.5),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            // Lihat Kalender button
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: GestureDetector(
-                onTap: () {
-                  context.router.push(
-                    WaliSantriKalenderAbsensiRoute(
-                      name: widget.name,
-                      nis: widget.nis,
-                      programType: widget.programType,
-                    ),
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(14.r),
-                    border: Border.all(color: colors.primary, width: 1.5),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        t.riwayatAbsensi.lihatKalender,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: colors.primary,
-                          fontFamily: 'Poppins',
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Icon(
-                        Icons.calendar_month,
-                        size: 20.sp,
-                        color: colors.primary,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            // Keterangan (legend) card
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(18.w),
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: BorderRadius.circular(14.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.riwayatAbsensi.keterangan,
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                        color: colors.textPrimary,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    SizedBox(height: 12.h),
-                    Row(
+                  // Month navigator
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: Row(
                       children: [
-                        _buildLegendItem(
+                        Expanded(
+                          child: AppMonthSelector(
+                            month: _currentMonth,
+                            year: _currentYear,
+                            onPrev: _prevMonth,
+                            onNext: _nextMonth,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        AppCalendarPickerButton(
+                          currentMonth: _currentMonth,
+                          currentYear: _currentYear,
+                          onSelected: (month, year) {
+                            setState(() {
+                              _currentMonth = month;
+                              _currentYear = year;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+
+                  // Summary stats
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: Row(
+                      children: [
+                        _buildStat(
+                          '${stats['hadir']}',
+                          t.riwayatAbsensi.hadir,
                           colors.primary,
-                          t.riwayatAbsensi.hadirLabel,
                           colors,
                         ),
-                        SizedBox(width: 40.w),
-                        _buildLegendItem(
+                        SizedBox(width: 10.w),
+                        _buildStat(
+                          '${stats['sakit']}',
+                          t.riwayatAbsensi.sakit,
                           colors.yellow,
-                          t.riwayatAbsensi.sakitLabel,
                           colors,
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 8.h),
-                    Row(
-                      children: [
-                        _buildLegendItem(
-                          colors.red,
-                          t.riwayatAbsensi.alphaLabel,
-                          colors,
-                        ),
-                        SizedBox(width: 40.w),
-                        _buildLegendItem(
+                        SizedBox(width: 10.w),
+                        _buildStat(
+                          '${stats['izin']}',
+                          t.riwayatAbsensi.izin,
                           colors.blue,
-                          t.riwayatAbsensi.izinLabel,
+                          colors,
+                        ),
+                        SizedBox(width: 10.w),
+                        _buildStat(
+                          '${stats['alfa']}',
+                          t.riwayatAbsensi.alfa,
+                          colors.red,
                           colors,
                         ),
                       ],
                     ),
-                    SizedBox(height: 14.h),
-                    Divider(
-                      color: colors.border.withValues(alpha: 0.5),
-                      height: 1,
+                  ),
+                  SizedBox(height: 20.h),
+
+                  // Day cards — ALL days in month, empty data shown as '-'
+                  SizedBox(
+                    height: widget.programType == 'takhassus' ? 280.h : 180.h,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      itemCount: allDays.length,
+                      itemBuilder: (context, index) {
+                        final day = allDays[index];
+                        // If no data for this day, pass empty map
+                        final data = attendanceData[day] ?? <String, String>{};
+                        return _buildDayCard(
+                          day,
+                          _getDayName(day),
+                          data,
+                          colors,
+                        );
+                      },
                     ),
-                    SizedBox(height: 14.h),
-                    // Session label legend
-                    Text(
-                      'Keterangan Sesi',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: colors.textPrimary,
-                        fontFamily: 'Poppins',
+                  ),
+                  SizedBox(height: 8.h),
+
+                  // Swipe hint
+                  Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.chevron_left,
+                          size: 16.sp,
+                          color: colors.textSecondary.withValues(alpha: 0.5),
+                        ),
+                        Text(
+                          t.riwayatAbsensi.geserHint,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            color: colors.textSecondary.withValues(alpha: 0.5),
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          size: 16.sp,
+                          color: colors.textSecondary.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+
+                  // Lihat Kalender button
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: GestureDetector(
+                      onTap: () {
+                        context.router.push(
+                          WaliSantriKalenderAbsensiRoute(
+                            name: widget.name,
+                            nis: widget.nis,
+                            programType: widget.programType,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: Border.all(
+                            color: colors.primary,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              t.riwayatAbsensi.lihatKalender,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colors.primary,
+                                fontFamily: 'Poppins',
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Icon(
+                              Icons.calendar_month,
+                              size: 20.sp,
+                              color: colors.primary,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    SizedBox(height: 8.h),
-                    Wrap(
-                      spacing: 16.w,
-                      runSpacing: 6.h,
-                      children: widget.programType == 'takhassus'
-                          ? [
-                              _buildSessionLabel('P', 'Pagi (Shubuh)', colors),
-                              _buildSessionLabel('D', 'Dhuha', colors),
-                              _buildSessionLabel('S', 'Siang', colors),
-                              _buildSessionLabel('A', 'Sore (Ashar)', colors),
-                              _buildSessionLabel(
-                                'M',
-                                'Malam (Maghrib)',
+                  ),
+                  SizedBox(height: 16.h),
+
+                  // Keterangan card
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(18.w),
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(14.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.riwayatAbsensi.keterangan,
+                            style: TextStyle(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 12.h),
+                          Row(
+                            children: [
+                              _buildLegendItem(
+                                colors.primary,
+                                t.riwayatAbsensi.hadirLabel,
                                 colors,
                               ),
-                            ]
-                          : [
-                              _buildSessionLabel('P', 'Pagi (Shubuh)', colors),
-                              _buildSessionLabel(
-                                'M',
-                                'Malam (Maghrib)',
+                              SizedBox(width: 40.w),
+                              _buildLegendItem(
+                                colors.yellow,
+                                t.riwayatAbsensi.sakitLabel,
                                 colors,
                               ),
                             ],
+                          ),
+                          SizedBox(height: 8.h),
+                          Row(
+                            children: [
+                              _buildLegendItem(
+                                colors.red,
+                                t.riwayatAbsensi.alphaLabel,
+                                colors,
+                              ),
+                              SizedBox(width: 40.w),
+                              _buildLegendItem(
+                                colors.blue,
+                                t.riwayatAbsensi.izinLabel,
+                                colors,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 14.h),
+                          Divider(
+                            color: colors.border.withValues(alpha: 0.5),
+                            height: 1,
+                          ),
+                          SizedBox(height: 14.h),
+                          Text(
+                            'Keterangan Sesi',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Wrap(
+                            spacing: 16.w,
+                            runSpacing: 6.h,
+                            children: widget.programType == 'takhassus'
+                                ? [
+                                    _buildSessionLabel(
+                                      'P',
+                                      'Pagi (Shubuh)',
+                                      colors,
+                                    ),
+                                    _buildSessionLabel('D', 'Dhuha', colors),
+                                    _buildSessionLabel('S', 'Siang', colors),
+                                    _buildSessionLabel(
+                                      'A',
+                                      'Sore (Ashar)',
+                                      colors,
+                                    ),
+                                    _buildSessionLabel(
+                                      'M',
+                                      'Malam (Maghrib)',
+                                      colors,
+                                    ),
+                                  ]
+                                : [
+                                    _buildSessionLabel(
+                                      'P',
+                                      'Pagi (Shubuh)',
+                                      colors,
+                                    ),
+                                    _buildSessionLabel(
+                                      'M',
+                                      'Malam (Maghrib)',
+                                      colors,
+                                    ),
+                                  ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: 100.h),
+                ],
               ),
             ),
-            SizedBox(height: 100.h), // Space for bottom nav bar
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -633,7 +723,6 @@ class _WaliSantriRiwayatAbsensiScreenState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Day name
           Text(
             dayName,
             style: TextStyle(
@@ -644,7 +733,6 @@ class _WaliSantriRiwayatAbsensiScreenState
             ),
           ),
           SizedBox(height: 2.h),
-          // Day number
           Text(
             day.toString().padLeft(2, '0'),
             style: TextStyle(
@@ -655,7 +743,7 @@ class _WaliSantriRiwayatAbsensiScreenState
             ),
           ),
           SizedBox(height: 8.h),
-          // Session badges
+          // Show all session badges; '-' if no data for that session
           ...List.generate(keys.length, (i) {
             return Column(
               children: [
@@ -669,7 +757,7 @@ class _WaliSantriRiwayatAbsensiScreenState
                   ),
                 ),
                 SizedBox(height: 2.h),
-                _buildStatusBadge(data[keys[i]] ?? 'H', colors),
+                _buildStatusBadge(data[keys[i]] ?? '-', colors),
                 if (i < keys.length - 1) SizedBox(height: 4.h),
               ],
             );

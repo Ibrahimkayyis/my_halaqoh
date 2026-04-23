@@ -440,6 +440,7 @@ class _TranslationsRiwayatAbsensiId implements TranslationsRiwayatAbsensiEn {
 	@override String get alphaLabel => 'Alpha';
 	@override String get izinLabel => 'Izin';
 	@override String get downloadLaporan => 'DOWNLOAD LAPORAN ABSENSI';
+	@override String get belumAdaData => 'Belum ada data absensi bulan ini';
 }
 
 // Path: kalenderAbsensi
@@ -959,6 +960,7 @@ extension on TranslationsId {
 			case 'riwayatAbsensi.alphaLabel': return 'Alpha';
 			case 'riwayatAbsensi.izinLabel': return 'Izin';
 			case 'riwayatAbsensi.downloadLaporan': return 'DOWNLOAD LAPORAN ABSENSI';
+			case 'riwayatAbsensi.belumAdaData': return 'Belum ada data absensi bulan ini';
 			case 'kalenderAbsensi.title': return 'Kalender Absensi';
 			case 'kalenderAbsensi.nisHalaqoh': return ({required Object nis, required Object halaqoh}) => 'NIS: ${nis}  •  Halaqoh ${halaqoh}';
 			case 'kalenderAbsensi.keterangan': return 'Keterangan';

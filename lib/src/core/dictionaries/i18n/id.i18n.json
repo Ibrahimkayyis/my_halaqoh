@@ -231,7 +231,8 @@
     "sakitLabel": "Sakit",
     "alphaLabel": "Alpha",
     "izinLabel": "Izin",
-    "downloadLaporan": "DOWNLOAD LAPORAN ABSENSI"
+    "downloadLaporan": "DOWNLOAD LAPORAN ABSENSI",
+    "belumAdaData": "Belum ada data absensi bulan ini"
   },
   "kalenderAbsensi": {
     "title": "Kalender Absensi",

@@ -231,7 +231,8 @@
     "sakitLabel": "Sick",
     "alphaLabel": "Absent",
     "izinLabel": "Excused",
-    "downloadLaporan": "DOWNLOAD ATTENDANCE REPORT"
+    "downloadLaporan": "DOWNLOAD ATTENDANCE REPORT",
+    "belumAdaData": "No attendance data for this month"
   },
   "kalenderAbsensi": {
     "title": "Attendance Calendar",

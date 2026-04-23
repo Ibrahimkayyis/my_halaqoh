@@ -835,6 +835,9 @@ class TranslationsRiwayatAbsensiEn {
 
 	/// en: 'DOWNLOAD ATTENDANCE REPORT'
 	String get downloadLaporan => 'DOWNLOAD ATTENDANCE REPORT';
+
+	/// en: 'No attendance data for this month'
+	String get belumAdaData => 'No attendance data for this month';
 }
 
 // Path: kalenderAbsensi
@@ -1662,6 +1665,7 @@ extension on Translations {
 			case 'riwayatAbsensi.alphaLabel': return 'Absent';
 			case 'riwayatAbsensi.izinLabel': return 'Excused';
 			case 'riwayatAbsensi.downloadLaporan': return 'DOWNLOAD ATTENDANCE REPORT';
+			case 'riwayatAbsensi.belumAdaData': return 'No attendance data for this month';
 			case 'kalenderAbsensi.title': return 'Attendance Calendar';
 			case 'kalenderAbsensi.nisHalaqoh': return ({required Object nis, required Object halaqoh}) => 'NIS: ${nis}  •  Halaqoh ${halaqoh}';
 			case 'kalenderAbsensi.keterangan': return 'Legend';
