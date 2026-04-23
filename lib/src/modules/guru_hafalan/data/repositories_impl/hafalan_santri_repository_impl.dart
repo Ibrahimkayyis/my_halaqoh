@@ -42,29 +42,12 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
 
   @override
   Stream<List<HafalanSantriModel>> watchHafalanBySantriId(String santriId, int month, int year) {
-    _fetchFromRemoteAndCache(santriId);
     return _local.watchHafalanBySantriId(santriId, month, year);
   }
 
   @override
   Stream<List<HafalanSantriModel>> watchAllZiyadahBySantriId(String santriId) {
-    _fetchFromRemoteAndCache(santriId);
     return _local.watchAllZiyadahBySantriId(santriId);
-  }
-
-  Future<void> _fetchFromRemoteAndCache(String santriId) async {
-    try {
-      final remoteData = await _remote.getBySantriId(santriId);
-      for (final model in remoteData) {
-        // Only overwrite local if it's not a pending local sync
-        // Alternatively, since remote is source of truth for other devices, just put it.
-        // For the Guru who wrote it, it might overwrite their local pending if ID matches, 
-        // but remote data would have same content. If ID is "local_...", it won't be from remote.
-        await _local.put(model.copyWith(isSynced: true));
-      }
-    } catch (e) {
-      _log.w('Failed to fetch remote hafalan for santri $santriId. Error: $e');
-    }
   }
 
   @override

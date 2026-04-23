@@ -346,9 +346,24 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
     OverallHafalanProgress? progressData,
   ) {
     final int juzTarget = target?.targetJuz ?? 0;
-    final int juzCompleted = progressData?.completedJuz ?? 0;
+    
+    double juzCompleted = 0.0;
+    if (progressData != null) {
+      for (final jp in progressData.juzProgressList) {
+        if (jp.totalAyat > 0) {
+          juzCompleted += jp.memorizedAyat / jp.totalAyat;
+        }
+      }
+    }
+
     final double progress = juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
     final int percent = (progress * 100).round();
+    
+    // Format juzCompleted to remove .0 if it's a whole number, otherwise show 2 decimals
+    String formatJuz(double v) {
+      if (v == 0) return '0';
+      return v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+    }
 
     return Container(
       width: double.infinity,
@@ -400,7 +415,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '$juzCompleted ',
+                      text: '${formatJuz(juzCompleted)} ',
                       style: TextStyle(
                         fontSize: 28.sp,
                         fontWeight: FontWeight.w800,
