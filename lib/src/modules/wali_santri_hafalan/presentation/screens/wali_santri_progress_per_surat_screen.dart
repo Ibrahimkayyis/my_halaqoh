@@ -14,9 +14,13 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_s
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
+import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/cubits/wali_santri_progress_hafalan_cubit.dart';
+
 /// Progress Hafalan Per Surat — shows surah-level progress for a specific juz (Wali Santri view)
 @RoutePage()
-class WaliSantriProgressPerSuratScreen extends StatelessWidget {
+class WaliSantriProgressPerSuratScreen extends StatefulWidget {
   final String name;
   final String nis;
   final int juzNumber;
@@ -28,18 +32,65 @@ class WaliSantriProgressPerSuratScreen extends StatelessWidget {
     required this.juzNumber,
   });
 
-  /// Build surah data for this juz from QuranService.
-  List<Map<String, dynamic>> _buildSurahData() {
-    final juz = QuranService.instance.getJuzByNumber(juzNumber);
+  @override
+  State<WaliSantriProgressPerSuratScreen> createState() =>
+      _WaliSantriProgressPerSuratScreenState();
+}
+
+class _WaliSantriProgressPerSuratScreenState
+    extends State<WaliSantriProgressPerSuratScreen> {
+  late WaliSantriProgressHafalanCubit _progressCubit;
+  String? _loadedLinkedDocId;
+
+  @override
+  void initState() {
+    super.initState();
+    _progressCubit = sl<WaliSantriProgressHafalanCubit>();
+  }
+
+  @override
+  void dispose() {
+    _progressCubit.close();
+    super.dispose();
+  }
+
+  void _checkAndLoadData(String linkedDocId) {
+    if (linkedDocId.isNotEmpty && linkedDocId != _loadedLinkedDocId) {
+      _loadedLinkedDocId = linkedDocId;
+      _progressCubit.watchProgress(linkedDocId);
+    }
+  }
+
+  /// Build surah data for this juz from QuranService, combining it with real progress.
+  List<Map<String, dynamic>> _buildSurahData(OverallHafalanProgress? progressData) {
+    final juz = QuranService.instance.getJuzByNumber(widget.juzNumber);
     if (juz == null) return [];
+
+    JuzProgress? juzProgress;
+    if (progressData != null) {
+      try {
+        juzProgress = progressData.juzProgressList
+            .firstWhere((j) => j.juzNumber == widget.juzNumber);
+      } catch (_) {}
+    }
 
     return juz.surahs.map((seg) {
       final surah = QuranService.instance.getSurahById(seg.surahId);
       final totalAyat = seg.ayatEnd - seg.ayatStart + 1;
+      
+      int memorized = 0;
+      if (juzProgress != null) {
+        try {
+          final surahProg = juzProgress.surahProgressList
+              .firstWhere((sp) => sp.surahId == seg.surahId);
+          memorized = surahProg.memorizedAyat;
+        } catch (_) {}
+      }
+
       return {
         'name': surah?.name ?? 'Unknown',
         'totalAyat': totalAyat,
-        'memorized': 0, // Real hafalan progress — will be integrated when hafalan recording data is available
+        'memorized': memorized,
       };
     }).toList();
   }
@@ -47,7 +98,6 @@ class WaliSantriProgressPerSuratScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final surahs = _buildSurahData();
 
     // Look up the linked santri for real profile data
     final authState = context.watch<AuthCubit>().state;
@@ -61,6 +111,9 @@ class WaliSantriProgressPerSuratScreen extends StatelessWidget {
       orElse: () {},
     );
 
+    // Fetch data if needed
+    _checkAndLoadData(linkedDocId);
+
     SantriModel? santri;
     santriState.maybeWhen(
       loaded: (list) {
@@ -68,83 +121,98 @@ class WaliSantriProgressPerSuratScreen extends StatelessWidget {
           santri = list.firstWhere((s) => s.id == linkedDocId);
         } catch (_) {
           try {
-            santri = list.firstWhere((s) => s.nis == nis);
+            santri = list.firstWhere((s) => s.nis == widget.nis);
           } catch (_) {}
         }
       },
       orElse: () {},
     );
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // AppBar
-            Padding(
-              padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 24.w),
-              child: Row(
+    return BlocProvider.value(
+      value: _progressCubit,
+      child: BlocBuilder<WaliSantriProgressHafalanCubit, WaliSantriProgressHafalanState>(
+        builder: (context, progressState) {
+          OverallHafalanProgress? progressData;
+          progressState.maybeWhen(
+            loaded: (data) => progressData = data,
+            orElse: () {},
+          );
+
+          final surahs = _buildSurahData(progressData);
+
+          return Scaffold(
+            backgroundColor: colors.background,
+            body: SafeArea(
+              child: Column(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: colors.textPrimary),
-                    onPressed: () => Navigator.of(context).pop(),
+                  // AppBar
+                  Padding(
+                    padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 24.w),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          'Juz ${widget.juzNumber}',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textPrimary,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    'Juz $juzNumber',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                      fontFamily: 'Poppins',
+                  SizedBox(height: 8.h),
+
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Green gradient profile card
+                          _buildProfileCard(context, colors, santri),
+                          SizedBox(height: 20.h),
+
+                          // Progress Per Surat header
+                          Text(
+                            t.progressHafalanPerSurat.title,
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            t.progressHafalanPerSurat.detailJuz(juz: '${widget.juzNumber}'),
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w400,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 14.h),
+
+                          // Surah cards
+                          ...surahs.map((surah) => _buildSurahCard(surah, colors)),
+                          SizedBox(height: 24.h),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 8.h),
-
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Green gradient profile card
-                    _buildProfileCard(context, colors, santri),
-                    SizedBox(height: 20.h),
-
-                    // Progress Per Surat header
-                    Text(
-                      t.progressHafalanPerSurat.title,
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w700,
-                        color: colors.textPrimary,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      t.progressHafalanPerSurat.detailJuz(juz: '$juzNumber'),
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w400,
-                        color: colors.textSecondary,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    SizedBox(height: 14.h),
-
-                    // Surah cards
-                    ...surahs.map((surah) => _buildSurahCard(surah, colors)),
-                    SizedBox(height: 24.h),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -152,8 +220,8 @@ class WaliSantriProgressPerSuratScreen extends StatelessWidget {
   Widget _buildProfileCard(
       BuildContext context, AppColorSet colors, SantriModel? santri) {
     // Use real santri data, fall back to route params
-    final displayName = santri?.nama ?? name;
-    final displayNis = santri?.nis ?? nis;
+    final displayName = santri?.nama ?? widget.name;
+    final displayNis = santri?.nis ?? widget.nis;
 
     // Look up halaqoh for kelas info
     final halaqohState = context.watch<HalaqohCubit>().state;

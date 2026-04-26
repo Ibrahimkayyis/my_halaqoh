@@ -17,7 +17,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_ha
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 import 'package:intl/intl.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
-import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/cubits/wali_santri_progress_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_cubit.dart';
@@ -40,7 +40,7 @@ class WaliSantriDashboardScreen extends StatefulWidget {
 }
 
 class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
-  late ProgressHafalanCubit _progressHafalanCubit;
+  late WaliSantriProgressHafalanCubit _progressHafalanCubit;
   late AbsensiCubit _absensiCubit;
   String? _loadedLinkedDocId;
   String? _loadedHalaqohId;
@@ -48,7 +48,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _progressHafalanCubit = sl<ProgressHafalanCubit>();
+    _progressHafalanCubit = sl<WaliSantriProgressHafalanCubit>();
     _absensiCubit = sl<AbsensiCubit>();
   }
 
@@ -196,7 +196,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: GestureDetector(
                 onTap: () => widget.onNavigateToTab?.call(1),
-                child: BlocBuilder<ProgressHafalanCubit, ProgressHafalanState>(
+                child: BlocBuilder<WaliSantriProgressHafalanCubit, WaliSantriProgressHafalanState>(
                   builder: (context, state) {
                     OverallHafalanProgress? progressData;
                     state.maybeWhen(

@@ -4,6 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/domain/models/wali_santri_hafalan_model.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/cubits/wali_santri_riwayat_hafalan_cubit.dart';
 
 /// Mutaba'ah Santri â€” daily memorization log split into Hafalan Baru & Murajaah tables
 @RoutePage()
@@ -18,148 +23,29 @@ class WaliSantriMutabaahScreen extends StatefulWidget {
   });
 
   @override
-  State<WaliSantriMutabaahScreen> createState() => _WaliSantriMutabaahScreenState();
+  State<WaliSantriMutabaahScreen> createState() =>
+      _WaliSantriMutabaahScreenState();
 }
 
 class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
-  int _currentMonth = 11; // November
-  int _currentYear = 2025;
+  int _currentMonth = DateTime.now().month;
+  int _currentYear = DateTime.now().year;
 
-
-
-  // Dummy hafalan baru records
-  final List<Map<String, dynamic>> _hafalanBaruRecords = [
-    {
-      'dayOfWeek': 'Sen',
-      'date': '01/11',
-      'surah': 'Al-Mulk',
-      'ayat': '1-10',
-      'nilai': 95,
-    },
-    {
-      'dayOfWeek': 'Rab',
-      'date': '03/11',
-      'surah': 'Al-Mulk',
-      'ayat': '11-20',
-      'nilai': 90,
-    },
-    {
-      'dayOfWeek': 'Jum',
-      'date': '05/11',
-      'surah': 'Al-Mulk',
-      'ayat': '21-30',
-      'nilai': 65,
-    },
-    {
-      'dayOfWeek': 'Sen',
-      'date': '08/11',
-      'surah': 'Al-Qalam',
-      'ayat': '1-15',
-      'nilai': 88,
-    },
-    {
-      'dayOfWeek': 'Rab',
-      'date': '10/11',
-      'surah': 'Al-Qalam',
-      'ayat': '16-30',
-      'nilai': 92,
-    },
-    {
-      'dayOfWeek': 'Jum',
-      'date': '12/11',
-      'surah': 'Al-Haqqah',
-      'ayat': '1-12',
-      'nilai': 78,
-    },
-    {
-      'dayOfWeek': 'Sen',
-      'date': '15/11',
-      'surah': 'Al-Haqqah',
-      'ayat': '13-25',
-      'nilai': 85,
-    },
-    {
-      'dayOfWeek': 'Rab',
-      'date': '17/11',
-      'surah': "Al-Ma'arij",
-      'ayat': '1-10',
-      'nilai': 90,
-    },
-    {
-      'dayOfWeek': 'Jum',
-      'date': '19/11',
-      'surah': 'Nuh',
-      'ayat': '1-14',
-      'nilai': 87,
-    },
-    {
-      'dayOfWeek': 'Sen',
-      'date': '22/11',
-      'surah': 'Nuh',
-      'ayat': '15-28',
-      'nilai': 93,
-    },
+  final List<String> _dayNames = [
+    'Sen',
+    'Sel',
+    'Rab',
+    'Kam',
+    'Jum',
+    'Sab',
+    'Aha',
   ];
 
-  // Dummy murajaah records
-  final List<Map<String, dynamic>> _murajaahRecords = [
-    {
-      'dayOfWeek': 'Sel',
-      'date': '02/11',
-      'surah': 'An-Naba',
-      'ayat': '1-40',
-      'nilai': 80,
-    },
-    {
-      'dayOfWeek': 'Kam',
-      'date': '04/11',
-      'surah': 'Abasa',
-      'ayat': '1-42',
-      'nilai': 92,
-    },
-    {
-      'dayOfWeek': 'Sab',
-      'date': '06/11',
-      'surah': 'At-Takwir',
-      'ayat': '1-29',
-      'nilai': 98,
-    },
-    {
-      'dayOfWeek': 'Sel',
-      'date': '09/11',
-      'surah': 'Al-Mulk',
-      'ayat': '1-30',
-      'nilai': 94,
-    },
-    {
-      'dayOfWeek': 'Kam',
-      'date': '11/11',
-      'surah': 'An-Naba',
-      'ayat': '1-40',
-      'nilai': 88,
-    },
-    {
-      'dayOfWeek': 'Sab',
-      'date': '13/11',
-      'surah': 'Al-Qalam',
-      'ayat': '1-30',
-      'nilai': 91,
-    },
-    {
-      'dayOfWeek': 'Sel',
-      'date': '16/11',
-      'surah': 'Al-Haqqah',
-      'ayat': '1-12',
-      'nilai': 95,
-    },
-    {
-      'dayOfWeek': 'Kam',
-      'date': '18/11',
-      'surah': "Al-Ma'arij",
-      'ayat': '1-10',
-      'nilai': 86,
-    },
-  ];
+  String _getDayName(int day) {
+    final date = DateTime(_currentYear, _currentMonth, day);
+    // DateTime.weekday returns 1 for Monday to 7 for Sunday
+    return _dayNames[date.weekday - 1];
+  }
 
   void _prevMonth() {
     setState(() {
@@ -169,6 +55,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
         _currentYear--;
       }
     });
+    _fetchData();
   }
 
   void _nextMonth() {
@@ -179,6 +66,33 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
         _currentYear++;
       }
     });
+    _fetchData();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchData();
+    });
+  }
+
+  void _fetchData() {
+    final authState = context.read<AuthCubit>().state;
+    String linkedDocId = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+    if (linkedDocId.isNotEmpty) {
+      context.read<WaliSantriRiwayatHafalanCubit>().watchRiwayat(
+        linkedDocId,
+        _currentMonth,
+        _currentYear,
+      );
+    }
   }
 
   /// Score badge color
@@ -197,6 +111,22 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final riwayatState = context.watch<WaliSantriRiwayatHafalanCubit>().state;
+
+    List<WaliSantriHafalanModel> hafalanBaruRecords = [];
+    List<WaliSantriHafalanModel> murajaahRecords = [];
+    bool isLoading = false;
+
+    riwayatState.maybeWhen(
+      loading: () => isLoading = true,
+      loaded: (records) {
+        hafalanBaruRecords = records
+            .where((r) => r.jenis == 'Ziyadah')
+            .toList();
+        murajaahRecords = records.where((r) => r.jenis == 'Murajaah').toList();
+      },
+      orElse: () {},
+    );
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -260,17 +190,41 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                     ),
                     SizedBox(height: 20.h),
 
-                    // â”€â”€ Hafalan Baru section â”€â”€
-                    _buildSectionHeader(t.mutabaahSantri.hafalanBaru, colors),
-                    SizedBox(height: 10.h),
-                    _buildDataTable(_hafalanBaruRecords, colors),
-                    SizedBox(height: 28.h),
+                    if (isLoading)
+                      const Center(child: CircularProgressIndicator())
+                    else ...[
+                      // ── Hafalan Baru section ──
+                      _buildSectionHeader(t.mutabaahSantri.hafalanBaru, colors),
+                      SizedBox(height: 10.h),
+                      if (hafalanBaruRecords.isEmpty)
+                        Text(
+                          'Tidak ada hafalan baru bulan ini',
+                          style: TextStyle(
+                            color: colors.textSecondary,
+                            fontFamily: 'Poppins',
+                            fontSize: 13.sp,
+                          ),
+                        )
+                      else
+                        _buildDataTable(hafalanBaruRecords, colors),
+                      SizedBox(height: 28.h),
 
-                    // â”€â”€ Murajaah section â”€â”€
-                    _buildSectionHeader(t.mutabaahSantri.murajaah, colors),
-                    SizedBox(height: 10.h),
-                    _buildDataTable(_murajaahRecords, colors),
-                    SizedBox(height: 24.h),
+                      // ── Murajaah section ──
+                      _buildSectionHeader(t.mutabaahSantri.murajaah, colors),
+                      SizedBox(height: 10.h),
+                      if (murajaahRecords.isEmpty)
+                        Text(
+                          'Tidak ada murajaah bulan ini',
+                          style: TextStyle(
+                            color: colors.textSecondary,
+                            fontFamily: 'Poppins',
+                            fontSize: 13.sp,
+                          ),
+                        )
+                      else
+                        _buildDataTable(murajaahRecords, colors),
+                      SizedBox(height: 24.h),
+                    ],
                   ],
                 ),
               ),
@@ -309,7 +263,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
 
   /// Data table matching the mockup layout
   Widget _buildDataTable(
-    List<Map<String, dynamic>> records,
+    List<WaliSantriHafalanModel> records,
     AppColorSet colors,
   ) {
     return Container(
@@ -370,7 +324,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                   SizedBox(
                     width: 50.w,
                     child: Text(
-                      record['dayOfWeek'],
+                      _getDayName(record.tanggalSetoran.day),
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
@@ -383,7 +337,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                   SizedBox(
                     width: 50.w,
                     child: Text(
-                      record['date'],
+                      '${record.tanggalSetoran.day.toString().padLeft(2, '0')}/${record.tanggalSetoran.month.toString().padLeft(2, '0')}',
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
@@ -395,7 +349,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                   // SURAT
                   Expanded(
                     child: Text(
-                      record['surah'],
+                      record.surahName,
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
@@ -408,7 +362,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                   SizedBox(
                     width: 55.w,
                     child: Text(
-                      record['ayat'],
+                      '${record.ayatMulai}-${record.ayatSelesai}',
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
@@ -417,7 +371,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                       ),
                     ),
                   ),
-                  // NILAI badge
+                  // NILAI badge (Using nilaiKelancaran as the primary score)
                   SizedBox(
                     width: 45.w,
                     child: Center(
@@ -426,17 +380,17 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                         height: 36.w,
                         decoration: BoxDecoration(
                           color: _scoreColor(
-                            record['nilai'],
+                            record.nilaiKelancaran,
                           ).withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          '${record['nilai']}',
+                          '${record.nilaiKelancaran}',
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
-                            color: _scoreTextColor(record['nilai']),
+                            color: _scoreTextColor(record.nilaiKelancaran),
                             fontFamily: 'Poppins',
                           ),
                         ),
@@ -476,4 +430,3 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
     return text;
   }
 }
-

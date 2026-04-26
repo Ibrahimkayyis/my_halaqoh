@@ -19,9 +19,13 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_st
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
+import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/cubits/wali_santri_progress_hafalan_cubit.dart';
+
 /// Progress Hafalan Per Juz — shows juz-level progress cards for a santri (Wali Santri view)
 @RoutePage()
-class WaliSantriProgressPerJuzScreen extends StatelessWidget {
+class WaliSantriProgressPerJuzScreen extends StatefulWidget {
   final String name;
   final String nis;
 
@@ -30,6 +34,35 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
     required this.name,
     required this.nis,
   });
+
+  @override
+  State<WaliSantriProgressPerJuzScreen> createState() =>
+      _WaliSantriProgressPerJuzScreenState();
+}
+
+class _WaliSantriProgressPerJuzScreenState
+    extends State<WaliSantriProgressPerJuzScreen> {
+  late WaliSantriProgressHafalanCubit _progressCubit;
+  String? _loadedLinkedDocId;
+
+  @override
+  void initState() {
+    super.initState();
+    _progressCubit = sl<WaliSantriProgressHafalanCubit>();
+  }
+
+  @override
+  void dispose() {
+    _progressCubit.close();
+    super.dispose();
+  }
+
+  void _checkAndLoadData(String linkedDocId) {
+    if (linkedDocId.isNotEmpty && linkedDocId != _loadedLinkedDocId) {
+      _loadedLinkedDocId = linkedDocId;
+      _progressCubit.watchProgress(linkedDocId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,16 +82,17 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
       orElse: () {},
     );
 
+    // Fetch data if needed
+    _checkAndLoadData(linkedDocId);
+
     SantriModel? santri;
     santriState.maybeWhen(
       loaded: (list) {
         try {
-          // Primary: find by linked document ID (wali's linkedDocId → santri.id)
           santri = list.firstWhere((s) => s.id == linkedDocId);
         } catch (_) {
           try {
-            // Fallback: find by NIS
-            santri = list.firstWhere((s) => s.nis == nis);
+            santri = list.firstWhere((s) => s.nis == widget.nis);
           } catch (_) {}
         }
       },
@@ -80,106 +114,132 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
       orElse: () {},
     );
 
-    // Build juz display data from target's juzList + QuranService (filter out invalid juz numbers)
-    final juzList = (target?.juzList ?? []).where((j) => j >= 1 && j <= 30).toList();
-    final juzDisplayData = juzList.map((juzNum) {
-      final juzModel = QuranService.instance.getJuzByNumber(juzNum);
-      return {
-        'juz': juzNum,
-        'total': juzModel?.surahs.length ?? 0,
-        'completed': 0, // Real hafalan progress — will be integrated when hafalan recording data is available
-      };
-    }).toList()
-      ..sort((a, b) => (b['juz'] as int).compareTo(a['juz'] as int));
+    return BlocProvider.value(
+      value: _progressCubit,
+      child: BlocBuilder<WaliSantriProgressHafalanCubit, WaliSantriProgressHafalanState>(
+        builder: (context, progressState) {
+          OverallHafalanProgress? progressData;
+          progressState.maybeWhen(
+            loaded: (data) => progressData = data,
+            orElse: () {},
+          );
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // AppBar
-            Padding(
-              padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 24.w),
-              child: Row(
+          // Build juz display data from target's juzList + QuranService
+          final juzList = (target?.juzList ?? []).where((j) => j >= 1 && j <= 30).toList();
+          final juzDisplayData = juzList.map((juzNum) {
+            final juzModel = QuranService.instance.getJuzByNumber(juzNum);
+            int totalAyat = juzModel?.totalAyat ?? 0;
+            int memorizedAyat = 0;
+
+            if (progressData != null) {
+              final juzProgress = progressData!.juzProgressList
+                  .where((jp) => jp.juzNumber == juzNum)
+                  .firstOrNull;
+              if (juzProgress != null) {
+                totalAyat = juzProgress.totalAyat;
+                memorizedAyat = juzProgress.memorizedAyat;
+              }
+            }
+
+            return {
+              'juz': juzNum,
+              'total': totalAyat,
+              'completed': memorizedAyat,
+            };
+          }).toList()
+            ..sort((a, b) => (b['juz'] as int).compareTo(a['juz'] as int));
+
+          return Scaffold(
+            backgroundColor: colors.background,
+            body: SafeArea(
+              child: Column(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: colors.textPrimary),
-                    onPressed: () => Navigator.of(context).pop(),
+                  // AppBar
+                  Padding(
+                    padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 24.w),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          t.progressHafalanPerJuz.title,
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textPrimary,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    t.progressHafalanPerJuz.title,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                      fontFamily: 'Poppins',
+                  SizedBox(height: 8.h),
+
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Green gradient profile card
+                          _buildProfileCard(context, colors, santri),
+                          SizedBox(height: 20.h),
+
+                          // Target Hafalan header
+                          Text(
+                            t.progressHafalanPerJuz.targetHafalan,
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            t.progressHafalanPerJuz.pilihJuz,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w400,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 14.h),
+
+                          // Juz cards — empty state if no targets
+                          if (juzDisplayData.isEmpty)
+                            Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 40.h),
+                                child: Text(
+                                  'Belum ada target hafalan yang ditetapkan.',
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    color: colors.textSecondary,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            )
+                          else
+                            ...juzDisplayData.map(
+                              (juz) => _buildJuzCard(context, juz, colors),
+                            ),
+                          SizedBox(height: 24.h),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 8.h),
-
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Green gradient profile card
-                    _buildProfileCard(context, colors, santri),
-                    SizedBox(height: 20.h),
-
-                    // Target Hafalan header
-                    Text(
-                      t.progressHafalanPerJuz.targetHafalan,
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w700,
-                        color: colors.textPrimary,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      t.progressHafalanPerJuz.pilihJuz,
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w400,
-                        color: colors.textSecondary,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    SizedBox(height: 14.h),
-
-                    // Juz cards — empty state if no targets
-                    if (juzDisplayData.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 40.h),
-                          child: Text(
-                            'Belum ada target hafalan yang ditetapkan.',
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              color: colors.textSecondary,
-                              fontFamily: 'Poppins',
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      )
-                    else
-                      ...juzDisplayData.map(
-                        (juz) => _buildJuzCard(context, juz, colors),
-                      ),
-                    SizedBox(height: 24.h),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -187,8 +247,8 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
   Widget _buildProfileCard(
       BuildContext context, AppColorSet colors, SantriModel? santri) {
     // Use real santri data, fall back to route params
-    final displayName = santri?.nama ?? name;
-    final displayNis = santri?.nis ?? nis;
+    final displayName = santri?.nama ?? widget.name;
+    final displayNis = santri?.nis ?? widget.nis;
 
     // Look up halaqoh for kelas info
     final halaqohState = context.watch<HalaqohCubit>().state;
@@ -289,8 +349,8 @@ class WaliSantriProgressPerJuzScreen extends StatelessWidget {
       onTap: () {
         context.router.push(
           WaliSantriProgressPerSuratRoute(
-            name: name,
-            nis: nis,
+            name: widget.name,
+            nis: widget.nis,
             juzNumber: juzNum,
           ),
         );

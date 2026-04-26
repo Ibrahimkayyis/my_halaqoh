@@ -76,6 +76,18 @@ import 'package:my_halaqoh/src/modules/guru_profile/domain/repositories/guru_pro
 // Guru Profile — Presentation Layer
 import 'package:my_halaqoh/src/modules/guru_profile/presentation/cubits/guru_profile_cubit.dart';
 
+// Wali Santri Hafalan — Data Layer
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/data/datasources/remote/source/abstract/wali_santri_hafalan_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/data/datasources/remote/source/implementation/wali_santri_hafalan_remote_datasource_impl.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/data/repositories_impl/wali_santri_hafalan_repository_impl.dart';
+
+// Wali Santri Hafalan — Domain Layer
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/domain/repositories/wali_santri_hafalan_repository.dart';
+
+// Wali Santri Hafalan — Presentation Layer
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/cubits/wali_santri_progress_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/cubits/wali_santri_riwayat_hafalan_cubit.dart';
+
 final sl = GetIt.instance;
 
 /// Call this in main.dart before runApp()
@@ -215,4 +227,18 @@ Future<void> initDependencies() async {
 
   // ── Guru Profile — Cubit (Factory — scoped per screen) ─────────────────────
   sl.registerFactory<GuruProfileCubit>(() => GuruProfileCubit(sl()));
+
+  // ── Wali Santri Hafalan — DataSources ──────────────────────────────────────
+  sl.registerLazySingleton<WaliSantriHafalanRemoteDataSource>(
+    () => WaliSantriHafalanRemoteDataSourceImpl(sl()),
+  );
+
+  // ── Wali Santri Hafalan — Repository ───────────────────────────────────────
+  sl.registerLazySingleton<WaliSantriHafalanRepository>(
+    () => WaliSantriHafalanRepositoryImpl(sl()),
+  );
+
+  // ── Wali Santri Hafalan — Cubits ───────────────────────────────────────────
+  sl.registerFactory<WaliSantriRiwayatHafalanCubit>(() => WaliSantriRiwayatHafalanCubit(sl()));
+  sl.registerFactory<WaliSantriProgressHafalanCubit>(() => WaliSantriProgressHafalanCubit(sl()));
 }
