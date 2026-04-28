@@ -233,12 +233,22 @@ class _WaliSantriRiwayatHafalanScreenState
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: Colors.white.withValues(alpha: 0.2),
+                                    image: mySantri?.profilePicture != null
+                                        ? DecorationImage(
+                                            image: NetworkImage(
+                                              mySantri!.profilePicture!,
+                                            ),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : null,
                                   ),
-                                  child: Icon(
-                                    Icons.person,
-                                    size: 26.sp,
-                                    color: Colors.white,
-                                  ),
+                                  child: mySantri?.profilePicture == null
+                                      ? Icon(
+                                          Icons.person,
+                                          size: 26.sp,
+                                          color: Colors.white,
+                                        )
+                                      : null,
                                 ),
                                 SizedBox(width: 14.w),
                                 Expanded(

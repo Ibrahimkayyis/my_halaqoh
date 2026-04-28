@@ -28,6 +28,16 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.linkedDocId == guruId;
       allow create, delete: if isAdmin();
     }
+
+    // Santri Profile: allow santri (wali santri) to update their own document
+    // Only profile-editable fields are changed from the app; admin-managed fields
+    // (nis, kelas, program, halaqohId, authUid) are never sent as writes from the client.
+    match /santri/{santriId} {
+      allow read: if isAuthenticated();
+      allow update: if isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.linkedDocId == santriId;
+      allow create, delete: if isAdmin();
+    }
     
     // Exception: Users can read their own metadata
     match /users/{userId} {

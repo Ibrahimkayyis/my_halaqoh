@@ -1,193 +1,301 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/cubits/wali_santri_profile_cubit.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/cubits/wali_santri_profile_state.dart';
 
-/// Ubah Password Screen â€” old password, new password, confirm, security tips
+/// Ubah Password Screen — old password, new password, confirm, security tips.
+/// Integrates with Firebase Auth via WaliSantriProfileCubit for password change.
 @RoutePage()
 class WaliSantriUbahPasswordScreen extends StatefulWidget {
   const WaliSantriUbahPasswordScreen({super.key});
 
   @override
-  State<WaliSantriUbahPasswordScreen> createState() => _WaliSantriUbahPasswordScreenState();
+  State<WaliSantriUbahPasswordScreen> createState() =>
+      _WaliSantriUbahPasswordScreenState();
 }
 
-class _WaliSantriUbahPasswordScreenState extends State<WaliSantriUbahPasswordScreen> {
+class _WaliSantriUbahPasswordScreenState
+    extends State<WaliSantriUbahPasswordScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _oldPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  late final WaliSantriProfileCubit _profileCubit;
+
   bool _obscureOld = true;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileCubit = sl<WaliSantriProfileCubit>();
+  }
 
   @override
   void dispose() {
     _oldPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
+    _profileCubit.close();
     super.dispose();
+  }
+
+  /// Validate and submit password change
+  Future<void> _onSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_isSubmitting) return;
+
+    setState(() => _isSubmitting = true);
+
+    final success = await _profileCubit.changePassword(
+      currentPassword: _oldPasswordController.text,
+      newPassword: _newPasswordController.text,
+    );
+
+    if (!mounted) return;
+
+    setState(() => _isSubmitting = false);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Password berhasil diubah',
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp),
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(bottom: 16.h, left: 16.w, right: 16.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+        ),
+      );
+      Navigator.of(context).pop();
+    } else {
+      // Extract error message from cubit state
+      final errorMessage = _profileCubit.state.maybeWhen(
+        error: (msg) => msg,
+        orElse: () => 'Gagal mengubah password',
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            errorMessage,
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp),
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(bottom: 16.h, left: 16.w, right: 16.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // AppBar
-            Padding(
-              padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 24.w),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: colors.textPrimary),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    t.ubahPassword.title,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 12.h),
-
-                    // Subtitle
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w),
-                      child: Text(
-                        t.ubahPassword.subtitle,
-                        textAlign: TextAlign.center,
+    return BlocProvider.value(
+      value: _profileCubit,
+      child: Scaffold(
+        backgroundColor: colors.background,
+        body: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                // AppBar
+                Padding(
+                  padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 24.w),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      SizedBox(width: 4.w),
+                      Text(
+                        t.ubahPassword.title,
                         style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w400,
-                          color: colors.textSecondary,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                          color: colors.textPrimary,
                           fontFamily: 'Poppins',
                         ),
                       ),
-                    ),
-                    SizedBox(height: 24.h),
+                    ],
+                  ),
+                ),
 
-                    // Kata Sandi Lama
-                    _buildPasswordField(
-                      colors,
-                      label: t.ubahPassword.kataSandiLama,
-                      controller: _oldPasswordController,
-                      obscure: _obscureOld,
-                      prefixIcon: Icons.lock_outline,
-                      onToggle: () =>
-                          setState(() => _obscureOld = !_obscureOld),
-                    ),
-                    SizedBox(height: 18.h),
+                // Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 12.h),
 
-                    // Kata Sandi Baru
-                    _buildPasswordField(
-                      colors,
-                      label: t.ubahPassword.kataSandiBaru,
-                      controller: _newPasswordController,
-                      obscure: _obscureNew,
-                      prefixIcon: Icons.lock_outline,
-                      onToggle: () =>
-                          setState(() => _obscureNew = !_obscureNew),
-                    ),
-                    SizedBox(height: 18.h),
-
-                    // Konfirmasi Kata Sandi Baru
-                    _buildPasswordField(
-                      colors,
-                      label: t.ubahPassword.konfirmasiKataSandiBaru,
-                      controller: _confirmPasswordController,
-                      obscure: _obscureConfirm,
-                      prefixIcon: Icons.check_circle_outline,
-                      onToggle: () =>
-                          setState(() => _obscureConfirm = !_obscureConfirm),
-                    ),
-                    SizedBox(height: 24.h),
-
-                    // Syarat Keamanan card
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(16.w),
-                      decoration: BoxDecoration(
-                        color: colors.primary.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            t.ubahPassword.syaratKeamanan,
+                        // Subtitle
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8.w),
+                          child: Text(
+                            t.ubahPassword.subtitle,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
-                              color: colors.primary,
+                              fontWeight: FontWeight.w400,
+                              color: colors.textSecondary,
                               fontFamily: 'Poppins',
                             ),
                           ),
-                          SizedBox(height: 8.h),
-                          _buildSecurityItem(
-                            t.ubahPassword.minimal8Karakter,
-                            colors,
-                          ),
-                          SizedBox(height: 4.h),
-                          _buildSecurityItem(
-                            t.ubahPassword.kombinasiHurufDanAngka,
-                            colors,
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 32.h),
-                  ],
-                ),
-              ),
-            ),
+                        ),
+                        SizedBox(height: 24.h),
 
-            // Ubah Kata Sandi button
-            Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: PrimaryButton(
-                  width: double.infinity,
-                  height: 52.h,
-                  onPressed: () {
-                    // TODO: Submit password change
-                    Navigator.of(context).pop();
-                  },
-                  label: t.ubahPassword.ubahKataSandi,
-                  borderRadius: 26.r,
+                        // Kata Sandi Lama
+                        _buildPasswordField(
+                          colors,
+                          label: t.ubahPassword.kataSandiLama,
+                          controller: _oldPasswordController,
+                          obscure: _obscureOld,
+                          prefixIcon: Icons.lock_outline,
+                          onToggle: () =>
+                              setState(() => _obscureOld = !_obscureOld),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Password lama wajib diisi';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 18.h),
+
+                        // Kata Sandi Baru
+                        _buildPasswordField(
+                          colors,
+                          label: t.ubahPassword.kataSandiBaru,
+                          controller: _newPasswordController,
+                          obscure: _obscureNew,
+                          prefixIcon: Icons.lock_outline,
+                          onToggle: () =>
+                              setState(() => _obscureNew = !_obscureNew),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Password baru wajib diisi';
+                            }
+                            if (value.length < 8) {
+                              return 'Minimal 8 karakter';
+                            }
+                            final hasLetter =
+                                RegExp(r'[a-zA-Z]').hasMatch(value);
+                            final hasDigit = RegExp(r'[0-9]').hasMatch(value);
+                            if (!hasLetter || !hasDigit) {
+                              return 'Harus kombinasi huruf dan angka';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 18.h),
+
+                        // Konfirmasi Kata Sandi Baru
+                        _buildPasswordField(
+                          colors,
+                          label: t.ubahPassword.konfirmasiKataSandiBaru,
+                          controller: _confirmPasswordController,
+                          obscure: _obscureConfirm,
+                          prefixIcon: Icons.check_circle_outline,
+                          onToggle: () =>
+                              setState(() => _obscureConfirm = !_obscureConfirm),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Konfirmasi password wajib diisi';
+                            }
+                            if (value != _newPasswordController.text) {
+                              return 'Password tidak cocok';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 24.h),
+
+                        // Syarat Keamanan card
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t.ubahPassword.syaratKeamanan,
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.primary,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              _buildSecurityItem(
+                                t.ubahPassword.minimal8Karakter,
+                                colors,
+                              ),
+                              SizedBox(height: 4.h),
+                              _buildSecurityItem(
+                                t.ubahPassword.kombinasiHurufDanAngka,
+                                colors,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 32.h),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+
+                // Ubah Kata Sandi button
+                Padding(
+                  padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 52.h,
+                    child: _isSubmitting
+                        ? const Center(child: CircularProgressIndicator())
+                        : PrimaryButton(
+                            width: double.infinity,
+                            height: 52.h,
+                            onPressed: _onSubmit,
+                            label: t.ubahPassword.ubahKataSandi,
+                            borderRadius: 26.r,
+                          ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  /// Password field with prefix icon, obscure toggle, and label
+  /// Password field with prefix icon, obscure toggle, label, and validator
   Widget _buildPasswordField(
     AppColorSet colors, {
     required String label,
@@ -195,6 +303,7 @@ class _WaliSantriUbahPasswordScreenState extends State<WaliSantriUbahPasswordScr
     required bool obscure,
     required IconData prefixIcon,
     required VoidCallback onToggle,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,6 +321,7 @@ class _WaliSantriUbahPasswordScreenState extends State<WaliSantriUbahPasswordScr
         TextFormField(
           controller: controller,
           obscureText: obscure,
+          validator: validator,
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
@@ -250,6 +360,14 @@ class _WaliSantriUbahPasswordScreenState extends State<WaliSantriUbahPasswordScr
               borderRadius: BorderRadius.circular(14.r),
               borderSide: BorderSide(color: colors.primary, width: 1.5),
             ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14.r),
+              borderSide: BorderSide(color: colors.error, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14.r),
+              borderSide: BorderSide(color: colors.error, width: 1.5),
+            ),
           ),
         ),
       ],
@@ -281,4 +399,3 @@ class _WaliSantriUbahPasswordScreenState extends State<WaliSantriUbahPasswordScr
     );
   }
 }
-

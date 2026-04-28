@@ -188,6 +188,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
                   ? 'Kelas ${myHalaqoh!.kelas}${myHalaqoh!.program} | Halaqoh ${myHalaqoh!.nama}'
                   : 'Belum terdaftar di Halaqoh mana pun',
               guruName: myHalaqoh?.guruNama,
+              profilePictureUrl: mySantri?.profilePicture,
             ),
             SizedBox(height: 24.h),
 
@@ -246,6 +247,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
     required String nis,
     required String halaqohInfo,
     String? guruName,
+    String? profilePictureUrl,
   }) {
     return Container(
       width: double.infinity,
@@ -277,8 +279,16 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
                     color: Colors.white.withValues(alpha: 0.4),
                     width: 3,
                   ),
+                  image: profilePictureUrl != null
+                      ? DecorationImage(
+                          image: NetworkImage(profilePictureUrl),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                child: Icon(Icons.person, size: 40.sp, color: Colors.white),
+                child: profilePictureUrl == null
+                    ? Icon(Icons.person, size: 40.sp, color: Colors.white)
+                    : null,
               ),
               SizedBox(height: 14.h),
 

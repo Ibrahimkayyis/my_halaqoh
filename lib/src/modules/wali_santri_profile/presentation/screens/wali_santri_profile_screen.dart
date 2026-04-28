@@ -1,21 +1,61 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
-import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/cubits/wali_santri_profile_cubit.dart';
+import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/cubits/wali_santri_profile_state.dart';
 
-/// Profile screen for Guru role â€” avatar, name, role badge, menu items, logout
+/// Profile screen for Wali Santri role — avatar, name, class badge, menu items, logout
 @RoutePage()
-class WaliSantriProfileScreen extends StatelessWidget {
+class WaliSantriProfileScreen extends StatefulWidget {
   const WaliSantriProfileScreen({super.key});
+
+  @override
+  State<WaliSantriProfileScreen> createState() =>
+      _WaliSantriProfileScreenState();
+}
+
+class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
+  late final WaliSantriProfileCubit _profileCubit;
+  String _linkedDocId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _profileCubit = sl<WaliSantriProfileCubit>();
+
+    // Read linkedDocId synchronously from AuthCubit — available in initState
+    // because AuthCubit is a global singleton already in the widget tree.
+    final authState = context.read<AuthCubit>().state;
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        _linkedDocId = userMeta.linkedDocId;
+      },
+      orElse: () {},
+    );
+
+    // Load full profile data for avatar (photo) display
+    if (_linkedDocId.isNotEmpty) {
+      _profileCubit.loadProfile(_linkedDocId);
+    }
+  }
+
+  @override
+  void dispose() {
+    _profileCubit.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +65,11 @@ class WaliSantriProfileScreen extends StatelessWidget {
     final halaqohState = context.watch<HalaqohCubit>().state;
 
     String santriName = '';
-    String linkedDocId = '';
     String nis = '';
 
     authState.maybeWhen(
       authenticated: (userMeta) {
         santriName = userMeta.displayName;
-        linkedDocId = userMeta.linkedDocId;
         nis = userMeta.identifier;
       },
       orElse: () {},
@@ -41,102 +79,119 @@ class WaliSantriProfileScreen extends StatelessWidget {
     halaqohState.maybeWhen(
       loaded: (list) {
         try {
-          myHalaqoh = list.firstWhere((h) => h.santriIds.contains(linkedDocId));
+          myHalaqoh =
+              list.firstWhere((h) => h.santriIds.contains(_linkedDocId));
         } catch (_) {}
       },
       orElse: () {},
     );
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: Column(
-        children: [
-          _buildHeader(
-            colors: colors,
-            name: santriName.isNotEmpty ? santriName : 'Memuat...',
-            nis: nis,
-            badge: myHalaqoh != null
-                ? 'Kelas ${myHalaqoh!.kelas} | ${myHalaqoh!.program == 'T' ? 'Takhassus' : 'Reguler'}'
-                : 'Kelas ? | ?',
-          ),
-          // â”€â”€ Menu sections â”€â”€
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Column(
-                children: [
-                  SizedBox(height: 24.h),
+    return BlocProvider.value(
+      value: _profileCubit,
+      child: BlocBuilder<WaliSantriProfileCubit, WaliSantriProfileState>(
+        builder: (context, profileState) {
+          // Extract profile picture URL from loaded santri data
+          SantriModel? santri;
+          profileState.maybeWhen(
+            loaded: (s) => santri = s,
+            updateSuccess: (s) => santri = s,
+            orElse: () {},
+          );
 
-                  // Card 1 â€” Edit Profile & Ubah Password
-                  _buildMenuCard(
-                    colors,
-                    items: [
-                      _MenuItem(
-                        icon: Icons.person,
-                        label: t.guruProfile.editProfile,
-                        onTap: () {
-                          context.router.push(
-                            const WaliSantriEditProfileRoute(),
-                          );
-                        },
-                      ),
-                      _MenuItem(
-                        icon: Icons.lock,
-                        label: t.guruProfile.ubahPassword,
-                        onTap: () {
-                          context.router.push(
-                            const WaliSantriUbahPasswordRoute(),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 14.h),
+          return Scaffold(
+            backgroundColor: colors.background,
+            body: Column(
+              children: [
+                _buildHeader(
+                  colors: colors,
+                  name: santriName.isNotEmpty ? santriName : 'Memuat...',
+                  nis: nis,
+                  badge: myHalaqoh != null
+                      ? 'Kelas ${myHalaqoh!.kelas} | ${myHalaqoh!.program == 'T' ? 'Takhassus' : 'Reguler'}'
+                      : 'Kelas ? | ?',
+                  profilePictureUrl: santri?.profilePicture,
+                ),
+                // ── Menu sections ──
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 24.h),
 
-                  // Card 2 â€” Pengaturan & Tentang Aplikasi
-                  _buildMenuCard(
-                    colors,
-                    items: [
-                      _MenuItem(
-                        icon: Icons.settings,
-                        label: t.guruProfile.pengaturan,
-                        onTap: () {
-                          context.router.push(
-                            const WaliSantriPengaturanRoute(),
-                          );
-                        },
-                      ),
-                      _MenuItem(
-                        icon: Icons.info_outline,
-                        label: t.guruProfile.tentangAplikasi,
-                        onTap: () {
-                          // TODO: Navigate to Tentang Aplikasi
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 14.h),
+                        // Card 1 — Edit Profile & Ubah Password
+                        _buildMenuCard(
+                          colors,
+                          items: [
+                            _MenuItem(
+                              icon: Icons.person,
+                              label: t.guruProfile.editProfile,
+                              onTap: () {
+                                context.router.push(
+                                  const WaliSantriEditProfileRoute(),
+                                );
+                              },
+                            ),
+                            _MenuItem(
+                              icon: Icons.lock,
+                              label: t.guruProfile.ubahPassword,
+                              onTap: () {
+                                context.router.push(
+                                  const WaliSantriUbahPasswordRoute(),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 14.h),
 
-                  // Logout button
-                  _buildLogoutCard(colors, context),
-                  SizedBox(height: 16.h),
+                        // Card 2 — Pengaturan & Tentang Aplikasi
+                        _buildMenuCard(
+                          colors,
+                          items: [
+                            _MenuItem(
+                              icon: Icons.settings,
+                              label: t.guruProfile.pengaturan,
+                              onTap: () {
+                                context.router.push(
+                                  const WaliSantriPengaturanRoute(),
+                                );
+                              },
+                            ),
+                            _MenuItem(
+                              icon: Icons.info_outline,
+                              label: t.guruProfile.tentangAplikasi,
+                              onTap: () {
+                                // TODO: Navigate to Tentang Aplikasi
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 14.h),
 
-                  // Version text
-                  Text(
-                    t.guruProfile.appVersion(version: '1.2.0'),
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: colors.textSecondary.withValues(alpha: 0.6),
-                      fontFamily: 'Poppins',
+                        // Logout button
+                        _buildLogoutCard(colors, context),
+                        SizedBox(height: 16.h),
+
+                        // Version text
+                        Text(
+                          t.guruProfile.appVersion(version: '1.2.0'),
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            color: colors.textSecondary.withValues(alpha: 0.6),
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        SizedBox(height: 100.h), // space for bottom nav
+                      ],
                     ),
                   ),
-                  SizedBox(height: 100.h), // space for bottom nav
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -147,6 +202,7 @@ class WaliSantriProfileScreen extends StatelessWidget {
     required String name,
     required String nis,
     required String badge,
+    String? profilePictureUrl,
   }) {
     return Container(
       width: double.infinity,
@@ -167,7 +223,7 @@ class WaliSantriProfileScreen extends StatelessWidget {
           padding: EdgeInsets.only(top: 24.h, bottom: 32.h),
           child: Column(
             children: [
-              // Avatar circle
+              // Avatar circle — shows profile picture if available
               Container(
                 width: 100.w,
                 height: 100.w,
@@ -178,8 +234,16 @@ class WaliSantriProfileScreen extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.5),
                     width: 3,
                   ),
+                  image: profilePictureUrl != null
+                      ? DecorationImage(
+                          image: NetworkImage(profilePictureUrl),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                child: Icon(Icons.person, size: 52.sp, color: Colors.white),
+                child: profilePictureUrl == null
+                    ? Icon(Icons.person, size: 52.sp, color: Colors.white)
+                    : null,
               ),
               SizedBox(height: 14.h),
 
