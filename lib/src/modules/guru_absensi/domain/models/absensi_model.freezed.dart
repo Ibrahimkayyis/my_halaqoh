@@ -19,10 +19,13 @@ mixin _$AbsensiModel {
  String get id;/// Reference to `/halaqoh/{id}`
  String get halaqohId;/// Reference to `/guru/{id}` — the teacher who recorded attendance
  String get guruId;/// Attendance date (date only, time portion is midnight)
- DateTime get tanggal;/// Session key: 'shubuh', 'dhuha1', 'dhuha2', 'ashar', 'maghrib'
+ DateTime get tanggal;/// Session key: 'shubuh', 'dhuha', 'siang', 'ashar', 'maghrib'
  String get sesi;/// Per-student attendance entries
  List<AbsensiRecordEntry> get records;/// Whether this record has been synced to Firestore
- bool get isSynced; DateTime get createdAt; DateTime get updatedAt;
+ bool get isSynced; DateTime get createdAt; DateTime get updatedAt;/// Timestamp set by the Cloud Function after FCM notifications have been
+/// dispatched for this session. Null means not yet notified.
+/// NEVER written by the Flutter client — this is a server-only field.
+@JsonKey(name: 'notifiedAt') DateTime? get notifiedAt;
 /// Create a copy of AbsensiModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -35,16 +38,16 @@ $AbsensiModelCopyWith<AbsensiModel> get copyWith => _$AbsensiModelCopyWithImpl<A
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AbsensiModel&&(identical(other.id, id) || other.id == id)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.tanggal, tanggal) || other.tanggal == tanggal)&&(identical(other.sesi, sesi) || other.sesi == sesi)&&const DeepCollectionEquality().equals(other.records, records)&&(identical(other.isSynced, isSynced) || other.isSynced == isSynced)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AbsensiModel&&(identical(other.id, id) || other.id == id)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.tanggal, tanggal) || other.tanggal == tanggal)&&(identical(other.sesi, sesi) || other.sesi == sesi)&&const DeepCollectionEquality().equals(other.records, records)&&(identical(other.isSynced, isSynced) || other.isSynced == isSynced)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.notifiedAt, notifiedAt) || other.notifiedAt == notifiedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,halaqohId,guruId,tanggal,sesi,const DeepCollectionEquality().hash(records),isSynced,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,halaqohId,guruId,tanggal,sesi,const DeepCollectionEquality().hash(records),isSynced,createdAt,updatedAt,notifiedAt);
 
 @override
 String toString() {
-  return 'AbsensiModel(id: $id, halaqohId: $halaqohId, guruId: $guruId, tanggal: $tanggal, sesi: $sesi, records: $records, isSynced: $isSynced, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'AbsensiModel(id: $id, halaqohId: $halaqohId, guruId: $guruId, tanggal: $tanggal, sesi: $sesi, records: $records, isSynced: $isSynced, createdAt: $createdAt, updatedAt: $updatedAt, notifiedAt: $notifiedAt)';
 }
 
 
@@ -55,7 +58,7 @@ abstract mixin class $AbsensiModelCopyWith<$Res>  {
   factory $AbsensiModelCopyWith(AbsensiModel value, $Res Function(AbsensiModel) _then) = _$AbsensiModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String halaqohId, String guruId, DateTime tanggal, String sesi, List<AbsensiRecordEntry> records, bool isSynced, DateTime createdAt, DateTime updatedAt
+ String id, String halaqohId, String guruId, DateTime tanggal, String sesi, List<AbsensiRecordEntry> records, bool isSynced, DateTime createdAt, DateTime updatedAt,@JsonKey(name: 'notifiedAt') DateTime? notifiedAt
 });
 
 
@@ -72,7 +75,7 @@ class _$AbsensiModelCopyWithImpl<$Res>
 
 /// Create a copy of AbsensiModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? halaqohId = null,Object? guruId = null,Object? tanggal = null,Object? sesi = null,Object? records = null,Object? isSynced = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? halaqohId = null,Object? guruId = null,Object? tanggal = null,Object? sesi = null,Object? records = null,Object? isSynced = null,Object? createdAt = null,Object? updatedAt = null,Object? notifiedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,halaqohId: null == halaqohId ? _self.halaqohId : halaqohId // ignore: cast_nullable_to_non_nullable
@@ -83,7 +86,8 @@ as String,records: null == records ? _self.records : records // ignore: cast_nul
 as List<AbsensiRecordEntry>,isSynced: null == isSynced ? _self.isSynced : isSynced // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,notifiedAt: freezed == notifiedAt ? _self.notifiedAt : notifiedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 
@@ -168,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String halaqohId,  String guruId,  DateTime tanggal,  String sesi,  List<AbsensiRecordEntry> records,  bool isSynced,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String halaqohId,  String guruId,  DateTime tanggal,  String sesi,  List<AbsensiRecordEntry> records,  bool isSynced,  DateTime createdAt,  DateTime updatedAt, @JsonKey(name: 'notifiedAt')  DateTime? notifiedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AbsensiModel() when $default != null:
-return $default(_that.id,_that.halaqohId,_that.guruId,_that.tanggal,_that.sesi,_that.records,_that.isSynced,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.halaqohId,_that.guruId,_that.tanggal,_that.sesi,_that.records,_that.isSynced,_that.createdAt,_that.updatedAt,_that.notifiedAt);case _:
   return orElse();
 
 }
@@ -189,10 +193,10 @@ return $default(_that.id,_that.halaqohId,_that.guruId,_that.tanggal,_that.sesi,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String halaqohId,  String guruId,  DateTime tanggal,  String sesi,  List<AbsensiRecordEntry> records,  bool isSynced,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String halaqohId,  String guruId,  DateTime tanggal,  String sesi,  List<AbsensiRecordEntry> records,  bool isSynced,  DateTime createdAt,  DateTime updatedAt, @JsonKey(name: 'notifiedAt')  DateTime? notifiedAt)  $default,) {final _that = this;
 switch (_that) {
 case _AbsensiModel():
-return $default(_that.id,_that.halaqohId,_that.guruId,_that.tanggal,_that.sesi,_that.records,_that.isSynced,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.halaqohId,_that.guruId,_that.tanggal,_that.sesi,_that.records,_that.isSynced,_that.createdAt,_that.updatedAt,_that.notifiedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +213,10 @@ return $default(_that.id,_that.halaqohId,_that.guruId,_that.tanggal,_that.sesi,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String halaqohId,  String guruId,  DateTime tanggal,  String sesi,  List<AbsensiRecordEntry> records,  bool isSynced,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String halaqohId,  String guruId,  DateTime tanggal,  String sesi,  List<AbsensiRecordEntry> records,  bool isSynced,  DateTime createdAt,  DateTime updatedAt, @JsonKey(name: 'notifiedAt')  DateTime? notifiedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _AbsensiModel() when $default != null:
-return $default(_that.id,_that.halaqohId,_that.guruId,_that.tanggal,_that.sesi,_that.records,_that.isSynced,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.halaqohId,_that.guruId,_that.tanggal,_that.sesi,_that.records,_that.isSynced,_that.createdAt,_that.updatedAt,_that.notifiedAt);case _:
   return null;
 
 }
@@ -224,7 +228,7 @@ return $default(_that.id,_that.halaqohId,_that.guruId,_that.tanggal,_that.sesi,_
 @JsonSerializable()
 
 class _AbsensiModel implements AbsensiModel {
-  const _AbsensiModel({required this.id, required this.halaqohId, required this.guruId, required this.tanggal, required this.sesi, required final  List<AbsensiRecordEntry> records, this.isSynced = false, required this.createdAt, required this.updatedAt}): _records = records;
+  const _AbsensiModel({required this.id, required this.halaqohId, required this.guruId, required this.tanggal, required this.sesi, required final  List<AbsensiRecordEntry> records, this.isSynced = false, required this.createdAt, required this.updatedAt, @JsonKey(name: 'notifiedAt') this.notifiedAt}): _records = records;
   factory _AbsensiModel.fromJson(Map<String, dynamic> json) => _$AbsensiModelFromJson(json);
 
 /// Firestore document ID
@@ -235,7 +239,7 @@ class _AbsensiModel implements AbsensiModel {
 @override final  String guruId;
 /// Attendance date (date only, time portion is midnight)
 @override final  DateTime tanggal;
-/// Session key: 'shubuh', 'dhuha1', 'dhuha2', 'ashar', 'maghrib'
+/// Session key: 'shubuh', 'dhuha', 'siang', 'ashar', 'maghrib'
 @override final  String sesi;
 /// Per-student attendance entries
  final  List<AbsensiRecordEntry> _records;
@@ -250,6 +254,10 @@ class _AbsensiModel implements AbsensiModel {
 @override@JsonKey() final  bool isSynced;
 @override final  DateTime createdAt;
 @override final  DateTime updatedAt;
+/// Timestamp set by the Cloud Function after FCM notifications have been
+/// dispatched for this session. Null means not yet notified.
+/// NEVER written by the Flutter client — this is a server-only field.
+@override@JsonKey(name: 'notifiedAt') final  DateTime? notifiedAt;
 
 /// Create a copy of AbsensiModel
 /// with the given fields replaced by the non-null parameter values.
@@ -264,16 +272,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AbsensiModel&&(identical(other.id, id) || other.id == id)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.tanggal, tanggal) || other.tanggal == tanggal)&&(identical(other.sesi, sesi) || other.sesi == sesi)&&const DeepCollectionEquality().equals(other._records, _records)&&(identical(other.isSynced, isSynced) || other.isSynced == isSynced)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AbsensiModel&&(identical(other.id, id) || other.id == id)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.tanggal, tanggal) || other.tanggal == tanggal)&&(identical(other.sesi, sesi) || other.sesi == sesi)&&const DeepCollectionEquality().equals(other._records, _records)&&(identical(other.isSynced, isSynced) || other.isSynced == isSynced)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.notifiedAt, notifiedAt) || other.notifiedAt == notifiedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,halaqohId,guruId,tanggal,sesi,const DeepCollectionEquality().hash(_records),isSynced,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,halaqohId,guruId,tanggal,sesi,const DeepCollectionEquality().hash(_records),isSynced,createdAt,updatedAt,notifiedAt);
 
 @override
 String toString() {
-  return 'AbsensiModel(id: $id, halaqohId: $halaqohId, guruId: $guruId, tanggal: $tanggal, sesi: $sesi, records: $records, isSynced: $isSynced, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'AbsensiModel(id: $id, halaqohId: $halaqohId, guruId: $guruId, tanggal: $tanggal, sesi: $sesi, records: $records, isSynced: $isSynced, createdAt: $createdAt, updatedAt: $updatedAt, notifiedAt: $notifiedAt)';
 }
 
 
@@ -284,7 +292,7 @@ abstract mixin class _$AbsensiModelCopyWith<$Res> implements $AbsensiModelCopyWi
   factory _$AbsensiModelCopyWith(_AbsensiModel value, $Res Function(_AbsensiModel) _then) = __$AbsensiModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String halaqohId, String guruId, DateTime tanggal, String sesi, List<AbsensiRecordEntry> records, bool isSynced, DateTime createdAt, DateTime updatedAt
+ String id, String halaqohId, String guruId, DateTime tanggal, String sesi, List<AbsensiRecordEntry> records, bool isSynced, DateTime createdAt, DateTime updatedAt,@JsonKey(name: 'notifiedAt') DateTime? notifiedAt
 });
 
 
@@ -301,7 +309,7 @@ class __$AbsensiModelCopyWithImpl<$Res>
 
 /// Create a copy of AbsensiModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? halaqohId = null,Object? guruId = null,Object? tanggal = null,Object? sesi = null,Object? records = null,Object? isSynced = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? halaqohId = null,Object? guruId = null,Object? tanggal = null,Object? sesi = null,Object? records = null,Object? isSynced = null,Object? createdAt = null,Object? updatedAt = null,Object? notifiedAt = freezed,}) {
   return _then(_AbsensiModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,halaqohId: null == halaqohId ? _self.halaqohId : halaqohId // ignore: cast_nullable_to_non_nullable
@@ -312,7 +320,8 @@ as String,records: null == records ? _self._records : records // ignore: cast_nu
 as List<AbsensiRecordEntry>,isSynced: null == isSynced ? _self.isSynced : isSynced // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,notifiedAt: freezed == notifiedAt ? _self.notifiedAt : notifiedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 

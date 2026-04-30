@@ -19,6 +19,9 @@ _AbsensiModel _$AbsensiModelFromJson(Map<String, dynamic> json) =>
       isSynced: json['isSynced'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      notifiedAt: json['notifiedAt'] == null
+          ? null
+          : DateTime.parse(json['notifiedAt'] as String),
     );
 
 Map<String, dynamic> _$AbsensiModelToJson(_AbsensiModel instance) =>
@@ -32,4 +35,5 @@ Map<String, dynamic> _$AbsensiModelToJson(_AbsensiModel instance) =>
       'isSynced': instance.isSynced,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
+      'notifiedAt': instance.notifiedAt?.toIso8601String(),
     };

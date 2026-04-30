@@ -23,6 +23,9 @@ _HafalanSantriModel _$HafalanSantriModelFromJson(Map<String, dynamic> json) =>
       nilaiTajwid: (json['nilaiTajwid'] as num).toInt(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       isSynced: json['isSynced'] as bool? ?? false,
+      notifiedAt: json['notifiedAt'] == null
+          ? null
+          : DateTime.parse(json['notifiedAt'] as String),
     );
 
 Map<String, dynamic> _$HafalanSantriModelToJson(_HafalanSantriModel instance) =>
@@ -42,4 +45,5 @@ Map<String, dynamic> _$HafalanSantriModelToJson(_HafalanSantriModel instance) =>
       'nilaiTajwid': instance.nilaiTajwid,
       'createdAt': instance.createdAt.toIso8601String(),
       'isSynced': instance.isSynced,
+      'notifiedAt': instance.notifiedAt?.toIso8601String(),
     };

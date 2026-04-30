@@ -20,10 +20,18 @@ class HafalanSantriMapper {
       nilaiTajwid: data['nilaiTajwid'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isSynced: true, // Data from Firestore is by definition synced
+      // CRITICAL: notifiedAt is a Firestore Timestamp set by Cloud Function.
+      // Must be explicitly cast — json_serializable cannot handle Timestamp
+      // automatically and will throw a type-casting crash otherwise.
+      notifiedAt: (data['notifiedAt'] as Timestamp?)?.toDate(),
     );
   }
 
   static Map<String, dynamic> toFirestore(HafalanSantriModel model) {
+    // NOTE: `notifiedAt` is intentionally EXCLUDED from this map.
+    // It is a server-only field written exclusively by the Cloud Function
+    // after dispatching FCM messages. Writing it from the client would
+    // corrupt the deduplication logic in sendHafalanNotification.
     return {
       'santriId': model.santriId,
       'guruId': model.guruId,
@@ -38,7 +46,7 @@ class HafalanSantriMapper {
       'nilaiKelancaran': model.nilaiKelancaran,
       'nilaiTajwid': model.nilaiTajwid,
       'createdAt': Timestamp.fromDate(model.createdAt),
-      // isSynced is not saved to Firestore since it's a local status flag
+      'isSynced': true, // Always true — data going to Firestore is synced by definition
     };
   }
 }

@@ -16,6 +16,9 @@ class AbsensiModelAdapter extends TypeAdapter<AbsensiModel> {
     for (int i = 0; i < fieldsCount; i++) {
       fields[reader.readByte()] = reader.read();
     }
+    // Field 10 (notifiedAt) is optional — absent in records written before
+    // this field was added. Read as nullable int (millisecondsSinceEpoch).
+    final notifiedAtMs = fields[10] as int?;
     return AbsensiModel(
       id: fields[0] as String,
       halaqohId: fields[1] as String,
@@ -26,12 +29,15 @@ class AbsensiModelAdapter extends TypeAdapter<AbsensiModel> {
       isSynced: fields[6] as bool,
       createdAt: DateTime.fromMillisecondsSinceEpoch(fields[7] as int),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(fields[8] as int),
+      notifiedAt: notifiedAtMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(notifiedAtMs)
+          : null,
     );
   }
 
   @override
   void write(BinaryWriter writer, AbsensiModel obj) {
-    writer.writeByte(9); // field count
+    writer.writeByte(10); // field count — updated to 10 (added notifiedAt)
     writer.writeByte(0);
     writer.write(obj.id);
     writer.writeByte(1);
@@ -50,6 +56,9 @@ class AbsensiModelAdapter extends TypeAdapter<AbsensiModel> {
     writer.write(obj.createdAt.millisecondsSinceEpoch);
     writer.writeByte(8);
     writer.write(obj.updatedAt.millisecondsSinceEpoch);
+    // Field 10: notifiedAt — written as nullable int (ms since epoch)
+    writer.writeByte(10);
+    writer.write(obj.notifiedAt?.millisecondsSinceEpoch);
   }
 }
 

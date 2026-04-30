@@ -16,6 +16,12 @@ abstract class HafalanSantriRepository {
   /// Push all pending (isSynced == false) records from Hive to Firestore.
   Future<void> syncPendingRecords();
 
+  /// Seed the local Hive cache from Firestore for a specific santri.
+  /// Only performs a network fetch if the local box has NO records for this santri.
+  /// Call this when opening any screen that reads from the local Hive box to
+  /// ensure historical data is present after a fresh install or cache wipe.
+  Future<void> seedFromRemoteIfEmpty(String santriId);
+
   /// Get all hafalan records for students in a halaqoh on a specific date.
   /// Reads from local Hive cache (synchronous).
   List<HafalanSantriModel> getHafalanByHalaqohAndDate(

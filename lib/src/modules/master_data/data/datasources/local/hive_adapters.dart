@@ -299,12 +299,16 @@ class HafalanSantriModelAdapter extends TypeAdapter<HafalanSantriModel> {
       nilaiTajwid: fields[12] as int,
       createdAt: DateTime.parse(fields[13] as String),
       isSynced: fields[14] as bool? ?? false,
+      // fields[15] is notifiedAt — null-safe for boxes written before this field was added
+      notifiedAt: fields[15] != null
+          ? DateTime.parse(fields[15] as String)
+          : null,
     );
   }
 
   @override
   void write(BinaryWriter writer, HafalanSantriModel obj) {
-    writer.writeByte(15);
+    writer.writeByte(16); // number of fields (0–15)
     writer.writeByte(0);
     writer.write(obj.id);
     writer.writeByte(1);
@@ -335,5 +339,7 @@ class HafalanSantriModelAdapter extends TypeAdapter<HafalanSantriModel> {
     writer.write(obj.createdAt.toIso8601String());
     writer.writeByte(14);
     writer.write(obj.isSynced);
+    writer.writeByte(15);
+    writer.write(obj.notifiedAt?.toIso8601String());
   }
 }

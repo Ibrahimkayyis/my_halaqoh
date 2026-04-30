@@ -75,6 +75,36 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
   }
 
   @override
+  Future<void> seedFromRemoteIfEmpty(String santriId) async {
+    // Guard: only fetch from Firestore if the local box has NO records for this santri
+    // across all months. Checks Ziyadah (all-time) as a fast proxy since every
+    // santri has at least some Ziyadah records if they have any hafalan at all.
+    final hasAnyLocal = _local.getAllZiyadahBySantriId(santriId).isNotEmpty ||
+        _local.getHafalanBySantriId(santriId, DateTime.now().month, DateTime.now().year).isNotEmpty;
+
+    if (hasAnyLocal) {
+      _log.d('seedFromRemoteIfEmpty: local data exists for santriId=$santriId — skipping fetch.');
+      return;
+    }
+
+    _log.i('seedFromRemoteIfEmpty: Hive box empty for santriId=$santriId. Fetching from Firestore...');
+    try {
+      final remoteRecords = await _remote.fetchBySantriId(santriId);
+      if (remoteRecords.isEmpty) {
+        _log.i('seedFromRemoteIfEmpty: no records in Firestore for santriId=$santriId.');
+        return;
+      }
+      for (final record in remoteRecords) {
+        await _local.put(record); // isSynced: true via fromFirestore in mapper
+      }
+      _log.i('seedFromRemoteIfEmpty: seeded ${remoteRecords.length} records into Hive for santriId=$santriId.');
+    } catch (e, st) {
+      // Non-fatal: screen shows empty state; user can retry by re-opening the screen.
+      _log.e('seedFromRemoteIfEmpty: Firestore fetch failed', error: e, stackTrace: st);
+    }
+  }
+
+  @override
   List<HafalanSantriModel> getHafalanByHalaqohAndDate(
       List<String> santriIds, DateTime date) {
     return _local.getHafalanByHalaqohAndDate(santriIds, date);

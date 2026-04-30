@@ -31,10 +31,18 @@ class AbsensiMapper {
       isSynced: true,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      // CRITICAL: notifiedAt is a Firestore Timestamp set by Cloud Function.
+      // Must be explicitly cast — json_serializable cannot handle Timestamp
+      // automatically and will throw a type-casting crash otherwise.
+      notifiedAt: (data['notifiedAt'] as Timestamp?)?.toDate(),
     );
   }
 
   static Map<String, dynamic> toFirestore(AbsensiModel model) {
+    // NOTE: `notifiedAt` is intentionally EXCLUDED from this map.
+    // It is a server-only field written exclusively by the Cloud Function
+    // after dispatching FCM messages. Writing it from the client would
+    // corrupt the deduplication logic in sendAbsensiNotification.
     return {
       'halaqohId': model.halaqohId,
       'guruId': model.guruId,
@@ -48,8 +56,10 @@ class AbsensiMapper {
                 'status': r.status,
               })
           .toList(),
+      'isSynced': true,
       'createdAt': Timestamp.fromDate(model.createdAt),
       'updatedAt': Timestamp.fromDate(model.updatedAt),
     };
   }
 }
+

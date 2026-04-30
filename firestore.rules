@@ -39,10 +39,18 @@ service cloud.firestore {
       allow create, delete: if isAdmin();
     }
     
-    // Exception: Users can read their own metadata
+    // Exception: Users can read their own metadata.
+    // Wali Santri can also update their own fcmToken for push notifications.
+    // The affectedKeys guard ensures ONLY fcmToken and fcmTokenUpdatedAt can be
+    // changed — no other fields (e.g. role, identifier) are writable by the client.
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId || isAdmin();
       allow write: if isAdmin();
+      // Allow authenticated user to update their own FCM token fields only
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['fcmToken', 'fcmTokenUpdatedAt']);
     }
 
     // Absensi: allow authenticated Gurus to write attendance

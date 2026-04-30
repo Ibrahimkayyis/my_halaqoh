@@ -21,6 +21,9 @@ abstract class HafalanSantriModel with _$HafalanSantriModel {
     required int nilaiTajwid,
     required DateTime createdAt,
     @Default(false) bool isSynced,
+    // Server-only field: written by sendHafalanNotification Cloud Function
+    // after FCM dispatch. NEVER set by the client.
+    @JsonKey(name: 'notifiedAt') DateTime? notifiedAt,
   }) = _HafalanSantriModel;
 
   factory HafalanSantriModel.fromJson(Map<String, dynamic> json) =>

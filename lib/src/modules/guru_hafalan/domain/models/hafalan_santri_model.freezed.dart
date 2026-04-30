@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 mixin _$HafalanSantriModel {
 
  String get id; String get santriId; String get guruId; String get halaqohId; DateTime get tanggalSetoran; String get jenis;// "Ziyadah" or "Murajaah"
- int get surahId; String get surahName; int get ayatMulai; int get ayatSelesai; int get juz; int get nilaiKelancaran; int get nilaiTajwid; DateTime get createdAt; bool get isSynced;
+ int get surahId; String get surahName; int get ayatMulai; int get ayatSelesai; int get juz; int get nilaiKelancaran; int get nilaiTajwid; DateTime get createdAt; bool get isSynced;// Server-only field: written by sendHafalanNotification Cloud Function
+// after FCM dispatch. NEVER set by the client.
+@JsonKey(name: 'notifiedAt') DateTime? get notifiedAt;
 /// Create a copy of HafalanSantriModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +31,16 @@ $HafalanSantriModelCopyWith<HafalanSantriModel> get copyWith => _$HafalanSantriM
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HafalanSantriModel&&(identical(other.id, id) || other.id == id)&&(identical(other.santriId, santriId) || other.santriId == santriId)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.tanggalSetoran, tanggalSetoran) || other.tanggalSetoran == tanggalSetoran)&&(identical(other.jenis, jenis) || other.jenis == jenis)&&(identical(other.surahId, surahId) || other.surahId == surahId)&&(identical(other.surahName, surahName) || other.surahName == surahName)&&(identical(other.ayatMulai, ayatMulai) || other.ayatMulai == ayatMulai)&&(identical(other.ayatSelesai, ayatSelesai) || other.ayatSelesai == ayatSelesai)&&(identical(other.juz, juz) || other.juz == juz)&&(identical(other.nilaiKelancaran, nilaiKelancaran) || other.nilaiKelancaran == nilaiKelancaran)&&(identical(other.nilaiTajwid, nilaiTajwid) || other.nilaiTajwid == nilaiTajwid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isSynced, isSynced) || other.isSynced == isSynced));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HafalanSantriModel&&(identical(other.id, id) || other.id == id)&&(identical(other.santriId, santriId) || other.santriId == santriId)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.tanggalSetoran, tanggalSetoran) || other.tanggalSetoran == tanggalSetoran)&&(identical(other.jenis, jenis) || other.jenis == jenis)&&(identical(other.surahId, surahId) || other.surahId == surahId)&&(identical(other.surahName, surahName) || other.surahName == surahName)&&(identical(other.ayatMulai, ayatMulai) || other.ayatMulai == ayatMulai)&&(identical(other.ayatSelesai, ayatSelesai) || other.ayatSelesai == ayatSelesai)&&(identical(other.juz, juz) || other.juz == juz)&&(identical(other.nilaiKelancaran, nilaiKelancaran) || other.nilaiKelancaran == nilaiKelancaran)&&(identical(other.nilaiTajwid, nilaiTajwid) || other.nilaiTajwid == nilaiTajwid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isSynced, isSynced) || other.isSynced == isSynced)&&(identical(other.notifiedAt, notifiedAt) || other.notifiedAt == notifiedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,santriId,guruId,halaqohId,tanggalSetoran,jenis,surahId,surahName,ayatMulai,ayatSelesai,juz,nilaiKelancaran,nilaiTajwid,createdAt,isSynced);
+int get hashCode => Object.hash(runtimeType,id,santriId,guruId,halaqohId,tanggalSetoran,jenis,surahId,surahName,ayatMulai,ayatSelesai,juz,nilaiKelancaran,nilaiTajwid,createdAt,isSynced,notifiedAt);
 
 @override
 String toString() {
-  return 'HafalanSantriModel(id: $id, santriId: $santriId, guruId: $guruId, halaqohId: $halaqohId, tanggalSetoran: $tanggalSetoran, jenis: $jenis, surahId: $surahId, surahName: $surahName, ayatMulai: $ayatMulai, ayatSelesai: $ayatSelesai, juz: $juz, nilaiKelancaran: $nilaiKelancaran, nilaiTajwid: $nilaiTajwid, createdAt: $createdAt, isSynced: $isSynced)';
+  return 'HafalanSantriModel(id: $id, santriId: $santriId, guruId: $guruId, halaqohId: $halaqohId, tanggalSetoran: $tanggalSetoran, jenis: $jenis, surahId: $surahId, surahName: $surahName, ayatMulai: $ayatMulai, ayatSelesai: $ayatSelesai, juz: $juz, nilaiKelancaran: $nilaiKelancaran, nilaiTajwid: $nilaiTajwid, createdAt: $createdAt, isSynced: $isSynced, notifiedAt: $notifiedAt)';
 }
 
 
@@ -49,7 +51,7 @@ abstract mixin class $HafalanSantriModelCopyWith<$Res>  {
   factory $HafalanSantriModelCopyWith(HafalanSantriModel value, $Res Function(HafalanSantriModel) _then) = _$HafalanSantriModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String santriId, String guruId, String halaqohId, DateTime tanggalSetoran, String jenis, int surahId, String surahName, int ayatMulai, int ayatSelesai, int juz, int nilaiKelancaran, int nilaiTajwid, DateTime createdAt, bool isSynced
+ String id, String santriId, String guruId, String halaqohId, DateTime tanggalSetoran, String jenis, int surahId, String surahName, int ayatMulai, int ayatSelesai, int juz, int nilaiKelancaran, int nilaiTajwid, DateTime createdAt, bool isSynced,@JsonKey(name: 'notifiedAt') DateTime? notifiedAt
 });
 
 
@@ -66,7 +68,7 @@ class _$HafalanSantriModelCopyWithImpl<$Res>
 
 /// Create a copy of HafalanSantriModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? santriId = null,Object? guruId = null,Object? halaqohId = null,Object? tanggalSetoran = null,Object? jenis = null,Object? surahId = null,Object? surahName = null,Object? ayatMulai = null,Object? ayatSelesai = null,Object? juz = null,Object? nilaiKelancaran = null,Object? nilaiTajwid = null,Object? createdAt = null,Object? isSynced = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? santriId = null,Object? guruId = null,Object? halaqohId = null,Object? tanggalSetoran = null,Object? jenis = null,Object? surahId = null,Object? surahName = null,Object? ayatMulai = null,Object? ayatSelesai = null,Object? juz = null,Object? nilaiKelancaran = null,Object? nilaiTajwid = null,Object? createdAt = null,Object? isSynced = null,Object? notifiedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,santriId: null == santriId ? _self.santriId : santriId // ignore: cast_nullable_to_non_nullable
@@ -83,7 +85,8 @@ as int,nilaiKelancaran: null == nilaiKelancaran ? _self.nilaiKelancaran : nilaiK
 as int,nilaiTajwid: null == nilaiTajwid ? _self.nilaiTajwid : nilaiTajwid // ignore: cast_nullable_to_non_nullable
 as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,isSynced: null == isSynced ? _self.isSynced : isSynced // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,notifiedAt: freezed == notifiedAt ? _self.notifiedAt : notifiedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 
@@ -168,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String santriId,  String guruId,  String halaqohId,  DateTime tanggalSetoran,  String jenis,  int surahId,  String surahName,  int ayatMulai,  int ayatSelesai,  int juz,  int nilaiKelancaran,  int nilaiTajwid,  DateTime createdAt,  bool isSynced)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String santriId,  String guruId,  String halaqohId,  DateTime tanggalSetoran,  String jenis,  int surahId,  String surahName,  int ayatMulai,  int ayatSelesai,  int juz,  int nilaiKelancaran,  int nilaiTajwid,  DateTime createdAt,  bool isSynced, @JsonKey(name: 'notifiedAt')  DateTime? notifiedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HafalanSantriModel() when $default != null:
-return $default(_that.id,_that.santriId,_that.guruId,_that.halaqohId,_that.tanggalSetoran,_that.jenis,_that.surahId,_that.surahName,_that.ayatMulai,_that.ayatSelesai,_that.juz,_that.nilaiKelancaran,_that.nilaiTajwid,_that.createdAt,_that.isSynced);case _:
+return $default(_that.id,_that.santriId,_that.guruId,_that.halaqohId,_that.tanggalSetoran,_that.jenis,_that.surahId,_that.surahName,_that.ayatMulai,_that.ayatSelesai,_that.juz,_that.nilaiKelancaran,_that.nilaiTajwid,_that.createdAt,_that.isSynced,_that.notifiedAt);case _:
   return orElse();
 
 }
@@ -189,10 +192,10 @@ return $default(_that.id,_that.santriId,_that.guruId,_that.halaqohId,_that.tangg
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String santriId,  String guruId,  String halaqohId,  DateTime tanggalSetoran,  String jenis,  int surahId,  String surahName,  int ayatMulai,  int ayatSelesai,  int juz,  int nilaiKelancaran,  int nilaiTajwid,  DateTime createdAt,  bool isSynced)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String santriId,  String guruId,  String halaqohId,  DateTime tanggalSetoran,  String jenis,  int surahId,  String surahName,  int ayatMulai,  int ayatSelesai,  int juz,  int nilaiKelancaran,  int nilaiTajwid,  DateTime createdAt,  bool isSynced, @JsonKey(name: 'notifiedAt')  DateTime? notifiedAt)  $default,) {final _that = this;
 switch (_that) {
 case _HafalanSantriModel():
-return $default(_that.id,_that.santriId,_that.guruId,_that.halaqohId,_that.tanggalSetoran,_that.jenis,_that.surahId,_that.surahName,_that.ayatMulai,_that.ayatSelesai,_that.juz,_that.nilaiKelancaran,_that.nilaiTajwid,_that.createdAt,_that.isSynced);case _:
+return $default(_that.id,_that.santriId,_that.guruId,_that.halaqohId,_that.tanggalSetoran,_that.jenis,_that.surahId,_that.surahName,_that.ayatMulai,_that.ayatSelesai,_that.juz,_that.nilaiKelancaran,_that.nilaiTajwid,_that.createdAt,_that.isSynced,_that.notifiedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +212,10 @@ return $default(_that.id,_that.santriId,_that.guruId,_that.halaqohId,_that.tangg
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String santriId,  String guruId,  String halaqohId,  DateTime tanggalSetoran,  String jenis,  int surahId,  String surahName,  int ayatMulai,  int ayatSelesai,  int juz,  int nilaiKelancaran,  int nilaiTajwid,  DateTime createdAt,  bool isSynced)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String santriId,  String guruId,  String halaqohId,  DateTime tanggalSetoran,  String jenis,  int surahId,  String surahName,  int ayatMulai,  int ayatSelesai,  int juz,  int nilaiKelancaran,  int nilaiTajwid,  DateTime createdAt,  bool isSynced, @JsonKey(name: 'notifiedAt')  DateTime? notifiedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _HafalanSantriModel() when $default != null:
-return $default(_that.id,_that.santriId,_that.guruId,_that.halaqohId,_that.tanggalSetoran,_that.jenis,_that.surahId,_that.surahName,_that.ayatMulai,_that.ayatSelesai,_that.juz,_that.nilaiKelancaran,_that.nilaiTajwid,_that.createdAt,_that.isSynced);case _:
+return $default(_that.id,_that.santriId,_that.guruId,_that.halaqohId,_that.tanggalSetoran,_that.jenis,_that.surahId,_that.surahName,_that.ayatMulai,_that.ayatSelesai,_that.juz,_that.nilaiKelancaran,_that.nilaiTajwid,_that.createdAt,_that.isSynced,_that.notifiedAt);case _:
   return null;
 
 }
@@ -224,7 +227,7 @@ return $default(_that.id,_that.santriId,_that.guruId,_that.halaqohId,_that.tangg
 @JsonSerializable()
 
 class _HafalanSantriModel implements HafalanSantriModel {
-  const _HafalanSantriModel({required this.id, required this.santriId, required this.guruId, required this.halaqohId, required this.tanggalSetoran, required this.jenis, required this.surahId, required this.surahName, required this.ayatMulai, required this.ayatSelesai, required this.juz, required this.nilaiKelancaran, required this.nilaiTajwid, required this.createdAt, this.isSynced = false});
+  const _HafalanSantriModel({required this.id, required this.santriId, required this.guruId, required this.halaqohId, required this.tanggalSetoran, required this.jenis, required this.surahId, required this.surahName, required this.ayatMulai, required this.ayatSelesai, required this.juz, required this.nilaiKelancaran, required this.nilaiTajwid, required this.createdAt, this.isSynced = false, @JsonKey(name: 'notifiedAt') this.notifiedAt});
   factory _HafalanSantriModel.fromJson(Map<String, dynamic> json) => _$HafalanSantriModelFromJson(json);
 
 @override final  String id;
@@ -243,6 +246,9 @@ class _HafalanSantriModel implements HafalanSantriModel {
 @override final  int nilaiTajwid;
 @override final  DateTime createdAt;
 @override@JsonKey() final  bool isSynced;
+// Server-only field: written by sendHafalanNotification Cloud Function
+// after FCM dispatch. NEVER set by the client.
+@override@JsonKey(name: 'notifiedAt') final  DateTime? notifiedAt;
 
 /// Create a copy of HafalanSantriModel
 /// with the given fields replaced by the non-null parameter values.
@@ -257,16 +263,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HafalanSantriModel&&(identical(other.id, id) || other.id == id)&&(identical(other.santriId, santriId) || other.santriId == santriId)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.tanggalSetoran, tanggalSetoran) || other.tanggalSetoran == tanggalSetoran)&&(identical(other.jenis, jenis) || other.jenis == jenis)&&(identical(other.surahId, surahId) || other.surahId == surahId)&&(identical(other.surahName, surahName) || other.surahName == surahName)&&(identical(other.ayatMulai, ayatMulai) || other.ayatMulai == ayatMulai)&&(identical(other.ayatSelesai, ayatSelesai) || other.ayatSelesai == ayatSelesai)&&(identical(other.juz, juz) || other.juz == juz)&&(identical(other.nilaiKelancaran, nilaiKelancaran) || other.nilaiKelancaran == nilaiKelancaran)&&(identical(other.nilaiTajwid, nilaiTajwid) || other.nilaiTajwid == nilaiTajwid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isSynced, isSynced) || other.isSynced == isSynced));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HafalanSantriModel&&(identical(other.id, id) || other.id == id)&&(identical(other.santriId, santriId) || other.santriId == santriId)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.tanggalSetoran, tanggalSetoran) || other.tanggalSetoran == tanggalSetoran)&&(identical(other.jenis, jenis) || other.jenis == jenis)&&(identical(other.surahId, surahId) || other.surahId == surahId)&&(identical(other.surahName, surahName) || other.surahName == surahName)&&(identical(other.ayatMulai, ayatMulai) || other.ayatMulai == ayatMulai)&&(identical(other.ayatSelesai, ayatSelesai) || other.ayatSelesai == ayatSelesai)&&(identical(other.juz, juz) || other.juz == juz)&&(identical(other.nilaiKelancaran, nilaiKelancaran) || other.nilaiKelancaran == nilaiKelancaran)&&(identical(other.nilaiTajwid, nilaiTajwid) || other.nilaiTajwid == nilaiTajwid)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.isSynced, isSynced) || other.isSynced == isSynced)&&(identical(other.notifiedAt, notifiedAt) || other.notifiedAt == notifiedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,santriId,guruId,halaqohId,tanggalSetoran,jenis,surahId,surahName,ayatMulai,ayatSelesai,juz,nilaiKelancaran,nilaiTajwid,createdAt,isSynced);
+int get hashCode => Object.hash(runtimeType,id,santriId,guruId,halaqohId,tanggalSetoran,jenis,surahId,surahName,ayatMulai,ayatSelesai,juz,nilaiKelancaran,nilaiTajwid,createdAt,isSynced,notifiedAt);
 
 @override
 String toString() {
-  return 'HafalanSantriModel(id: $id, santriId: $santriId, guruId: $guruId, halaqohId: $halaqohId, tanggalSetoran: $tanggalSetoran, jenis: $jenis, surahId: $surahId, surahName: $surahName, ayatMulai: $ayatMulai, ayatSelesai: $ayatSelesai, juz: $juz, nilaiKelancaran: $nilaiKelancaran, nilaiTajwid: $nilaiTajwid, createdAt: $createdAt, isSynced: $isSynced)';
+  return 'HafalanSantriModel(id: $id, santriId: $santriId, guruId: $guruId, halaqohId: $halaqohId, tanggalSetoran: $tanggalSetoran, jenis: $jenis, surahId: $surahId, surahName: $surahName, ayatMulai: $ayatMulai, ayatSelesai: $ayatSelesai, juz: $juz, nilaiKelancaran: $nilaiKelancaran, nilaiTajwid: $nilaiTajwid, createdAt: $createdAt, isSynced: $isSynced, notifiedAt: $notifiedAt)';
 }
 
 
@@ -277,7 +283,7 @@ abstract mixin class _$HafalanSantriModelCopyWith<$Res> implements $HafalanSantr
   factory _$HafalanSantriModelCopyWith(_HafalanSantriModel value, $Res Function(_HafalanSantriModel) _then) = __$HafalanSantriModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String santriId, String guruId, String halaqohId, DateTime tanggalSetoran, String jenis, int surahId, String surahName, int ayatMulai, int ayatSelesai, int juz, int nilaiKelancaran, int nilaiTajwid, DateTime createdAt, bool isSynced
+ String id, String santriId, String guruId, String halaqohId, DateTime tanggalSetoran, String jenis, int surahId, String surahName, int ayatMulai, int ayatSelesai, int juz, int nilaiKelancaran, int nilaiTajwid, DateTime createdAt, bool isSynced,@JsonKey(name: 'notifiedAt') DateTime? notifiedAt
 });
 
 
@@ -294,7 +300,7 @@ class __$HafalanSantriModelCopyWithImpl<$Res>
 
 /// Create a copy of HafalanSantriModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? santriId = null,Object? guruId = null,Object? halaqohId = null,Object? tanggalSetoran = null,Object? jenis = null,Object? surahId = null,Object? surahName = null,Object? ayatMulai = null,Object? ayatSelesai = null,Object? juz = null,Object? nilaiKelancaran = null,Object? nilaiTajwid = null,Object? createdAt = null,Object? isSynced = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? santriId = null,Object? guruId = null,Object? halaqohId = null,Object? tanggalSetoran = null,Object? jenis = null,Object? surahId = null,Object? surahName = null,Object? ayatMulai = null,Object? ayatSelesai = null,Object? juz = null,Object? nilaiKelancaran = null,Object? nilaiTajwid = null,Object? createdAt = null,Object? isSynced = null,Object? notifiedAt = freezed,}) {
   return _then(_HafalanSantriModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,santriId: null == santriId ? _self.santriId : santriId // ignore: cast_nullable_to_non_nullable
@@ -311,7 +317,8 @@ as int,nilaiKelancaran: null == nilaiKelancaran ? _self.nilaiKelancaran : nilaiK
 as int,nilaiTajwid: null == nilaiTajwid ? _self.nilaiTajwid : nilaiTajwid // ignore: cast_nullable_to_non_nullable
 as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,isSynced: null == isSynced ? _self.isSynced : isSynced // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,notifiedAt: freezed == notifiedAt ? _self.notifiedAt : notifiedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 

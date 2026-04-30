@@ -13,6 +13,13 @@ class RiwayatHafalanCubit extends Cubit<RiwayatHafalanState> {
 
   RiwayatHafalanCubit(this._repository) : super(const RiwayatHafalanState.initial());
 
+  /// Load riwayat hafalan for [santriId] in the given month/year.
+  ///
+  /// Flow:
+  /// 1. Subscribe to the Hive stream immediately (fast, offline-first).
+  /// 2. Trigger a non-blocking seed from Firestore in case Hive was wiped
+  ///    (e.g. fresh install, cache cleared). When the seed writes records to Hive,
+  ///    the stream emits automatically — no extra reload needed.
   void watchRiwayat(String santriId, int month, int year) {
     emit(const RiwayatHafalanState.loading());
     _subscription?.cancel();
@@ -20,6 +27,10 @@ class RiwayatHafalanCubit extends Cubit<RiwayatHafalanState> {
       (list) => emit(RiwayatHafalanState.loaded(list)),
       onError: (e) => emit(RiwayatHafalanState.error(e.toString())),
     );
+
+    // Non-blocking seed: if Hive is empty for this santri, fetch from Firestore.
+    // The stream listener above will automatically receive the newly seeded data.
+    _repository.seedFromRemoteIfEmpty(santriId);
   }
 
   @override

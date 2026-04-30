@@ -11,6 +11,7 @@ import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/cubits/dashbo
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_halaqoh/src/core/theme/data/theme_repository.dart';
@@ -99,6 +100,17 @@ import 'package:my_halaqoh/src/modules/wali_santri_profile/domain/repositories/w
 // Wali Santri Profile — Presentation Layer
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/cubits/wali_santri_profile_cubit.dart';
 
+// Notifications — Data Layer
+import 'package:my_halaqoh/src/modules/notifications/data/datasources/remote/source/abstract/notification_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/notifications/data/datasources/remote/source/implementation/notification_remote_datasource_impl.dart';
+import 'package:my_halaqoh/src/modules/notifications/data/repositories_impl/notification_repository_impl.dart';
+
+// Notifications — Domain Layer
+import 'package:my_halaqoh/src/modules/notifications/domain/repositories/notification_repository.dart';
+
+// Notifications — Presentation Layer
+import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_cubit.dart';
+
 final sl = GetIt.instance;
 
 /// Call this in main.dart before runApp()
@@ -127,6 +139,9 @@ Future<void> initDependencies() async {
   );
   sl.registerLazySingleton<FirebaseFunctions>(
     () => FirebaseFunctions.instance,
+  );
+  sl.registerLazySingleton<FirebaseMessaging>(
+    () => FirebaseMessaging.instance,
   );
 
   // ── Auth ──────────────────────────────────────────────────────────────────
@@ -265,4 +280,21 @@ Future<void> initDependencies() async {
 
   // ── Wali Santri Profile — Cubit (Factory — scoped per screen) ─────────────
   sl.registerFactory<WaliSantriProfileCubit>(() => WaliSantriProfileCubit(sl()));
+
+  // ── Notifications — DataSource ────────────────────────────────────────────
+  // Receives FirebaseMessaging + FirebaseFirestore via GetIt injection.
+  sl.registerLazySingleton<NotificationRemoteDataSource>(
+    () => NotificationRemoteDataSourceImpl(sl<FirebaseMessaging>(), sl<FirebaseFirestore>()),
+  );
+
+  // ── Notifications — Repository ────────────────────────────────────────────
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(sl()),
+  );
+
+  // ── Notifications — Cubit (Singleton — must outlive navigation) ───────────
+  // Registered as Singleton (not Factory) so the onTokenRefresh stream
+  // subscription persists for the entire app session without being torn down
+  // on screen disposal.
+  sl.registerSingleton<NotificationCubit>(NotificationCubit(sl()));
 }

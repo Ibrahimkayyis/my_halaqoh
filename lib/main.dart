@@ -1,8 +1,10 @@
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
@@ -35,15 +37,58 @@ import 'src/modules/guru_hafalan/domain/services/hafalan_sync_service.dart';
 // Auth
 import 'src/modules/auth/presentation/cubits/auth_cubit.dart';
 
+// ── FCM Background Message Handler ────────────────────────────────────────────
+// MUST be a top-level function (not inside a class).
+// CONSTRAINT: This runs in a SEPARATE BACKGROUND ISOLATE.
+// Do NOT use GetIt (sl), Cubits, BuildContext, or any UI code here.
+// Firebase is already initialized by the FCM SDK before this is called.
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // FCM native SDK handles the OS notification display automatically.
+  // No additional action is needed for background/terminated state display.
+  // Add any background data-only processing here if required in the future.
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ── 1. Firebase ────────────────────────────────────────────────────────────
+  // ── 1. Firebase ────────────────────────────────────────────────────
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ── 1b. Firebase App Check ──────────────────────────────────────────────
+  // ── 1a. FCM Background Handler ──────────────────────────────────────
+  // Must be registered immediately after Firebase.initializeApp().
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // ── 1b. Android Notification Channels ──────────────────────────────
+  // Required on Android 8+ (API 26+). Channel IDs must match values in
+  // the Cloud Function payloads (sendAbsensiNotification / sendHafalanNotification).
+  const absensiChannel = AndroidNotificationChannel(
+    'my_halaqoh_absensi',           // id — matches Cloud Function + foreground handler
+    'Notifikasi Absensi MyHalaqoh', // human-readable name
+    description: 'Notifikasi kehadiran santri dari guru halaqoh.',
+    importance: Importance.high,
+  );
+  const hafalanChannel = AndroidNotificationChannel(
+    'my_halaqoh_hafalan',           // id — matches sendHafalanNotification Cloud Function
+    'Notifikasi Hafalan MyHalaqoh', // human-readable name
+    description: 'Notifikasi setoran hafalan santri dari guru halaqoh.',
+    importance: Importance.high,
+  );
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  
+  const initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  final androidImpl = flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+  await androidImpl?.createNotificationChannel(absensiChannel);
+  await androidImpl?.createNotificationChannel(hafalanChannel);
+
+
+  // ── 1c. Firebase App Check ───────────────────────────────────────────────
   await FirebaseAppCheck.instance.activate(
     providerAndroid:
         kDebugMode ? AndroidDebugProvider() : AndroidPlayIntegrityProvider(),

@@ -24,7 +24,7 @@ abstract class AbsensiModel with _$AbsensiModel {
     /// Attendance date (date only, time portion is midnight)
     required DateTime tanggal,
 
-    /// Session key: 'shubuh', 'dhuha1', 'dhuha2', 'ashar', 'maghrib'
+    /// Session key: 'shubuh', 'dhuha', 'siang', 'ashar', 'maghrib'
     required String sesi,
 
     /// Per-student attendance entries
@@ -35,6 +35,11 @@ abstract class AbsensiModel with _$AbsensiModel {
 
     required DateTime createdAt,
     required DateTime updatedAt,
+
+    /// Timestamp set by the Cloud Function after FCM notifications have been
+    /// dispatched for this session. Null means not yet notified.
+    /// NEVER written by the Flutter client — this is a server-only field.
+    @JsonKey(name: 'notifiedAt') DateTime? notifiedAt,
   }) = _AbsensiModel;
 
   factory AbsensiModel.fromJson(Map<String, dynamic> json) =>

@@ -30,6 +30,22 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- FCM: Default notification channel — must match channel ID in main.dart and Cloud Function -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="my_halaqoh_absensi" />
+
+        <!-- FCM: Default notification icon (white monochrome, placed in res/drawable) -->
+        <!-- Using the built-in ic_launcher as fallback; replace with a custom monochrome icon -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+
+        <!-- FCM: Default notification accent color (green matching app primary) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@android:color/holo_green_dark" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
