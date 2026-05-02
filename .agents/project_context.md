@@ -1,51 +1,53 @@
 # MyHalaqoh — Project Context (Source of Truth)
 
-> **Purpose:** This document is the authoritative system prompt for any AI model interacting with the MyHalaqoh codebase. It describes the project's ecosystem, architecture, conventions, and constraints in detail. Every AI-generated code change **must** conform to the rules and patterns documented here.
+> **Purpose:** Authoritative system prompt for any AI model working on this codebase. Every AI-generated change **must** conform to the rules documented here.
+> **Last Updated:** 2026-05-02
 
 ---
 
 ## Table of Contents
-
 1. [Project Overview](#1-project-overview)
 2. [System Architecture (Clean Architecture)](#2-system-architecture-clean-architecture)
 3. [State Management (Cubit Strategy)](#3-state-management-cubit-strategy)
 4. [Database Configuration & Caching Strategy](#4-database-configuration--caching-strategy)
 5. [Quran Data Implementation (Core Feature)](#5-quran-data-implementation-core-feature)
 6. [Authentication & Session Management](#6-authentication--session-management)
-7. [Dependencies & Core Packages](#7-dependencies--core-packages)
-8. [Error Handling & API Integration](#8-error-handling--api-integration)
-9. [AI Coding Rules & Conventions](#9-ai-coding-rules--conventions)
+7. [Push Notifications (FCM)](#7-push-notifications-fcm)
+8. [Offline-First & Sync Architecture](#8-offline-first--sync-architecture)
+9. [Dependencies & Core Packages](#9-dependencies--core-packages)
+10. [Error Handling & Data Mapping](#10-error-handling--data-mapping)
+11. [AI Coding Rules & Conventions](#11-ai-coding-rules--conventions)
 
 ---
 
 ## 1. Project Overview
 
-**MyHalaqoh** is a Flutter mobile application for managing Islamic boarding school (pesantren) operations. Its primary functions are:
+**MyHalaqoh** is a Flutter mobile application for managing Islamic boarding school (pesantren) operations.
 
-- **Halaqoh Management** — Creating and managing Quran study groups (halaqoh), each led by a guru (teacher) with assigned santri (students).
-- **Attendance (Absensi)** — QR/barcode-based attendance tracking for halaqoh sessions.
-- **Hafalan Monitoring** — Recording and tracking Quran memorization (hafalan) progress per student, per juz, and per surah.
-- **Multi-Role Dashboard** — Three distinct role-based experiences: **Admin**, **Guru**, and **Wali Santri** (parent/guardian of santri).
-- **Target Hafalan** — Curriculum-based memorization targets defined per grade level and program (Reguler / Takhassus).
+| Attribute | Value |
+|---|---|
+| Package | `my_halaqoh` |
+| Dart SDK | `^3.9.2` |
+| Firebase Project | `my-halaqoh` |
+| Design Size | `360 × 690` (ScreenUtil) |
+| Primary Font | Poppins (100–900, bundled) |
+| Localization | `slang` (ID/EN), default `id` |
+| State Management | `flutter_bloc` / Cubit |
+| Routing | `auto_route` v10 |
+| DI | `get_it` |
+| Remote DB | Cloud Firestore |
+| Local Cache | Hive |
+| Auth | Firebase Auth (identifier-based email/password) |
+| Cloud Functions | Account creation + FCM notifications |
+| Push Notifications | Firebase Cloud Messaging (FCM) |
 
-| Attribute         | Value                                       |
-| ----------------- | ------------------------------------------- |
-| Package Name      | `my_halaqoh`                                |
-| Dart SDK          | `^3.9.2`                                    |
-| Flutter           | Material 3 enabled                          |
-| Firebase Project  | `my-halaqoh`                                |
-| Design Size       | `360 × 690` (ScreenUtil)                    |
-| Primary Font      | Poppins (100–900 weights bundled)           |
-| Localization      | `slang` (ID / EN), default `id`             |
-| State Management  | `flutter_bloc` / `Cubit`                    |
-| Routing           | `auto_route` v10                            |
-| DI                | `get_it`                                    |
-| Remote DB         | Cloud Firestore                             |
-| Local Cache       | Hive                                        |
-| Auth              | Firebase Auth (email/password, identifier-based) |
-| Cloud Functions   | Firebase Cloud Functions (user account creation) |
-| App Check         | Firebase App Check (Play Integrity / App Attest) |
-| Offline Sync      | `connectivity_plus` + SyncService pattern         |
+**Core features:**
+- **Halaqoh Management** — Study group CRUD; Admin only.
+- **Attendance (Absensi)** — QR/barcode-based session recording; offline-first with Hive.
+- **Hafalan Monitoring** — Quran memorization recording & progress tracking; offline-first with Hive.
+- **Target Hafalan** — Curriculum targets per grade/program (Admin-defined).
+- **Push Notifications** — FCM notifications to Wali Santri on attendance & hafalan events.
+- **Multi-Role Dashboard** — Separate experiences for Admin, Guru, and Wali Santri.
 
 ---
 
@@ -57,874 +59,682 @@
 lib/
 ├── main.dart                          # App entry point & bootstrap
 ├── firebase_options.dart              # FlutterFire generated config
-├── gen/                               # flutter_gen & slang generated code
+├── gen/                               # flutter_gen & slang generated (DO NOT EDIT)
 │   ├── assets.gen.dart
 │   ├── colors.gen.dart
 │   ├── fonts.gen.dart
-│   └── i18n/                          # slang translations
-│       └── translations.g.dart
+│   └── i18n/translations.g.dart
 └── src/
-    ├── core/                          # Cross-cutting concerns
-    │   ├── dictionaries/i18n/         # Translation source files
-    │   ├── locale/                    # Locale cubit & repository
-    │   │   ├── cubit/
-    │   │   └── data/
-    │   ├── quran/                     # Static Quran data module
-    │   │   ├── quran_service.dart
-    │   │   ├── quran_data.dart
-    │   │   ├── surah_model.dart
-    │   │   ├── juz_model.dart
-    │   │   ├── juz_segment_model.dart
-    │   │   └── hafalan_progress.dart
-    │   ├── router/                    # auto_route config
-    │   │   ├── app_router.dart
-    │   │   ├── app_router.gr.dart     # Generated
-    │   │   └── guards/
-    │   │       ├── auth_guard.dart    # Ensures user is authenticated
-    │   │       └── role_guard.dart    # Ensures user has required role
-    │   ├── service_locator/           # GetIt DI setup
-    │   │   └── service_locator.dart
-    │   ├── services/                  # Shared services
-    │   │   └── storage_service.dart   # Firebase Storage wrapper
-    │   ├── theme/                     # Theme system
-    │   │   ├── app_colors.dart
-    │   │   ├── app_theme.dart
-    │   │   ├── theme_mode.dart
-    │   │   ├── cubit/
-    │   │   └── data/
-    │   └── widget/                    # Global reusable widgets
-    │       ├── widgets.dart           # Barrel file
-    │       ├── button/
-    │       ├── dialog/
-    │       ├── month/
-    │       └── tab/
-    └── modules/                       # Feature modules
-        ├── auth/                      # Authentication
-        ├── master_data/               # Admin CRUD (guru, santri, halaqoh, target)
-        ├── guru_dashboard/            # Guru main dashboard
-        ├── guru_absensi/              # Guru attendance features
-        ├── guru_hafalan/              # Guru hafalan recording
-        ├── guru_halaqoh/              # Guru halaqoh detail
-        ├── guru_laporan/              # Guru reports
-        ├── guru_profile/              # Guru profile & settings
-        ├── wali_santri_dashboard/     # Parent/Guardian dashboard
-        ├── wali_santri_absensi/       # Parent attendance view
-        ├── wali_santri_hafalan/       # Parent hafalan view
-        └── wali_santri_profile/       # Parent profile & settings
+    ├── core/
+    │   ├── dictionaries/i18n/         # slang translation source files
+    │   ├── locale/cubit/ + data/      # Locale cubit & SharedPreferences repo
+    │   ├── quran/                     # Static Quran data (singleton service)
+    │   ├── router/                    # auto_route config + generated file
+    │   ├── service_locator/           # GetIt DI — single file
+    │   ├── services/storage_service.dart  # Firebase Storage wrapper
+    │   ├── theme/cubit/ + data/       # Theme cubit & SharedPreferences repo
+    │   └── widget/                    # Global reusable widgets (barrel: widgets.dart)
+    └── modules/                       # Feature modules (13 total)
+        ├── auth/
+        ├── master_data/
+        ├── notifications/             # FCM token management (NEW)
+        ├── guru_dashboard/
+        ├── guru_absensi/              # Full Clean Architecture (NEW)
+        ├── guru_hafalan/              # Full Clean Architecture (NEW)
+        ├── guru_halaqoh/
+        ├── guru_laporan/
+        ├── guru_profile/              # Full Clean Architecture (NEW)
+        ├── wali_santri_dashboard/
+        ├── wali_santri_absensi/
+        ├── wali_santri_hafalan/       # Full Clean Architecture (NEW)
+        └── wali_santri_profile/       # Full Clean Architecture (NEW)
 ```
 
-### 2.2 Clean Architecture Layers (per Module)
+### 2.2 Module Layer Structure
 
-Each feature module follows a strict three-layer architecture:
+Every fully-implemented module follows this pattern:
 
 ```
 modules/<feature>/
-├── data/                              # DATA LAYER
+├── data/
 │   ├── datasources/
-│   │   ├── local/                     # Hive cache
+│   │   ├── local/        # Hive datasource + adapter registration helper
 │   │   └── remote/
-│   │       ├── mapper/                # Firestore ↔ Model mappers
+│   │       ├── mapper/   # Static Mapper classes (fromFirestore / toFirestore)
 │   │       └── source/
-│   │           ├── abstract/          # DataSource contracts
-│   │           └── implementation/    # Firestore implementations
-│   └── repositories_impl/            # Repository implementations
-├── domain/                            # DOMAIN LAYER
-│   ├── models/                        # Freezed data models
-│   ├── repositories/                  # Repository contracts (abstract)
-│   ├── usecase/                       # Use cases (if applicable)
-│   └── helpers/                       # Domain utility classes
-└── presentation/                      # PRESENTATION LAYER
-    ├── cubits/                        # Cubit + State files
-    ├── screens/                       # Page-level widgets (@RoutePage)
-    └── widgets/                       # Feature-specific widgets
+│   │           ├── abstract/         # DataSource interface
+│   │           └── implementation/   # Firestore impl
+│   └── repositories_impl/
+├── domain/
+│   ├── models/           # @freezed models
+│   ├── repositories/     # Abstract repo contracts
+│   ├── services/         # Domain-level services (e.g., SyncService)
+│   ├── usecase/          # (optional) single-responsibility use cases
+│   └── helpers/          # Pure utility classes
+└── presentation/
+    ├── cubits/           # Cubit + State files
+    ├── screens/          # @RoutePage() screens
+    └── widgets/          # Feature-specific widgets
 ```
 
-> **Note:** All major feature modules (`guru_absensi`, `guru_hafalan`, `guru_profile`, `guru_dashboard`) now have their own full 3-layer architecture (data/domain/presentation). They define their own datasources, repositories, cubits, and models independently. Some presentation-only modules (e.g., `wali_santri_*`) may still rely on shared cubits from other modules.
+> **Partial modules** (e.g., `guru_halaqoh`, `guru_laporan`, `wali_santri_absensi`) have only a `presentation/` layer and rely on cubits/repositories from other modules provided through the global `MultiBlocProvider`.
 
 ### 2.3 Data Flow
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        PRESENTATION LAYER                           │
-│  Screen (Widget) ──► BlocBuilder/Listener ──► Cubit.method()        │
-│                                                    │                │
-│                                                    ▼                │
-│                              Cubit (extends Cubit<State>)           │
-│                              emits State variants                   │
-│                              calls Repository methods               │
-└────────────────────────────────┬────────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                          DOMAIN LAYER                               │
-│  Repository (abstract class)                                        │
-│  - Defines contracts: Stream<List<T>>, Future<Either<String, T>>    │
-│  - No implementation details, no imports from data layer            │
-│                                                                     │
-│  UseCase (optional)                                                 │
-│  - Single-responsibility business logic                             │
-│  - Calls repository methods                                        │
-│                                                                     │
-│  Model (Freezed @freezed)                                           │
-│  - Immutable data classes with copyWith, fromJson, toJson           │
-└────────────────────────────────┬────────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                           DATA LAYER                                │
-│                                                                     │
-│  RepositoryImpl                                                     │
-│  ├── RemoteDataSource (Firestore)                                   │
-│  │   ├── watchAll()  → Stream via .snapshots()                      │
-│  │   ├── getAll()    → Future one-time fetch                        │
-│  │   ├── add()       → Create document                              │
-│  │   ├── update()    → Update document                              │
-│  │   └── delete()    → Delete document                              │
-│  │                                                                  │
-│  └── LocalDataSource (Hive)                                         │
-│      ├── cacheAll()  → Clear + re-put all items                     │
-│      ├── put()       → Upsert single item                           │
-│      ├── getAll()    → Read from box                                │
-│      └── delete()    → Remove from box                              │
-│                                                                     │
-│  Mapper (static utility class)                                      │
-│  ├── fromFirestore(DocumentSnapshot) → Model                       │
-│  └── toFirestore(Model) → Map<String, dynamic>                     │
-└─────────────────────────────────────────────────────────────────────┘
+UI Widget
+  └── context.read<XxxCubit>().method()
+        └── Repository (abstract)
+              ├── RemoteDataSource → Firestore / Cloud Functions
+              └── LocalDataSource  → Hive (cache / offline-first)
 ```
+
+- **Realtime:** `watchAll()` → `collection.snapshots().map(mapper)` → side-effect caches to Hive
+- **One-time:** `getAll()` → Firestore fetch → cache to Hive; on failure → read Hive fallback
+- **Offline-first (Absensi & Hafalan):** Write to Hive first → mark `isSynced: false` → SyncService pushes to Firestore when online
 
 ### 2.4 Dependency Injection (GetIt)
 
-All dependencies are registered in `lib/src/core/service_locator/service_locator.dart`.
+Global singleton: `final sl = GetIt.instance;` in `service_locator.dart`.
 
-**Registration order (critical):**
+**Registration order (strict):**
 
-1. **Core:** `SharedPreferences`, `ThemeRepository`, `ThemeCubit`, `LocaleRepository`, `LocaleCubit`, `StorageService`
-2. **Firebase Instances:** `FirebaseFirestore.instance`, `FirebaseAuth.instance`, `FirebaseFunctions.instance`
-3. **Auth:** `AuthRemoteDataSource` → `AuthRepository` → `AuthCubit`
-4. **Master Data Local:** `MasterDataLocalDataSource` (singleton)
-5. **Master Data Remote:** `GuruRemoteDataSource`, `SantriRemoteDataSource`, `HalaqohRemoteDataSource`, `TargetHafalanRemoteDataSource`
-6. **Master Data Repositories:** `GuruRepository`, `SantriRepository`, `HalaqohRepository`, `TargetHafalanRepository`
-7. **Master Data Cubits:** `GuruCubit`, `SantriCubit`, `HalaqohCubit`, `TargetHafalanCubit` (registered as `Factory`)
-8. **Guru Absensi:** `AbsensiLocalDataSource` → `AbsensiRemoteDataSource` → `AbsensiRepository` → `AbsensiSyncService` → `AbsensiCubit`
-9. **Guru Hafalan:** `HafalanSantriLocalDataSource` → `HafalanSantriRemoteDataSource` → `HafalanSantriRepository` → `HafalanSyncService` → `InputHafalanCubit`, `RiwayatHafalanCubit`, `ProgressHafalanCubit`
-10. **Guru Dashboard:** `DashboardSummaryCubit` (composed from `AbsensiRepository` + `HafalanSantriRepository`)
-11. **Guru Profile:** `GuruProfileRemoteDataSource` → `GuruProfileRepository` → `GuruProfileCubit`
+1. `SharedPreferences` → `ThemeRepository/Cubit` → `LocaleRepository/Cubit` → `StorageService`
+2. Firebase: `FirebaseFirestore`, `FirebaseAuth`, `FirebaseFunctions`, **`FirebaseMessaging`** *(new)*
+3. Auth: DataSource → Repository → `AuthCubit` (Singleton)
+4. Master Data: Local DS (Singleton) → Remote DSes → Repositories → Cubits (Factory)
+5. Guru Absensi: Local DS → Remote DS → Repository → `AbsensiSyncService` → `AbsensiCubit` (Factory)
+6. Guru Hafalan: Local DS → Remote DS → Repository → `HafalanSyncService` → Cubits (Factory)
+7. Guru Dashboard: `DashboardSummaryCubit` (Factory)
+8. Guru Profile: Remote DS → Repository → `GuruProfileCubit` (Factory)
+9. Wali Santri Hafalan: Remote DS → Repository → Cubits (Factory)
+10. Wali Santri Profile: Remote DS → Repository → `WaliSantriProfileCubit` (Factory)
+11. Notifications: Remote DS → Repository → **`NotificationCubit` (Singleton)** *(new)*
 
-**Conventions:**
+**Registration rules:**
 
-| Type                 | Registration Method         | Reason                                         |
-| -------------------- | --------------------------- | ---------------------------------------------- |
-| Firebase instances   | `registerLazySingleton`     | Single instance, created on first use          |
-| DataSources          | `registerLazySingleton`     | Stateless, shared across repos                 |
-| Repositories         | `registerLazySingleton`     | Stateless, shared across cubits                |
-| Sync Services        | `registerLazySingleton`     | Long-lived, listen to connectivity changes     |
-| Global Cubits        | `registerSingleton`         | Auth, Theme, Locale — need to persist          |
-| Feature Cubits       | `registerFactory`           | New instance per widget tree                   |
-
-**Access pattern:** Use `sl<Type>()` to resolve dependencies. Never construct classes manually if they are registered in the service locator.
+| Type | Method | Reason |
+|---|---|---|
+| Firebase instances | `registerLazySingleton` | Single SDK instance |
+| DataSources | `registerLazySingleton` | Stateless |
+| Repositories | `registerLazySingleton` | Stateless |
+| Global Cubits (Auth, Theme, Locale, **Notification**) | `registerSingleton` | Must persist for app lifetime |
+| Feature Cubits | `registerFactory` | Scoped per screen |
 
 ### 2.5 Bootstrap Sequence (`main.dart`)
 
 ```dart
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // 1. Firebase.initializeApp()
-  // 1b. FirebaseAppCheck.instance.activate() (debug vs production providers)
-  // 2. Hive.initFlutter() + registerMasterDataAdapters() + registerAbsensiAdapters()
-  // 3. QuranService.instance.initialize()
-  // 4. initDependencies() (GetIt)
-  // 5. sl<MasterDataLocalDataSource>().init() (open Hive boxes)
-  // 6. sl<ThemeCubit>().initialize() + sl<LocaleCubit>().initialize()
-  // 7. sl<AbsensiSyncService>().start() + sl<HafalanSyncService>().start()
-  // 8. runApp(TranslationProvider(child: MyApp()))
-}
+// 1. Firebase.initializeApp()
+// 1a. FirebaseMessaging.onBackgroundMessage(_handler)  // top-level function
+// 1b. Android notification channels (absensi + hafalan) via flutter_local_notifications
+// 1c. FirebaseAppCheck.instance.activate()             // debug/release providers
+// 2. Hive.initFlutter()
+//    registerMasterDataAdapters()   // in hive_adapters.dart
+//    registerAbsensiAdapters()      // in absensi_hive_adapters.dart
+// 3. QuranService.instance.initialize()
+// 4. initDependencies()              // GetIt
+// 5. sl<MasterDataLocalDataSource>().init()  // open Hive boxes
+// 6. sl<ThemeCubit>().initialize() + sl<LocaleCubit>().initialize()
+// 7. sl<AbsensiSyncService>().start()
+//    sl<HafalanSyncService>().start()
+// 8. runApp(TranslationProvider(child: MyApp()))
 ```
 
-Global cubits are provided via `MultiBlocProvider` in `MyApp.build()`:
-- `ThemeCubit`, `LocaleCubit`
-- `AuthCubit` (with `..checkAuthStatus()`)
-- `GuruCubit`, `SantriCubit`, `HalaqohCubit`, `TargetHafalanCubit` (each with `..watchAll()`)
+`AppRouter` now receives `AuthCubit` via constructor: `AppRouter(sl<AuthCubit>())`.
+
+**Global `MultiBlocProvider`:** ThemeCubit, LocaleCubit, AuthCubit (+ `checkAuthStatus()`), GuruCubit (+ `watchAll()`), SantriCubit, HalaqohCubit, TargetHafalanCubit.
+
+> `NotificationCubit` is **not** in the global MultiBlocProvider. It is initialized directly on `AuthState.authenticated` and accessed via `sl<NotificationCubit>()`.
 
 ---
 
 ## 3. State Management (Cubit Strategy)
 
-### 3.1 State Definition Pattern
-
-All Cubit states use **Freezed sealed unions** with the following canonical variants:
+### 3.1 Standard State Definition
 
 ```dart
 @freezed
 abstract class XxxState with _$XxxState {
-  const factory XxxState.initial()                  = _Initial;
-  const factory XxxState.loading()                  = _Loading;
+  const factory XxxState.initial()                   = _Initial;
+  const factory XxxState.loading()                   = _Loading;
   const factory XxxState.loaded(List<XxxModel> data) = _Loaded;
-  const factory XxxState.error(String message)      = _Error;
+  const factory XxxState.error(String message)       = _Error;
 }
 ```
 
-**Key rules:**
-- The `loaded` state carries the **domain model(s)** as its payload.
-- The `error` state carries a **user-facing `String` message** (not an exception object).
-- Additional state variants (e.g., `authenticated`, `unauthenticated`) are added only when semantically necessary (see `AuthState`).
+### 3.2 Specialized States
 
-### 3.2 Cubit Implementation Pattern
+**`AuthState`** adds `authenticated(UserModel)` and `unauthenticated()`.
+
+**`NotificationState`** uses: `initial`, `loading`, `tokenSaved`, `permissionDenied`, `error`. Note: `permissionDenied` is **not** treated as an error — the app continues normally.
+
+### 3.3 Standard Cubit Pattern
 
 ```dart
 class XxxCubit extends Cubit<XxxState> {
   final XxxRepository _repository;
-  StreamSubscription<List<XxxModel>>? _subscription;
+  StreamSubscription? _sub;
 
   XxxCubit(this._repository) : super(const XxxState.initial());
 
-  /// Real-time streaming from Firestore
   void watchAll() {
     emit(const XxxState.loading());
-    _subscription?.cancel();
-    _subscription = _repository.watchAll().listen(
+    _sub?.cancel();
+    _sub = _repository.watchAll().listen(
       (list) => emit(XxxState.loaded(list)),
       onError: (e) => emit(XxxState.error(e.toString())),
     );
   }
 
-  /// One-time fetch (uses Either for error handling)
   Future<void> loadAll() async {
     emit(const XxxState.loading());
     final result = await _repository.getAll();
     result.fold(
-      (error) => emit(XxxState.error(error)),
-      (list)  => emit(XxxState.loaded(list)),
+      (err) => emit(XxxState.error(err)),
+      (list) => emit(XxxState.loaded(list)),
     );
   }
 
-  /// CUD operations return bool for UI feedback
-  Future<bool> addXxx(XxxModel model) async {
-    final result = await _repository.add(model);
-    return result.isRight();
-  }
+  // CUD methods return bool for UI feedback
+  Future<bool> addXxx(XxxModel model) async =>
+      (await _repository.add(model)).isRight();
 
   @override
-  Future<void> close() {
-    _subscription?.cancel();
-    return super.close();
-  }
+  Future<void> close() { _sub?.cancel(); return super.close(); }
 }
 ```
 
-### 3.3 UI Consumption Pattern
+### 3.4 UI Consumption
 
-**BlocBuilder** — For rendering based on state:
-```dart
-BlocBuilder<XxxCubit, XxxState>(
-  builder: (context, state) {
-    return state.when(
-      initial:  () => const SizedBox.shrink(),
-      loading:  () => const CircularProgressIndicator(),
-      loaded:   (data) => ListView(...),
-      error:    (msg) => Text(msg),
-    );
-  },
-)
-```
-
-**BlocListener** — For side effects (snackbars, navigation):
-```dart
-BlocListener<AuthCubit, AuthState>(
-  listener: (context, state) {
-    state.maybeWhen(
-      error: (msg) => ScaffoldMessenger.of(context).showSnackBar(...),
-      orElse: () {},
-    );
-  },
-)
-```
-
-**context.read\<Cubit\>()** — To invoke cubit methods from event handlers.
+- `BlocBuilder` → render UI based on state (`state.when(...)`)
+- `BlocListener` → side effects: snackbars, navigation
+- `context.read<XxxCubit>().method()` → invoke actions from event handlers
 
 ---
 
 ## 4. Database Configuration & Caching Strategy
 
-### 4.1 Remote — Cloud Firestore
+### 4.1 Firestore Collections Schema
 
-#### Collections Schema
-
-| Collection        | Document ID Format      | Key Fields                                                                      |
-| ----------------- | ----------------------- | ------------------------------------------------------------------------------- |
-| `/users/{uid}`    | Firebase Auth UID       | `uid`, `identifier`, `role` ("admin"/"guru"/"santri"), `programType`, `displayName`, `linkedDocId` |
-| `/guru/{id}`      | Auto-generated          | `nip`, `nama`, `phone?`, `profilePicture?`, `program` ("R"/"T"), `authUid?`, `createdAt`, `updatedAt` |
-| `/santri/{id}`    | Auto-generated          | `nis`, `nama`, `profilePicture?`, `kelas` ("7"-"12"), `program` ("R"/"T"), `halaqohId?`, `waliSantri?` (embedded), `authUid?`, `createdAt`, `updatedAt` |
-| `/halaqoh/{id}`   | Auto-generated          | `nama`, `kelas`, `program`, `guruId`, `guruNama` (denormalized), `santriIds[]`, `jumlahSantri`, `createdAt`, `updatedAt` |
+| Collection | Doc ID | Key Fields |
+|---|---|---|
+| `/users/{uid}` | Firebase Auth UID | `uid`, `identifier`, `role` ("admin"/"guru"/"santri"), `programType` ("R"/"T"), `displayName`, `linkedDocId`, **`fcmToken`** *(new)*, **`fcmTokenUpdatedAt`** *(new)* |
+| `/guru/{id}` | Auto | `nip`, `nama`, `phone?`, `profilePicture?`, `program` ("R"/"T"), `authUid?`, `createdAt`, `updatedAt` |
+| `/santri/{id}` | Auto | `nis`, `nama`, `kelas` ("7"-"12"), `program` ("R"/"T"), `halaqohId?`, `waliSantri` (embedded), `authUid?`, `profilePicture?`, `createdAt`, `updatedAt` |
+| `/halaqoh/{id}` | Auto | `nama`, `kelas`, `program`, `guruId`, `guruNama` (denorm.), `santriIds[]`, `jumlahSantri`, `createdAt`, `updatedAt` |
 | `/targetHafalan/{id}` | `"{kelas}_{program}"` (e.g., `"7_Reguler"`) | `kelas`, `program` ("Reguler"/"Takhassus"), `targetJuz`, `juzList[]`, `tahunAjaran`, `createdAt`, `updatedAt` |
-| `/absensi/{id}`   | Auto-generated          | `halaqohId`, `guruId`, `tanggal` (date), `sesi` ("shubuh"/"dhuha1"/"dhuha2"/"ashar"/"maghrib"), `records[]` (embedded `AbsensiRecordEntry`), `isSynced`, `createdAt`, `updatedAt` |
-| `/hafalan_santri/{id}` | Auto-generated     | `santriId`, `guruId`, `halaqohId`, `tanggalSetoran`, `jenis` ("Ziyadah"/"Murajaah"), `surahId`, `surahName`, `ayatMulai`, `ayatSelesai`, `juz`, `nilaiKelancaran`, `nilaiTajwid`, `isSynced`, `createdAt` |
+| `/absensi/{id}` | Auto | `halaqohId`, `guruId`, `tanggal`, `sesi` ("shubuh"/"dhuha"/"siang"/"ashar"/"maghrib"), `records[]` (embedded `AbsensiRecordEntry`), `isSynced`, `createdAt`, `updatedAt`, `notifiedAt?` (server-only) |
+| `/hafalan/{id}` | Auto | `santriId`, `guruId`, `halaqohId`, `tanggalSetoran`, `jenis` ("Ziyadah"/"Murajaah"), `surahId`, `surahName`, `ayatMulai`, `ayatSelesai`, `juz`, `nilaiKelancaran`, `nilaiTajwid`, `createdAt`, `isSynced`, `notifiedAt?` (server-only) |
 
-#### Schema Design Principles
+**Schema design principles:**
+1. **Denormalization:** `guruNama` in halaqoh; `nama`/`nis` in `AbsensiRecordEntry` — avoids joins.
+2. **Embedded documents:** `WaliSantriModel` inside santri; `AbsensiRecordEntry` list inside absensi.
+3. **Server-only fields:** `notifiedAt` on absensi and hafalan is **written only by Cloud Functions** after FCM dispatch. The Flutter client must **never** set this field.
+4. **Program codes:** Master data uses `"R"`/`"T"` short codes; `targetHafalan` uses `"Reguler"`/`"Takhassus"`. Use `TargetHafalanHelper.programCodeToFullName()` to convert.
+5. **Timestamps:** Firestore `Timestamp` ↔ Dart `DateTime` conversion is handled exclusively in Mapper classes.
 
-1. **Denormalization:** `guruNama` is stored in `halaqoh` documents to avoid extra reads for display.
-2. **Embedded Documents:** `WaliSantriModel` (parent info) is nested inside the `santri` document, not a separate collection.
-3. **Timestamps:** All documents use Firestore `Timestamp` type for `createdAt` / `updatedAt`. Mappers convert to/from Dart `DateTime`.
-4. **Program Codes:** Master data uses short codes (`"R"`, `"T"`). `TargetHafalan` uses full names (`"Reguler"`, `"Takhassus"`). Use `TargetHafalanHelper` for conversion.
+### 4.2 Hive — Complete Type ID Registry
 
-#### Data Fetching Patterns
+> **CRITICAL: Type IDs are permanent. Never reuse a retired ID.**
 
-- **Realtime Streams:** Primary method. `watchAll()` uses `collection.snapshots().map(...)` for live updates.
-- **One-Time Fetch:** `getAll()` uses `collection.get()` as fallback (e.g., offline mode reads from Hive cache).
-- **Ordering:** Documents are typically ordered by `'nama'` (alphabetically).
+| Type ID | Class | Adapter Location |
+|---|---|---|
+| 1 | `GuruModel` | `hive_adapters.dart` |
+| 2 | `SantriModel` | `hive_adapters.dart` |
+| 3 | `WaliSantriModel` | `hive_adapters.dart` |
+| 4 | `HalaqohModel` | `hive_adapters.dart` |
+| 5 | `TargetHafalanModel` | `hive_adapters.dart` |
+| 6 | `HafalanSantriModel` | `hive_adapters.dart` |
+| 7 | *(reserved / deprecated)* | — |
+| 8 | `AbsensiModel` | `absensi_hive_adapters.dart` |
+| 9 | `AbsensiRecordEntry` | `absensi_hive_adapters.dart` |
 
-#### Firestore Security Rules
+**Next available Type ID: 10**
 
-```
-- Authenticated users can READ all data.
-- Only Admin role can WRITE/MODIFY data (default rule).
-- Users can read their own /users/{uid} document.
-- Guru can UPDATE their own /guru/{guruId} document (linkedDocId match).
-- /absensi/{id}: Any authenticated user can read/write (guru attendance recording).
-- /hafalan_santri/{id}: Any authenticated user can read/write (guru hafalan recording).
-```
+**Two adapter registration helpers:**
+- `registerMasterDataAdapters()` — in `hive_adapters.dart`, called first in `main()`
+- `registerAbsensiAdapters()` — in `absensi_hive_adapters.dart`, called second in `main()`
 
-### 4.2 Local — Hive (Cache Layer)
+### 4.3 Hive Boxes
 
-#### Setup
+| Box Name | Type | Opened By |
+|---|---|---|
+| `guru_box` | `Box<GuruModel>` | `MasterDataLocalDataSource.init()` |
+| `santri_box` | `Box<SantriModel>` | `MasterDataLocalDataSource.init()` |
+| `halaqoh_box` | `Box<HalaqohModel>` | `MasterDataLocalDataSource.init()` |
+| `target_hafalan_box` | `Box<TargetHafalanModel>` | `MasterDataLocalDataSource.init()` |
+| `hafalan_santri_box` | `Box<HafalanSantriModel>` | `HafalanSantriLocalDataSource` (lazy via `Hive.box()`) |
+| `absensi_box` | `Box<AbsensiModel>` | `AbsensiLocalDataSource` (lazy via `Hive.box()`) |
 
-1. **Initialization:** `Hive.initFlutter()` is called in `main()`.
-2. **Adapter Registration:** Two registration functions are called in `main()` immediately after Hive init:
-   - `registerMasterDataAdapters()` — Registers adapters for Guru, Santri, WaliSantri, Halaqoh, TargetHafalan, and HafalanSantri models.
-   - `registerAbsensiAdapters()` — Registers adapters for AbsensiModel and AbsensiRecordEntry.
-3. **Box Opening:** `MasterDataLocalDataSource.init()` opens boxes for guru, santri, halaqoh, targetHafalan, and hafalanSantri. The `AbsensiLocalDataSource` opens its own box lazily via `_openBox()`.
+> Absensi and Hafalan boxes use **lazy access** (`Hive.box<T>(name)`) — they must be opened before being accessed. Opening happens in the respective local datasource constructors or `init()` methods.
 
-#### Hive Boxes
+### 4.4 Caching Strategies by Module
 
-| Box Name            | Type                        | Type ID | Managed By                    |
-| ------------------- | --------------------------- | ------- | ----------------------------- |
-| `guru_box`          | `Box<GuruModel>`            | 1       | `MasterDataLocalDataSource`   |
-| `santri_box`        | `Box<SantriModel>`          | 2       | `MasterDataLocalDataSource`   |
-| `halaqoh_box`       | `Box<HalaqohModel>`         | 4       | `MasterDataLocalDataSource`   |
-| `target_hafalan_box`| `Box<TargetHafalanModel>`   | 5       | `MasterDataLocalDataSource`   |
-| `hafalan_santri_box`| `Box<HafalanSantriModel>`   | 6       | `MasterDataLocalDataSource`   |
-| `absensi_box`       | `Box<AbsensiModel>`         | 8       | `AbsensiLocalDataSource`      |
+**Master Data (Guru, Santri, Halaqoh, TargetHafalan):** Write-through cache.
+- `watchAll()` → Firestore stream → cache Hive on each emission → emit to Cubit.
+- `getAll()` → fetch Firestore → cache Hive → on failure read Hive.
 
-> `WaliSantriModel` has Type ID `3` (embedded inside `SantriModel`).
-> `AbsensiRecordEntry` has Type ID `9` (embedded inside `AbsensiModel`).
-
-#### TypeAdapter Convention
-
-- Adapters are **hand-written** (not generated) in `hive_adapters.dart`.
-- Each adapter reads/writes fields by index (byte-based).
-- `DateTime` fields are serialized as ISO 8601 strings (master data adapters) or millisecondsSinceEpoch (absensi adapters).
-- **Type IDs must never be reused.** The next available Type ID is **10**.
-
-#### Caching Strategy
-
-Two distinct caching strategies are used:
-
-**Pattern A — Write-through cache (Master Data):**
-```
-watchAll():
-  Firestore stream → on each emission:
-    1. Update Hive cache (clear + re-put all)
-    2. Emit data to Cubit
-
-getAll():
-  try: Fetch from Firestore → cache to Hive → return Right(data)
-  catch: Read from Hive cache → if not empty return Right(cached)
-         else return Left(errorMessage)
-
-add/update/delete():
-  1. Perform Firestore operation
-  2. Update Hive cache (put/delete)
-  3. Return Either result
-```
-
-**Pattern B — Offline-first with sync (Absensi & Hafalan):**
-```
-saveSession() / addHafalan():
-  1. Save to Hive immediately (isSynced: false)
-  2. Try to push to Firestore
-  3. If online success → mark as synced (isSynced: true)
-  4. If offline → stays in Hive with isSynced: false
-
-SyncService.start():
-  1. Listen to connectivity_plus changes
-  2. On connectivity restored → repository.syncPendingRecords()
-  3. syncPendingRecords() reads all isSynced=false from Hive,
-     pushes to Firestore, marks synced on success
-  4. Also performs an immediate sync attempt on app startup
-```
-
-> **Key difference:** Master data is admin-managed and always online. Absensi and hafalan are guru-recorded and must work offline (e.g., in areas with poor connectivity).
+**Absensi & Hafalan (Offline-First):**
+- **Write:** Save to Hive immediately with `isSynced: false`. SyncService pushes to Firestore when connectivity is restored.
+- **Read:** Stream from Hive box (reactive via `box.watch()`). Seed from Firestore on first open if local box is empty (`seedFromRemoteIfEmpty`).
+- **Sync flag:** `isSynced: false` = pending. SyncService calls `syncPendingRecords()` on connectivity change.
+- **`notifiedAt`:** Read-only from client perspective. Set by Cloud Function only.
 
 ---
 
 ## 5. Quran Data Implementation (Core Feature)
 
-### 5.1 Overview
-
-The Quran data is a **static JSON asset** (`assets/data/quran.json`) containing the complete structure of all 114 surahs and 30 juz, including ayat counts and juz-to-surah mappings. It is the backbone for hafalan target definition and progress calculation.
-
-### 5.2 Data Loading Workflow
+### 5.1 Data Loading Workflow
 
 ```
 main() → QuranService.instance.initialize()
-           │
-           ├── rootBundle.loadString('assets/data/quran.json')
-           ├── jsonDecode(raw) → Map<String, dynamic>
-           ├── QuranData.fromJson(json)  (Freezed deserialization)
-           │
-           └── Build O(1) lookup maps:
-               _surahById   : Map<int, SurahModel>
-               _juzByNumber : Map<int, JuzModel>
+  1. rootBundle.loadString('assets/data/quran.json')
+  2. jsonDecode(raw) → Map<String, dynamic>
+  3. QuranData.fromJson(json)    // Freezed deserialization
+  4. Build O(1) maps:
+     _surahById   : Map<int, SurahModel>
+     _juzByNumber : Map<int, JuzModel>
+  5. _initialized = true
 ```
 
-### 5.3 Data Models
+### 5.2 Data Model Hierarchy
 
 ```
 QuranData
 ├── surahs: List<SurahModel>
-│   ├── id: int (1-114)
-│   ├── name: String (e.g., "Al-Fatihah")
-│   ├── nameAr: String (Arabic name)
-│   ├── ayatCount: int
-│   ├── juzStart: int
+│   ├── id, name, nameAr, ayatCount, juzStart
 │   └── juzMappings: List<JuzSegmentModel>
-│       ├── juz: int (juz number)
-│       ├── ayatStart: int
-│       └── ayatEnd: int
-│
+│       └── juz, ayatStart, ayatEnd
 └── juz: List<JuzModel>
-    ├── number: int (1-30)
-    ├── totalAyat: int
+    ├── number, totalAyat
     └── surahs: List<JuzSegmentModel>
-        ├── surahId: int
-        ├── ayatStart: int
-        └── ayatEnd: int
+        └── surahId, ayatStart, ayatEnd
 ```
 
-### 5.4 QuranService API
+### 5.3 QuranService API
 
-`QuranService` is a **Singleton** accessed via `QuranService.instance`.
+`QuranService.instance` — Singleton. Call `initialize()` once in `main()`.
 
-| Method | Description |
-| --- | --- |
-| `initialize()` | Load & parse JSON. Must be called once before any queries. |
-| `getAllSurahs()` | Returns unmodifiable list of all 114 surahs. |
-| `getSurahById(int)` | O(1) lookup by surah ID. |
-| `getSurahsByJuz(int)` | All surahs that appear in a given juz. |
-| `getAllJuz()` | Returns unmodifiable list of all 30 juz. |
-| `getJuzByNumber(int)` | O(1) lookup by juz number. |
-| `getTotalAyatInJuz(int)` | Total ayat count for a specific juz. |
-| `getTotalAyatForJuzList(List<int>)` | Sum of ayat for multiple juz numbers. |
-| `isValidAyatRange(...)` | Validates a surah/ayat range. |
-| `calculateProgress(...)` | Computes `OverallHafalanProgress` from memorized segments. |
-| `getSegmentsForJuzList(List<int>)` | All `JuzSegmentModel`s for given juz numbers. |
+| Method | Returns | Notes |
+|---|---|---|
+| `getAllSurahs()` | `List<SurahModel>` (unmodifiable) | |
+| `getSurahById(int)` | `SurahModel?` | O(1) map lookup |
+| `getSurahsByJuz(int)` | `List<SurahModel>` | |
+| `getAllJuz()` | `List<JuzModel>` (unmodifiable) | |
+| `getJuzByNumber(int)` | `JuzModel?` | O(1) map lookup |
+| `getTotalAyatInJuz(int)` | `int` | |
+| `getTotalAyatForJuzList(List<int>)` | `int` | Used for target calculation |
+| `isValidAyatRange(...)` | `bool` | Validates hafalan input ranges |
+| `calculateProgress(List<Map<String, int>>)` | `OverallHafalanProgress` | Core progress engine |
+| `getSegmentsForJuzList(List<int>)` | `List<JuzSegmentModel>` | |
 
-### 5.5 Progress Calculation
-
-`calculateProgress(List<Map<String, int>> memorizedSegments)` produces:
+### 5.4 Progress Data Model
 
 ```
 OverallHafalanProgress
-├── totalAyatQuran: int
-├── totalMemorized: int
-├── percentage: double
-├── completedJuz: int
+├── totalAyatQuran, totalMemorized, percentage, completedJuz
 └── juzProgressList: List<JuzProgress>
     ├── juzNumber, totalAyat, memorizedAyat, percentage
     └── surahProgressList: List<SurahProgress>
         └── surahId, surahName, totalAyat, memorizedAyat, percentage
 ```
 
-### 5.6 Memory Considerations
+### 5.5 Memory Considerations
 
-- The full `quran.json` is loaded once at startup and held in memory for the app's lifetime.
-- O(1) lookup maps (`_surahById`, `_juzByNumber`) are built during initialization.
-- `_assertInitialized()` guards all public methods to prevent NPE on uninitialized access.
-- The `calculateProgress` method uses a `Set<int>` per ayat range to deduplicate overlapping memorized segments.
+- JSON loaded **once at startup**, held in memory for app lifetime.
+- `_assertInitialized()` guards all public methods.
+- `calculateProgress` uses `Set<int>` per range to deduplicate overlapping memorized segments.
 
 ---
 
 ## 6. Authentication & Session Management
 
-### 6.1 Auth Flow
+### 6.1 Login Flow
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                         LOGIN FLOW                                │
-│                                                                   │
-│  1. User enters identifier (NIP or NIS) + password                │
-│  2. App constructs email: "{identifier}@myhalaqoh.app"            │
-│  3. FirebaseAuth.signInWithEmailAndPassword(email, password)      │
-│  4. On success → fetch /users/{uid} document from Firestore       │
-│  5. Parse UserModel (uid, identifier, role, programType, etc.)    │
-│  6. AuthCubit emits AuthState.authenticated(userModel)            │
-│                                                                   │
-│  NOTE: The AuthCubit does NOT manually emit authenticated on      │
-│  login success. Instead, the authStateChanges listener detects    │
-│  the new user and triggers _fetchUserMeta() automatically.        │
-└──────────────────────────────────────────────────────────────────┘
+1. User enters identifier (NIP/NIS) + password
+2. Build email: "{identifier}@myhalaqoh.app"
+3. FirebaseAuth.signInWithEmailAndPassword(email, password)
+4. Fetch /users/{uid} from Firestore → parse UserModel
+5. AuthCubit.authStateChanges listener → _fetchUserMeta() → emit authenticated(userModel)
 ```
 
-### 6.2 Auth Account Creation
+> **Important:** On successful login, `AuthCubit` does **not** manually emit `authenticated`. The `authStateChanges` stream detects the new Firebase session and triggers `_fetchUserMeta()` automatically.
 
-New guru/santri accounts are created via **Firebase Cloud Functions** (`createUserAccount`), not client-side. The flow:
-
-1. Admin adds a guru/santri via the master data UI.
-2. `RemoteDataSourceImpl.add()` calls `FirebaseFunctions.httpsCallable('createUserAccount')`.
-3. Cloud Function creates a Firebase Auth user with email `"{nip_or_nis}@myhalaqoh.app"` and a default password.
-4. Cloud Function creates the `/users/{uid}` metadata document.
-5. The returned `uid` is stored in the guru/santri Firestore document as `authUid`.
-
-### 6.3 UserModel
+### 6.2 UserModel Fields
 
 ```dart
 UserModel {
   uid: String,           // Firebase Auth UID
   identifier: String,    // NIP, NIS, or "admin"
   role: String,          // "admin", "guru", or "santri"
-  programType: String?,  // "R" or "T" (nullable for Admin)
+  programType: String?,  // "R" or "T" (null for Admin)
   displayName: String,
-  linkedDocId: String,   // Doc ID in /guru or /santri (or "SYSTEM" for admin)
+  linkedDocId: String,   // doc ID in /guru or /santri (or "SYSTEM" for admin)
 }
 ```
 
-### 6.4 AuthState Variants
+`/users/{uid}` also stores `fcmToken` and `fcmTokenUpdatedAt` — managed exclusively by `NotificationCubit`.
+
+### 6.3 AuthState Variants
 
 ```dart
-AuthState.initial()                    // App just started
-AuthState.loading()                    // Checking auth / signing in
-AuthState.authenticated(UserModel)     // User logged in with metadata
-AuthState.unauthenticated()            // No user / logged out
-AuthState.error(String message)        // Auth failure
+AuthState.initial()                   // App start
+AuthState.loading()                   // Checking / signing in
+AuthState.authenticated(UserModel)    // Logged in with role metadata
+AuthState.unauthenticated()           // No session / logged out
+AuthState.error(String message)       // Auth failure
 ```
 
-### 6.5 Role-Based Routing (SplashScreen)
+### 6.4 Role-Based Routing (SplashScreen)
 
-The `SplashScreen` reads `AuthCubit.state` after a timed delay and routes accordingly:
+| `user.role` | Destination |
+|---|---|
+| `"admin"` | `DashboardWrapperRoute()` |
+| `"guru"` | `GuruDashboardWrapperRoute(programType: "reguler"/"takhassus")` |
+| `"santri"` | `WaliSantriDashboardWrapperRoute(programType: ...)` |
+| other | `LoginRoute()` |
 
-| Role      | Destination Route                        |
-| --------- | ---------------------------------------- |
-| `admin`   | `DashboardWrapperRoute()`                |
-| `guru`    | `GuruDashboardWrapperRoute(programType)` |
-| `santri`  | `WaliSantriDashboardWrapperRoute(programType)` |
-| Others    | `LoginRoute()`                           |
+### 6.5 Account Creation
+
+New accounts are created via **Cloud Function `createUserAccount`** — never client-side. The function creates the Firebase Auth user and the `/users/{uid}` document. The returned `uid` is stored as `authUid` on the guru/santri document.
 
 ### 6.6 Session Persistence
 
-- Firebase Auth handles session persistence natively (token stored by Firebase SDK).
-- On app restart, `AuthCubit.checkAuthStatus()` listens to `authStateChanges` stream.
-- If a Firebase user exists, `_fetchUserMeta()` loads the `/users/{uid}` document.
-- If metadata is missing (invalid state), the user is forcefully signed out.
+Firebase Auth persists the token natively. On restart, `AuthCubit.checkAuthStatus()` listens to `authStateChanges`. If metadata fetch fails (missing `/users/{uid}`), the user is force signed-out.
 
 ---
 
-## 7. Dependencies & Core Packages
+## 7. Push Notifications (FCM)
 
-### 7.1 Runtime Dependencies
+### 7.1 Architecture
 
-| Package | Version | Purpose & Usage Rule |
-| --- | --- | --- |
-| `flutter_bloc` / `bloc` | `^9.1.1` / `^9.0.0` | State management. Always use `Cubit` (not `Bloc`). Never emit states outside the Cubit class. |
-| `auto_route` | `^10.1.2` | Declarative routing. All screens must be annotated with `@RoutePage()`. Route names are auto-generated by stripping `Screen`/`Page` suffix. |
-| `get_it` | `^8.2.0` | Service locator DI. Access via the global `sl<T>()` function. Register all new dependencies in `service_locator.dart`. |
-| `cloud_firestore` | `^6.2.0` | Firestore database. Use through `RemoteDataSource` abstractions, never directly in Cubits or UI. |
-| `firebase_auth` | `^6.3.0` | Authentication. Used only inside `AuthRemoteDataSource`. |
-| `firebase_core` | `^4.6.0` | Firebase initialization. Called once in `main()`. |
-| `firebase_storage` | `^13.2.0` | File uploads (profile pictures). Wrapped by `StorageService`. |
-| `cloud_functions` | `^6.1.0` | Server-side user account creation. Used in remote datasource `add()` methods. |
-| `freezed_annotation` | `^3.1.0` | Immutable model annotations. All domain models and states must use `@freezed`. |
-| `json_annotation` | `^4.9.0` | JSON serialization annotations. Use `@JsonKey(name: 'snake_case')` for Firestore field mapping. |
-| `dartz` | `^0.10.1` | Functional programming. Use `Either<String, T>` for repository return types (`Left` = error message, `Right` = success value). |
-| `hive` / `hive_flutter` | `^2.2.3` / `^1.1.0` | Local cache database. Used in `MasterDataLocalDataSource`, `AbsensiLocalDataSource`, `HafalanSantriLocalDataSource`. Never use directly in UI. |
-| `flutter_screenutil` | `^5.9.3` | Responsive dimensions. Use `.w`, `.h`, `.sp`, `.r` extensions for all sizing. Design size: 360×690. |
-| `slang` / `slang_flutter` | `^4.8.1` / `^4.8.0` | Type-safe i18n. Access translations via `t.section.key`. |
-| `dio` | `^5.9.0` | HTTP client (for any external REST APIs). Wrap with `pretty_dio_logger` for debug logging. |
-| `equatable` | `^2.0.7` | Value equality. Use for classes that need comparison but don't warrant full Freezed treatment. |
-| `google_fonts` | `^6.3.2` | Font loading. Primary font is bundled Poppins; use Google Fonts only for secondary/accent fonts. |
-| `logger` | `^2.6.1` | Structured logging. Use `Logger()` for debug/info/error logs in services and datasources. |
-| `mobile_scanner` | `^7.1.2` | QR/barcode scanning for attendance. |
-| `image_picker` | `^1.1.2` | Profile picture selection from gallery/camera. |
-| `pdf` / `printing` | `^3.11.3` / `^5.14.2` | PDF generation and printing for reports. |
-| `share_plus` | `^12.0.0` | Native sharing (e.g., PDF reports). |
-| `percent_indicator` | `^4.2.5` | Circular/linear progress indicators for hafalan progress display. |
-| `animated_custom_dropdown` | `3.1.1` | Enhanced dropdown menus in forms. |
-| `animated_notch_bottom_bar` | `^1.0.3` | Bottom navigation bar with notch animation. |
-| `shared_preferences` | `^2.5.4` | Simple key-value persistence (theme mode, locale preference). |
-| `collection` | `^1.19.1` | Extended collection utilities (e.g., `firstWhereOrNull`). |
-| `csv` | `^6.0.0` | CSV parsing for bulk data import. |
-| `file_picker` | `^8.1.2` | File selection for bulk upload. |
+FCM is integrated for notifying Wali Santri when:
+- A guru records attendance (`sendAbsensiNotification` Cloud Function)
+- A guru submits hafalan (`sendHafalanNotification` Cloud Function)
+
+The client is **passive** — it only manages the FCM device token. The Cloud Functions dispatch the actual notifications.
+
+### 7.2 Android Notification Channels
+
+Two channels are created at startup in `main()`:
+
+| Channel ID | Name | Used by |
+|---|---|---|
+| `my_halaqoh_absensi` | Notifikasi Absensi MyHalaqoh | `sendAbsensiNotification` CF |
+| `my_halaqoh_hafalan` | Notifikasi Hafalan MyHalaqoh | `sendHafalanNotification` CF |
+
+### 7.3 Background Handler
+
+```dart
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // FCM native SDK handles OS notification display automatically.
+  // CONSTRAINT: Runs in a SEPARATE ISOLATE.
+  // NEVER use GetIt (sl), Cubits, BuildContext, or UI code here.
+}
+```
+
+### 7.4 NotificationCubit Lifecycle
+
+- **Registration:** `registerSingleton<NotificationCubit>` in GetIt.
+- **Initialization:** Call `sl<NotificationCubit>().initialize(uid)` after a Wali Santri authenticates (role == "santri").
+- **Token refresh:** `NotificationCubit` subscribes to `NotificationRepository.onTokenRefresh` and auto-persists new tokens. This is why it must be a **Singleton** (not Factory) — a Factory would destroy the subscription on navigation.
+- **Logout:** Call `sl<NotificationCubit>().clearToken(uid)` **before** `AuthCubit.logout()` to wipe the stale token from Firestore.
+
+### 7.5 Token Storage in Firestore
+
+`NotificationRepository.saveToken(uid, token)` writes:
+```
+/users/{uid} {
+  fcmToken: "...",
+  fcmTokenUpdatedAt: Timestamp
+}
+```
+
+---
+
+## 8. Offline-First & Sync Architecture
+
+### 8.1 Modules with Offline-First Behavior
+
+Both `guru_absensi` and `guru_hafalan` use **Hive as the primary write target**, with Firestore as the eventual sync destination.
+
+### 8.2 Write Path (Online or Offline)
+
+```
+1. Build model with isSynced: false
+2. Put model into Hive box (immediate)
+3. Attempt Firestore write:
+   - Success → mark isSynced: true in Hive
+   - Failure → leave isSynced: false (SyncService will retry)
+4. Return success to UI (user never sees failure if Hive write succeeds)
+```
+
+### 8.3 Sync Services
+
+Both `AbsensiSyncService` and `HafalanSyncService` follow the same pattern:
+
+```dart
+class XxxSyncService {
+  // Uses connectivity_plus to detect network changes
+  void start() {
+    _subscription = Connectivity().onConnectivityChanged.listen((results) {
+      if (results.any((r) => r != ConnectivityResult.none)) {
+        _repository.syncPendingRecords();
+      }
+    });
+    _trySyncNow(); // immediate attempt on start
+  }
+  void dispose() => _subscription?.cancel();
+}
+```
+
+Both services are started in `main()` **after** `initDependencies()`:
+```dart
+sl<AbsensiSyncService>().start();
+sl<HafalanSyncService>().start();
+```
+
+### 8.4 `syncPendingRecords()` Contract
+
+- Reads all Hive records where `isSynced == false`.
+- Writes each to Firestore.
+- On success: marks record as `isSynced: true` in Hive.
+- On failure: leaves record pending for next sync attempt.
+
+### 8.5 `seedFromRemoteIfEmpty(santriId)`
+
+- Called when opening a hafalan history/progress screen.
+- Only fetches from Firestore if the local Hive box has **no records** for that santri.
+- Prevents redundant network calls on subsequent opens.
+
+### 8.6 Dashboard Reactive Updates
+
+`DashboardSummaryCubit` (guru dashboard) uses `HafalanSantriRepository.watchAnyChanges()` — a stream that emits `void` on any Hive box change — to reactively recompute today's setoran percentage without polling Firestore.
+
+---
+
+## 9. Dependencies & Core Packages
+
+### 9.1 New Packages (added since v1 of this document)
+
+| Package | Version | Rule |
+|---|---|---|
+| `firebase_messaging` | `^16.1.3` | FCM. Used only through `NotificationRemoteDataSource`. Never call directly in UI or Cubits. |
+| `firebase_app_check` | `^0.4.2` | App attestation. Activated in `main()` only. |
+| `flutter_local_notifications` | `^18.0.1` | Android channel setup in `main()` only. Do NOT use elsewhere. |
+| `connectivity_plus` | `^7.1.1` | Network detection. Used only in SyncService classes. Never poll in UI. |
+
+### 9.2 Full Dependency Reference
+
+| Package | Version | Purpose |
+|---|---|---|
+| `flutter_bloc` / `bloc` | `^9.1.1` / `^9.0.0` | Always use Cubit. Never emit outside Cubit class. |
+| `auto_route` | `^10.1.2` | `@RoutePage()` on all screens. `AppRouter(sl<AuthCubit>())`. |
+| `get_it` | `^8.2.0` | `sl<T>()`. Register all deps in `service_locator.dart`. |
+| `cloud_firestore` | `^6.2.0` | Remote DB. Only through DataSource abstractions. |
+| `firebase_auth` | `^6.3.0` | Only inside `AuthRemoteDataSource`. |
+| `firebase_core` | `^4.6.0` | Init once in `main()`. |
+| `firebase_storage` | `^13.2.0` | File uploads via `StorageService`. |
+| `cloud_functions` | `^6.1.0` | Account creation + callable functions. |
+| `freezed_annotation` | `^3.1.0` | All domain models and states use `@freezed`. |
+| `json_annotation` | `^4.9.0` | `@JsonKey(name: 'snake_case')` for field name mapping. |
+| `dartz` | `^0.10.1` | `Either<String, T>`. Left=error, Right=success. |
+| `hive` / `hive_flutter` | `^2.2.3` / `^1.1.0` | Local cache. Only via datasource classes. |
+| `flutter_screenutil` | `^5.9.3` | `.w`, `.h`, `.sp`, `.r` everywhere. Design 360x690. |
+| `slang` / `slang_flutter` | `^4.8.1` / `^4.8.0` | `t.section.key`. Never hardcode user-facing strings. |
+| `logger` | `^2.6.1` | `Logger()` in services/datasources. Never use `print()`. |
+| `mobile_scanner` | `^7.1.2` | QR/barcode attendance scanning. |
+| `image_picker` | `^1.1.2` | Profile photo selection. |
+| `pdf` / `printing` | `^3.11.3` / `^5.14.2` | Report generation and printing. |
+| `share_plus` | `^12.0.0` | Native sharing of reports. |
+| `percent_indicator` | `^4.2.5` | Hafalan progress display. |
+| `animated_custom_dropdown` | `3.1.1` | Dropdown menus in forms. |
+| `animated_notch_bottom_bar` | `^1.0.3` | Bottom navigation bar. |
+| `shared_preferences` | `^2.5.4` | Theme/locale persistence. |
+| `collection` | `^1.19.1` | `firstWhereOrNull`, etc. |
+| `csv` / `file_picker` | `^6.0.0` / `^8.1.2` | Bulk data import. |
 | `intl` | `^0.20.2` | Date/number formatting. |
-| `flutter_gen` | `^5.12.0` | Asset/color/font code generation. Access via `Assets.images.xxx`, `ColorName.xxx`. |
-| `flutter_localization` | `^0.3.3` | Localization delegate support. |
-| `connectivity_plus` | `^7.1.1` | Network connectivity detection. Used by `AbsensiSyncService` and `HafalanSyncService` for offline-first sync. |
-| `firebase_app_check` | `^0.4.2` | Firebase App Check. Activated in `main()` with debug/production providers. |
+| `flutter_gen` | `^5.12.0` | `Assets.xxx`, `ColorName.xxx` — do not hardcode paths. |
+| `dio` | `^5.9.0` | External REST APIs with `pretty_dio_logger`. |
+| `equatable` | `^2.0.7` | Value equality for non-Freezed classes. |
+| `google_fonts` | `^6.3.2` | Secondary fonts only. Primary is bundled Poppins. |
 
-### 7.2 Dev Dependencies
+### 9.3 Code Generation Command
 
-| Package | Purpose |
-| --- | --- |
-| `build_runner` | Code generation runner (`dart run build_runner build --delete-conflicting-outputs`). |
-| `freezed` | Generates `.freezed.dart` files for immutable classes. |
-| `json_serializable` | Generates `.g.dart` files for JSON serialization. |
-| `auto_route_generator` | Generates `app_router.gr.dart` from `@RoutePage()` annotations. |
-| `flutter_gen_runner` | Generates asset/color/font references from `pubspec.yaml` config. |
-| `slang_build_runner` | Generates translation files from i18n source. |
-| `mocktail` | Mocking framework for unit tests. |
-| `flutter_lints` | Linting rules. Config in `analysis_options.yaml`. |
-
-### 7.3 Code Generation Command
-
-```bash
+`
 dart run build_runner build --delete-conflicting-outputs
-```
+`
 
-Run this after modifying any:
-- `@freezed` model
-- `@RoutePage()` screen
-- `@JsonSerializable()` class
-- Translation source files
-- Asset files
+Run after: @freezed model changes, @RoutePage() additions, translation source changes, asset changes.
 
 ---
 
-## 8. Error Handling & API Integration
+## 10. Error Handling & Data Mapping
 
-### 8.1 Error Handling Pattern — Either<String, T>
+### 10.1 Either Pattern
 
-All repository methods return `Either<String, T>` from the `dartz` package:
+- Left(String) = user-facing error in Bahasa Indonesia.
+- Right(T) = success payload.
+- Stream<T> methods do NOT use Either — errors flow to onError callback.
 
-```dart
-// Repository contract
-abstract class XxxRepository {
-  Future<Either<String, List<XxxModel>>> getAll();
-  Future<Either<String, String>> add(XxxModel model);
-  Future<Either<String, void>> update(XxxModel model);
-  Future<Either<String, void>> delete(String id);
-  Stream<List<XxxModel>> watchAll(); // Streams don't use Either
-}
-```
+### 10.2 Offline-First Write Strategy (Absensi & Hafalan)
 
-**Convention:**
-- `Left(String)` = User-facing error message (in Bahasa Indonesia).
-- `Right(T)` = Success payload.
+Write to Hive first, then attempt Firestore. On Firestore failure, SyncService retries later. The UI always sees a success if the Hive write succeeds.
 
-### 8.2 Repository Error Handling
+### 10.3 Firebase Auth Error Mapping
 
-```dart
-@override
-Future<Either<String, List<XxxModel>>> getAll() async {
-  try {
-    final list = await _remote.getAll();
-    await _local.cacheXxx(list);
-    return Right(list);
-  } catch (e) {
-    // Fallback to local cache
-    final cached = _local.getAllXxx();
-    if (cached.isNotEmpty) return Right(cached);
-    return Left('Gagal memuat data xxx: $e');
-  }
-}
-```
+user-not-found / invalid-credential / wrong-password → 'NIP/NIS atau Password salah'
+network-request-failed → 'Tidak ada koneksi internet'
+too-many-requests → 'Terlalu banyak percobaan. Harap tunggu sesaat.'
+user-disabled → 'Akun pengguna ini telah dinonaktifkan.'
+default → 'Error autentikasi: {e.message}'
 
-### 8.3 Firebase Auth Error Mapping
+### 10.4 Firestore Mapper Pattern
 
-```dart
-String _mapFirebaseAuthError(FirebaseAuthException e) {
-  switch (e.code) {
-    case 'user-not-found':
-    case 'invalid-credential':
-    case 'invalid-email':
-    case 'wrong-password':
-      return 'NIP/NIS atau Password salah';
-    case 'network-request-failed':
-      return 'Tidak ada koneksi internet';
-    case 'too-many-requests':
-      return 'Terlalu banyak percobaan. Harap tunggu sesaat.';
-    case 'user-disabled':
-      return 'Akun pengguna ini telah dinonaktifkan.';
-    default:
-      return 'Error autentikasi: ${e.message}';
-  }
-}
-```
-
-### 8.4 Firestore Mapper Pattern
-
-Each entity has a dedicated `Mapper` class that handles the Firestore ↔ Model conversion:
-
-```dart
-class XxxMapper {
-  const XxxMapper._();
-
-  static XxxModel fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data()!;
-    return XxxModel(
-      id: doc.id,                                         // Always from doc.id
-      field: data['field'] as String,
-      createdAt: (data['createdAt'] as Timestamp).toDate(), // Timestamp → DateTime
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-    );
-  }
-
-  static Map<String, dynamic> toFirestore(XxxModel model) {
-    return {
-      'field': model.field,
-      'createdAt': Timestamp.fromDate(model.createdAt),   // DateTime → Timestamp
-      'updatedAt': Timestamp.fromDate(model.updatedAt),
-    };
-  }
-}
-```
-
-**Rules:**
-- `doc.id` is **never stored** as a field in Firestore; it's always extracted from the document reference.
-- `Timestamp` from Firestore is always converted to `DateTime` in the model.
-- The `toFirestore()` method **excludes the `id` field** since it's the document path.
-
-### 8.5 UI Error Display
-
-Errors bubble up to the Cubit state as `XxxState.error(String message)`, and the UI reacts using `BlocBuilder`'s `state.when(error: (msg) => ...)` or `BlocListener` for snackbars.
+- doc.id is always the model 'id' field — never stored as a Firestore field.
+- Timestamp from Firestore always converted to DateTime in the model.
+- toFirestore() NEVER includes 'id' or 'notifiedAt' (server-only).
 
 ---
 
-## 9. AI Coding Rules & Conventions
+## 11. AI Coding Rules & Conventions
 
-### 9.1 Absolute Rules (NEVER Break)
+### 11.1 Absolute Rules (NEVER Break)
 
-1. **NEVER mix UI and business logic.** UI widgets must not contain Firestore calls, Hive operations, or complex data transformations. All logic goes through Cubits → Repositories → DataSources.
+1. No business logic in UI widgets. No Firestore/Hive calls in widgets.
+2. No data layer imports in domain layer. Domain has zero framework dependencies.
+3. No data/domain imports directly in UI — only Models for type annotations.
+4. Every new Cubit must be registered in service_locator.dart.
+5. No raw Firebase instances in Cubits or UI — always DataSource → Repository → Cubit.
+6. Never reuse Hive Type IDs. Next available: 10.
+7. Never edit generated files (.freezed.dart, .g.dart, .gr.dart, gen/).
+8. Never write notifiedAt from Flutter client. It is a server-only field set by Cloud Functions.
+9. NotificationCubit must be Singleton — Factory would kill the onTokenRefresh subscription.
+10. No GetIt/Cubits/BuildContext in _firebaseMessagingBackgroundHandler — it runs in a separate isolate.
 
-2. **NEVER import `data` layer classes in `domain` layer files.** The domain layer is the innermost ring; it has zero knowledge of Firestore, Hive, or any external framework.
+### 11.2 Naming Conventions
 
-3. **NEVER import `data` or `domain` layer classes directly in UI widgets.** Widgets interact with the domain only through Cubits. The only exception is importing Models for type annotations.
+| Artifact | Pattern | Example |
+|---|---|---|
+| Feature module dir | snake_case with role prefix | guru_hafalan/ |
+| Model | snake_case_model.dart | hafalan_santri_model.dart |
+| Repo contract | snake_case_repository.dart | hafalan_santri_repository.dart |
+| Repo impl | snake_case_repository_impl.dart | |
+| Remote DS abstract | snake_case_remote_datasource.dart | |
+| Remote DS impl | snake_case_remote_datasource_impl.dart | |
+| Local DS | snake_case_local_data_source.dart | |
+| Hive adapters file | snake_case_hive_adapters.dart | absensi_hive_adapters.dart |
+| Mapper | snake_case_mapper.dart | guru_mapper.dart |
+| Cubit | snake_case_cubit.dart | input_hafalan_cubit.dart |
+| State | snake_case_state.dart | input_hafalan_state.dart |
+| Screen | snake_case_screen.dart + @RoutePage() | |
+| SyncService | snake_case_sync_service.dart | hafalan_sync_service.dart |
 
-4. **NEVER create a Cubit without registering it in `service_locator.dart`.** Every new Cubit must be registered and provided via `BlocProvider`.
+### 11.3 Model Rules
 
-5. **NEVER use raw Firebase instances in Cubits or UI.** Always go through the DataSource → Repository → Cubit chain.
+1. All domain models: @freezed.
+2. Use @JsonKey(name: 'snake_case') for field name differences.
+3. Use @Default(value) for optional fields with defaults.
+4. DateTime in models always. Mappers handle Timestamp conversion.
+5. Server-only fields (e.g., notifiedAt): DateTime? + comment "Server-only. NEVER set by client."
 
-6. **NEVER reuse Hive Type IDs.** Current max is `9`. The next available ID is **10**. See Section 4.2 for the full registry.
+### 11.4 Hive Adapter Rules
 
-7. **NEVER commit generated files with manual edits.** Files ending in `.freezed.dart`, `.g.dart`, `.gr.dart`, and `gen/` are auto-generated. Only edit source files and re-run `build_runner`.
+1. Hand-written adapters only (no code generation).
+2. DateTime serialization: ISO 8601 string (master data / hafalan) OR millisecondsSinceEpoch int (absensi). Be consistent per module.
+3. New fields on existing adapters must be read as nullable for backward compatibility.
+4. Use `if (!Hive.isAdapterRegistered(typeId))` guard in registerAbsensiAdapters().
 
-### 9.2 Naming Conventions
+### 11.5 Repository Rules
 
-| Artifact | Convention | Example |
-| --- | --- | --- |
-| Feature Module Dir | `snake_case` with role prefix | `guru_hafalan/`, `wali_santri_absensi/` |
-| Model File | `snake_case_model.dart` | `guru_model.dart` |
-| Repository Contract | `snake_case_repository.dart` | `guru_repository.dart` |
-| Repository Impl | `snake_case_repository_impl.dart` | `guru_repository_impl.dart` |
-| Remote DataSource Abstract | `snake_case_remote_datasource.dart` | `guru_remote_datasource.dart` |
-| Remote DataSource Impl | `snake_case_remote_datasource_impl.dart` | `guru_remote_datasource_impl.dart` |
-| Mapper | `snake_case_mapper.dart` | `guru_mapper.dart` |
-| Cubit File | `snake_case_cubit.dart` | `guru_cubit.dart` |
-| State File | `snake_case_state.dart` | `guru_state.dart` |
-| Screen File | `snake_case_screen.dart` | `hafalan_screen.dart` |
-| Widget File | `snake_case_widget.dart` or descriptive | `attendance_card.dart` |
-| Hive Adapter | `XxxModelAdapter` class in `hive_adapters.dart` | `GuruModelAdapter` |
-| Cubit Class | `XxxCubit` | `GuruCubit` |
-| State Class | `XxxState` | `GuruState` |
-| Model Class | `XxxModel` | `GuruModel` |
-| Repository Class | `XxxRepository` (abstract), `XxxRepositoryImpl` | `GuruRepository`, `GuruRepositoryImpl` |
+1. Abstract repos in domain/repositories/ using Either<String, T> and Stream<List<T>>.
+2. Impls in data/repositories_impl/ composing remote + local.
+3. Always provide offline fallback for getAll().
+4. Offline-first modules: write Hive first, then attempt Firestore.
 
-### 9.3 File Organization Rules
+### 11.6 Notification Rules
 
-1. **One model per file.** Each Freezed model gets its own `.dart` file plus generated `.freezed.dart` and `.g.dart`.
-2. **One cubit per file, one state per file.** `xxx_cubit.dart` and `xxx_state.dart` are always separate files.
-3. **Barrel files** are used sparingly (only `widgets.dart` for shared widgets). Avoid adding barrel files for modules.
-4. **Screen files** must be annotated with `@RoutePage()` for auto_route code generation.
+1. Initialize NotificationCubit only for Wali Santri (role == "santri").
+2. Call clearToken(uid) BEFORE logout(), not after.
+3. Never craft FCM payloads from the client — Cloud Functions handle dispatch.
+4. Never include notifiedAt in toFirestore() mapper output.
 
-### 9.4 Model Rules
+### 11.7 SyncService Rules
 
-1. **All domain models must use `@freezed`.** This ensures immutability, `copyWith`, `==`, `hashCode`, and `toString`.
-2. **Use `@JsonKey(name: 'snake_case')` for Firestore fields** that differ from Dart property names.
-3. **Use `@Default(value)` for optional fields with defaults** (e.g., `@Default([]) List<String> santriIds`).
-4. **Include the private constructor** `const XxxModel._();` only if you need helper methods/getters on the model.
-5. **Timestamps:** Always use `DateTime` in models. Mappers handle `Timestamp` ↔ `DateTime` conversion.
+1. SyncServices live in domain/services/ (depend on Repository only).
+2. Registered as registerLazySingleton in GetIt.
+3. start() called in main() after initDependencies().
+4. Never call dispose() during normal app lifecycle.
 
-### 9.5 Repository Rules
+### 11.8 General Code Quality
 
-1. **Abstract repositories live in `domain/repositories/`.** They define the contract using `Either<String, T>` return types and `Stream<List<T>>` for realtime data.
-2. **Implementations live in `data/repositories_impl/`.** They compose remote and local datasources.
-3. **Always implement offline fallback:** If the remote fetch fails, try reading from the Hive cache before returning an error.
-4. **Stream operations update the cache as a side-effect** inside `.map()`.
-
-### 9.6 DataSource Rules
-
-1. **Remote datasources always have an abstract + implementation pair** in separate directories.
-2. **The abstract class lives in `source/abstract/`**, the implementation in `source/implementation/`.
-3. **Each remote datasource implementation receives Firebase instances via constructor injection** from GetIt.
-4. **Use Mappers** for all Firestore ↔ Model conversions. Never do inline map parsing.
-
-### 9.7 Routing Rules
-
-1. **All screens must have `@RoutePage()` annotation.**
-2. **Route names strip `Screen`/`Page` suffix.** `HafalanScreen` → `HafalanRoute`.
-3. **Navigation uses `context.router.push()`, `.replace()`, or `.pop()`** from auto_route.
-4. **Route parameters** use constructor parameters on the screen class.
-5. **After adding a new screen**, re-run `build_runner` and update `app_router.dart` with the new `AutoRoute(page: XxxRoute.page)` entry.
-6. **All protected routes must use guards:** `AuthGuard` (checks authentication) and `RoleGuard` (checks role allowlist).
-7. **Guard pattern:** `guards: [AuthGuard(_authCubit), RoleGuard(_authCubit, allowedRoles: ['guru'])]`.
-8. **Unauthorized access** redirects to `AccessDeniedRoute` (not login).
-
-**Route groups by role:**
-| Role | Routes |
-| --- | --- |
-| Public | `SplashRoute`, `LoginRoute`, `AccessDeniedRoute` |
-| Admin | `DashboardWrapperRoute`, `AddHalaqohRoute`, `SelectSantriRoute`, `PengaturanMasterDataRoute` |
-| Guru | `GuruDashboardWrapperRoute`, `AttendanceRoute`, `HafalanRoute`, `MyHalaqohRoute`, `InputHafalanRoute`, `RiwayatHafalanSantriRoute`, `ProgressHafalanPerJuzRoute`, `ProgressHafalanPerSuratRoute`, `MutabaahSantriRoute`, `EditProfileRoute`, `UbahPasswordRoute`, `PengaturanRoute`, etc. |
-| Santri (Wali) | `WaliSantriDashboardWrapperRoute`, `WaliSantriRiwayatHafalanRoute`, `WaliSantriProgressPerJuzRoute`, `WaliSantriMutabaahRoute`, `WaliSantriRiwayatAbsensiRoute`, `WaliSantriProfileRoute`, etc. |
-
-### 9.8 Theming Rules
-
-1. **Always use `AppColors.of(context)` to get theme-aware colors.** Never hardcode color values in widgets.
-2. **Use theme text styles** from `Theme.of(context).textTheme`. Always specify `fontFamily: 'Poppins'` for custom text styles.
-3. **Design size is 360×690.** Use `flutter_screenutil` extensions (`.w`, `.h`, `.sp`, `.r`) for responsive scaling.
-4. **Both light and dark themes** must be supported. Test UI in both modes.
-
-### 9.9 Internationalization Rules
-
-1. **Use `slang` for all user-facing strings.** Access via `t.section.key`.
-2. **Never hardcode user-facing strings** in Dart files. The only exception is internal error messages for debugging.
-3. **Error messages from repositories** may be in Bahasa Indonesia since they are user-facing.
-
-### 9.10 Testing Rules
-
-1. **Use `mocktail` for mocking** in unit tests (not `mockito`).
-2. **Test Cubits** by verifying state emissions for each method.
-3. **Test Repositories** by mocking datasources and verifying correct delegation.
-
-### 9.11 General Code Quality
-
-1. **Write docstrings** for all public classes, methods, and complex functions. Use `///` format.
-2. **Use `const` constructors** wherever possible for performance.
-3. **Prefer `final` variables** over `var`.
-4. **Handle stream subscriptions** — Always cancel in `close()` override of Cubits.
-5. **Avoid `print()`** — Use `Logger()` from the `logger` package.
-6. **Follow existing patterns.** When in doubt, look at how `GuruCubit`, `GuruRepository`, `GuruRemoteDataSourceImpl`, and `GuruMapper` are implemented — they are the canonical reference.
+1. /// docstrings for all public classes and methods.
+2. const constructors wherever possible.
+3. final over var.
+4. Cancel stream subscriptions in Cubit close().
+5. Logger() for all logging. Never print().
+6. Canonical references:
+   - Master data pattern: GuruCubit, GuruRepository, GuruRemoteDataSourceImpl, GuruMapper
+   - Offline-first pattern: HafalanSantriRepository, HafalanSantriLocalDataSource, HafalanSyncService
+   - Notification pattern: NotificationCubit, NotificationRepositoryImpl
 
 ---
 
-## Appendix: Quick Reference Checklist for New Features
+## Appendix: Checklist for New Features
 
-When adding a new entity/feature, follow this checklist:
-
-- [ ] **Model:** Create `xxx_model.dart` with `@freezed` in `domain/models/`.
-- [ ] **Repository Contract:** Create abstract `xxx_repository.dart` in `domain/repositories/`.
-- [ ] **Remote DataSource Abstract:** Create in `data/datasources/remote/source/abstract/`.
-- [ ] **Remote DataSource Impl:** Create in `data/datasources/remote/source/implementation/`.
-- [ ] **Mapper:** Create `xxx_mapper.dart` in `data/datasources/remote/mapper/`.
-- [ ] **Repository Impl:** Create `xxx_repository_impl.dart` in `data/repositories_impl/`.
-- [ ] **Hive Adapter:** Add to `hive_adapters.dart` with a new unique Type ID. Register in `registerMasterDataAdapters()`.
-- [ ] **Local DataSource:** Add box and CRUD methods to `MasterDataLocalDataSource`.
-- [ ] **State:** Create `xxx_state.dart` with Freezed sealed union.
-- [ ] **Cubit:** Create `xxx_cubit.dart` with `watchAll()`, `loadAll()`, CUD methods.
-- [ ] **Register in GetIt:** Add datasource, repository, and cubit to `service_locator.dart`.
-- [ ] **Provide Cubit:** Add `BlocProvider` in `main.dart` `MultiBlocProvider` if global.
-- [ ] **Screens:** Create screen files with `@RoutePage()` annotation.
-- [ ] **Router:** Add `AutoRoute(page: XxxRoute.page)` in `app_router.dart`.
-- [ ] **Run code gen:** `dart run build_runner build --delete-conflicting-outputs`.
-
----
-
-> **Last Updated:** 2026-04-23
-> **Maintained by:** AI System Prompt — Do not edit manually without updating all sections consistently.
+- [ ] Model: @freezed in domain/models/
+- [ ] Repo contract: abstract in domain/repositories/
+- [ ] Remote DS abstract: in data/datasources/remote/source/abstract/
+- [ ] Remote DS impl: in data/datasources/remote/source/implementation/
+- [ ] Mapper: static class in data/datasources/remote/mapper/
+- [ ] Repo impl: in data/repositories_impl/
+- [ ] If offline-first: Local DS in data/datasources/local/; Hive adapter (Type ID >= 10); register in adapter helper; open box before use
+- [ ] If syncing: SyncService in domain/services/; registerLazySingleton; start() in main()
+- [ ] State: Freezed sealed union in presentation/cubits/
+- [ ] Cubit: in presentation/cubits/; register in service_locator.dart
+- [ ] If global: add BlocProvider to MultiBlocProvider in main.dart
+- [ ] Screens: @RoutePage() annotation in presentation/screens/
+- [ ] Router: add AutoRoute(page: XxxRoute.page) in app_router.dart
+- [ ] Run codegen: dart run build_runner build --delete-conflicting-outputs
