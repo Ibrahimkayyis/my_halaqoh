@@ -1225,58 +1225,6 @@ class SelectSantriRouteArgs {
 }
 
 /// generated route for
-/// [SplashScreen]
-class SplashRoute extends PageRouteInfo<SplashRouteArgs> {
-  SplashRoute({
-    Key? key,
-    Duration splashDuration = const Duration(seconds: 3),
-    List<PageRouteInfo>? children,
-  }) : super(
-         SplashRoute.name,
-         args: SplashRouteArgs(key: key, splashDuration: splashDuration),
-         initialChildren: children,
-       );
-
-  static const String name = 'SplashRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      final args = data.argsAs<SplashRouteArgs>(
-        orElse: () => const SplashRouteArgs(),
-      );
-      return SplashScreen(key: args.key, splashDuration: args.splashDuration);
-    },
-  );
-}
-
-class SplashRouteArgs {
-  const SplashRouteArgs({
-    this.key,
-    this.splashDuration = const Duration(seconds: 3),
-  });
-
-  final Key? key;
-
-  final Duration splashDuration;
-
-  @override
-  String toString() {
-    return 'SplashRouteArgs{key: $key, splashDuration: $splashDuration}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! SplashRouteArgs) return false;
-    return key == other.key && splashDuration == other.splashDuration;
-  }
-
-  @override
-  int get hashCode => key.hashCode ^ splashDuration.hashCode;
-}
-
-/// generated route for
 /// [UbahPasswordScreen]
 class UbahPasswordRoute extends PageRouteInfo<void> {
   const UbahPasswordRoute({List<PageRouteInfo>? children})

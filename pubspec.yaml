@@ -53,12 +53,15 @@ dependencies:
   slang: ^4.8.1
   slang_flutter: ^4.8.0
   connectivity_plus: ^7.1.1
+  flutter_native_splash: ^2.4.5
   
 dev_dependencies:
   auto_route_generator: ^10.2.4
   build_runner: ^2.7.1
   flutter_gen_runner: ^5.12.0
+  flutter_launcher_icons: ^0.14.3
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.5
   flutter_test:
     sdk: flutter
   freezed: ^3.2.3
@@ -75,6 +78,34 @@ flutter_gen:
     flutter_svg: true
     lottie: true
     rive: true
+
+# ── Launcher Icon Generator ─────────────────────────────────────────────────
+# Run: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/my_halaqoh_icon_padded.png"
+  # Adaptive icon (Android 8.0+ / API 26+)
+  # ColorName.primary = #10B981
+  adaptive_icon_background: "#10B981"
+  adaptive_icon_foreground: "assets/images/my_halaqoh_icon_padded.png"
+  min_sdk_android: 21
+
+# ── Native Splash Screen Generator ─────────────────────────────────────────
+# Run: dart run flutter_native_splash:create
+# Remove: dart run flutter_native_splash:remove
+flutter_native_splash:
+  # ColorName.background = #F5F5F5 (light mode surface)
+  color: "#F5F5F5"
+  image: assets/images/my_halaqoh_logo.png
+  # ColorName.backgroundDark = #0F172A (dark mode surface)
+  color_dark: "#0F172A"
+  image_dark: assets/images/my_halaqoh_logo.png
+  android: true
+  ios: true
+  fullscreen: false
+  android_gravity: center
+  ios_content_mode: center
 
 flutter:
   uses-material-design: true
