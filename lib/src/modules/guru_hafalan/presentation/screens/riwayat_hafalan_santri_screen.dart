@@ -10,6 +10,12 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/domain/models/hafalan_santri_model.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/riwayat_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/guru_laporan/presentation/widgets/laporan_konfigurasi_hafalan_sheet.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper class: groups multiple HafalanSantriModel records that belong to the
@@ -464,7 +470,27 @@ class _RiwayatHafalanSantriScreenState
                               width: double.infinity,
                               height: 48.h,
                               onPressed: () {
-                                // TODO: Download report
+                                HalaqohModel? myHalaqoh;
+                                String linkedDocId = '';
+                                context.read<AuthCubit>().state.maybeWhen(
+                                  authenticated: (u) => linkedDocId = u.linkedDocId,
+                                  orElse: () {},
+                                );
+                                context.read<HalaqohCubit>().state.maybeWhen(
+                                  loaded: (list) {
+                                    try { myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId); } catch (_) {}
+                                  },
+                                  orElse: () {},
+                                );
+                                LaporanKonfigurasiHafalanSheet.show(
+                                  context,
+                                  santriId:     widget.santriId,
+                                  santriName:   widget.name,
+                                  santriNis:    widget.nis,
+                                  halaqoh:      myHalaqoh,
+                                  initialMonth: _currentMonth,
+                                  initialYear:  _currentYear,
+                                );
                               },
                               icon: Icons.download,
                               label: t.riwayatHafalanSantri.downloadLaporan,

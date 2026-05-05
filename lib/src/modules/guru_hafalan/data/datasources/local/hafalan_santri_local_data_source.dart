@@ -36,6 +36,12 @@ class HafalanSantriLocalDataSource {
     return _getFilteredHafalan(santriId, month, year);
   }
 
+  /// Get ALL records for a specific santri.
+  List<HafalanSantriModel> getAllHafalanBySantriId(String santriId) {
+    return _box.values.where((item) => item.santriId == santriId).toList()
+      ..sort((a, b) => b.tanggalSetoran.compareTo(a.tanggalSetoran));
+  }
+
   /// Watch all Ziyadah records for progress calculation.
   /// Emits current data immediately, then on every Hive change.
   Stream<List<HafalanSantriModel>> watchAllZiyadahBySantriId(String santriId) async* {

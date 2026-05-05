@@ -51,6 +51,11 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
   }
 
   @override
+  List<HafalanSantriModel> getAllHafalanBySantriId(String santriId) {
+    return _local.getAllHafalanBySantriId(santriId);
+  }
+
+  @override
   Future<void> syncPendingRecords() async {
     final pending = _local.getPendingSync();
     if (pending.isEmpty) return;

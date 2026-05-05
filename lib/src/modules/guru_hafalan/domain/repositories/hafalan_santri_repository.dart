@@ -13,6 +13,10 @@ abstract class HafalanSantriRepository {
   /// Sources directly from local Hive box.
   Stream<List<HafalanSantriModel>> watchAllZiyadahBySantriId(String santriId);
 
+  /// Get ALL hafalan records for a specific santri.
+  /// Reads from local Hive cache (synchronous).
+  List<HafalanSantriModel> getAllHafalanBySantriId(String santriId);
+
   /// Push all pending (isSynced == false) records from Hive to Firestore.
   Future<void> syncPendingRecords();
 

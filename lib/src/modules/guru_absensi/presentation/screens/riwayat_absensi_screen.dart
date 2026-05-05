@@ -15,6 +15,7 @@ import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/guru_laporan/presentation/widgets/laporan_konfigurasi_sheet.dart';
 
 /// Riwayat Absensi screen — individual student attendance history
 @RoutePage()
@@ -613,7 +614,35 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                       width: double.infinity,
                       height: 52.h,
                       onPressed: () {
-                        // TODO: download report
+                        // Resolve the teacher's halaqoh from the global cubit
+                        HalaqohModel? myHalaqoh;
+                        final authState = context.read<AuthCubit>().state;
+                        String linkedDocId = '';
+                        authState.maybeWhen(
+                          authenticated: (u) => linkedDocId = u.linkedDocId,
+                          orElse: () {},
+                        );
+                        context.read<HalaqohCubit>().state.maybeWhen(
+                          loaded: (list) {
+                            try {
+                              myHalaqoh = list.firstWhere(
+                                (h) => h.guruId == linkedDocId,
+                              );
+                            } catch (_) {}
+                          },
+                          orElse: () {},
+                        );
+
+                        LaporanKonfigurasiSheet.show(
+                          context,
+                          records:     allRecords,
+                          santriName:  widget.name,
+                          santriNis:   widget.nis,
+                          programType: widget.programType,
+                          halaqoh:     myHalaqoh,
+                          initialMonth: _currentMonth,
+                          initialYear:  _currentYear,
+                        );
                       },
                       icon: Icons.download,
                       label: t.riwayatAbsensi.downloadLaporan,

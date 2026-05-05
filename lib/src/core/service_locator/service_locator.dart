@@ -111,6 +111,10 @@ import 'package:my_halaqoh/src/modules/notifications/domain/repositories/notific
 // Notifications — Presentation Layer
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_cubit.dart';
 
+// Guru Laporan — Presentation Layer
+import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_absensi_cubit.dart';
+import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_hafalan_cubit.dart';
+
 final sl = GetIt.instance;
 
 /// Call this in main.dart before runApp()
@@ -297,4 +301,10 @@ Future<void> initDependencies() async {
   // subscription persists for the entire app session without being torn down
   // on screen disposal.
   sl.registerSingleton<NotificationCubit>(NotificationCubit(sl()));
+
+  // ── Guru Laporan — Cubit ──────────────────────────────────────────────────
+  // Factory — scoped to the LaporanKonfigurasiSheet bottom sheet lifetime.
+  // Requires no repository dependencies — delegates to AbsensiPdfBuilder.
+  sl.registerFactory<LaporanAbsensiCubit>(() => LaporanAbsensiCubit());
+  sl.registerFactory<LaporanHafalanCubit>(() => LaporanHafalanCubit(sl()));
 }

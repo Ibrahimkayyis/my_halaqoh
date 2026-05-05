@@ -28,12 +28,20 @@ class $AssetsImagesGen {
   AssetGenImage get logoLuqmanAlHakim =>
       const AssetGenImage('assets/images/logo luqman al hakim.png');
 
+  /// File path: assets/images/my_halaqoh_icon_padded.png
+  AssetGenImage get myHalaqohIconPadded =>
+      const AssetGenImage('assets/images/my_halaqoh_icon_padded.png');
+
   /// File path: assets/images/my_halaqoh_logo.png
   AssetGenImage get myHalaqohLogo =>
       const AssetGenImage('assets/images/my_halaqoh_logo.png');
 
   /// List of all assets
-  List<AssetGenImage> get values => [logoLuqmanAlHakim, myHalaqohLogo];
+  List<AssetGenImage> get values => [
+    logoLuqmanAlHakim,
+    myHalaqohIconPadded,
+    myHalaqohLogo,
+  ];
 }
 
 class Assets {
