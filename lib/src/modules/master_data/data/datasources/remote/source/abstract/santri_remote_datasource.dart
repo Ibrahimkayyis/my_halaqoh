@@ -28,4 +28,7 @@ abstract class SantriRemoteDataSource {
 
   /// Update the halaqohId field for a specific santri.
   Future<void> updateHalaqohId(String santriId, String? halaqohId);
+
+  /// Reset a santri's Firebase Auth password.
+  Future<void> resetPassword(String authUid);
 }

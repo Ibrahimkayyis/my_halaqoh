@@ -20,6 +20,8 @@ import 'package:my_halaqoh/src/modules/guru_absensi/presentation/widgets/mulai_a
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
 /// Main attendance screen — start session button, search, action buttons, santri list
+/// Redesigned with CustomScrollView for a smooth, unified scrolling experience
+/// and a bottom-rounded surface header.
 @RoutePage()
 class AttendanceScreen extends StatefulWidget {
   final String programType;
@@ -50,10 +52,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       builder: (ctx) => MulaiAbsensiDialog(
         programType: widget.programType,
         onScanBarcode: (date, sesi) {
-          context.router.push(BarcodeScannerRoute(
-            selectedDate: date,
-            selectedSesi: sesi,
-          ));
+          context.router.push(
+            BarcodeScannerRoute(selectedDate: date, selectedSesi: sesi),
+          );
         },
         onTandaiSemuaHadir: (date, sesi) =>
             _handleTandaiSemuaHadir(mySantriList, date, sesi),
@@ -67,11 +68,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     String sesi,
   ) {
     final allNisList = mySantriList.map((s) => s.nis).toList();
-    context.router.push(DetailAbsensiHariIniRoute(
-      scannedNisList: allNisList,
-      selectedDate: date,
-      selectedSesi: sesi,
-    ));
+    context.router.push(
+      DetailAbsensiHariIniRoute(
+        scannedNisList: allNisList,
+        selectedDate: date,
+        selectedSesi: sesi,
+      ),
+    );
   }
 
   @override
@@ -129,187 +132,248 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         return cubit;
       },
       child: Scaffold(
-        backgroundColor: colors.background,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 12.h),
-
-              // Mulai Sesi Absensi button
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52.h,
-                  child: PrimaryButton(
-                    width: double.infinity,
-                    height: 52.h,
-                    onPressed: () => _showMulaiAbsensiDialog(
-                      mySantriList,
-                      myHalaqoh?.id ?? '',
-                      linkedDocId,
-                    ),
-                    icon: Icons.qr_code_scanner,
-                    label: t.absensi.mulaiSesi,
+        backgroundColor:
+            colors.background, // Background utama untuk list santri
+        body: CustomScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          slivers: [
+            // --- HEADER SECTION (SURFACE CONTAINER DENGAN BOTTOM RADIUS) ---
+            SliverToBoxAdapter(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: colors.surface, // Container solid putih/surface
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(32.r), // Sudut bawah melengkung
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(height: 16.h),
+                child: SafeArea(
+                  bottom: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 12.h),
 
-              // Search bar
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(12.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                      // Mulai Sesi Absensi button
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 52.h,
+                          child: PrimaryButton(
+                            width: double.infinity,
+                            height: 52.h,
+                            onPressed: () => _showMulaiAbsensiDialog(
+                              mySantriList,
+                              myHalaqoh?.id ?? '',
+                              linkedDocId,
+                            ),
+                            icon: Icons.qr_code_scanner,
+                            label: t.absensi.mulaiSesi,
+                          ),
+                        ),
                       ),
+                      SizedBox(height: 16.h),
+
+                      // Search bar
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: colors
+                                .background, // Sedikit lebih gelap dari surface
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(
+                              color: colors.border.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: (value) =>
+                                setState(() => _searchQuery = value),
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontFamily: 'Poppins',
+                              color: colors.textPrimary,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: t.absensi.searchHint,
+                              hintStyle: TextStyle(
+                                fontSize: 13.sp,
+                                fontFamily: 'Poppins',
+                                color: colors.textSecondary.withValues(
+                                  alpha: 0.6,
+                                ),
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search,
+                                size: 20.sp,
+                                color: colors.textSecondary,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 12.h,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+
+                      // Action buttons
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Column(
+                          children: [
+                            _buildActionButton(
+                              Icons.calendar_today,
+                              t.absensi.lihatAbsensiHalaqoh,
+                              colors,
+                              () {
+                                context.router.push(
+                                  AbsensiHalaqohRoute(
+                                    programType: widget.programType,
+                                  ),
+                                );
+                              },
+                            ),
+                            SizedBox(height: 8.h),
+                            _buildActionButton(
+                              Icons.event_note,
+                              t.absensi.lihatDetailHariIni,
+                              colors,
+                              () {
+                                context.router.push(
+                                  DetailAbsensiHariIniRoute(
+                                    selectedDate: DateTime.now(),
+                                    selectedSesi:
+                                        'shubuh', // Opsional, bisa disesuaikan
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
+
+                      // Daftar Santri header
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              t.absensi.daftarSantri,
+                              style: TextStyle(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colors.textPrimary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 4.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8.r),
+                                border: Border.all(
+                                  color: colors.primary.withValues(alpha: 0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                t.absensi.santriCount(
+                                  count: '${filtered.length}',
+                                ),
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.primary,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20.h), // Jarak melengkung
                     ],
                   ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (value) => setState(() => _searchQuery = value),
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontFamily: 'Poppins',
-                      color: colors.textPrimary,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: t.absensi.searchHint,
-                      hintStyle: TextStyle(
-                        fontSize: 13.sp,
-                        fontFamily: 'Poppins',
-                        color: colors.textSecondary.withValues(alpha: 0.6),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        size: 20.sp,
+                ),
+              ),
+            ),
+
+            // --- SCROLLABLE LIST SECTION ---
+            if (filtered.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 32.h),
+                    child: Text(
+                      'Santri tidak ditemukan.',
+                      style: TextStyle(
+                        fontSize: 14.sp,
                         color: colors.textSecondary,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 12.h,
+                        fontFamily: 'Poppins',
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: 12.h),
-
-              // Action buttons
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  children: [
-                    _buildActionButton(
-                      Icons.calendar_today,
-                      t.absensi.lihatAbsensiHalaqoh,
-                      colors,
-                      () {
-                        context.router.push(
-                          AbsensiHalaqohRoute(
-                              programType: widget.programType),
-                        );
-                      },
-                    ),
-                    SizedBox(height: 8.h),
-                    _buildActionButton(
-                      Icons.event_note,
-                      t.absensi.lihatDetailHariIni,
-                      colors,
-                      () {
-                        context.router.push(DetailAbsensiHariIniRoute(
-                          selectedDate: DateTime.now(),
-                          selectedSesi: 'shubuh',
-                        ));
-                      },
-                    ),
-                  ],
+              )
+            else
+              SliverPadding(
+                padding: EdgeInsets.only(
+                  top: 16.h,
+                  left: 24.w,
+                  right: 24.w,
+                  bottom: MediaQuery.of(context).padding.bottom + 24.h,
                 ),
-              ),
-              SizedBox(height: 20.h),
-
-              // Daftar Santri header
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      t.absensi.daftarSantri,
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w700,
-                        color: colors.textPrimary,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 4.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(
-                          color: colors.primary.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        t.absensi.santriCount(count: '${filtered.length}'),
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colors.primary,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 12.h),
-
-              // Santri list
-              Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
                     final santri = filtered[index];
-                    return AbsensiSantriItem(
-                      name: santri.nama,
-                      nis: santri.nis,
-                      riwayatLabel: t.absensi.riwayatAbsensi,
-                      onRiwayatTap: () {
-                        context.router.push(
-                          RiwayatAbsensiRoute(
-                            name: santri.nama,
-                            nis: santri.nis,
-                            programType: widget.programType,
-                          ),
-                        );
-                      },
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: AbsensiSantriItem(
+                        name: santri.nama,
+                        nis: santri.nis,
+                        riwayatLabel: t.absensi.riwayatAbsensi,
+                        onRiwayatTap: () {
+                          context.router.push(
+                            RiwayatAbsensiRoute(
+                              name: santri.nama,
+                              nis: santri.nis,
+                              programType: widget.programType,
+                            ),
+                          );
+                        },
+                      ),
                     );
-                  },
+                  }, childCount: filtered.length),
                 ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
 
+  // Desain tombol aksi disesuaikan agar tidak blend in dengan container putih
   Widget _buildActionButton(
     IconData icon,
     String label,
@@ -322,15 +386,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
-          color: colors.surface,
+          color: colors.background, // Sedikit lebih gelap dari putih
           borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: colors.border.withValues(alpha: 0.5)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -340,7 +398,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             Text(
               label,
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
                 color: colors.textPrimary,
                 fontFamily: 'Poppins',

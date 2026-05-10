@@ -17,6 +17,7 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.d
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/guru_laporan/presentation/widgets/laporan_konfigurasi_halaqoh_sheet.dart';
 
 /// Absensi Halaqoh — split-panel attendance grid.
 /// Names stick on the left, dates+sessions scroll horizontally.
@@ -558,7 +559,17 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                         PrimaryButton(
                           width: double.infinity,
                           onPressed: () {
-                            // TODO: download attendance report
+                            LaporanKonfigurasiHalaqohSheet.show(
+                              context,
+                              records: allRecords,
+                              santriList: mySantriList,
+                              halaqohName: myHalaqoh?.nama ?? '-',
+                              kelas: myHalaqoh?.kelas ?? '-',
+                              programType: widget.programType,
+                              guruNama: myHalaqoh?.guruNama ?? '-',
+                              initialMonth: _currentMonth,
+                              initialYear: _currentYear,
+                            );
                           },
                           icon: Icons.download,
                           label: t.absensiHalaqoh.downloadLaporan,

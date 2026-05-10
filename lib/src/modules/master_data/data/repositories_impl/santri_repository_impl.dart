@@ -95,4 +95,14 @@ class SantriRepositoryImpl implements SantriRepository {
       return Left('Gagal menghapus santri: $e');
     }
   }
+
+  @override
+  Future<Either<String, void>> resetPassword(String authUid) async {
+    try {
+      await _remote.resetPassword(authUid);
+      return const Right(null);
+    } catch (e) {
+      return Left(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
 }

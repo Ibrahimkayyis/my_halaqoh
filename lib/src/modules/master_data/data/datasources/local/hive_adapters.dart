@@ -226,17 +226,16 @@ class TargetHafalanModelAdapter extends TypeAdapter<TargetHafalanModel> {
       id: fields[0] as String,
       kelas: fields[1] as String,
       program: fields[2] as String,
-      targetJuz: fields[3] as int,
-      juzList: List<int>.from(fields[4] as List),
-      tahunAjaran: fields[5] as String,
-      createdAt: DateTime.parse(fields[6] as String),
-      updatedAt: DateTime.parse(fields[7] as String),
+      tahunAjaran: fields[3] as String? ?? '',
+      semesterAktif: fields[4] as int?,
+      createdAt: DateTime.parse(fields[5] as String),
+      updatedAt: DateTime.parse(fields[6] as String),
     );
   }
 
   @override
   void write(BinaryWriter writer, TargetHafalanModel obj) {
-    writer.writeByte(8);
+    writer.writeByte(7); // number of fields
     writer.writeByte(0);
     writer.write(obj.id);
     writer.writeByte(1);
@@ -244,14 +243,12 @@ class TargetHafalanModelAdapter extends TypeAdapter<TargetHafalanModel> {
     writer.writeByte(2);
     writer.write(obj.program);
     writer.writeByte(3);
-    writer.write(obj.targetJuz);
-    writer.writeByte(4);
-    writer.write(obj.juzList);
-    writer.writeByte(5);
     writer.write(obj.tahunAjaran);
-    writer.writeByte(6);
+    writer.writeByte(4);
+    writer.write(obj.semesterAktif);
+    writer.writeByte(5);
     writer.write(obj.createdAt.toIso8601String());
-    writer.writeByte(7);
+    writer.writeByte(6);
     writer.write(obj.updatedAt.toIso8601String());
   }
 }

@@ -125,7 +125,7 @@ class _WaliSantriProgressPerJuzScreenState
           );
 
           // Build juz display data from target's juzList + QuranService
-          final juzList = (target?.juzList ?? []).where((j) => j >= 1 && j <= 30).toList();
+          final juzList = target != null && santri != null ? TargetHafalanHelper.getTargetJuzList(target, santri!.kelas, santri!.program) : <int>[];
           final juzDisplayData = juzList.map((juzNum) {
             final juzModel = QuranService.instance.getJuzByNumber(juzNum);
             int totalAyat = juzModel?.totalAyat ?? 0;

@@ -20,6 +20,89 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.d
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/domain/models/wali_santri_hafalan_model.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/cubits/wali_santri_riwayat_hafalan_cubit.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper class: Menggabungkan beberapa record hafalan ke dalam satu group
+// berdasarkan tanggal, jenis, dan nilai.
+// ─────────────────────────────────────────────────────────────────────────────
+class _SubmissionGroup {
+  final DateTime tanggalSetoran;
+  final String jenis;
+  final int nilaiKelancaran;
+  final int nilaiTajwid;
+  final List<WaliSantriHafalanModel> records;
+
+  _SubmissionGroup({
+    required this.tanggalSetoran,
+    required this.jenis,
+    required this.nilaiKelancaran,
+    required this.nilaiTajwid,
+    required this.records,
+  });
+
+  /// Rata-rata nilai kelancaran dan tajwid, sama persis dengan guru screen.
+  int get avgScore => ((nilaiKelancaran + nilaiTajwid) / 2).round();
+
+  /// Range surah — sort by surahId sebelum ambil first/last.
+  String get surahDisplay {
+    if (records.length == 1) {
+      return records.first.surahName;
+    }
+    final sorted = List<WaliSantriHafalanModel>.from(records)
+      ..sort((a, b) => a.surahId.compareTo(b.surahId));
+    return '${sorted.first.surahName} — ${sorted.last.surahName}';
+  }
+
+  String get ayatDisplay {
+    if (records.length == 1) {
+      final r = records.first;
+      return 'Ayat ${r.ayatMulai} - ${r.ayatSelesai}';
+    }
+    return '${records.length} surat';
+  }
+
+  /// Detail per-surah — sorted by surahId.
+  List<String> get detailLines {
+    final sorted = List<WaliSantriHafalanModel>.from(records)
+      ..sort((a, b) => a.surahId.compareTo(b.surahId));
+    return sorted
+        .map((r) => '${r.surahName} (${r.ayatMulai}-${r.ayatSelesai})')
+        .toList();
+  }
+}
+
+/// Groups a flat list of records into submission groups.
+/// Records belong to the same submission when they share
+/// tanggalSetoran, jenis, nilaiKelancaran, AND nilaiTajwid —
+/// identik dengan logika di guru riwayat_hafalan_santri_screen.
+List<_SubmissionGroup> _groupIntoSubmissions(
+  List<WaliSantriHafalanModel> records,
+) {
+  final Map<String, List<WaliSantriHafalanModel>> grouped = {};
+
+  for (final record in records) {
+    // Kunci mencakup nilaiTajwid agar sesi dengan kelancaran sama
+    // tapi tajwid berbeda tidak tergabung secara keliru.
+    final key =
+        '${record.tanggalSetoran.toIso8601String()}_${record.jenis}_${record.nilaiKelancaran}_${record.nilaiTajwid}';
+    grouped.putIfAbsent(key, () => []).add(record);
+  }
+
+  final groups = grouped.entries.map((entry) {
+    final list = entry.value;
+    return _SubmissionGroup(
+      tanggalSetoran: list.first.tanggalSetoran,
+      jenis: list.first.jenis,
+      nilaiKelancaran: list.first.nilaiKelancaran,
+      nilaiTajwid: list.first.nilaiTajwid,
+      records: list,
+    );
+  }).toList();
+
+  // Sort terbaru di atas (sama dengan guru screen)
+  groups.sort((a, b) => b.tanggalSetoran.compareTo(a.tanggalSetoran));
+  return groups;
+}
+
 @RoutePage()
 class WaliSantriRiwayatHafalanScreen extends StatefulWidget {
   final String name;
@@ -42,6 +125,9 @@ class _WaliSantriRiwayatHafalanScreenState
 
   int _currentMonth = DateTime.now().month;
   int _currentYear = DateTime.now().year;
+
+  // State untuk melacak card mana yang sedang di-expand
+  int? _expandedIndex;
 
   final List<String> _dayNames = [
     'SEN',
@@ -78,6 +164,7 @@ class _WaliSantriRiwayatHafalanScreenState
         _currentMonth = 12;
         _currentYear--;
       }
+      _expandedIndex = null; // Tutup expand jika ganti bulan
     });
     _fetchData();
   }
@@ -89,6 +176,7 @@ class _WaliSantriRiwayatHafalanScreenState
         _currentMonth = 1;
         _currentYear++;
       }
+      _expandedIndex = null; // Tutup expand jika ganti bulan
     });
     _fetchData();
   }
@@ -191,11 +279,13 @@ class _WaliSantriRiwayatHafalanScreenState
                 .toList();
           }
 
-          final totalBaru = allRecords
-              .where((r) => r.jenis == 'Ziyadah')
-              .length;
-          final totalMurajaah = allRecords
-              .where((r) => r.jenis == 'Murajaah')
+          // Gunakan logika grouping di sini
+          final groups = _groupIntoSubmissions(filteredRecords);
+          final allGroups = _groupIntoSubmissions(allRecords);
+
+          final totalBaru = allGroups.where((g) => g.jenis == 'Ziyadah').length;
+          final totalMurajaah = allGroups
+              .where((g) => g.jenis == 'Murajaah')
               .length;
 
           return Scaffold(
@@ -327,6 +417,7 @@ class _WaliSantriRiwayatHafalanScreenState
                                   setState(() {
                                     _currentMonth = month;
                                     _currentYear = year;
+                                    _expandedIndex = null;
                                   });
                                   _fetchData();
                                 },
@@ -367,9 +458,10 @@ class _WaliSantriRiwayatHafalanScreenState
                                   initialItem: _selectedFilterLabel,
                                   onChanged: (value) {
                                     if (value != null) {
-                                      setState(
-                                        () => _selectedFilterLabel = value,
-                                      );
+                                      setState(() {
+                                        _selectedFilterLabel = value;
+                                        _expandedIndex = null;
+                                      });
                                     }
                                   },
                                   decoration: CustomDropdownDecoration(
@@ -462,7 +554,7 @@ class _WaliSantriRiwayatHafalanScreenState
                             orElse: () => false,
                           ))
                             const Center(child: CircularProgressIndicator())
-                          else if (filteredRecords.isEmpty)
+                          else if (groups.isEmpty)
                             Center(
                               child: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 20.h),
@@ -477,8 +569,8 @@ class _WaliSantriRiwayatHafalanScreenState
                               ),
                             )
                           else
-                            ...filteredRecords.map(
-                              (record) => _buildRecordCard(record, colors),
+                            ...groups.asMap().entries.map(
+                              (e) => _buildGroupCard(e.value, e.key, colors),
                             ),
                           SizedBox(height: 16.h),
 
@@ -553,101 +645,202 @@ class _WaliSantriRiwayatHafalanScreenState
     );
   }
 
-  Widget _buildRecordCard(WaliSantriHafalanModel record, AppColorSet colors) {
-    final dayStr = record.tanggalSetoran.day.toString().padLeft(2, '0');
-    final dayName = _getDayName(record.tanggalSetoran.day);
-    final isBaru = record.jenis == 'Ziyadah';
+  // Merender card yang sudah tergabung berdasarkan _SubmissionGroup
+  Widget _buildGroupCard(
+    _SubmissionGroup group,
+    int index,
+    AppColorSet colors,
+  ) {
+    final dayStr = group.tanggalSetoran.day.toString().padLeft(2, '0');
+    final dayName = _getDayName(group.tanggalSetoran.day);
+    final isBaru = group.jenis == 'Ziyadah';
+    final isExpanded = _expandedIndex == index;
+    final hasMultiple = group.records.length > 1;
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(14.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Day info
-          Column(
-            children: [
-              Text(
-                dayName,
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w500,
-                  color: colors.textSecondary,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-              Text(
-                dayStr,
-                style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w800,
-                  color: colors.textPrimary,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 16.w),
-
-          // Surah info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: hasMultiple
+          ? () {
+              setState(() {
+                _expandedIndex = isExpanded ? null : index;
+              });
+            }
+          : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: EdgeInsets.only(bottom: 10.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(14.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
               children: [
-                Text(
-                  isBaru
-                      ? t.riwayatHafalanSantri.hafalanBaru
-                      : t.riwayatHafalanSantri.murajaah,
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w500,
-                    color: colors.textSecondary,
-                    fontFamily: 'Poppins',
+                // Day info
+                Column(
+                  children: [
+                    Text(
+                      dayName,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w500,
+                        color: colors.textSecondary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    Text(
+                      dayStr,
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w800,
+                        color: colors.textPrimary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(width: 16.w),
+
+                // Surah info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            isBaru
+                                ? t.riwayatHafalanSantri.hafalanBaru
+                                : t.riwayatHafalanSantri.murajaah,
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          if (hasMultiple) ...[
+                            SizedBox(width: 6.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6.w,
+                                vertical: 1.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                              child: Text(
+                                '${group.records.length} surat',
+                                style: TextStyle(
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.primary,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      Text(
+                        group.surahDisplay,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                          color: colors.textPrimary,
+                          fontFamily: 'Poppins',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        group.ayatDisplay,
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w400,
+                          color: colors.textSecondary,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  record.surahName,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: colors.textPrimary,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                Text(
-                  'Ayat ${record.ayatMulai} - ${record.ayatSelesai}',
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w400,
-                    color: colors.textSecondary,
-                    fontFamily: 'Poppins',
-                  ),
+
+                // Avg score & expand icon (sama dengan guru screen)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${group.avgScore}',
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w800,
+                        color: colors.textPrimary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    if (hasMultiple) ...[
+                      SizedBox(width: 4.w),
+                      AnimatedRotation(
+                        turns: isExpanded ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(
+                          Icons.expand_more,
+                          size: 20.sp,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
-          ),
 
-          // Score
-          Text(
-            '${record.nilaiKelancaran}',
-            style: TextStyle(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w800,
-              color: colors.textPrimary,
-              fontFamily: 'Poppins',
-            ),
-          ),
-        ],
+            // ── Expanded detail ──
+            if (isExpanded && hasMultiple) ...[
+              SizedBox(height: 8.h),
+              Divider(color: colors.border.withValues(alpha: 0.5), height: 1),
+              SizedBox(height: 8.h),
+              ...group.detailLines.map(
+                (line) => Padding(
+                  padding: EdgeInsets.only(left: 38.w, bottom: 4.h),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 5.w,
+                        height: 5.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colors.primary.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          line,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: colors.textSecondary,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

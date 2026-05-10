@@ -207,6 +207,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
                     return _buildProgressHafalanCard(
                       context,
                       colors,
+                      mySantri,
                       myTarget,
                       progressData,
                     );
@@ -352,10 +353,13 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
   Widget _buildProgressHafalanCard(
     BuildContext context,
     AppColorSet colors,
+    SantriModel? santri,
     TargetHafalanModel? target,
     OverallHafalanProgress? progressData,
   ) {
-    final int juzTarget = target?.targetJuz ?? 0;
+    final int juzTarget = target != null && santri != null 
+        ? TargetHafalanHelper.getTargetJuzCount(target, santri.kelas, santri.program) 
+        : 0;
     
     double juzCompleted = 0.0;
     if (progressData != null) {

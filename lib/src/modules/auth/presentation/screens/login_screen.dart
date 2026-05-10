@@ -12,6 +12,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_cubi
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/widgets/forgot_password_bottom_sheet.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -339,7 +340,7 @@ class _LoginScreenState extends State<LoginScreen> {
       alignment: Alignment.centerRight,
       child: TextButton(
         onPressed: () {
-          // TODO: Navigate to forgot password
+          ForgotPasswordBottomSheet.show(context);
         },
         style: TextButton.styleFrom(
           padding: EdgeInsets.zero,

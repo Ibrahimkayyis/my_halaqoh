@@ -12,9 +12,8 @@ class TargetHafalanMapper {
       id: doc.id,
       kelas: data['kelas'] as String,
       program: data['program'] as String,
-      targetJuz: data['targetJuz'] as int,
-      juzList: List<int>.from(data['juzList'] ?? []),
       tahunAjaran: data['tahunAjaran'] as String? ?? '',
+      semesterAktif: data['semesterAktif'] as int?,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
@@ -24,11 +23,11 @@ class TargetHafalanMapper {
     return {
       'kelas': model.kelas,
       'program': model.program,
-      'targetJuz': model.targetJuz,
-      'juzList': model.juzList,
       'tahunAjaran': model.tahunAjaran,
+      'semesterAktif': model.semesterAktif,
       'createdAt': Timestamp.fromDate(model.createdAt),
       'updatedAt': Timestamp.fromDate(model.updatedAt),
     };
   }
 }
+

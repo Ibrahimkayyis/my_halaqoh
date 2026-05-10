@@ -18,13 +18,6 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.d
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 
 /// Barcode scanner screen.
-///
-/// Flow:
-/// 1. Screen opens → draggable bottom sheet shows list of santri in the group.
-/// 2. Guru scans a barcode → matching santri is auto-checked (haptic + green flash + success popup).
-/// 3. Scanning a barcode NOT in the list shows an error banner.
-/// 4. Guru taps SIMPAN → navigates to [DetailAbsensiHariIniScreen] with
-///    scanned NIS list so those santri start with status "hadir".
 @RoutePage()
 class BarcodeScannerScreen extends StatefulWidget {
   final DateTime selectedDate;
@@ -42,36 +35,46 @@ class BarcodeScannerScreen extends StatefulWidget {
 
 class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     with SingleTickerProviderStateMixin {
-  // ── Scanner ────────────────────────────────────────────────────────────────
-  final MobileScannerController _scannerController = MobileScannerController();
+  late final MobileScannerController _scannerController;
   bool _torchOn = false;
 
-  // ── Scan-line animation ────────────────────────────────────────────────────
   late AnimationController _animController;
   late Animation<double> _scanLineAnim;
 
-  // ── Real santri data ───────────────────────────────────────────────────────
   List<SantriModel> _santriList = [];
   final Set<String> _scannedNisSet = {};
 
-  // ── Flash-highlight state (NIS of last scanned) ───────────────────────────
   String? _flashNis;
-
-  // ── Error banner ──────────────────────────────────────────────────────────
   String? _errorMessage;
-
-  // ── Success banner ────────────────────────────────────────────────────────
   String? _successMessage;
 
-  // ── Cooldown to avoid duplicate scans ─────────────────────────────────────
-  bool _scanCooldown = false;
+  // ── Anti-Ghost Read ──
+  // Bukan cooldown global — melainkan validasi format + konfirmasi 2x baca
+  // untuk barcode yang valid secara format tapi tidak ada di daftar halaqoh.
+  String? _lastUnrecognizedNis;
+  int _unrecognizedCount = 0;
 
-  // ── Card overlay ratio ────────────────────────────────────────────────────
+  // Regex untuk format NIS yang valid (4–13 digit angka).
+  // NIS bervariasi panjangnya (contoh: 3100002603 = 10 digit).
+  // Tetap memfilter ghost read karena noise kamera menghasilkan
+  // huruf, simbol, atau string sangat pendek/panjang.
+  static final _nisPattern = RegExp(r'^\d{4,13}$');
+
+  // Debounce: barcode terakhir yang berhasil di-scan (agar tidak re-proses)
+  String? _lastAcceptedBarcode;
+  DateTime _lastAcceptedTime = DateTime(2000);
+
   static const double _cardAspectRatio = 1.586;
 
   @override
   void initState() {
     super.initState();
+
+    _scannerController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.normal,
+      facing: CameraFacing.back,
+    );
+
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
@@ -81,7 +84,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     );
     _animController.repeat(reverse: true);
 
-    // Build santri list from cubits after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadSantriList());
   }
 
@@ -127,63 +129,106 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     super.dispose();
   }
 
-  // ── Scan handler ──────────────────────────────────────────────────────────
+  // ── Scan handler — Fast + Ghost-Free ──────────────────────────────────────
+  //
+  // Strategi anti-ghost-read tanpa mengorbankan kecepatan:
+  //
+  // 1. FORMAT FILTER: Ghost read menghasilkan string acak (huruf, simbol,
+  //    panjang tidak sesuai). NIS selalu 12 digit angka. Dengan satu cek
+  //    regex, >99% ghost read langsung terbuang di frame pertama — GRATIS,
+  //    tanpa cooldown, tanpa delay.
+  //
+  // 2. VALID NIS MATCH → TERIMA LANGSUNG: Jika barcode lolos format DAN
+  //    cocok dengan NIS santri di halaqoh, langsung diterima. Probabilitas
+  //    ghost read menghasilkan NIS 12 digit yang kebetulan cocok = ~0%.
+  //
+  // 3. VALID FORMAT TAPI TIDAK DIKENAL → KONFIRMASI 2x: Jika NIS formatnya
+  //    benar tapi bukan anggota halaqoh, mungkin kartu santri lain. Tunggu
+  //    2 pembacaan konsisten sebelum tampilkan error (berjaga-jaga dari
+  //    misread 1 digit, tetap sangat cepat karena hanya butuh 2 frame).
+  //
+  // 4. DEBOUNCE PER-BARCODE: Setelah NIS diterima, barcode yang SAMA
+  //    diabaikan selama 1 detik. Barcode LAIN tetap bisa langsung terbaca.
+  //    Tidak ada global cooldown yang memblokir semua scan.
+  //
   void _onDetect(BarcodeCapture capture) {
-    if (_scanCooldown) return;
     final rawValue = capture.barcodes.firstOrNull?.rawValue;
-    if (rawValue == null) return;
+    if (rawValue == null || rawValue.isEmpty) return;
 
-    _setCooldown();
+    final cleanValue = rawValue.trim();
 
-    final index = _santriList.indexWhere((s) => s.nis == rawValue);
+    // ── STEP 1: Format filter — buang ghost read instan ──────────────────
+    if (!_nisPattern.hasMatch(cleanValue)) return;
 
-    if (index == -1) {
-      // Santri not in this halaqoh
-      HapticFeedback.heavyImpact();
-      setState(() {
-        _errorMessage =
-            'Santri dengan NIS $rawValue bukan anggota halaqoh Anda';
-        _flashNis = null;
-        _successMessage = null; // reset success if error occurs
-      });
-      // Auto-dismiss error after 3 s
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) setState(() => _errorMessage = null);
-      });
+    // ── STEP 2: Debounce — abaikan barcode yang baru saja diproses ───────
+    final now = DateTime.now();
+    if (_lastAcceptedBarcode == cleanValue &&
+        now.difference(_lastAcceptedTime).inMilliseconds < 1000) {
       return;
     }
 
-    if (_scannedNisSet.contains(rawValue)) return; // already checked
+    // ── STEP 3: Cek apakah NIS ada di daftar santri halaqoh ─────────────
+    final index = _santriList.indexWhere((s) => s.nis == cleanValue);
+
+    if (index == -1) {
+      // Format NIS valid tapi bukan anggota halaqoh.
+      // Konfirmasi 2x pembacaan konsisten sebelum tampilkan error.
+      if (_lastUnrecognizedNis == cleanValue) {
+        _unrecognizedCount++;
+      } else {
+        _lastUnrecognizedNis = cleanValue;
+        _unrecognizedCount = 1;
+      }
+
+      if (_unrecognizedCount >= 2) {
+        // Sudah terbaca 2x berturut — ini memang kartu yang salah.
+        _lastAcceptedBarcode = cleanValue;
+        _lastAcceptedTime = now;
+        _lastUnrecognizedNis = null;
+        _unrecognizedCount = 0;
+
+        if (_errorMessage == null) {
+          HapticFeedback.heavyImpact();
+          setState(() {
+            _errorMessage =
+                'Santri dengan NIS $cleanValue bukan anggota halaqoh Anda';
+            _flashNis = null;
+            _successMessage = null;
+          });
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted) setState(() => _errorMessage = null);
+          });
+        }
+      }
+      return;
+    }
+
+    // ── STEP 4: NIS dikenali — sudah pernah di-scan? ────────────────────
+    if (_scannedNisSet.contains(cleanValue)) return;
+
+    // ── STEP 5: SUKSES — terima langsung tanpa delay ────────────────────
+    _lastAcceptedBarcode = cleanValue;
+    _lastAcceptedTime = now;
+    _lastUnrecognizedNis = null;
+    _unrecognizedCount = 0;
 
     HapticFeedback.mediumImpact();
-
-    // Ambil nama santri berdasarkan index yang ditemukan
     final scannedSantriName = _santriList[index].nama;
 
     setState(() {
-      _scannedNisSet.add(rawValue);
-      _flashNis = rawValue;
+      _scannedNisSet.add(cleanValue);
+      _flashNis = cleanValue;
       _errorMessage = null;
-      _successMessage = scannedSantriName; // Simpan nama untuk pop-up
+      _successMessage = scannedSantriName;
     });
 
-    // Remove highlight after 800 ms
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) setState(() => _flashNis = null);
     });
 
-    // Auto-dismiss success pop-up after 1.5 seconds
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) setState(() => _successMessage = null);
     });
-  }
-
-  void _setCooldown() {
-    _scanCooldown = true;
-    Future.delayed(
-      const Duration(milliseconds: 800),
-      () => _scanCooldown = false,
-    );
   }
 
   // ── Navigate to detail screen ─────────────────────────────────────────────
@@ -211,7 +256,19 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       body: Stack(
         children: [
           // Camera
-          MobileScanner(controller: _scannerController, onDetect: _onDetect),
+          MobileScanner(
+            controller: _scannerController,
+            onDetect: _onDetect,
+            errorBuilder: (context, error) {
+              return Center(
+                child: Text(
+                  'Gagal memuat kamera:\n${error.errorCode}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              );
+            },
+          ),
 
           // Card overlay + scan line
           _buildCardOverlay(colors),
@@ -225,7 +282,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
           // Success banner
           _buildSuccessBanner(colors),
 
-          // Instruction text (only when error is absent)
+          // Instruction text (Hanya tampil jika tidak ada error)
           if (_errorMessage == null)
             Positioned(
               bottom: 320.h,
@@ -235,20 +292,35 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                 child: Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: 20.w,
-                    vertical: 8.h,
+                    vertical: 10.h,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Colors.black.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
-                  child: Text(
-                    t.absensi.scanInstruction,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                      fontFamily: 'Poppins',
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        t.absensi.scanInstruction,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'Pastikan barcode berada dalam posisi yang jelas',
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -304,8 +376,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
           // Torch toggle
           GestureDetector(
-            onTap: () {
-              _scannerController.toggleTorch();
+            onTap: () async {
+              await _scannerController.toggleTorch();
               setState(() => _torchOn = !_torchOn);
             },
             child: Container(
@@ -319,7 +391,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                 children: [
                   Icon(Icons.flashlight_on, color: Colors.white, size: 18.sp),
                   SizedBox(width: 6.w),
-                  // Toggle pill
                   Container(
                     width: 36.w,
                     height: 20.h,
@@ -427,11 +498,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
         duration: const Duration(milliseconds: 300),
         child: Center(
           child: Container(
-            // Padding vertikal sedikit ditambah agar lega jika teks menjadi 2 baris
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
             decoration: BoxDecoration(
               color: Colors.green.shade600.withValues(alpha: 0.95),
-              // Menggunakan 16.r (rounded rectangle) agar tetap bagus meski teks multi-line
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
@@ -443,7 +512,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              // Memastikan ikon tetap di tengah secara vertikal jika teks turun ke baris 2
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(
@@ -460,9 +528,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                       fontFamily: 'Poppins',
-                      height: 1.3, // Jarak antar baris teks agar rapi
+                      height: 1.3,
                     ),
-                    // maxLines dan overflow dihapus agar teks tampil penuh!
                   ),
                 ),
               ],
@@ -582,7 +649,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                           ),
                           SizedBox(height: 2.h),
                           Text(
-                            'Total $_totalCount Santri', // Teks dibersihkan agar tidak dobel
+                            'Total $_totalCount Santri',
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w400,
@@ -768,7 +835,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   }
 }
 
-// ── Card corner painter (unchanged) ──────────────────────────────────────────
+// ── Card corner painter ──────────────────────────────────────────────────────
 class _CardCornerPainter extends CustomPainter {
   final Color color;
   _CardCornerPainter({required this.color});
@@ -784,7 +851,6 @@ class _CardCornerPainter extends CustomPainter {
     const cornerLength = 30.0;
     const cornerRadius = 16.0;
 
-    // Top-left
     canvas.drawPath(
       Path()
         ..moveTo(0, cornerLength)
@@ -793,7 +859,6 @@ class _CardCornerPainter extends CustomPainter {
         ..lineTo(cornerLength, 0),
       paint,
     );
-    // Top-right
     canvas.drawPath(
       Path()
         ..moveTo(size.width - cornerLength, 0)
@@ -802,7 +867,6 @@ class _CardCornerPainter extends CustomPainter {
         ..lineTo(size.width, cornerLength),
       paint,
     );
-    // Bottom-left
     canvas.drawPath(
       Path()
         ..moveTo(0, size.height - cornerLength)
@@ -811,7 +875,6 @@ class _CardCornerPainter extends CustomPainter {
         ..lineTo(cornerLength, size.height),
       paint,
     );
-    // Bottom-right
     canvas.drawPath(
       Path()
         ..moveTo(size.width - cornerLength, size.height)

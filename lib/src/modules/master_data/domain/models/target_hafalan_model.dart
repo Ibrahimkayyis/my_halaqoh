@@ -6,6 +6,10 @@ part 'target_hafalan_model.g.dart';
 /// Domain model for Target Hafalan per class + program.
 /// Maps to Firestore collection: `/targetHafalan/{id}`
 /// Document ID format: "{kelas}_{program}", e.g. "7_Reguler"
+///
+/// NOTE: The actual curriculum content (which juz per semester/period) is
+/// stored as compile-time constants in [CurriculumData], not in this model.
+/// This model only stores admin-configured metadata: tahunAjaran + semesterAktif.
 @freezed
 abstract class TargetHafalanModel with _$TargetHafalanModel {
   const factory TargetHafalanModel({
@@ -18,14 +22,11 @@ abstract class TargetHafalanModel with _$TargetHafalanModel {
     /// Program: "Reguler" or "Takhassus"
     required String program,
 
-    /// Number of target juz, e.g. 2 or 5
-    required int targetJuz,
-
-    /// List of specific juz numbers, e.g. [29, 30]
-    @Default([]) List<int> juzList,
-
     /// Academic year, e.g. "2025 / 2026"
     @Default('') String tahunAjaran,
+
+    /// Active semester set by admin: 1 or 2. Null = not yet set.
+    @Default(null) int? semesterAktif,
 
     required DateTime createdAt,
     required DateTime updatedAt,

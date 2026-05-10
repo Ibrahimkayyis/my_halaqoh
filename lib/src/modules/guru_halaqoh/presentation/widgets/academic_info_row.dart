@@ -29,7 +29,10 @@ class AcademicInfoRow extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          // Tambahkan crossAxisAlignment agar jika value sampai 2 baris,
+          // icon dan label tetap berada di posisi atas (rapi)
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Icon box
               Container(
@@ -39,17 +42,15 @@ class AcademicInfoRow extends StatelessWidget {
                   color: iconBgColor,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(
-                  icon,
-                  size: 20.sp,
-                  color: iconColor,
-                ),
+                child: Icon(icon, size: 20.sp, color: iconColor),
               ),
               SizedBox(width: 14.w),
 
-              // Label — fixed width so it never wraps
-              SizedBox(
-                width: 100.w,
+              // Label — Dibiarkan mengambil lebar aslinya agar selalu 1 baris
+              // dan tidak akan pernah terpotong
+              Padding(
+                // Sedikit padding top agar text sejajar dengan tengah-tengah icon
+                padding: EdgeInsets.only(top: 8.h),
                 child: Text(
                   label,
                   style: TextStyle(
@@ -61,16 +62,24 @@ class AcademicInfoRow extends StatelessWidget {
                 ),
               ),
 
-              // Value — takes remaining space and wraps when long
+              // Jarak aman antara label dan value
+              SizedBox(width: 16.w),
+
+              // Value — Mengambil sisa ruang.
+              // Jika terlalu panjang, otomatis akan turun ke baris ke-2 tanpa terpotong
               Expanded(
-                child: Text(
-                  value,
-                  textAlign: TextAlign.end,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: colors.textPrimary,
-                    fontFamily: 'Poppins',
+                child: Padding(
+                  // Sedikit padding top agar sejajar dengan label
+                  padding: EdgeInsets.only(top: 8.h),
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary,
+                      fontFamily: 'Poppins',
+                    ),
                   ),
                 ),
               ),

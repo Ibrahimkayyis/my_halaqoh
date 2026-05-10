@@ -75,6 +75,7 @@ class TranslationsId extends Translations {
 	@override late final _TranslationsWaliSantriPengaturanScreenId WaliSantriPengaturanScreen = _TranslationsWaliSantriPengaturanScreenId._(_root);
 	@override late final _TranslationsDialogsId dialogs = _TranslationsDialogsId._(_root);
 	@override late final _TranslationsMasterDataSettingsId masterDataSettings = _TranslationsMasterDataSettingsId._(_root);
+	@override late final _TranslationsTentangAplikasiScreenId tentangAplikasiScreen = _TranslationsTentangAplikasiScreenId._(_root);
 }
 
 // Path: app
@@ -201,10 +202,20 @@ class _TranslationsTargetHafalanId extends TranslationsTargetHafalanEn {
 	@override String get reguler => 'REGULER';
 	@override String get takhassus => 'TAKHASSUS';
 	@override String get infoText => 'Atur target hafalan untuk setiap kelas, target akan diterapkan untuk seluruh santri pada kelas tersebut.';
+	@override String get infoTextNew => 'Kurikulum hafalan sesuai program pesantren. Tetapkan tahun ajaran dan semester yang sedang berjalan.';
 	@override String get kelasLabel => 'Kelas';
-	@override String targetJuz({required Object count}) => 'Target: ${count} Juz';
-	@override String juzRange({required Object range}) => 'Juz ${range}';
 	@override String get smp => 'SMP';
+	@override String get semesterAktif => 'Semester Aktif';
+	@override String get belumDitetapkan => 'Belum ditetapkan';
+	@override String get semester1 => 'Semester 1';
+	@override String get semester2 => 'Semester 2';
+	@override String get periodeUTS => 'UTS';
+	@override String get periodeUAS => 'UAS';
+	@override String get tipeIdadTahsin => 'I\'dad Tahsin';
+	@override String get tipeDauroh => 'Dauroh';
+	@override String get tipeMurajaah => 'Muraja\'ah';
+	@override String get tipeUAT => 'UAT (Ujian Akhir Tahfidz)';
+	@override String get editPengaturan => 'Edit Pengaturan';
 }
 
 // Path: editTarget
@@ -214,11 +225,10 @@ class _TranslationsEditTargetId extends TranslationsEditTargetEn {
 	final TranslationsId _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Edit Target Hafalan';
+	@override String get title => 'Pengaturan Target Kelas';
 	@override String get tahunAjaran => 'TAHUN AJARAN';
-	@override String get pilihJuz => 'PILIH JUZ';
-	@override String get totalTarget => 'TOTAL TARGET';
-	@override String totalJuz({required Object count}) => '${count} Juz';
+	@override String get semesterAktif => 'SEMESTER AKTIF';
+	@override String get pilihSemester => 'Pilih Semester yang Sedang Berjalan';
 	@override String get simpanPerubahan => 'Simpan Perubahan';
 }
 
@@ -282,9 +292,9 @@ class _TranslationsAddHalaqohId extends TranslationsAddHalaqohEn {
 	@override String get namaHalaqoh => 'Nama Halaqoh';
 	@override String get namaHalaqohHint => 'Contoh: Halaqoh 7A';
 	@override String get kelas => 'Kelas';
-	@override String get kelasHint => 'Pilih Kelas';
+	@override String get kelasHint => 'Kelas';
 	@override String get program => 'Program';
-	@override String get programHint => 'Pilih Program';
+	@override String get programHint => 'Program';
 	@override String get pengampu => 'Pengampu (Guru)';
 	@override String get pengampuHint => 'Cari nama pengampu...';
 	@override String get daftarSantri => 'Daftar Santri';
@@ -761,6 +771,44 @@ class _TranslationsMasterDataSettingsId extends TranslationsMasterDataSettingsEn
 	@override String get appVersion => 'Versi {version}';
 }
 
+// Path: tentangAplikasiScreen
+class _TranslationsTentangAplikasiScreenId extends TranslationsTentangAplikasiScreenEn {
+	_TranslationsTentangAplikasiScreenId._(TranslationsId root) : this._root = root, super.internal(root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Tentang Aplikasi';
+	@override String get appName => 'MyHalaqoh';
+	@override String get tagline => 'Platform Digital Manajemen Halaqoh';
+	@override String get version => 'Versi';
+	@override String get sectionTentang => 'Tentang MyHalaqoh';
+	@override String get deskripsi1 => 'MyHalaqoh adalah platform digital terpadu yang dirancang khusus untuk membantu pengelolaan halaqoh di lingkungan pesantren secara efisien, transparan, dan mudah diakses.';
+	@override String deskripsi2({required Object pesantren}) => 'Dikembangkan khusus untuk ${pesantren}, aplikasi ini menghubungkan Admin, Guru, dan Wali Santri dalam satu ekosistem digital yang terintegrasi.';
+	@override String get sectionFitur => 'Fitur Unggulan';
+	@override String get fiturAbsensiJudul => 'Absensi QR Code';
+	@override String get fiturAbsensiDesc => 'Rekam kehadiran santri dengan cepat menggunakan barcode scanner terintegrasi.';
+	@override String get fiturHafalanJudul => 'Hafalan Al-Quran';
+	@override String get fiturHafalanDesc => 'Pantau progress hafalan santri per juz dan per surat secara real-time.';
+	@override String get fiturNotifJudul => 'Notifikasi Otomatis';
+	@override String get fiturNotifDesc => 'Informasi absensi dan hafalan dikirim langsung ke Wali Santri via push notification.';
+	@override String get fiturMultiRoleJudul => 'Multi-Role Dashboard';
+	@override String get fiturMultiRoleDesc => 'Tampilan dan fitur yang disesuaikan untuk Admin, Guru, dan Wali Santri.';
+	@override String get fiturOfflineJudul => 'Mode Offline';
+	@override String get fiturOfflineDesc => 'Absensi dan hafalan tetap bisa direkam meskipun tanpa koneksi internet.';
+	@override String get sectionInfo => 'Informasi Aplikasi';
+	@override String get infoNamaApp => 'Nama Aplikasi';
+	@override String get infoVersi => 'Versi';
+	@override String get infoPlatform => 'Platform';
+	@override String get infoLembaga => 'Lembaga';
+	@override String get infoPlatformValue => 'Android';
+	@override String get sectionKontak => 'Kontak & Dukungan';
+	@override String get kontakDeskripsi => 'Jika Anda memerlukan bantuan teknis atau memiliki pertanyaan seputar aplikasi, silakan hubungi administrator melalui WhatsApp.';
+	@override String get kontakButton => 'Hubungi Admin via WhatsApp';
+	@override String get footer => 'Dibuat dengan ❤️ untuk kemajuan pendidikan pesantren';
+	@override String get copyright => '© 2026 MyHalaqoh. All rights reserved.';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on TranslationsId {
@@ -820,15 +868,24 @@ extension on TranslationsId {
 			case 'targetHafalan.reguler': return 'REGULER';
 			case 'targetHafalan.takhassus': return 'TAKHASSUS';
 			case 'targetHafalan.infoText': return 'Atur target hafalan untuk setiap kelas, target akan diterapkan untuk seluruh santri pada kelas tersebut.';
+			case 'targetHafalan.infoTextNew': return 'Kurikulum hafalan sesuai program pesantren. Tetapkan tahun ajaran dan semester yang sedang berjalan.';
 			case 'targetHafalan.kelasLabel': return 'Kelas';
-			case 'targetHafalan.targetJuz': return ({required Object count}) => 'Target: ${count} Juz';
-			case 'targetHafalan.juzRange': return ({required Object range}) => 'Juz ${range}';
 			case 'targetHafalan.smp': return 'SMP';
-			case 'editTarget.title': return 'Edit Target Hafalan';
+			case 'targetHafalan.semesterAktif': return 'Semester Aktif';
+			case 'targetHafalan.belumDitetapkan': return 'Belum ditetapkan';
+			case 'targetHafalan.semester1': return 'Semester 1';
+			case 'targetHafalan.semester2': return 'Semester 2';
+			case 'targetHafalan.periodeUTS': return 'UTS';
+			case 'targetHafalan.periodeUAS': return 'UAS';
+			case 'targetHafalan.tipeIdadTahsin': return 'I\'dad Tahsin';
+			case 'targetHafalan.tipeDauroh': return 'Dauroh';
+			case 'targetHafalan.tipeMurajaah': return 'Muraja\'ah';
+			case 'targetHafalan.tipeUAT': return 'UAT (Ujian Akhir Tahfidz)';
+			case 'targetHafalan.editPengaturan': return 'Edit Pengaturan';
+			case 'editTarget.title': return 'Pengaturan Target Kelas';
 			case 'editTarget.tahunAjaran': return 'TAHUN AJARAN';
-			case 'editTarget.pilihJuz': return 'PILIH JUZ';
-			case 'editTarget.totalTarget': return 'TOTAL TARGET';
-			case 'editTarget.totalJuz': return ({required Object count}) => '${count} Juz';
+			case 'editTarget.semesterAktif': return 'SEMESTER AKTIF';
+			case 'editTarget.pilihSemester': return 'Pilih Semester yang Sedang Berjalan';
 			case 'editTarget.simpanPerubahan': return 'Simpan Perubahan';
 			case 'nav.dashboard': return 'Dashboard';
 			case 'nav.santri': return 'Santri';
@@ -865,9 +922,9 @@ extension on TranslationsId {
 			case 'addHalaqoh.namaHalaqoh': return 'Nama Halaqoh';
 			case 'addHalaqoh.namaHalaqohHint': return 'Contoh: Halaqoh 7A';
 			case 'addHalaqoh.kelas': return 'Kelas';
-			case 'addHalaqoh.kelasHint': return 'Pilih Kelas';
+			case 'addHalaqoh.kelasHint': return 'Kelas';
 			case 'addHalaqoh.program': return 'Program';
-			case 'addHalaqoh.programHint': return 'Pilih Program';
+			case 'addHalaqoh.programHint': return 'Program';
 			case 'addHalaqoh.pengampu': return 'Pengampu (Guru)';
 			case 'addHalaqoh.pengampuHint': return 'Cari nama pengampu...';
 			case 'addHalaqoh.daftarSantri': return 'Daftar Santri';
@@ -1117,6 +1174,35 @@ extension on TranslationsId {
 			case 'masterDataSettings.tentangAplikasi': return 'Tentang Aplikasi';
 			case 'masterDataSettings.keluar': return 'Keluar';
 			case 'masterDataSettings.appVersion': return 'Versi {version}';
+			case 'tentangAplikasiScreen.title': return 'Tentang Aplikasi';
+			case 'tentangAplikasiScreen.appName': return 'MyHalaqoh';
+			case 'tentangAplikasiScreen.tagline': return 'Platform Digital Manajemen Halaqoh';
+			case 'tentangAplikasiScreen.version': return 'Versi';
+			case 'tentangAplikasiScreen.sectionTentang': return 'Tentang MyHalaqoh';
+			case 'tentangAplikasiScreen.deskripsi1': return 'MyHalaqoh adalah platform digital terpadu yang dirancang khusus untuk membantu pengelolaan halaqoh di lingkungan pesantren secara efisien, transparan, dan mudah diakses.';
+			case 'tentangAplikasiScreen.deskripsi2': return ({required Object pesantren}) => 'Dikembangkan khusus untuk ${pesantren}, aplikasi ini menghubungkan Admin, Guru, dan Wali Santri dalam satu ekosistem digital yang terintegrasi.';
+			case 'tentangAplikasiScreen.sectionFitur': return 'Fitur Unggulan';
+			case 'tentangAplikasiScreen.fiturAbsensiJudul': return 'Absensi QR Code';
+			case 'tentangAplikasiScreen.fiturAbsensiDesc': return 'Rekam kehadiran santri dengan cepat menggunakan barcode scanner terintegrasi.';
+			case 'tentangAplikasiScreen.fiturHafalanJudul': return 'Hafalan Al-Quran';
+			case 'tentangAplikasiScreen.fiturHafalanDesc': return 'Pantau progress hafalan santri per juz dan per surat secara real-time.';
+			case 'tentangAplikasiScreen.fiturNotifJudul': return 'Notifikasi Otomatis';
+			case 'tentangAplikasiScreen.fiturNotifDesc': return 'Informasi absensi dan hafalan dikirim langsung ke Wali Santri via push notification.';
+			case 'tentangAplikasiScreen.fiturMultiRoleJudul': return 'Multi-Role Dashboard';
+			case 'tentangAplikasiScreen.fiturMultiRoleDesc': return 'Tampilan dan fitur yang disesuaikan untuk Admin, Guru, dan Wali Santri.';
+			case 'tentangAplikasiScreen.fiturOfflineJudul': return 'Mode Offline';
+			case 'tentangAplikasiScreen.fiturOfflineDesc': return 'Absensi dan hafalan tetap bisa direkam meskipun tanpa koneksi internet.';
+			case 'tentangAplikasiScreen.sectionInfo': return 'Informasi Aplikasi';
+			case 'tentangAplikasiScreen.infoNamaApp': return 'Nama Aplikasi';
+			case 'tentangAplikasiScreen.infoVersi': return 'Versi';
+			case 'tentangAplikasiScreen.infoPlatform': return 'Platform';
+			case 'tentangAplikasiScreen.infoLembaga': return 'Lembaga';
+			case 'tentangAplikasiScreen.infoPlatformValue': return 'Android';
+			case 'tentangAplikasiScreen.sectionKontak': return 'Kontak & Dukungan';
+			case 'tentangAplikasiScreen.kontakDeskripsi': return 'Jika Anda memerlukan bantuan teknis atau memiliki pertanyaan seputar aplikasi, silakan hubungi administrator melalui WhatsApp.';
+			case 'tentangAplikasiScreen.kontakButton': return 'Hubungi Admin via WhatsApp';
+			case 'tentangAplikasiScreen.footer': return 'Dibuat dengan ❤️ untuk kemajuan pendidikan pesantren';
+			case 'tentangAplikasiScreen.copyright': return '© 2026 MyHalaqoh. All rights reserved.';
 			default: return null;
 		}
 	}

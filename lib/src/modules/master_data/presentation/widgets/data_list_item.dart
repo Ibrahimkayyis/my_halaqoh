@@ -10,6 +10,7 @@ class DataListItem extends StatelessWidget {
   final Color? badgeColor;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final VoidCallback? onResetPassword;
 
   const DataListItem({
     super.key,
@@ -19,6 +20,7 @@ class DataListItem extends StatelessWidget {
     this.badgeColor,
     this.onEdit,
     this.onDelete,
+    this.onResetPassword,
   });
 
   @override
@@ -64,8 +66,6 @@ class DataListItem extends StatelessWidget {
                     color: colors.textPrimary,
                     fontFamily: 'Poppins',
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -108,6 +108,20 @@ class DataListItem extends StatelessWidget {
               ),
             ),
           ),
+          if (onResetPassword != null) ...[
+            SizedBox(width: 4.w),
+            GestureDetector(
+              onTap: onResetPassword,
+              child: Padding(
+                padding: EdgeInsets.all(4.w),
+                child: Icon(
+                  Icons.lock_reset_outlined,
+                  size: 20.sp,
+                  color: colors.primary,
+                ),
+              ),
+            ),
+          ],
           SizedBox(width: 4.w),
           GestureDetector(
             onTap: onDelete,

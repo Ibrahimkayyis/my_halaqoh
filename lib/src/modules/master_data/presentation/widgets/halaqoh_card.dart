@@ -54,8 +54,6 @@ class HalaqohCard extends StatelessWidget {
                     color: colors.textPrimary,
                     fontFamily: 'Poppins',
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               SizedBox(width: 10.w),

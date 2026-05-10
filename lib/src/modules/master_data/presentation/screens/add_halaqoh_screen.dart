@@ -510,22 +510,9 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
             ),
             child: Row(
               children: [
-                SizedBox(
-                  width: 50.w,
-                  child: Text(
-                    t.addHalaqoh.nis,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: colors.textSecondary,
-                      letterSpacing: 0.5,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ),
                 Expanded(
                   child: Text(
-                    t.addHalaqoh.namaSantri,
+                    t.santri.identitas,
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
@@ -578,30 +565,32 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                   ),
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      width: 50.w,
-                      child: Text(
-                        santri.nis,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w400,
-                          color: colors.textSecondary,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ),
                     Expanded(
-                      child: Text(
-                        santri.nama,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w500,
-                          color: colors.textPrimary,
-                          fontFamily: 'Poppins',
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            santri.nis,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              color: colors.primary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            santri.nama,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textPrimary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     GestureDetector(

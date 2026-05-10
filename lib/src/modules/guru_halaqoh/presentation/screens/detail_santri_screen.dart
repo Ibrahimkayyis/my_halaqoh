@@ -247,7 +247,7 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
                           loaded: (data) => progressData = data,
                           orElse: () {},
                         );
-                        return _buildProgressCard(colors, target, progressData);
+                        return _buildProgressCard(colors, santri, target, progressData);
                       },
                     ),
                     SizedBox(height: 40.h),
@@ -334,8 +334,8 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
 
   /// Progress Hafalan card driven by admin-set memorization targets.
   /// Shows target juz, completion count (0 for now), progress bar.
-  Widget _buildProgressCard(AppColorSet colors, TargetHafalanModel? target, OverallHafalanProgress? progressData) {
-    final int juzTarget = target?.targetJuz ?? 0;
+  Widget _buildProgressCard(AppColorSet colors, SantriModel? santri, TargetHafalanModel? target, OverallHafalanProgress? progressData) {
+    final int juzTarget = target != null && santri != null ? TargetHafalanHelper.getTargetJuzCount(target, santri.kelas, santri.program) : 0;
     
     double juzCompleted = 0.0;
     if (progressData != null) {

@@ -79,8 +79,9 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
     halaqohState.maybeWhen(
       loaded: (list) {
         try {
-          myHalaqoh =
-              list.firstWhere((h) => h.santriIds.contains(_linkedDocId));
+          myHalaqoh = list.firstWhere(
+            (h) => h.santriIds.contains(_linkedDocId),
+          );
         } catch (_) {}
       },
       orElse: () {},
@@ -162,7 +163,9 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
                               icon: Icons.info_outline,
                               label: t.guruProfile.tentangAplikasi,
                               onTap: () {
-                                // TODO: Navigate to Tentang Aplikasi
+                                context.router.push(
+                                  const TentangAplikasiRoute(),
+                                );
                               },
                             ),
                           ],
@@ -172,17 +175,6 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
                         // Logout button
                         _buildLogoutCard(colors, context),
                         SizedBox(height: 16.h),
-
-                        // Version text
-                        Text(
-                          t.guruProfile.appVersion(version: '1.2.0'),
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w400,
-                            color: colors.textSecondary.withValues(alpha: 0.6),
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
                         SizedBox(height: 100.h), // space for bottom nav
                       ],
                     ),
@@ -387,10 +379,9 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
         onTap: () async {
           final confirmed = await ConfirmLogoutDialog.show(context);
           if (confirmed && context.mounted) {
-            await context.read<AuthCubit>().logout();
-            if (context.mounted) {
-              context.router.replaceAll([const LoginRoute()]);
-            }
+            final authCubit = context.read<AuthCubit>();
+            context.router.replaceAll([const LoginRoute()]);
+            await authCubit.logout();
           }
         },
         borderRadius: BorderRadius.circular(16.r),

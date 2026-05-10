@@ -48,6 +48,15 @@ class GuruCubit extends Cubit<GuruState> {
     return result.isRight();
   }
 
+  /// Reset a guru's password.
+  Future<String?> resetPassword(String authUid) async {
+    final result = await _repository.resetPassword(authUid);
+    return result.fold(
+      (error) => error,
+      (_) => null,
+    );
+  }
+
   @override
   Future<void> close() {
     _subscription?.cancel();

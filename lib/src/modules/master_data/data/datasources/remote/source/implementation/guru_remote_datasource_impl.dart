@@ -85,4 +85,16 @@ class GuruRemoteDataSourceImpl implements GuruRemoteDataSource {
   Future<void> delete(String id) async {
     await _col.doc(id).delete();
   }
+
+  @override
+  Future<void> resetPassword(String authUid) async {
+    try {
+      final callable = _functions.httpsCallable('resetUserPassword');
+      await callable.call({'uid': authUid});
+    } on FirebaseFunctionsException catch (error) {
+      throw Exception('Gagal mereset password: ${error.message}');
+    } catch (error) {
+      throw Exception('Gagal mereset password: $error');
+    }
+  }
 }

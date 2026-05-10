@@ -99,4 +99,16 @@ class SantriRemoteDataSourceImpl implements SantriRemoteDataSource {
   Future<void> updateHalaqohId(String santriId, String? halaqohId) async {
     await _col.doc(santriId).update({'halaqohId': halaqohId});
   }
+
+  @override
+  Future<void> resetPassword(String authUid) async {
+    try {
+      final callable = _functions.httpsCallable('resetUserPassword');
+      await callable.call({'uid': authUid});
+    } on FirebaseFunctionsException catch (error) {
+      throw Exception('Gagal mereset password: ${error.message}');
+    } catch (error) {
+      throw Exception('Gagal mereset password: $error');
+    }
+  }
 }

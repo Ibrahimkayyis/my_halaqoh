@@ -9,4 +9,5 @@ abstract class SantriRepository {
   Future<Either<String, String>> add(SantriModel model);
   Future<Either<String, void>> update(SantriModel model);
   Future<Either<String, void>> delete(String id);
+  Future<Either<String, void>> resetPassword(String authUid);
 }

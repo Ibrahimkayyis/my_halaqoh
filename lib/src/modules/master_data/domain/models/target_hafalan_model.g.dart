@@ -11,13 +11,8 @@ _TargetHafalanModel _$TargetHafalanModelFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       kelas: json['kelas'] as String,
       program: json['program'] as String,
-      targetJuz: (json['targetJuz'] as num).toInt(),
-      juzList:
-          (json['juzList'] as List<dynamic>?)
-              ?.map((e) => (e as num).toInt())
-              .toList() ??
-          const [],
       tahunAjaran: json['tahunAjaran'] as String? ?? '',
+      semesterAktif: (json['semesterAktif'] as num?)?.toInt() ?? null,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -27,9 +22,8 @@ Map<String, dynamic> _$TargetHafalanModelToJson(_TargetHafalanModel instance) =>
       'id': instance.id,
       'kelas': instance.kelas,
       'program': instance.program,
-      'targetJuz': instance.targetJuz,
-      'juzList': instance.juzList,
       'tahunAjaran': instance.tahunAjaran,
+      'semesterAktif': instance.semesterAktif,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };

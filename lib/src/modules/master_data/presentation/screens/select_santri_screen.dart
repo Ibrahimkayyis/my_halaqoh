@@ -1,3 +1,4 @@
+import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,6 +29,17 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
   String _searchQuery = '';
   final Set<String> _selectedIds = {};
 
+  // ── Filter state ─────────────────────────────────────────────────────────
+  String? _filterKelas;
+  String? _filterProgram;
+
+  final List<String> _kelasOptions = [
+    'Semua Kelas', '7', '8', '9', '10', '11', '12',
+  ];
+  final List<String> _programOptions = [
+    'Semua Program', 'Reguler', 'Takhassus',
+  ];
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -39,17 +51,32 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
   }
 
   List<SantriModel> _applyFilter(List<SantriModel> allSantri) {
-    // Filter out those already assigned
-    final available = allSantri
+    // Exclude santri already assigned to another halaqoh
+    var result = allSantri
         .where((s) => !widget.assignedSantriIds.contains(s.id))
         .toList();
 
-    if (_searchQuery.isEmpty) return available;
-    return available
-        .where((s) =>
-            s.nama.toLowerCase().contains(_searchQuery) ||
-            s.nis.contains(_searchQuery))
-        .toList();
+    // Search query
+    if (_searchQuery.isNotEmpty) {
+      result = result
+          .where((s) =>
+              s.nama.toLowerCase().contains(_searchQuery) ||
+              s.nis.contains(_searchQuery))
+          .toList();
+    }
+
+    // Kelas filter
+    if (_filterKelas != null && _filterKelas != 'Semua Kelas') {
+      result = result.where((s) => s.kelas == _filterKelas).toList();
+    }
+
+    // Program filter
+    if (_filterProgram != null && _filterProgram != 'Semua Program') {
+      final code = _filterProgram == 'Takhassus' ? 'T' : 'R';
+      result = result.where((s) => s.program == code).toList();
+    }
+
+    return result;
   }
 
   void _toggleSelect(String id) {
@@ -63,9 +90,8 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
   }
 
   void _confirmSelection(List<SantriModel> allSantri) {
-    final selected = allSantri
-        .where((s) => _selectedIds.contains(s.id))
-        .toList();
+    final selected =
+        allSantri.where((s) => _selectedIds.contains(s.id)).toList();
     context.router.maybePop(selected);
   }
 
@@ -98,14 +124,16 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (message) => Center(
               child: Text(message,
-                  style: TextStyle(color: colors.error, fontFamily: 'Poppins')),
+                  style: TextStyle(
+                      color: colors.error, fontFamily: 'Poppins')),
             ),
             loaded: (santriList) {
               final filtered = _applyFilter(santriList);
               return Column(
                 children: [
                   SizedBox(height: 8.h),
-                  // Search field
+
+                  // ── Search bar ────────────────────────────────────────────
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     child: TextField(
@@ -128,7 +156,8 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                           color: colors.textSecondary,
                           size: 20.sp,
                         ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 12.h),
                         filled: true,
                         fillColor: colors.surface,
                         enabledBorder: OutlineInputBorder(
@@ -137,50 +166,26 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(color: colors.primary),
+                          borderSide:
+                              BorderSide(color: colors.primary),
                         ),
                       ),
                     ),
                   ),
                   SizedBox(height: 10.h),
 
-                  // Filter + count
+                  // ── Filter dropdowns (Kelas + Program) ──────────────────
+                  _buildFilterRow(colors),
+                  SizedBox(height: 10.h),
+
+                  // ── Count + assigned-hidden notice ───────────────────────
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     child: Row(
                       children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 6.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.surface,
-                            borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(color: colors.border),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.tune,
-                                  size: 16.sp, color: colors.textSecondary),
-                              SizedBox(width: 6.w),
-                              Text(
-                                t.selectSantri.filter,
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: colors.textPrimary,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
                         Text(
                           t.selectSantri.countLabel(
-                              count: santriList.length.toString()),
+                              count: filtered.length.toString()),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
@@ -188,33 +193,31 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                             fontFamily: 'Poppins',
                           ),
                         ),
+                        if (widget.assignedSantriIds.isNotEmpty) ...[
+                          SizedBox(width: 6.w),
+                          Expanded(
+                            child: Text(
+                              '(${widget.assignedSantriIds.length} sudah di halaqoh lain)',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: colors.primary,
+                                fontStyle: FontStyle.italic,
+                                fontFamily: 'Poppins',
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 8.h),
 
-                  // Info Text if any hidden
-                  if (widget.assignedSantriIds.isNotEmpty) ...[
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w),
-                      child: Text(
-                        '* ${widget.assignedSantriIds.length} santri disembunyikan karena sudah berada di halaqoh lain.',
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          color: colors.primary,
-                          fontStyle: FontStyle.italic,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                  ],
-
-                  // Table header
+                  // ── Table header ─────────────────────────────────────────
                   _buildTableHeader(colors),
                   SizedBox(height: 4.h),
 
-                  // List
+                  // ── List ─────────────────────────────────────────────────
                   Expanded(
                     child: filtered.isEmpty
                         ? Center(
@@ -233,15 +236,16 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                               final santri = filtered[index];
                               final isSelected =
                                   _selectedIds.contains(santri.id);
-                              return _buildRow(colors, santri, isSelected);
+                              return _buildRow(
+                                  colors, santri, isSelected);
                             },
                           ),
                   ),
 
-                  // Bottom bar
+                  // ── Bottom action bar ────────────────────────────────────
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 20.w, vertical: 16.h),
                     decoration: BoxDecoration(
                       color: colors.surface,
                       boxShadow: [
@@ -278,27 +282,106 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
     );
   }
 
+  // ── Filter row ─────────────────────────────────────────────────────────────
+  Widget _buildFilterRow(AppColorSet colors) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: Row(
+        children: [
+          Expanded(
+            child: CustomDropdown<String>(
+              hintText: 'Kelas',
+              items: _kelasOptions,
+              initialItem: _filterKelas,
+              onChanged: (value) {
+                setState(() =>
+                    _filterKelas =
+                        (value == 'Semua Kelas') ? null : value);
+              },
+              closedHeaderPadding: EdgeInsets.symmetric(
+                horizontal: 12.w,
+                vertical: 10.h,
+              ),
+              decoration: CustomDropdownDecoration(
+                closedBorderRadius: BorderRadius.circular(10.r),
+                closedBorder: Border.all(color: colors.border),
+                closedFillColor: colors.surface,
+                expandedBorderRadius: BorderRadius.circular(10.r),
+                expandedBorder: Border.all(color: colors.primary),
+                expandedFillColor: colors.surface,
+                headerStyle: TextStyle(
+                  fontSize: 13.sp,
+                  color: colors.textPrimary,
+                  fontFamily: 'Poppins',
+                ),
+                hintStyle: TextStyle(
+                  fontSize: 13.sp,
+                  color: colors.textSecondary,
+                  fontFamily: 'Poppins',
+                ),
+                listItemStyle: TextStyle(
+                  fontSize: 13.sp,
+                  color: colors.textPrimary,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: CustomDropdown<String>(
+              hintText: 'Program',
+              items: _programOptions,
+              initialItem: _filterProgram,
+              onChanged: (value) {
+                setState(() => _filterProgram =
+                    (value == 'Semua Program') ? null : value);
+              },
+              closedHeaderPadding: EdgeInsets.symmetric(
+                horizontal: 12.w,
+                vertical: 10.h,
+              ),
+              decoration: CustomDropdownDecoration(
+                closedBorderRadius: BorderRadius.circular(10.r),
+                closedBorder: Border.all(color: colors.border),
+                closedFillColor: colors.surface,
+                expandedBorderRadius: BorderRadius.circular(10.r),
+                expandedBorder: Border.all(color: colors.primary),
+                expandedFillColor: colors.surface,
+                headerStyle: TextStyle(
+                  fontSize: 13.sp,
+                  color: colors.textPrimary,
+                  fontFamily: 'Poppins',
+                ),
+                hintStyle: TextStyle(
+                  fontSize: 13.sp,
+                  color: colors.textSecondary,
+                  fontFamily: 'Poppins',
+                ),
+                listItemStyle: TextStyle(
+                  fontSize: 13.sp,
+                  color: colors.textPrimary,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Table header ───────────────────────────────────────────────────────────
   Widget _buildTableHeader(AppColorSet colors) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Row(
         children: [
-          SizedBox(
-            width: 55.w,
-            child: Text(
-              t.selectSantri.nis,
-              style: TextStyle(
-                fontSize: 11.sp,
-                fontWeight: FontWeight.w600,
-                color: colors.textSecondary,
-                letterSpacing: 0.5,
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ),
+          // Identitas column header (NIS + Nama stacked)
           Expanded(
+            flex: 3,
             child: Text(
-              t.selectSantri.nama,
+              t.santri.identitas,
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w600,
@@ -328,41 +411,48 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
     );
   }
 
-  Widget _buildRow(AppColorSet colors, SantriModel santri, bool isSelected) {
+  // ── List row ───────────────────────────────────────────────────────────────
+  Widget _buildRow(
+      AppColorSet colors, SantriModel santri, bool isSelected) {
     return InkWell(
       onTap: () => _toggleSelect(santri.id),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        padding:
+            EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // NIS
-            SizedBox(
-              width: 55.w,
-              child: Text(
-                santri.nis,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w400,
-                  color: colors.textSecondary,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ),
-            // Name
+            // ── NIS + Nama in one stacked column ──────────────────────────
             Expanded(
-              child: Text(
-                santri.nama,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: colors.textPrimary,
-                  fontFamily: 'Poppins',
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              flex: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    santri.nis,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: colors.primary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    santri.nama,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary,
+                      fontFamily: 'Poppins',
+                    ),
+                    // No maxLines / overflow — full name always visible
+                  ),
+                ],
               ),
             ),
-            // Kelas badge
+
+            // ── Kelas badge ───────────────────────────────────────────────
             SizedBox(
               width: 50.w,
               child: Center(
@@ -372,7 +462,8 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                     vertical: 2.h,
                   ),
                   decoration: BoxDecoration(
-                    color: colors.primary.withValues(alpha: 0.1),
+                    color:
+                        colors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
@@ -388,15 +479,19 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
               ),
             ),
             SizedBox(width: 12.w),
-            // Checkbox circle
+
+            // ── Checkbox circle ───────────────────────────────────────────
             Container(
               width: 24.w,
               height: 24.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? colors.primary : Colors.transparent,
+                color: isSelected
+                    ? colors.primary
+                    : Colors.transparent,
                 border: Border.all(
-                  color: isSelected ? colors.primary : colors.border,
+                  color:
+                      isSelected ? colors.primary : colors.border,
                   width: 2,
                 ),
               ),

@@ -230,10 +230,10 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
               controller: _nipController,
               hint: t.addData.nipHint,
               keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(13)],
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(13)],
               validator: (value) {
                 if (value == null || value.isEmpty) return 'NIP wajib diisi';
-                if (value.length != 13) return 'NIP harus 13 digit';
+                if (value.length < 12 || value.length > 13) return 'NIP harus 12 atau 13 digit';
                 return null;
               },
             ),

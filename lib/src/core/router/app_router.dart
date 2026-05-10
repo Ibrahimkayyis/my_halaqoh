@@ -25,6 +25,7 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.d
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/dashboard_wrapper_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/add_halaqoh_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/pengaturan_master_data_screen.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/screens/pengaturan_master_data_settings_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/select_santri_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/screens/guru_dashboard_wrapper_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_dashboard/presentation/screens/wali_santri_dashboard_wrapper_screen.dart';
@@ -44,6 +45,7 @@ import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_edit_profile_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_ubah_password_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_pengaturan_screen.dart';
+import 'package:my_halaqoh/src/modules/about/presentation/screens/tentang_aplikasi_screen.dart';
 
 part 'app_router.gr.dart';
 
@@ -89,6 +91,13 @@ class AppRouter extends RootStackRouter {
     ),
     AutoRoute(
       page: PengaturanMasterDataRoute.page,
+      guards: [
+        AuthGuard(_authCubit),
+        RoleGuard(_authCubit, allowedRoles: ['admin']),
+      ],
+    ),
+    AutoRoute(
+      page: PengaturanMasterDataSettingsRoute.page,
       guards: [
         AuthGuard(_authCubit),
         RoleGuard(_authCubit, allowedRoles: ['admin']),
@@ -300,6 +309,12 @@ class AppRouter extends RootStackRouter {
         AuthGuard(_authCubit),
         RoleGuard(_authCubit, allowedRoles: ['santri']),
       ],
+    ),
+
+    // ── Shared routes (all authenticated roles) ────────────────────
+    AutoRoute(
+      page: TentangAplikasiRoute.page,
+      guards: [AuthGuard(_authCubit)],
     ),
   ];
 

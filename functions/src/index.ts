@@ -9,6 +9,7 @@ import { onDeleteUser } from "./deleteUserAccount";
 import { seedAdmin } from "./adminSeeder";
 import { sendAbsensiNotification } from "./sendAbsensiNotification";
 import { sendHafalanNotification } from "./sendHafalanNotification";
+import { resetUserPassword } from "./resetUserPassword";
 
 // Initialize the Firebase Admin SDK only once.
 // The guard prevents "default Firebase app already exists" errors when the
@@ -30,4 +31,5 @@ export {
     seedAdmin,
     sendAbsensiNotification,
     sendHafalanNotification,
+    resetUserPassword,
 };

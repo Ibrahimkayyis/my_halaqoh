@@ -48,6 +48,15 @@ class SantriCubit extends Cubit<SantriState> {
     return result.isRight();
   }
 
+  /// Reset a santri's password.
+  Future<String?> resetPassword(String authUid) async {
+    final result = await _repository.resetPassword(authUid);
+    return result.fold(
+      (error) => error,
+      (_) => null,
+    );
+  }
+
   @override
   Future<void> close() {
     _subscription?.cancel();

@@ -836,6 +836,22 @@ class PengaturanMasterDataRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [PengaturanMasterDataSettingsScreen]
+class PengaturanMasterDataSettingsRoute extends PageRouteInfo<void> {
+  const PengaturanMasterDataSettingsRoute({List<PageRouteInfo>? children})
+    : super(PengaturanMasterDataSettingsRoute.name, initialChildren: children);
+
+  static const String name = 'PengaturanMasterDataSettingsRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const PengaturanMasterDataSettingsScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [PengaturanScreen]
 class PengaturanRoute extends PageRouteInfo<void> {
   const PengaturanRoute({List<PageRouteInfo>? children})
@@ -1222,6 +1238,22 @@ class SelectSantriRouteArgs {
   @override
   int get hashCode =>
       key.hashCode ^ const SetEquality().hash(assignedSantriIds);
+}
+
+/// generated route for
+/// [TentangAplikasiScreen]
+class TentangAplikasiRoute extends PageRouteInfo<void> {
+  const TentangAplikasiRoute({List<PageRouteInfo>? children})
+    : super(TentangAplikasiRoute.name, initialChildren: children);
+
+  static const String name = 'TentangAplikasiRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const TentangAplikasiScreen();
+    },
+  );
 }
 
 /// generated route for

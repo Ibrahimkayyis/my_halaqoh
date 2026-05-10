@@ -75,6 +75,78 @@ class _GuruListScreenState extends State<GuruListScreen> {
     context.read<GuruCubit>().deleteGuru(guru.id);
   }
 
+  Future<void> _onResetPassword(GuruModel guru) async {
+    if (guru.authUid == null || guru.authUid!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Guru ini belum memiliki akun yang terhubung.', style: TextStyle(fontFamily: 'Poppins')),
+          backgroundColor: AppColors.of(context).error,
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final colors = AppColors.of(context);
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: colors.surface,
+          title: Text(
+            'Reset Password',
+            style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: colors.textPrimary),
+          ),
+          content: Text(
+            'Apakah Anda yakin ingin mereset password untuk ${guru.nama}? Password akan dikembalikan ke default "generasi554".',
+            style: TextStyle(fontFamily: 'Poppins', color: colors.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text('Batal', style: TextStyle(fontFamily: 'Poppins', color: colors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text('Ya, Reset', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: colors.primary)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final error = await context.read<GuruCubit>().resetPassword(guru.authUid!);
+
+    if (!mounted) return;
+    Navigator.pop(context); // close loading
+
+    if (error == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Password berhasil direset ke "generasi554".', style: TextStyle(fontFamily: 'Poppins')),
+          backgroundColor: AppColors.of(context).success,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error, style: const TextStyle(fontFamily: 'Poppins')),
+          backgroundColor: AppColors.of(context).error,
+        ),
+      );
+    }
+  }
+
   void _onAdd() {
     AddDataMethodDialog.show(
       context,
@@ -168,6 +240,7 @@ class _GuruListScreenState extends State<GuruListScreen> {
                                 name: guru.nama,
                                 onEdit: () => _onEdit(guru),
                                 onDelete: () => _onDelete(guru),
+                                onResetPassword: () => _onResetPassword(guru),
                               );
                             },
                           ),

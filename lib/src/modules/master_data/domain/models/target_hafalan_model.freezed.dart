@@ -18,10 +18,9 @@ mixin _$TargetHafalanModel {
 /// Document ID: "{kelas}_{program}", e.g. "7_Reguler"
  String get id;/// Class level: "7", "8", ..., "12"
  String get kelas;/// Program: "Reguler" or "Takhassus"
- String get program;/// Number of target juz, e.g. 2 or 5
- int get targetJuz;/// List of specific juz numbers, e.g. [29, 30]
- List<int> get juzList;/// Academic year, e.g. "2025 / 2026"
- String get tahunAjaran; DateTime get createdAt; DateTime get updatedAt;
+ String get program;/// Academic year, e.g. "2025 / 2026"
+ String get tahunAjaran;/// Active semester set by admin: 1 or 2. Null = not yet set.
+ int? get semesterAktif; DateTime get createdAt; DateTime get updatedAt;
 /// Create a copy of TargetHafalanModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -34,16 +33,16 @@ $TargetHafalanModelCopyWith<TargetHafalanModel> get copyWith => _$TargetHafalanM
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TargetHafalanModel&&(identical(other.id, id) || other.id == id)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.targetJuz, targetJuz) || other.targetJuz == targetJuz)&&const DeepCollectionEquality().equals(other.juzList, juzList)&&(identical(other.tahunAjaran, tahunAjaran) || other.tahunAjaran == tahunAjaran)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TargetHafalanModel&&(identical(other.id, id) || other.id == id)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.tahunAjaran, tahunAjaran) || other.tahunAjaran == tahunAjaran)&&(identical(other.semesterAktif, semesterAktif) || other.semesterAktif == semesterAktif)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,kelas,program,targetJuz,const DeepCollectionEquality().hash(juzList),tahunAjaran,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,kelas,program,tahunAjaran,semesterAktif,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'TargetHafalanModel(id: $id, kelas: $kelas, program: $program, targetJuz: $targetJuz, juzList: $juzList, tahunAjaran: $tahunAjaran, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'TargetHafalanModel(id: $id, kelas: $kelas, program: $program, tahunAjaran: $tahunAjaran, semesterAktif: $semesterAktif, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -54,7 +53,7 @@ abstract mixin class $TargetHafalanModelCopyWith<$Res>  {
   factory $TargetHafalanModelCopyWith(TargetHafalanModel value, $Res Function(TargetHafalanModel) _then) = _$TargetHafalanModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String kelas, String program, int targetJuz, List<int> juzList, String tahunAjaran, DateTime createdAt, DateTime updatedAt
+ String id, String kelas, String program, String tahunAjaran, int? semesterAktif, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -71,15 +70,14 @@ class _$TargetHafalanModelCopyWithImpl<$Res>
 
 /// Create a copy of TargetHafalanModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kelas = null,Object? program = null,Object? targetJuz = null,Object? juzList = null,Object? tahunAjaran = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kelas = null,Object? program = null,Object? tahunAjaran = null,Object? semesterAktif = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,kelas: null == kelas ? _self.kelas : kelas // ignore: cast_nullable_to_non_nullable
 as String,program: null == program ? _self.program : program // ignore: cast_nullable_to_non_nullable
-as String,targetJuz: null == targetJuz ? _self.targetJuz : targetJuz // ignore: cast_nullable_to_non_nullable
-as int,juzList: null == juzList ? _self.juzList : juzList // ignore: cast_nullable_to_non_nullable
-as List<int>,tahunAjaran: null == tahunAjaran ? _self.tahunAjaran : tahunAjaran // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,tahunAjaran: null == tahunAjaran ? _self.tahunAjaran : tahunAjaran // ignore: cast_nullable_to_non_nullable
+as String,semesterAktif: freezed == semesterAktif ? _self.semesterAktif : semesterAktif // ignore: cast_nullable_to_non_nullable
+as int?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
@@ -166,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String kelas,  String program,  int targetJuz,  List<int> juzList,  String tahunAjaran,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String kelas,  String program,  String tahunAjaran,  int? semesterAktif,  DateTime createdAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TargetHafalanModel() when $default != null:
-return $default(_that.id,_that.kelas,_that.program,_that.targetJuz,_that.juzList,_that.tahunAjaran,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.kelas,_that.program,_that.tahunAjaran,_that.semesterAktif,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -187,10 +185,10 @@ return $default(_that.id,_that.kelas,_that.program,_that.targetJuz,_that.juzList
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String kelas,  String program,  int targetJuz,  List<int> juzList,  String tahunAjaran,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String kelas,  String program,  String tahunAjaran,  int? semesterAktif,  DateTime createdAt,  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _TargetHafalanModel():
-return $default(_that.id,_that.kelas,_that.program,_that.targetJuz,_that.juzList,_that.tahunAjaran,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.kelas,_that.program,_that.tahunAjaran,_that.semesterAktif,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +205,10 @@ return $default(_that.id,_that.kelas,_that.program,_that.targetJuz,_that.juzList
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String kelas,  String program,  int targetJuz,  List<int> juzList,  String tahunAjaran,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String kelas,  String program,  String tahunAjaran,  int? semesterAktif,  DateTime createdAt,  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _TargetHafalanModel() when $default != null:
-return $default(_that.id,_that.kelas,_that.program,_that.targetJuz,_that.juzList,_that.tahunAjaran,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.kelas,_that.program,_that.tahunAjaran,_that.semesterAktif,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -222,7 +220,7 @@ return $default(_that.id,_that.kelas,_that.program,_that.targetJuz,_that.juzList
 @JsonSerializable()
 
 class _TargetHafalanModel implements TargetHafalanModel {
-  const _TargetHafalanModel({required this.id, required this.kelas, required this.program, required this.targetJuz, final  List<int> juzList = const [], this.tahunAjaran = '', required this.createdAt, required this.updatedAt}): _juzList = juzList;
+  const _TargetHafalanModel({required this.id, required this.kelas, required this.program, this.tahunAjaran = '', this.semesterAktif = null, required this.createdAt, required this.updatedAt});
   factory _TargetHafalanModel.fromJson(Map<String, dynamic> json) => _$TargetHafalanModelFromJson(json);
 
 /// Document ID: "{kelas}_{program}", e.g. "7_Reguler"
@@ -231,19 +229,10 @@ class _TargetHafalanModel implements TargetHafalanModel {
 @override final  String kelas;
 /// Program: "Reguler" or "Takhassus"
 @override final  String program;
-/// Number of target juz, e.g. 2 or 5
-@override final  int targetJuz;
-/// List of specific juz numbers, e.g. [29, 30]
- final  List<int> _juzList;
-/// List of specific juz numbers, e.g. [29, 30]
-@override@JsonKey() List<int> get juzList {
-  if (_juzList is EqualUnmodifiableListView) return _juzList;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_juzList);
-}
-
 /// Academic year, e.g. "2025 / 2026"
 @override@JsonKey() final  String tahunAjaran;
+/// Active semester set by admin: 1 or 2. Null = not yet set.
+@override@JsonKey() final  int? semesterAktif;
 @override final  DateTime createdAt;
 @override final  DateTime updatedAt;
 
@@ -260,16 +249,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TargetHafalanModel&&(identical(other.id, id) || other.id == id)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.targetJuz, targetJuz) || other.targetJuz == targetJuz)&&const DeepCollectionEquality().equals(other._juzList, _juzList)&&(identical(other.tahunAjaran, tahunAjaran) || other.tahunAjaran == tahunAjaran)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TargetHafalanModel&&(identical(other.id, id) || other.id == id)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.tahunAjaran, tahunAjaran) || other.tahunAjaran == tahunAjaran)&&(identical(other.semesterAktif, semesterAktif) || other.semesterAktif == semesterAktif)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,kelas,program,targetJuz,const DeepCollectionEquality().hash(_juzList),tahunAjaran,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,kelas,program,tahunAjaran,semesterAktif,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'TargetHafalanModel(id: $id, kelas: $kelas, program: $program, targetJuz: $targetJuz, juzList: $juzList, tahunAjaran: $tahunAjaran, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'TargetHafalanModel(id: $id, kelas: $kelas, program: $program, tahunAjaran: $tahunAjaran, semesterAktif: $semesterAktif, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -280,7 +269,7 @@ abstract mixin class _$TargetHafalanModelCopyWith<$Res> implements $TargetHafala
   factory _$TargetHafalanModelCopyWith(_TargetHafalanModel value, $Res Function(_TargetHafalanModel) _then) = __$TargetHafalanModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String kelas, String program, int targetJuz, List<int> juzList, String tahunAjaran, DateTime createdAt, DateTime updatedAt
+ String id, String kelas, String program, String tahunAjaran, int? semesterAktif, DateTime createdAt, DateTime updatedAt
 });
 
 
@@ -297,15 +286,14 @@ class __$TargetHafalanModelCopyWithImpl<$Res>
 
 /// Create a copy of TargetHafalanModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kelas = null,Object? program = null,Object? targetJuz = null,Object? juzList = null,Object? tahunAjaran = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kelas = null,Object? program = null,Object? tahunAjaran = null,Object? semesterAktif = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_TargetHafalanModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,kelas: null == kelas ? _self.kelas : kelas // ignore: cast_nullable_to_non_nullable
 as String,program: null == program ? _self.program : program // ignore: cast_nullable_to_non_nullable
-as String,targetJuz: null == targetJuz ? _self.targetJuz : targetJuz // ignore: cast_nullable_to_non_nullable
-as int,juzList: null == juzList ? _self._juzList : juzList // ignore: cast_nullable_to_non_nullable
-as List<int>,tahunAjaran: null == tahunAjaran ? _self.tahunAjaran : tahunAjaran // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,tahunAjaran: null == tahunAjaran ? _self.tahunAjaran : tahunAjaran // ignore: cast_nullable_to_non_nullable
+as String,semesterAktif: freezed == semesterAktif ? _self.semesterAktif : semesterAktif // ignore: cast_nullable_to_non_nullable
+as int?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));

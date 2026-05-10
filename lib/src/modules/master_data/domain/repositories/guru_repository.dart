@@ -8,4 +8,5 @@ abstract class GuruRepository {
   Future<Either<String, String>> add(GuruModel model);
   Future<Either<String, void>> update(GuruModel model);
   Future<Either<String, void>> delete(String id);
+  Future<Either<String, void>> resetPassword(String authUid);
 }

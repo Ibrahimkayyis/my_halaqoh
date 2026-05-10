@@ -22,4 +22,7 @@ abstract class GuruRemoteDataSource {
 
   /// Delete a guru by document ID.
   Future<void> delete(String id);
+
+  /// Reset a guru's Firebase Auth password.
+  Future<void> resetPassword(String authUid);
 }

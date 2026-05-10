@@ -9,15 +9,15 @@ import 'package:my_halaqoh/src/core/widget/widgets.dart';
 class EditTargetDialog extends StatefulWidget {
   final String kelasTitle;
   final String programLabel;
-  final Set<int> initialSelectedJuz;
+  final int? initialSemesterAktif;
   final String? initialTahunAjaran;
-  final void Function(int target, String juzRange, String tahunAjaran)? onSave;
+  final void Function(int? semesterAktif, String tahunAjaran)? onSave;
 
   const EditTargetDialog({
     super.key,
     required this.kelasTitle,
     required this.programLabel,
-    this.initialSelectedJuz = const {},
+    this.initialSemesterAktif,
     this.initialTahunAjaran,
     this.onSave,
   });
@@ -27,9 +27,9 @@ class EditTargetDialog extends StatefulWidget {
     BuildContext context, {
     required String kelasTitle,
     required String programLabel,
-    Set<int> initialSelectedJuz = const {},
+    int? initialSemesterAktif,
     String? initialTahunAjaran,
-    void Function(int target, String juzRange, String tahunAjaran)? onSave,
+    void Function(int? semesterAktif, String tahunAjaran)? onSave,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -38,7 +38,7 @@ class EditTargetDialog extends StatefulWidget {
       builder: (_) => EditTargetDialog(
         kelasTitle: kelasTitle,
         programLabel: programLabel,
-        initialSelectedJuz: initialSelectedJuz,
+        initialSemesterAktif: initialSemesterAktif,
         initialTahunAjaran: initialTahunAjaran,
         onSave: onSave,
       ),
@@ -50,20 +50,17 @@ class EditTargetDialog extends StatefulWidget {
 }
 
 class _EditTargetDialogState extends State<EditTargetDialog> {
-  late Set<int> _selectedJuz;
   late String _selectedTahun;
   late List<String> _tahunList;
+  int? _selectedSemester;
 
   /// Auto-compute academic year list based on current date.
-  /// July–December → "{year} / {year+1}" is current.
-  /// January–June  → "{year-1} / {year}" is current.
   static List<String> _buildTahunList() {
     final now = DateTime.now();
     // Academic year starts in July
     final baseYear = now.month >= 7 ? now.year : now.year - 1;
     return [
-      for (int y = baseYear - 2; y <= baseYear + 2; y++)
-        '$y / ${y + 1}',
+      for (int y = baseYear - 2; y <= baseYear + 2; y++) '$y / ${y + 1}',
     ];
   }
 
@@ -76,25 +73,14 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedJuz = Set<int>.from(widget.initialSelectedJuz);
+    _selectedSemester = widget.initialSemesterAktif;
     _tahunList = _buildTahunList();
-    // Pre-fill with existing target's tahun, or fall back to current
     final initial = widget.initialTahunAjaran;
     if (initial != null && initial.isNotEmpty && _tahunList.contains(initial)) {
       _selectedTahun = initial;
     } else {
       _selectedTahun = _currentTahunAjaran();
     }
-  }
-
-  void _toggleJuz(int juz) {
-    setState(() {
-      if (_selectedJuz.contains(juz)) {
-        _selectedJuz.remove(juz);
-      } else {
-        _selectedJuz.add(juz);
-      }
-    });
   }
 
   @override
@@ -170,7 +156,7 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 24.h),
 
                   // Tahun Ajaran
                   Text(
@@ -220,11 +206,11 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 24.h),
 
-                  // Pilih Juz
+                  // Semester Aktif
                   Text(
-                    t.editTarget.pilihJuz,
+                    t.editTarget.semesterAktif,
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
@@ -233,34 +219,42 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                       fontFamily: 'Poppins',
                     ),
                   ),
-                  SizedBox(height: 10.h),
-                  _buildJuzGrid(colors),
+                  SizedBox(height: 6.h),
+                  Text(
+                    t.editTarget.pilihSemester,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: colors.textSecondary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
                   SizedBox(height: 12.h),
 
-                  // Reset button
-                  if (_selectedJuz.isNotEmpty)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () => setState(() => _selectedJuz.clear()),
-                        icon: Icon(Icons.restart_alt,
-                            size: 16.sp, color: colors.red),
-                        label: Text(
-                          'Reset Target',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            color: colors.red,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
+                  // Semester selector
+                  Column(
+                    children: [
+                      _buildSemesterOption(
+                        colors,
+                        value: 1,
+                        label: t.targetHafalan.semester1,
                       ),
-                    ),
-                  SizedBox(height: 8.h),
-
-                  // Total target card
-                  _buildTotalCard(colors),
-                  SizedBox(height: 16.h),
+                      SizedBox(height: 10.h),
+                      _buildSemesterOption(
+                        colors,
+                        value: 2,
+                        label: t.targetHafalan.semester2,
+                      ),
+                      SizedBox(height: 10.h),
+                      _buildSemesterOption(
+                        colors,
+                        value: null,
+                        label: t.targetHafalan.belumDitetapkan,
+                        isDanger: true,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 24.h),
                 ],
               ),
             ),
@@ -277,13 +271,7 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                   if (!confirmed) return;
 
                   if (widget.onSave != null) {
-                    final sorted = _selectedJuz.toList()..sort();
-                    // Smart format: group consecutive juz into ranges
-                    final juzStr = sorted.isEmpty
-                        ? '-'
-                        : _formatJuzList(sorted);
-                    widget.onSave!(
-                        sorted.length, juzStr, _selectedTahun);
+                    widget.onSave!(_selectedSemester, _selectedTahun);
                   }
 
                   if (context.mounted) {
@@ -297,6 +285,54 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSemesterOption(
+    AppColorSet colors, {
+    required int? value,
+    required String label,
+    bool isDanger = false,
+  }) {
+    final isSelected = _selectedSemester == value;
+    final primaryColor = isDanger ? colors.red : colors.primary;
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedSemester = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? primaryColor.withValues(alpha: 0.08)
+              : colors.surface,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: isSelected ? primaryColor : colors.border,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+              color: isSelected ? primaryColor : colors.textSecondary,
+              size: 20.sp,
+            ),
+            SizedBox(width: 12.w),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? primaryColor : colors.textPrimary,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -332,114 +368,5 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
       ),
     );
   }
-
-  Widget _buildJuzGrid(AppColorSet colors) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 6,
-        crossAxisSpacing: 8.w,
-        mainAxisSpacing: 8.h,
-        childAspectRatio: 1.0,
-      ),
-      itemCount: 30,
-      itemBuilder: (context, index) {
-        final juz = index + 1;
-        final isSelected = _selectedJuz.contains(juz);
-
-        return GestureDetector(
-          onTap: () => _toggleJuz(juz),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: isSelected ? colors.primary : Colors.transparent,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isSelected ? colors.primary : colors.border,
-                width: 1.5,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '$juz',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected
-                      ? colors.textOnButton
-                      : colors.textSecondary,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildTotalCard(AppColorSet colors) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 16.h),
-      decoration: BoxDecoration(
-        color: colors.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14.r),
-      ),
-      child: Column(
-        children: [
-          Text(
-            t.editTarget.totalTarget,
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w600,
-              color: colors.textSecondary,
-              letterSpacing: 0.5,
-              fontFamily: 'Poppins',
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.verified, size: 22.sp, color: colors.primary),
-              SizedBox(width: 8.w),
-              Text(
-                t.editTarget.totalJuz(count: _selectedJuz.length.toString()),
-                style: TextStyle(
-                  fontSize: 26.sp,
-                  fontWeight: FontWeight.w800,
-                  color: colors.primary,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-  /// Format juz list into smart range groups: e.g. [1,2,3,29,30] → "1-3, 29-30"
-  String _formatJuzList(List<int> sorted) {
-    if (sorted.isEmpty) return '-';
-    if (sorted.length == 1) return 'Juz ${sorted.first}';
-
-    final List<String> groups = [];
-    int start = sorted.first;
-    int end = sorted.first;
-
-    for (int i = 1; i < sorted.length; i++) {
-      if (sorted[i] == end + 1) {
-        end = sorted[i];
-      } else {
-        groups.add(start == end ? '$start' : '$start-$end');
-        start = sorted[i];
-        end = sorted[i];
-      }
-    }
-    groups.add(start == end ? '$start' : '$start-$end');
-
-    return 'Juz ${groups.join(', ')}';
-  }
 }
+

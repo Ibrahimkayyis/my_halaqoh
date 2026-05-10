@@ -54,6 +54,7 @@ dependencies:
   slang_flutter: ^4.8.0
   connectivity_plus: ^7.1.1
   flutter_native_splash: ^2.4.5
+  url_launcher: ^6.3.2
   
 dev_dependencies:
   auto_route_generator: ^10.2.4

@@ -363,7 +363,7 @@ class _ProgressHafalanPerJuzScreenState
     );
 
     // Combine admin juz + teacher-added juz (filter out invalid juz numbers)
-    final adminJuzList = (target?.juzList ?? []).where((j) => j >= 1 && j <= 30).toList();
+    final adminJuzList = target != null && santri != null ? TargetHafalanHelper.getTargetJuzList(target, santri!.kelas, santri!.program) : <int>[];
     final allTargetJuzNums = <int>{...adminJuzList, ..._teacherAddedJuz};
 
     // Get progress data from ProgressHafalanCubit

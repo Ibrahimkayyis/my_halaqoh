@@ -254,7 +254,6 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
   Future<void> _onSave() async {
     if (_myHalaqoh == null) return;
 
-    // Check for duplicates only if not editing an existing session intentionally
     if (!_isEditing) {
       final existing = await _absensiCubit.findExisting(
         _myHalaqoh!.id,
@@ -263,23 +262,20 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
       );
 
       if (existing != null && mounted) {
-        // Show duplicate warning dialog
         final shouldOverwrite = await _showDuplicateWarning();
         if (!shouldOverwrite) return;
       }
     }
 
-    // Confirm save
     if (!mounted) return;
     final confirmed = await ConfirmSaveDialog.show(context);
     if (!confirmed || !mounted) return;
 
-    // Build records
     final records = <AbsensiRecordEntry>[];
     for (int i = 0; i < _mySantriList.length; i++) {
       final santri = _mySantriList[i];
       final status = _santriStatuses[i] ?? 'belum';
-      if (status == 'belum') continue; // skip unresolved
+      if (status == 'belum') continue;
       records.add(
         AbsensiRecordEntry(
           santriId: santri.id,
@@ -419,7 +415,8 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
     final dateStr = DateFormat('d MMMM yyyy', 'id').format(widget.selectedDate);
 
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor:
+          colors.background, // Background utama abu-abu untuk daftar santri
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _onSave,
         backgroundColor: colors.primary,
@@ -433,177 +430,206 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
           ),
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Back button ────────────────────────────────────────────────
-            Padding(
-              padding: EdgeInsets.only(left: 8.w, top: 8.h),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: colors.textPrimary),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-
-            if (_isLoading)
-              Expanded(
-                child: Center(
-                  child: CircularProgressIndicator(color: colors.primary),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        slivers: [
+          // --- HEADER SECTION (SURFACE CONTAINER DENGAN BOTTOM RADIUS) ---
+          SliverToBoxAdapter(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(32.r),
                 ),
-              )
-            else ...[
-              // ── Header card ────────────────────────────────────────────────
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(18.w),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        t.detailAbsensiHariIni.title,
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w700,
-                          color: colors.textPrimary,
-                          fontFamily: 'Poppins',
+                ],
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Back button
+                    Padding(
+                      padding: EdgeInsets.only(left: 8.w, top: 8.h),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+
+                    if (!_isLoading) ...[
+                      // Header card info (Diberi warna background agar kontras dengan putih)
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(18.w),
+                          decoration: BoxDecoration(
+                            color: colors
+                                .background, // Sedikit gelap untuk pembeda
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(
+                              color: colors.border.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t.detailAbsensiHariIni.title,
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.textPrimary,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              SizedBox(height: 6.h),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.calendar_today,
+                                    size: 14.sp,
+                                    color: colors.textSecondary,
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  Text(
+                                    '$dayName, $dateStr',
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      color: colors.textSecondary,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 12.h),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.qr_code_scanner,
+                                    size: 14.sp,
+                                    color: colors.primary,
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  Text(
+                                    '${widget.scannedNisList.length} santri berhasil di-scan',
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.primary,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 14.h),
+                              Wrap(
+                                spacing: 8.w,
+                                runSpacing: 8.h,
+                                children: [
+                                  _buildStatChip(
+                                    '${t.detailAbsensiHariIni.hadir} (${stats['hadir']})',
+                                    colors.primary,
+                                  ),
+                                  _buildStatChip(
+                                    '${t.detailAbsensiHariIni.sakit} (${stats['sakit']})',
+                                    colors.yellow,
+                                  ),
+                                  _buildStatChip(
+                                    '${t.detailAbsensiHariIni.izin} (${stats['izin']})',
+                                    colors.blue,
+                                  ),
+                                  _buildStatChip(
+                                    '${t.detailAbsensiHariIni.alfa} (${stats['alfa']})',
+                                    colors.red,
+                                  ),
+                                  _buildStatChip(
+                                    '${t.detailAbsensiHariIni.belumAbsen} (${stats['belum']})',
+                                    colors.textSecondary,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      SizedBox(height: 6.h),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 14.sp,
-                            color: colors.textSecondary,
-                          ),
-                          SizedBox(width: 6.w),
-                          Text(
-                            '$dayName, $dateStr',
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              color: colors.textSecondary,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
+                      SizedBox(height: 16.h),
+
+                      // Tab Selector
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: _myHalaqoh?.program == 'T'
+                            ? _buildTakhassusSelector(colors)
+                            : AppTabSelector(
+                                controller: _tabController,
+                                tabs: _sessionLabels,
+                              ),
                       ),
-                      SizedBox(height: 12.h),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.qr_code_scanner,
-                            size: 14.sp,
-                            color: colors.primary,
+                      SizedBox(height: 24.h),
+
+                      // List header "Daftar Kehadiran Santri"
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Text(
+                          t.detailAbsensiHariIni.daftarKehadiranSantri,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textPrimary,
+                            fontFamily: 'Poppins',
                           ),
-                          SizedBox(width: 6.w),
-                          Text(
-                            '${widget.scannedNisList.length} santri berhasil di-scan',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                              color: colors.primary,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                      SizedBox(height: 14.h),
-                      Wrap(
-                        spacing: 8.w,
-                        runSpacing: 8.h,
-                        children: [
-                          _buildStatChip(
-                            '${t.detailAbsensiHariIni.hadir} (${stats['hadir']})',
-                            colors.primary,
-                          ),
-                          _buildStatChip(
-                            '${t.detailAbsensiHariIni.sakit} (${stats['sakit']})',
-                            colors.yellow,
-                          ),
-                          _buildStatChip(
-                            '${t.detailAbsensiHariIni.izin} (${stats['izin']})',
-                            colors.blue,
-                          ),
-                          _buildStatChip(
-                            '${t.detailAbsensiHariIni.alfa} (${stats['alfa']})',
-                            colors.red,
-                          ),
-                          _buildStatChip(
-                            '${t.detailAbsensiHariIni.belumAbsen} (${stats['belum']})',
-                            colors.textSecondary,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                      SizedBox(height: 20.h), // Spasi ke sudut melengkung bawah
+                    ] else
+                      SizedBox(height: 16.h),
+                  ],
                 ),
               ),
-              SizedBox(height: 16.h),
+            ),
+          ),
 
-              // ── Tab Selector ───────────────────────────────────────────────
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: _myHalaqoh?.program == 'T'
-                    ? _buildTakhassusSelector(colors)
-                    : AppTabSelector(
-                        controller: _tabController,
-                        tabs: _sessionLabels,
-                      ),
+          // --- SCROLLABLE LIST SECTION ATAU LOADING SECTION ---
+          if (_isLoading)
+            SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(color: colors.primary),
               ),
-              SizedBox(height: 20.h),
-
-              // ── List header ────────────────────────────────────────────────
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Text(
-                  t.detailAbsensiHariIni.daftarKehadiranSantri,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: colors.textPrimary,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsets.only(
+                top: 16.h,
+                left: 24.w,
+                right: 24.w,
+                bottom: 100
+                    .h, // Spasi aman agar tidak tertutup FloatingActionButton
               ),
-              SizedBox(height: 12.h),
-
-              // ── Santri list ────────────────────────────────────────────────
-              Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 100.h),
-                  itemCount: _mySantriList.length,
-                  itemBuilder: (context, index) {
-                    final santri = _mySantriList[index];
-                    final wasScanned = widget.scannedNisList.contains(
-                      santri.nis,
-                    );
-                    return _buildSantriCard(
-                      index,
-                      santri.nama,
-                      santri.nis,
-                      wasScanned,
-                      colors,
-                    );
-                  },
-                ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final santri = _mySantriList[index];
+                  final wasScanned = widget.scannedNisList.contains(santri.nis);
+                  return _buildSantriCard(
+                    index,
+                    santri.nama,
+                    santri.nis,
+                    wasScanned,
+                    colors,
+                  );
+                }, childCount: _mySantriList.length),
               ),
-            ],
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -656,19 +682,14 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
             height: 42.h,
             alignment: Alignment.center,
             decoration: BoxDecoration(
+              // Ubah background unselected agar lebih menyatu dengan container surface
               color: isSelected
-                  ? colors.surface
-                  : colors.border.withValues(alpha: 0.3),
+                  ? colors.primary.withValues(alpha: 0.1)
+                  : colors.background,
               borderRadius: BorderRadius.circular(10.r),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ]
-                  : null,
+              border: isSelected
+                  ? Border.all(color: colors.primary.withValues(alpha: 0.5))
+                  : Border.all(color: colors.border.withValues(alpha: 0.4)),
             ),
             child: Text(
               label,
@@ -727,7 +748,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                 color: colors.primary.withValues(alpha: 0.3),
                 width: 1.5,
               )
-            : null,
+            : Border.all(color: colors.border.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -767,7 +788,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
               ),
               SizedBox(width: 12.w),
 
-              // Nama dan NIS (Bisa memanjang ke bawah)
+              // Nama dan NIS
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -778,7 +799,6 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                         Expanded(
                           child: Text(
                             name,
-                            // maxLines dan ellipsis dihapus agar teks nama bisa tampil penuh
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
@@ -786,8 +806,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                                   ? colors.primary
                                   : colors.textPrimary,
                               fontFamily: 'Poppins',
-                              height:
-                                  1.3, // Jarak antar baris teks jika nama panjang
+                              height: 1.3,
                             ),
                           ),
                         ),
@@ -820,10 +839,10 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
             ],
           ),
 
-          // ── Bagian Bawah: Dropdown Status (Full Width) ──
-          SizedBox(height: 14.h), // Jarak antara profil santri dan dropdown
+          // ── Bagian Bawah: Dropdown Status ──
+          SizedBox(height: 14.h),
           SizedBox(
-            width: double.infinity, // Membuat dropdown memanjang penuh
+            width: double.infinity,
             child: _buildStatusDropdown(index, currentStatus, colors),
           ),
         ],

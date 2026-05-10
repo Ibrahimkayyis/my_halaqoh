@@ -48,14 +48,16 @@ class PengaturanMasterDataScreen extends StatelessWidget {
                   icon: Icons.settings,
                   label: t.masterDataSettings.title, // "Pengaturan"
                   onTap: () {
-                    context.router.push(const PengaturanRoute());
+                    context.router.push(
+                      const PengaturanMasterDataSettingsRoute(),
+                    );
                   },
                 ),
                 _MenuItem(
                   icon: Icons.info_outline,
                   label: t.masterDataSettings.tentangAplikasi,
                   onTap: () {
-                    // TODO: Navigate to Tentang Aplikasi
+                    context.router.push(const TentangAplikasiRoute());
                   },
                 ),
               ],
@@ -173,6 +175,15 @@ class PengaturanMasterDataScreen extends StatelessWidget {
         onTap: () async {
           final confirmed = await ConfirmLogoutDialog.show(context);
           if (confirmed && context.mounted) {
+            // Show loading overlay to prevent glimpse/delay
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
+            );
+
             await context.read<AuthCubit>().logout();
             if (context.mounted) {
               context.router.replaceAll([const LoginRoute()]);

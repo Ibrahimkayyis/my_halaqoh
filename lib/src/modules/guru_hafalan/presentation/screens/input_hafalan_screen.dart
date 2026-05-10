@@ -130,6 +130,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
     final colors = AppColors.of(context);
     final searchController = TextEditingController();
     String searchQuery = '';
+    int? selectedJuz;
     final tempSelected = <int>{..._selectedSurahs.map((s) => s.surah.id)};
 
     showModalBottomSheet(
@@ -140,6 +141,9 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
             final filtered = _surahList.where((s) {
+              if (selectedJuz != null && !s.juzNumbers.contains(selectedJuz)) {
+                return false;
+              }
               if (searchQuery.isEmpty) return true;
               return s.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
                   s.id.toString().contains(searchQuery);
@@ -198,6 +202,48 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     ),
                   ),
                   SizedBox(height: 16.h),
+                  // ── Juz Filter ──
+                  SizedBox(
+                    height: 40.h,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      itemCount: 31, // "Semua" + 30 Juz
+                      itemBuilder: (ctx, index) {
+                        final isSemua = index == 0;
+                        final juzNum = index;
+                        final isSelected = isSemua ? selectedJuz == null : selectedJuz == juzNum;
+                        return Padding(
+                          padding: EdgeInsets.only(right: 8.w),
+                          child: ChoiceChip(
+                            label: Text(
+                              isSemua ? 'Semua' : 'Juz $juzNum',
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                color: isSelected ? Colors.white : colors.textPrimary,
+                              ),
+                            ),
+                            selected: isSelected,
+                            selectedColor: colors.primary,
+                            backgroundColor: colors.surface,
+                            side: BorderSide(
+                              color: isSelected ? colors.primary : colors.border,
+                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
+                            onSelected: (selected) {
+                              setSheetState(() {
+                                selectedJuz = isSemua ? null : juzNum;
+                              });
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  // ── Search Field ──
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
                     child: Container(

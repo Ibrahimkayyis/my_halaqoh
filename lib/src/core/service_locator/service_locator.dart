@@ -113,6 +113,7 @@ import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notific
 
 // Guru Laporan — Presentation Layer
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_absensi_cubit.dart';
+import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_absensi_halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_hafalan_cubit.dart';
 
 final sl = GetIt.instance;
@@ -306,5 +307,6 @@ Future<void> initDependencies() async {
   // Factory — scoped to the LaporanKonfigurasiSheet bottom sheet lifetime.
   // Requires no repository dependencies — delegates to AbsensiPdfBuilder.
   sl.registerFactory<LaporanAbsensiCubit>(() => LaporanAbsensiCubit());
+  sl.registerFactory<LaporanAbsensiHalaqohCubit>(() => LaporanAbsensiHalaqohCubit());
   sl.registerFactory<LaporanHafalanCubit>(() => LaporanHafalanCubit(sl()));
 }

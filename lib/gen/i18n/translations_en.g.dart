@@ -76,6 +76,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsWaliSantriPengaturanScreenEn WaliSantriPengaturanScreen = TranslationsWaliSantriPengaturanScreenEn.internal(_root);
 	late final TranslationsDialogsEn dialogs = TranslationsDialogsEn.internal(_root);
 	late final TranslationsMasterDataSettingsEn masterDataSettings = TranslationsMasterDataSettingsEn.internal(_root);
+	late final TranslationsTentangAplikasiScreenEn tentangAplikasiScreen = TranslationsTentangAplikasiScreenEn.internal(_root);
 }
 
 // Path: app
@@ -311,17 +312,47 @@ class TranslationsTargetHafalanEn {
 	/// en: 'Set memorization targets for each class, the target will be applied to all students in that class.'
 	String get infoText => 'Set memorization targets for each class, the target will be applied to all students in that class.';
 
+	/// en: 'Memorization curriculum based on boarding school program. Set the current academic year and active semester.'
+	String get infoTextNew => 'Memorization curriculum based on boarding school program. Set the current academic year and active semester.';
+
 	/// en: 'Class'
 	String get kelasLabel => 'Class';
 
-	/// en: 'Target: $count Juz'
-	String targetJuz({required Object count}) => 'Target: ${count} Juz';
-
-	/// en: 'Juz $range'
-	String juzRange({required Object range}) => 'Juz ${range}';
-
 	/// en: 'SMP'
 	String get smp => 'SMP';
+
+	/// en: 'Active Semester'
+	String get semesterAktif => 'Active Semester';
+
+	/// en: 'Not Set'
+	String get belumDitetapkan => 'Not Set';
+
+	/// en: 'Semester 1'
+	String get semester1 => 'Semester 1';
+
+	/// en: 'Semester 2'
+	String get semester2 => 'Semester 2';
+
+	/// en: 'Midterm'
+	String get periodeUTS => 'Midterm';
+
+	/// en: 'Finals'
+	String get periodeUAS => 'Finals';
+
+	/// en: 'I'dad Tahsin'
+	String get tipeIdadTahsin => 'I\'dad Tahsin';
+
+	/// en: 'Dauroh'
+	String get tipeDauroh => 'Dauroh';
+
+	/// en: 'Review (Muraja'ah)'
+	String get tipeMurajaah => 'Review (Muraja\'ah)';
+
+	/// en: 'Final Tahfidz Exam'
+	String get tipeUAT => 'Final Tahfidz Exam';
+
+	/// en: 'Edit Settings'
+	String get editPengaturan => 'Edit Settings';
 }
 
 // Path: editTarget
@@ -332,20 +363,17 @@ class TranslationsEditTargetEn {
 
 	// Translations
 
-	/// en: 'Edit Memorization Target'
-	String get title => 'Edit Memorization Target';
+	/// en: 'Class Target Settings'
+	String get title => 'Class Target Settings';
 
 	/// en: 'ACADEMIC YEAR'
 	String get tahunAjaran => 'ACADEMIC YEAR';
 
-	/// en: 'SELECT JUZ'
-	String get pilihJuz => 'SELECT JUZ';
+	/// en: 'ACTIVE SEMESTER'
+	String get semesterAktif => 'ACTIVE SEMESTER';
 
-	/// en: 'TOTAL TARGET'
-	String get totalTarget => 'TOTAL TARGET';
-
-	/// en: '$count Juz'
-	String totalJuz({required Object count}) => '${count} Juz';
+	/// en: 'Select Active Semester'
+	String get pilihSemester => 'Select Active Semester';
 
 	/// en: 'Save Changes'
 	String get simpanPerubahan => 'Save Changes';
@@ -482,14 +510,14 @@ class TranslationsAddHalaqohEn {
 	/// en: 'Class'
 	String get kelas => 'Class';
 
-	/// en: 'Select Class'
-	String get kelasHint => 'Select Class';
+	/// en: 'Class'
+	String get kelasHint => 'Class';
 
 	/// en: 'Program'
 	String get program => 'Program';
 
-	/// en: 'Select Program'
-	String get programHint => 'Select Program';
+	/// en: 'Program'
+	String get programHint => 'Program';
 
 	/// en: 'Instructor (Teacher)'
 	String get pengampu => 'Instructor (Teacher)';
@@ -1464,6 +1492,102 @@ class TranslationsMasterDataSettingsEn {
 	String get appVersion => 'Version {version}';
 }
 
+// Path: tentangAplikasiScreen
+class TranslationsTentangAplikasiScreenEn {
+	TranslationsTentangAplikasiScreenEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'About App'
+	String get title => 'About App';
+
+	/// en: 'MyHalaqoh'
+	String get appName => 'MyHalaqoh';
+
+	/// en: 'Digital Halaqoh Management Platform'
+	String get tagline => 'Digital Halaqoh Management Platform';
+
+	/// en: 'Version'
+	String get version => 'Version';
+
+	/// en: 'About MyHalaqoh'
+	String get sectionTentang => 'About MyHalaqoh';
+
+	/// en: 'MyHalaqoh is an integrated digital platform specifically designed to help manage halaqoh in Islamic boarding school environments efficiently, transparently, and accessibly.'
+	String get deskripsi1 => 'MyHalaqoh is an integrated digital platform specifically designed to help manage halaqoh in Islamic boarding school environments efficiently, transparently, and accessibly.';
+
+	/// en: 'Developed specifically for $pesantren, this app connects Admins, Teachers, and Student Guardians in one integrated digital ecosystem.'
+	String deskripsi2({required Object pesantren}) => 'Developed specifically for ${pesantren}, this app connects Admins, Teachers, and Student Guardians in one integrated digital ecosystem.';
+
+	/// en: 'Key Features'
+	String get sectionFitur => 'Key Features';
+
+	/// en: 'QR Code Attendance'
+	String get fiturAbsensiJudul => 'QR Code Attendance';
+
+	/// en: 'Record student attendance quickly using an integrated barcode scanner.'
+	String get fiturAbsensiDesc => 'Record student attendance quickly using an integrated barcode scanner.';
+
+	/// en: 'Quran Memorization'
+	String get fiturHafalanJudul => 'Quran Memorization';
+
+	/// en: 'Track student memorization progress per juz and per surah in real-time.'
+	String get fiturHafalanDesc => 'Track student memorization progress per juz and per surah in real-time.';
+
+	/// en: 'Automatic Notifications'
+	String get fiturNotifJudul => 'Automatic Notifications';
+
+	/// en: 'Attendance and memorization information is sent directly to Student Guardians via push notification.'
+	String get fiturNotifDesc => 'Attendance and memorization information is sent directly to Student Guardians via push notification.';
+
+	/// en: 'Multi-Role Dashboard'
+	String get fiturMultiRoleJudul => 'Multi-Role Dashboard';
+
+	/// en: 'Views and features tailored for Admin, Teacher, and Student Guardian.'
+	String get fiturMultiRoleDesc => 'Views and features tailored for Admin, Teacher, and Student Guardian.';
+
+	/// en: 'Offline Mode'
+	String get fiturOfflineJudul => 'Offline Mode';
+
+	/// en: 'Attendance and memorization can still be recorded even without an internet connection.'
+	String get fiturOfflineDesc => 'Attendance and memorization can still be recorded even without an internet connection.';
+
+	/// en: 'App Information'
+	String get sectionInfo => 'App Information';
+
+	/// en: 'App Name'
+	String get infoNamaApp => 'App Name';
+
+	/// en: 'Version'
+	String get infoVersi => 'Version';
+
+	/// en: 'Platform'
+	String get infoPlatform => 'Platform';
+
+	/// en: 'Institution'
+	String get infoLembaga => 'Institution';
+
+	/// en: 'Android'
+	String get infoPlatformValue => 'Android';
+
+	/// en: 'Contact & Support'
+	String get sectionKontak => 'Contact & Support';
+
+	/// en: 'If you need technical assistance or have questions about the app, please contact the administrator via WhatsApp.'
+	String get kontakDeskripsi => 'If you need technical assistance or have questions about the app, please contact the administrator via WhatsApp.';
+
+	/// en: 'Contact Admin via WhatsApp'
+	String get kontakButton => 'Contact Admin via WhatsApp';
+
+	/// en: 'Made with ❤️ for the advancement of Islamic boarding school education'
+	String get footer => 'Made with ❤️ for the advancement of Islamic boarding school education';
+
+	/// en: '© 2026 MyHalaqoh. All rights reserved.'
+	String get copyright => '© 2026 MyHalaqoh. All rights reserved.';
+}
+
 /// Flat map(s) containing all translations.
 /// Only for edge cases! For simple maps, use the map function of this library.
 extension on Translations {
@@ -1523,15 +1647,24 @@ extension on Translations {
 			case 'targetHafalan.reguler': return 'REGULAR';
 			case 'targetHafalan.takhassus': return 'TAKHASSUS';
 			case 'targetHafalan.infoText': return 'Set memorization targets for each class, the target will be applied to all students in that class.';
+			case 'targetHafalan.infoTextNew': return 'Memorization curriculum based on boarding school program. Set the current academic year and active semester.';
 			case 'targetHafalan.kelasLabel': return 'Class';
-			case 'targetHafalan.targetJuz': return ({required Object count}) => 'Target: ${count} Juz';
-			case 'targetHafalan.juzRange': return ({required Object range}) => 'Juz ${range}';
 			case 'targetHafalan.smp': return 'SMP';
-			case 'editTarget.title': return 'Edit Memorization Target';
+			case 'targetHafalan.semesterAktif': return 'Active Semester';
+			case 'targetHafalan.belumDitetapkan': return 'Not Set';
+			case 'targetHafalan.semester1': return 'Semester 1';
+			case 'targetHafalan.semester2': return 'Semester 2';
+			case 'targetHafalan.periodeUTS': return 'Midterm';
+			case 'targetHafalan.periodeUAS': return 'Finals';
+			case 'targetHafalan.tipeIdadTahsin': return 'I\'dad Tahsin';
+			case 'targetHafalan.tipeDauroh': return 'Dauroh';
+			case 'targetHafalan.tipeMurajaah': return 'Review (Muraja\'ah)';
+			case 'targetHafalan.tipeUAT': return 'Final Tahfidz Exam';
+			case 'targetHafalan.editPengaturan': return 'Edit Settings';
+			case 'editTarget.title': return 'Class Target Settings';
 			case 'editTarget.tahunAjaran': return 'ACADEMIC YEAR';
-			case 'editTarget.pilihJuz': return 'SELECT JUZ';
-			case 'editTarget.totalTarget': return 'TOTAL TARGET';
-			case 'editTarget.totalJuz': return ({required Object count}) => '${count} Juz';
+			case 'editTarget.semesterAktif': return 'ACTIVE SEMESTER';
+			case 'editTarget.pilihSemester': return 'Select Active Semester';
 			case 'editTarget.simpanPerubahan': return 'Save Changes';
 			case 'nav.dashboard': return 'Dashboard';
 			case 'nav.santri': return 'Santri';
@@ -1568,9 +1701,9 @@ extension on Translations {
 			case 'addHalaqoh.namaHalaqoh': return 'Halaqoh Name';
 			case 'addHalaqoh.namaHalaqohHint': return 'Example: Halaqoh 7A';
 			case 'addHalaqoh.kelas': return 'Class';
-			case 'addHalaqoh.kelasHint': return 'Select Class';
+			case 'addHalaqoh.kelasHint': return 'Class';
 			case 'addHalaqoh.program': return 'Program';
-			case 'addHalaqoh.programHint': return 'Select Program';
+			case 'addHalaqoh.programHint': return 'Program';
 			case 'addHalaqoh.pengampu': return 'Instructor (Teacher)';
 			case 'addHalaqoh.pengampuHint': return 'Search instructor name...';
 			case 'addHalaqoh.daftarSantri': return 'Santri List';
@@ -1820,6 +1953,35 @@ extension on Translations {
 			case 'masterDataSettings.tentangAplikasi': return 'About App';
 			case 'masterDataSettings.keluar': return 'Log Out';
 			case 'masterDataSettings.appVersion': return 'Version {version}';
+			case 'tentangAplikasiScreen.title': return 'About App';
+			case 'tentangAplikasiScreen.appName': return 'MyHalaqoh';
+			case 'tentangAplikasiScreen.tagline': return 'Digital Halaqoh Management Platform';
+			case 'tentangAplikasiScreen.version': return 'Version';
+			case 'tentangAplikasiScreen.sectionTentang': return 'About MyHalaqoh';
+			case 'tentangAplikasiScreen.deskripsi1': return 'MyHalaqoh is an integrated digital platform specifically designed to help manage halaqoh in Islamic boarding school environments efficiently, transparently, and accessibly.';
+			case 'tentangAplikasiScreen.deskripsi2': return ({required Object pesantren}) => 'Developed specifically for ${pesantren}, this app connects Admins, Teachers, and Student Guardians in one integrated digital ecosystem.';
+			case 'tentangAplikasiScreen.sectionFitur': return 'Key Features';
+			case 'tentangAplikasiScreen.fiturAbsensiJudul': return 'QR Code Attendance';
+			case 'tentangAplikasiScreen.fiturAbsensiDesc': return 'Record student attendance quickly using an integrated barcode scanner.';
+			case 'tentangAplikasiScreen.fiturHafalanJudul': return 'Quran Memorization';
+			case 'tentangAplikasiScreen.fiturHafalanDesc': return 'Track student memorization progress per juz and per surah in real-time.';
+			case 'tentangAplikasiScreen.fiturNotifJudul': return 'Automatic Notifications';
+			case 'tentangAplikasiScreen.fiturNotifDesc': return 'Attendance and memorization information is sent directly to Student Guardians via push notification.';
+			case 'tentangAplikasiScreen.fiturMultiRoleJudul': return 'Multi-Role Dashboard';
+			case 'tentangAplikasiScreen.fiturMultiRoleDesc': return 'Views and features tailored for Admin, Teacher, and Student Guardian.';
+			case 'tentangAplikasiScreen.fiturOfflineJudul': return 'Offline Mode';
+			case 'tentangAplikasiScreen.fiturOfflineDesc': return 'Attendance and memorization can still be recorded even without an internet connection.';
+			case 'tentangAplikasiScreen.sectionInfo': return 'App Information';
+			case 'tentangAplikasiScreen.infoNamaApp': return 'App Name';
+			case 'tentangAplikasiScreen.infoVersi': return 'Version';
+			case 'tentangAplikasiScreen.infoPlatform': return 'Platform';
+			case 'tentangAplikasiScreen.infoLembaga': return 'Institution';
+			case 'tentangAplikasiScreen.infoPlatformValue': return 'Android';
+			case 'tentangAplikasiScreen.sectionKontak': return 'Contact & Support';
+			case 'tentangAplikasiScreen.kontakDeskripsi': return 'If you need technical assistance or have questions about the app, please contact the administrator via WhatsApp.';
+			case 'tentangAplikasiScreen.kontakButton': return 'Contact Admin via WhatsApp';
+			case 'tentangAplikasiScreen.footer': return 'Made with ❤️ for the advancement of Islamic boarding school education';
+			case 'tentangAplikasiScreen.copyright': return '© 2026 MyHalaqoh. All rights reserved.';
 			default: return null;
 		}
 	}

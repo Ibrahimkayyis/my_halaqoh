@@ -106,7 +106,7 @@ class HafalanSantriItem extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
 
-          // Bottom row: two buttons — keduanya punya border 1.5 agar tinggi sama
+          // Bottom row: two buttons — text-only (no icons) to prevent overflow
           Row(
             children: [
               // Riwayat Hafalan (outlined)
@@ -123,34 +123,25 @@ class HafalanSantriItem extends StatelessWidget {
                         width: 1.5,
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.history,
-                          size: 14.sp,
+                    child: Center(
+                      child: Text(
+                        riwayatLabel,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
                           color: colors.primary,
+                          fontFamily: 'Poppins',
+                          letterSpacing: 0.2,
                         ),
-                        SizedBox(width: 6.w),
-                        Text(
-                          riwayatLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            color: colors.primary,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
               SizedBox(width: 10.w),
 
-              // Input Hafalan (filled) — transparent border agar tinggi sama
+              // Input Hafalan (filled)
               Expanded(
                 child: GestureDetector(
                   onTap: onInputTap,
@@ -159,30 +150,19 @@ class HafalanSantriItem extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: colors.primary,
                       borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(
-                        color: Colors.transparent,
-                        width: 1.5,
-                      ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.edit_note,
-                          size: 14.sp,
+                    child: Center(
+                      child: Text(
+                        inputLabel,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
                           color: colors.textOnButton,
+                          fontFamily: 'Poppins',
+                          letterSpacing: 0.2,
                         ),
-                        SizedBox(width: 6.w),
-                        Text(
-                          inputLabel,
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            color: colors.textOnButton,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
