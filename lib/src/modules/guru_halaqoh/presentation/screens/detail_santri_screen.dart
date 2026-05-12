@@ -15,6 +15,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cu
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
@@ -63,8 +64,11 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
     final halaqohState = context.watch<HalaqohCubit>().state;
     final targetHafalanState = context.watch<TargetHafalanCubit>().state;
 
+    bool isSantriLoading = false;
     SantriModel? santri;
     santriState.maybeWhen(
+      initial: () => isSantriLoading = true,
+      loading: () => isSantriLoading = true,
       loaded: (list) {
         try {
           santri = list.firstWhere((s) => s.nis == nis);
@@ -74,9 +78,12 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
     );
 
     // Look up halaqoh for this santri
+    bool isHalaqohLoading = false;
     HalaqohModel? halaqoh;
-    if (santri?.halaqohId != null) {
+    if (santri?.halaqohId != null || isSantriLoading) {
       halaqohState.maybeWhen(
+        initial: () => isHalaqohLoading = true,
+        loading: () => isHalaqohLoading = true,
         loaded: (list) {
           try {
             halaqoh = list.firstWhere((h) => h.id == santri!.halaqohId);
@@ -149,12 +156,15 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
                     SizedBox(height: 8.h),
 
                     // Profile header card
-                    _buildProfileHeader(
-                      colors,
-                      displayName,
-                      displayNis,
-                      profilePictureUrl,
-                    ),
+                    if (isSantriLoading)
+                      const ShimmerProfileHeader()
+                    else
+                      _buildProfileHeader(
+                        colors,
+                        displayName,
+                        displayNis,
+                        profilePictureUrl,
+                      ),
                     SizedBox(height: 28.h),
 
                     // INFORMASI AKADEMIK section
@@ -174,53 +184,56 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
                     SizedBox(height: 12.h),
 
                     // Info card
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 24.w),
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(16.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                    if (isSantriLoading || isHalaqohLoading)
+                      const ShimmerAcademicInfo()
+                    else
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 24.w),
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(16.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            AcademicInfoRow(
+                              icon: Icons.school,
+                              iconColor: colors.primary,
+                              iconBgColor: colors.primary.withValues(alpha: 0.1),
+                              label: t.detailSantri.kelas,
+                              value: displayKelas,
+                            ),
+                            AcademicInfoRow(
+                              icon: Icons.menu_book,
+                              iconColor: colors.blue,
+                              iconBgColor: colors.blue.withValues(alpha: 0.1),
+                              label: t.detailSantri.program,
+                              value: displayProgram,
+                            ),
+                            AcademicInfoRow(
+                              icon: Icons.auto_stories,
+                              iconColor: colors.primary,
+                              iconBgColor: colors.primary.withValues(alpha: 0.1),
+                              label: t.detailSantri.halaqoh,
+                              value: displayHalaqoh,
+                            ),
+                            AcademicInfoRow(
+                              icon: Icons.groups,
+                              iconColor: colors.red,
+                              iconBgColor: colors.red.withValues(alpha: 0.1),
+                              label: t.detailSantri.pembimbing,
+                              value: displayPembimbing,
+                              showDivider: false,
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Column(
-                        children: [
-                          AcademicInfoRow(
-                            icon: Icons.school,
-                            iconColor: colors.primary,
-                            iconBgColor: colors.primary.withValues(alpha: 0.1),
-                            label: t.detailSantri.kelas,
-                            value: displayKelas,
-                          ),
-                          AcademicInfoRow(
-                            icon: Icons.menu_book,
-                            iconColor: colors.blue,
-                            iconBgColor: colors.blue.withValues(alpha: 0.1),
-                            label: t.detailSantri.program,
-                            value: displayProgram,
-                          ),
-                          AcademicInfoRow(
-                            icon: Icons.auto_stories,
-                            iconColor: colors.primary,
-                            iconBgColor: colors.primary.withValues(alpha: 0.1),
-                            label: t.detailSantri.halaqoh,
-                            value: displayHalaqoh,
-                          ),
-                          AcademicInfoRow(
-                            icon: Icons.groups,
-                            iconColor: colors.red,
-                            iconBgColor: colors.red.withValues(alpha: 0.1),
-                            label: t.detailSantri.pembimbing,
-                            value: displayPembimbing,
-                            showDivider: false,
-                          ),
-                        ],
-                      ),
-                    ),
                     SizedBox(height: 28.h),
 
                     // PROGRESS HAFALAN section
@@ -242,11 +255,17 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
                     // Progress card (driven by admin target)
                     BlocBuilder<ProgressHafalanCubit, ProgressHafalanState>(
                       builder: (context, progressState) {
+                        bool isProgressLoading = false;
                         OverallHafalanProgress? progressData;
                         progressState.maybeWhen(
+                          initial: () => isProgressLoading = true,
+                          loading: () => isProgressLoading = true,
                           loaded: (data) => progressData = data,
                           orElse: () {},
                         );
+                        if (isSantriLoading || isHalaqohLoading || isProgressLoading) {
+                          return const ShimmerProgressCard();
+                        }
                         return _buildProgressCard(colors, santri, target, progressData);
                       },
                     ),

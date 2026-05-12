@@ -591,8 +591,32 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                         ),
                       ),
                       SizedBox(height: 20.h), // Spasi ke sudut melengkung bawah
-                    ] else
+                    ] else ...[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: const ShimmerDetailAbsensiHeader(),
+                      ),
                       SizedBox(height: 16.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: const ShimmerTabSelector(),
+                      ),
+                      SizedBox(height: 24.h),
+                      // List header "Daftar Kehadiran Santri"
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Text(
+                          t.detailAbsensiHariIni.daftarKehadiranSantri,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textPrimary,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                    ],
                   ],
                 ),
               ),
@@ -601,9 +625,17 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
 
           // --- SCROLLABLE LIST SECTION ATAU LOADING SECTION ---
           if (_isLoading)
-            SliverFillRemaining(
-              child: Center(
-                child: CircularProgressIndicator(color: colors.primary),
+            SliverPadding(
+              padding: EdgeInsets.only(
+                top: 16.h,
+                left: 24.w,
+                right: 24.w,
+                bottom: 100.h,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return const ShimmerDetailAbsensiSantriItem();
+                }, childCount: 4),
               ),
             )
           else

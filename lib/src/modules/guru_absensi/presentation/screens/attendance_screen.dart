@@ -24,9 +24,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_st
 /// and a bottom-rounded surface header.
 @RoutePage()
 class AttendanceScreen extends StatefulWidget {
-  final String programType;
-
-  const AttendanceScreen({super.key, this.programType = 'reguler'});
+  const AttendanceScreen({super.key});
 
   @override
   State<AttendanceScreen> createState() => _AttendanceScreenState();
@@ -46,11 +44,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     List<SantriModel> mySantriList,
     String halaqohId,
     String guruId,
+    String effectiveProgramType,
   ) {
     showDialog(
       context: context,
       builder: (ctx) => MulaiAbsensiDialog(
-        programType: widget.programType,
+        programType: effectiveProgramType,
         onScanBarcode: (date, sesi) {
           context.router.push(
             BarcodeScannerRoute(selectedDate: date, selectedSesi: sesi),
@@ -94,8 +93,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       orElse: () {},
     );
 
+    bool isHalaqohLoading = false;
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(
+      initial: () => isHalaqohLoading = true,
+      loading: () => isHalaqohLoading = true,
       loaded: (list) {
         try {
           myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId);
@@ -104,9 +106,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       orElse: () {},
     );
 
+    // Derive program type from the Halaqoh itself, not the Guru's personal
+    // programType. This is the correct source of truth: 'R' → reguler, 'T' → takhassus.
+    final effectiveProgramType =
+        myHalaqoh?.program == 'T' ? 'takhassus' : 'reguler';
+
+    bool isSantriLoading = false;
     List<SantriModel> mySantriList = [];
-    if (myHalaqoh != null) {
+    if (myHalaqoh != null || isHalaqohLoading) {
       santriState.maybeWhen(
+        initial: () => isSantriLoading = true,
+        loading: () => isSantriLoading = true,
         loaded: (sList) {
           mySantriList = sList
               .where((s) => myHalaqoh!.santriIds.contains(s.id))
@@ -177,6 +187,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               mySantriList,
                               myHalaqoh?.id ?? '',
                               linkedDocId,
+                              effectiveProgramType,
                             ),
                             icon: Icons.qr_code_scanner,
                             label: t.absensi.mulaiSesi,
@@ -242,9 +253,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               colors,
                               () {
                                 context.router.push(
-                                  AbsensiHalaqohRoute(
-                                    programType: widget.programType,
-                                  ),
+                                  AbsensiHalaqohRoute(),
                                 );
                               },
                             ),
@@ -319,7 +328,21 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ),
 
             // --- SCROLLABLE LIST SECTION ---
-            if (filtered.isEmpty)
+            if (isHalaqohLoading || isSantriLoading)
+              SliverPadding(
+                padding: EdgeInsets.only(
+                  top: 16.h,
+                  left: 24.w,
+                  right: 24.w,
+                  bottom: MediaQuery.of(context).padding.bottom + 24.h,
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    return const ShimmerAbsensiSantriItem();
+                  }, childCount: 4),
+                ),
+              )
+            else if (filtered.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: Center(
@@ -358,7 +381,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                             RiwayatAbsensiRoute(
                               name: santri.nama,
                               nis: santri.nis,
-                              programType: widget.programType,
                             ),
                           );
                         },

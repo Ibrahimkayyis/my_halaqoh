@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../guru_absensi/domain/models/absensi_model.dart';
+import '../../domain/helpers/schedule_helper.dart';
 import '../../domain/models/laporan_absensi_config.dart';
 
 /// Pure static helper that builds a [pw.Document] and returns its bytes.
@@ -166,7 +167,13 @@ class AbsensiPdfBuilder {
       (i) => DateTime(sD.year, sD.month, sD.day + i),
     );
 
-    final totalScheduled = dayCount * keys.length;
+    // Use the real per-weekday schedule instead of a flat sessionsPerDay × dayCount.
+    // Mon–Thu = full sessions; Fri/Sat/Sun = reduced sessions (see ScheduleHelper).
+    final totalScheduled = ScheduleHelper.totalScheduledSessions(
+      sD,
+      eD,
+      config.programType,
+    );
     final rate = totalScheduled > 0 ? hadir / totalScheduled : 0.0;
 
     // 6. Period label

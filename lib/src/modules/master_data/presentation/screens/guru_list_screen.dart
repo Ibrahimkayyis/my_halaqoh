@@ -11,7 +11,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_lis
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_data_method_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_manual_guru_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/bulk_upload_dialog.dart';
-import 'package:my_halaqoh/src/core/widget/dialog/confirm_delete_dialog.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Guru list screen (Tab 2 & Menu Card)
 class GuruListScreen extends StatefulWidget {
@@ -197,8 +197,8 @@ class _GuruListScreenState extends State<GuruListScreen> {
       body: BlocBuilder<GuruCubit, GuruState>(
         builder: (context, state) {
           return state.when(
-            initial: () => const SizedBox.shrink(),
-            loading: () => const Center(child: CircularProgressIndicator()),
+            initial: () => _buildShimmerList(),
+            loading: () => _buildShimmerList(),
             error: (message) => Center(
               child: Text(message,
                   style: TextStyle(color: colors.error, fontFamily: 'Poppins')),
@@ -259,6 +259,16 @@ class _GuruListScreenState extends State<GuruListScreen> {
           child: Icon(Icons.add, color: colors.textOnButton),
         ),
       ),
+    );
+  }
+
+  Widget _buildShimmerList() {
+    return ListView.builder(
+      padding: EdgeInsets.only(bottom: 80.h, top: 16.h),
+      itemCount: 6, // Show 6 shimmer items
+      itemBuilder: (context, index) {
+        return const ShimmerDataListItem();
+      },
     );
   }
 

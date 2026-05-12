@@ -68,6 +68,14 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState.unauthenticated());
   }
 
+  /// Resets the Cubit back to [AuthState.initial].
+  ///
+  /// Called by [LoginScreen] immediately after displaying an error snackbar
+  /// so that the stale [AuthState.error] cannot re-trigger the snackbar if
+  /// the widget tree is rebuilt (e.g. keyboard dismissal, orientation change).
+  void reset() => emit(const AuthState.initial());
+
+
   @override
   Future<void> close() {
     _authSubscription?.cancel();

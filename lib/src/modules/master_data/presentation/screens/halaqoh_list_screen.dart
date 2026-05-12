@@ -11,7 +11,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_c
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_search_bar.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/halaqoh_card.dart';
-import 'package:my_halaqoh/src/core/widget/dialog/confirm_delete_dialog.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
 /// Halaqoh list screen (Tab 3 & Menu Card)
 class HalaqohListScreen extends StatefulWidget {
@@ -101,8 +101,8 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
       body: BlocBuilder<HalaqohCubit, HalaqohState>(
         builder: (context, state) {
           return state.when(
-            initial: () => const SizedBox.shrink(),
-            loading: () => const Center(child: CircularProgressIndicator()),
+            initial: () => _buildShimmerList(),
+            loading: () => _buildShimmerList(),
             error: (message) => Center(
               child: Text(message,
                   style: TextStyle(color: colors.error, fontFamily: 'Poppins')),
@@ -170,6 +170,16 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
           child: Icon(Icons.add, color: colors.textOnButton),
         ),
       ),
+    );
+  }
+
+  Widget _buildShimmerList() {
+    return ListView.builder(
+      padding: EdgeInsets.only(bottom: 80.h, top: 8.h),
+      itemCount: 4, // Show 4 shimmer items for Halaqoh
+      itemBuilder: (context, index) {
+        return const ShimmerHalaqohCard();
+      },
     );
   }
 

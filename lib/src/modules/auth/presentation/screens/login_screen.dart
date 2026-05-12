@@ -85,11 +85,25 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: colors.background,
       body: BlocListener<AuthCubit, AuthState>(
+        // Only react when the state actually changes to a new distinct state.
+        // Without this, a stale AuthState.error persisting in the Cubit would
+        // re-trigger _showError on every rebuild (e.g. after a successful login
+        // causes a route replacement that rebuilds this subtree).
+        listenWhen: (previous, next) => previous != next,
         listener: (context, state) {
           state.maybeWhen(
-            error: (message) => _showError(message),
+            error: (message) {
+              // Clear any previously queued snackbars (from the failed attempt)
+              // so they don't surface after a successful login.
+              ScaffoldMessenger.of(context).clearSnackBars();
+              _showError(message);
+              // Reset Cubit to initial so this error won't re-fire if the
+              // widget tree is rebuilt while still on this screen.
+              context.read<AuthCubit>().reset();
+            },
             authenticated: (user) {
-              final String programStr = (user.programType == 'T') ? 'takhassus' : 'reguler';
+              final String programStr =
+                  (user.programType == 'T') ? 'takhassus' : 'reguler';
 
               // Restart the Firestore streams since they failed with Permission Denied on logout
               context.read<GuruCubit>().watchAll();

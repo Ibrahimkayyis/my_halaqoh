@@ -21,15 +21,10 @@ import 'package:my_halaqoh/src/modules/guru_laporan/presentation/widgets/laporan
 
 /// Absensi Halaqoh — split-panel attendance grid.
 /// Names stick on the left, dates+sessions scroll horizontally.
-/// [programType]: 'reguler' (2 sessions) or 'takhassus' (5 sessions)
+/// Derives program type at runtime from HalaqohModel.program.
 @RoutePage()
 class AbsensiHalaqohScreen extends StatefulWidget {
-  final String programType;
-
-  const AbsensiHalaqohScreen({
-    super.key,
-    @PathParam('programType') this.programType = 'reguler',
-  });
+  const AbsensiHalaqohScreen({super.key});
 
   @override
   State<AbsensiHalaqohScreen> createState() => _AbsensiHalaqohScreenState();
@@ -65,15 +60,18 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     'AHA',
   ];
 
-  List<String> get _sessionKeys {
-    if (widget.programType == 'takhassus') {
+  // Session keys and abbreviations are computed from the resolved programType
+  // (see _effectiveProgramType() in build). These static helpers accept the
+  // derived string so the getters can remain pure.
+  static List<String> _sessionKeysFor(String programType) {
+    if (programType == 'takhassus') {
       return ['shubuh', 'dhuha', 'siang', 'ashar', 'maghrib'];
     }
     return ['shubuh', 'maghrib'];
   }
 
-  List<String> get _sessionAbbr {
-    if (widget.programType == 'takhassus') {
+  static List<String> _sessionAbbrFor(String programType) {
+    if (programType == 'takhassus') {
       return ['P', 'D', 'S', 'A', 'M'];
     }
     return ['P', 'M'];
@@ -277,14 +275,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final daysInMonth = _daysInMonth(_currentYear, _currentMonth);
-    final sessions = _sessionAbbr;
-    final keys = _sessionKeys;
-    final sessionCount = sessions.length;
-    final colWidth = 36.0.w;
-    final nameColWidth = 130.0.w;
-    // Base row height — rows may grow taller if name wraps
-    final double baseRowHeight = 44.0.h;
-    final headerHeight = 52.h;
 
     final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
@@ -305,6 +295,19 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
       },
       orElse: () {},
     );
+
+    // Derive the effective program type from the Halaqoh, not from a route arg.
+    // Must be computed AFTER myHalaqoh is resolved above.
+    final effectiveProgramType =
+        myHalaqoh?.program == 'T' ? 'takhassus' : 'reguler';
+    final sessions = _sessionAbbrFor(effectiveProgramType);
+    final keys = _sessionKeysFor(effectiveProgramType);
+    final sessionCount = sessions.length;
+    final colWidth = 36.0.w;
+    final nameColWidth = 130.0.w;
+    // Base row height — rows may grow taller if name wraps
+    final double baseRowHeight = 44.0.h;
+    final headerHeight = 52.h;
 
     List<SantriModel> mySantriList = [];
     if (myHalaqoh != null) {
@@ -553,7 +556,7 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                           spacing: 12.w,
                           runSpacing: 6.h,
                           alignment: WrapAlignment.center,
-                          children: _buildSessionLegend(colors),
+                          children: _buildSessionLegend(colors, effectiveProgramType),
                         ),
                         SizedBox(height: 14.h),
                         PrimaryButton(
@@ -565,7 +568,7 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                               santriList: mySantriList,
                               halaqohName: myHalaqoh?.nama ?? '-',
                               kelas: myHalaqoh?.kelas ?? '-',
-                              programType: widget.programType,
+                              programType: effectiveProgramType,
                               guruNama: myHalaqoh?.guruNama ?? '-',
                               initialMonth: _currentMonth,
                               initialYear: _currentYear,
@@ -588,9 +591,9 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     );
   }
 
-  List<Widget> _buildSessionLegend(AppColorSet colors) {
+  List<Widget> _buildSessionLegend(AppColorSet colors, String effectiveProgramType) {
     final labels = <Map<String, String>>[];
-    if (widget.programType == 'takhassus') {
+    if (effectiveProgramType == 'takhassus') {
       labels.addAll([
         {'code': 'P', 'label': 'Pagi'},
         {'code': 'D', 'label': 'Dhuha'},
@@ -953,7 +956,7 @@ class _SyncedTableState extends State<_SyncedTable> {
                               ),
                               child: ValueListenableBuilder<double>(
                                 valueListenable: _horizOffset,
-                                builder: (_, offset, __) {
+                                builder: (_, offset, _) {
                                   return OverflowBox(
                                     minWidth: gridTotalWidth,
                                     maxWidth: gridTotalWidth,

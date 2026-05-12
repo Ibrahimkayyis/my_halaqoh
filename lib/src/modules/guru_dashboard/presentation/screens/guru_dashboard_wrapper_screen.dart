@@ -57,7 +57,7 @@ class _GuruDashboardWrapperScreenState
         programType: widget.programType,
       ),
       const MyHalaqohScreen(),
-      AttendanceScreen(programType: widget.programType),
+      const AttendanceScreen(),
       const HafalanScreen(),
       const GuruProfileScreen(),
     ];

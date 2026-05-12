@@ -20,7 +20,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_st
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/cubits/dashboard_summary_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/cubits/dashboard_summary_state.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
-
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 /// Main dashboard content page for Guru role.
 ///
 /// Displays real-time data:
@@ -148,12 +148,15 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
-              GuruDashboardHeader(
-                greeting: t.guruDashboard.greeting,
-                name: displayName.isNotEmpty ? displayName : 'Loading...',
-                subtitle: 'Awali Halaqoh dengan Do\'a Agar Selalu Diberkahi Allah SWT',
-                profilePictureUrl: profilePictureUrl,
-              ),
+              if (guruState.maybeWhen(initial: () => true, loading: () => true, orElse: () => false))
+                const ShimmerDashboardHeader()
+              else
+                GuruDashboardHeader(
+                  greeting: t.guruDashboard.greeting,
+                  name: displayName,
+                  subtitle: 'Awali Halaqoh dengan Do\'a Agar Selalu Diberkahi Allah SWT',
+                  profilePictureUrl: profilePictureUrl,
+                ),
               SizedBox(height: 24.h),
 
               // Capaian hari ini
@@ -337,7 +340,7 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
                               .toList(),
                         );
                       },
-                      orElse: () => _buildEmptySetoran(colors),
+                      orElse: () => _buildShimmerSetoranList(),
                     );
                   },
                 ),
@@ -384,6 +387,16 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Shimmer loading state for setoran records.
+  Widget _buildShimmerSetoranList() {
+    return Column(
+      children: List.generate(
+        3,
+        (index) => const ShimmerSetoranItem(),
       ),
     );
   }

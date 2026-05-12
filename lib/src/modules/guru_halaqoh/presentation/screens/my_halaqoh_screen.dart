@@ -15,6 +15,7 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.da
 import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/halaqoh_info_card.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/santri_list_item.dart';
@@ -61,7 +62,10 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
     );
 
     HalaqohModel? myHalaqoh;
+    bool isHalaqohLoading = false;
     halaqohState.maybeWhen(
+      initial: () => isHalaqohLoading = true,
+      loading: () => isHalaqohLoading = true,
       loaded: (list) {
         try {
           myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId);
@@ -86,8 +90,11 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
     }
 
     List<SantriModel> mySantriList = [];
-    if (myHalaqoh != null) {
+    bool isSantriLoading = false;
+    if (myHalaqoh != null || isHalaqohLoading) {
       santriState.maybeWhen(
+        initial: () => isSantriLoading = true,
+        loading: () => isSantriLoading = true,
         loaded: (sList) {
           mySantriList = sList
               .where((s) => myHalaqoh!.santriIds.contains(s.id))
@@ -138,7 +145,9 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                   children: [
                     SizedBox(height: 12.h),
                     // Halaqoh info card
-                    if (myHalaqoh != null)
+                    if (isHalaqohLoading)
+                      const ShimmerHalaqohInfoCard()
+                    else if (myHalaqoh != null)
                       HalaqohInfoCard(
                         kelas: t.myHalaqohScreen.kelas(kelas: myHalaqoh!.kelas),
                         program: t.myHalaqohScreen.program(
@@ -273,7 +282,24 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
             ),
 
             // --- SCROLLABLE LIST SECTION ---
-            if (filtered.isEmpty)
+            if (isSantriLoading || isHalaqohLoading)
+              SliverPadding(
+                padding: EdgeInsets.only(
+                  top: 16.h,
+                  left: 24.w,
+                  right: 24.w,
+                  bottom: MediaQuery.of(context).padding.bottom + 24.h,
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: const ShimmerSantriListItem(),
+                    );
+                  }, childCount: 4), // 4 dummy items
+                ),
+              )
+            else if (filtered.isEmpty)
               // UX Upgrade: Tampilan empty state jika hasil pencarian kosong
               SliverFillRemaining(
                 hasScrollBody: false,

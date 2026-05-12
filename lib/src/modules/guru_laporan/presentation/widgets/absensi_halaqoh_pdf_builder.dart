@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 import '../../../guru_absensi/domain/models/absensi_model.dart';
 import '../../../master_data/domain/models/santri_model.dart';
+import '../../domain/helpers/schedule_helper.dart';
 import '../../domain/models/laporan_absensi_config.dart';
 import '../../domain/models/laporan_absensi_halaqoh_config.dart';
 
@@ -23,8 +24,7 @@ import '../../domain/models/laporan_absensi_halaqoh_config.dart';
 /// +-----+------------------+-----------+-----------+-------+------+-----+
 /// ```
 ///
-/// Max = sessionsPerDay × 7 for weekly blocks.
-/// Max = sessionsPerDay × daysInMonth for semester (monthly) blocks.
+/// Max = schedule-aware total sessions for the block (see ScheduleHelper).
 /// Zero values in Sakit / Izin / Alpa are displayed as empty cells.
 class AbsensiHalaqohPdfBuilder {
   AbsensiHalaqohPdfBuilder._();
@@ -92,21 +92,20 @@ class AbsensiHalaqohPdfBuilder {
 
   // ─── Max computation ──────────────────────────────────────────────────────
 
-  /// Computes the theoretical maximum number of sessions for a block.
-  ///
-  /// - Weekly block  → `sessionsPerDay × 7`
-  /// - Monthly block → `sessionsPerDay × daysInBlock`
+  /// Computes the theoretical maximum number of sessions for a block
+  /// using the **real per-weekday schedule** for [programType] (Reguler /
+  /// Takhassus), rather than the naïve `sessionsPerDay × days` formula
+  /// that overcounted weekend sessions.
   static int _computeMax(
-    List<String> sessionKeys,
-    bool isSemester,
+    String programType,
     DateTime blockStart,
     DateTime blockEnd,
   ) {
-    if (isSemester) {
-      final days = blockEnd.difference(blockStart).inDays + 1;
-      return sessionKeys.length * days;
-    }
-    return sessionKeys.length * 7;
+    return ScheduleHelper.totalScheduledSessions(
+      blockStart,
+      blockEnd,
+      programType,
+    );
   }
 
   // ─── Aggregation ──────────────────────────────────────────────────────────
@@ -480,10 +479,9 @@ class AbsensiHalaqohPdfBuilder {
         : 'Pekan ke-${blockIndex + 1}'
               '  (${fmtFull.format(blockStart)} – ${fmtFull.format(blockEnd)})';
 
-    // Max sessions: fixed formula (sessions/day × 7) regardless of actual records
+    // Max sessions: uses the real per-weekday schedule (see ScheduleHelper)
     final maxSessions = _computeMax(
-      sessionKeys,
-      isSemester,
+      config.programType,
       blockStart,
       blockEnd,
     );

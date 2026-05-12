@@ -75,8 +75,12 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
   DateTime _tanggalSetoran = DateTime.now();
 
   final _juzController = TextEditingController();
-  final _kelancaranController = TextEditingController(text: '0');
-  final _tajwidController = TextEditingController(text: '0');
+  final _kelancaranController = TextEditingController();
+  final _tajwidController = TextEditingController();
+
+  // ── Inline validation error messages ─────────────────────────────────────
+  String? _kelancaranError;
+  String? _tajwidError;
 
   final List<_SelectedSurah> _selectedSurahs = [];
 
@@ -87,6 +91,14 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
     super.initState();
     _surahList = QuranService.instance.getAllSurahs();
     _tabController = TabController(length: 2, vsync: this);
+
+    // Clear inline errors as the teacher types
+    _kelancaranController.addListener(() {
+      if (_kelancaranError != null) setState(() => _kelancaranError = null);
+    });
+    _tajwidController.addListener(() {
+      if (_tajwidError != null) setState(() => _tajwidError = null);
+    });
   }
 
   @override
@@ -732,6 +744,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     Icons.speed,
                     _kelancaranController,
                     colors,
+                    errorText: _kelancaranError,
                   ),
                   SizedBox(height: 12.h),
 
@@ -742,6 +755,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     Icons.record_voice_over_outlined,
                     _tajwidController,
                     colors,
+                    errorText: _tajwidError,
                   ),
                   SizedBox(height: 32.h),
                 ],
@@ -769,15 +783,44 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                   width: double.infinity,
                   height: 50.h,
                   onPressed: () async {
+                    // ── Validation ──────────────────────────────────────────
                     if (_selectedSurahs.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: const Text('Pilih minimal satu surah', style: TextStyle(fontFamily: 'Poppins')),
+                          content: const Text(
+                            'Pilih minimal satu surah',
+                            style: TextStyle(fontFamily: 'Poppins'),
+                          ),
                           backgroundColor: colors.red,
                         ),
                       );
                       return;
                     }
+
+                    // Kelancaran: wajib diisi, angka 1–100
+                    final kelancaranRaw = _kelancaranController.text.trim();
+                    final kelancaranVal = int.tryParse(kelancaranRaw);
+                    // Tajwid: wajib diisi, angka 1–100
+                    final tajwidRaw = _tajwidController.text.trim();
+                    final tajwidVal = int.tryParse(tajwidRaw);
+
+                    // Compute both errors at once so all red borders show together
+                    final kelancaranErr = (kelancaranRaw.isEmpty || kelancaranVal == null || kelancaranVal < 1 || kelancaranVal > 100)
+                        ? 'Wajib diisi antara 1 sampai 100'
+                        : null;
+                    final tajwidErr = (tajwidRaw.isEmpty || tajwidVal == null || tajwidVal < 1 || tajwidVal > 100)
+                        ? 'Wajib diisi antara 1 sampai 100'
+                        : null;
+
+                    if (kelancaranErr != null || tajwidErr != null) {
+                      setState(() {
+                        _kelancaranError = kelancaranErr;
+                        _tajwidError = tajwidErr;
+                      });
+                      return;
+                    }
+
+                    // ── Confirmation & Save ──────────────────────────────────
                     final confirmed = await ConfirmSaveDialog.show(context);
                     if (confirmed && context.mounted) {
                       final models = _selectedSurahs.map((sel) {
@@ -795,8 +838,8 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                           ayatMulai: ayatStart,
                           ayatSelesai: int.tryParse(sel.ayatAkhirController.text) ?? sel.surah.ayatCount,
                           juz: int.tryParse(_juzController.text) ?? sel.surah.juzForAyat(ayatStart) ?? sel.surah.juzStart,
-                          nilaiKelancaran: int.tryParse(_kelancaranController.text) ?? 0,
-                          nilaiTajwid: int.tryParse(_tajwidController.text) ?? 0,
+                          nilaiKelancaran: kelancaranVal!,
+                          nilaiTajwid: tajwidVal!,
                           createdAt: DateTime.now(),
                           isSynced: false,
                         );
@@ -1041,8 +1084,10 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
     String scaleLabel,
     IconData icon,
     TextEditingController controller,
-    AppColorSet colors,
-  ) {
+    AppColorSet colors, {
+    String? errorText,
+  }) {
+    final hasError = errorText != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1054,7 +1099,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
-                color: colors.textPrimary,
+                color: hasError ? colors.red : colors.textPrimary,
                 fontFamily: 'Poppins',
               ),
             ),
@@ -1071,9 +1116,12 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
         SizedBox(height: 6.h),
         Container(
           decoration: BoxDecoration(
-            color: colors.surface,
+            color: hasError ? colors.red.withValues(alpha: 0.05) : colors.surface,
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: colors.border, width: 1),
+            border: Border.all(
+              color: hasError ? colors.red : colors.border,
+              width: hasError ? 1.5 : 1,
+            ),
           ),
           child: TextField(
             controller: controller,
@@ -1084,7 +1132,11 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
               color: colors.textPrimary,
             ),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, size: 20.sp, color: colors.textSecondary),
+              prefixIcon: Icon(
+                icon,
+                size: 20.sp,
+                color: hasError ? colors.red : colors.textSecondary,
+              ),
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 16.w,
@@ -1093,6 +1145,23 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
             ),
           ),
         ),
+        if (hasError) ...[
+          SizedBox(height: 4.h),
+          Row(
+            children: [
+              Icon(Icons.error_outline, size: 13.sp, color: colors.red),
+              SizedBox(width: 4.w),
+              Text(
+                errorText,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: colors.red,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }

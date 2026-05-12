@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
@@ -12,7 +13,6 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_lis
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_data_method_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_manual_santri_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/bulk_upload_dialog.dart';
-import 'package:my_halaqoh/src/core/widget/dialog/confirm_delete_dialog.dart';
 
 /// Santri list screen (Tab 1 & Menu Card)
 class SantriListScreen extends StatefulWidget {
@@ -223,8 +223,8 @@ class _SantriListScreenState extends State<SantriListScreen> {
       body: BlocBuilder<SantriCubit, SantriState>(
         builder: (context, state) {
           return state.when(
-            initial: () => const SizedBox.shrink(),
-            loading: () => const Center(child: CircularProgressIndicator()),
+            initial: () => _buildShimmerList(),
+            loading: () => _buildShimmerList(),
             error: (message) => Center(
               child: Text(message,
                   style: TextStyle(color: colors.error, fontFamily: 'Poppins')),
@@ -290,6 +290,16 @@ class _SantriListScreenState extends State<SantriListScreen> {
           child: Icon(Icons.add, color: colors.textOnButton),
         ),
       ),
+    );
+  }
+
+  Widget _buildShimmerList() {
+    return ListView.builder(
+      padding: EdgeInsets.only(bottom: 80.h, top: 16.h),
+      itemCount: 6, // Show 6 shimmer items
+      itemBuilder: (context, index) {
+        return const ShimmerDataListItem();
+      },
     );
   }
 

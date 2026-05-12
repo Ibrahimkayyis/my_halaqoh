@@ -20,13 +20,11 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_s
 class KalenderAbsensiScreen extends StatefulWidget {
   final String name;
   final String nis;
-  final String programType;
 
   const KalenderAbsensiScreen({
     super.key,
     @PathParam('name') required this.name,
     @PathParam('nis') required this.nis,
-    @PathParam('programType') this.programType = 'reguler',
   });
 
   @override
@@ -39,15 +37,18 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
 
   late AbsensiCubit _absensiCubit;
 
+  // Resolved from the Halaqoh's program field in _loadData().
+  String _effectiveProgramType = 'reguler';
+
   List<String> get _sessionKeys {
-    if (widget.programType == 'takhassus') {
+    if (_effectiveProgramType == 'takhassus') {
       return ['shubuh', 'dhuha', 'siang', 'ashar', 'maghrib'];
     }
     return ['shubuh', 'maghrib'];
   }
 
   List<String> get _sessionLabels {
-    if (widget.programType == 'takhassus') {
+    if (_effectiveProgramType == 'takhassus') {
       return ['1. Shubuh', '2. Dhuha', '3. Siang', '4. Ashar', '5. Maghrib'];
     }
     return ['Pagi (Kiri)', 'Malam (Kanan)'];
@@ -82,6 +83,11 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
 
     if (myHalaqoh != null) {
       _absensiCubit.watchByHalaqoh(myHalaqoh!.id);
+      // Resolve and cache the effective program type from the Halaqoh.
+      final derived = myHalaqoh!.program == 'T' ? 'takhassus' : 'reguler';
+      if (derived != _effectiveProgramType) {
+        setState(() => _effectiveProgramType = derived);
+      }
     }
   }
 
@@ -416,7 +422,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
                             height: 1,
                           ),
                           SizedBox(height: 14.h),
-                          if (widget.programType == 'takhassus')
+                          if (_effectiveProgramType == 'takhassus')
                             Wrap(
                               spacing: 12.w,
                               runSpacing: 6.h,
@@ -472,7 +478,6 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
     int dayCounter = 1;
     final totalCells = firstWeekday + daysInMonth;
     final totalRows = (totalCells / 7).ceil();
-    final keys = _sessionKeys;
 
     for (int row = 0; row < totalRows; row++) {
       final cells = <Widget>[];
@@ -513,7 +518,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
     final safeData = data ?? <String, String>{};
 
     return Container(
-      height: widget.programType == 'takhassus' ? 58.h : 52.h,
+      height: _effectiveProgramType == 'takhassus' ? 58.h : 52.h,
       margin: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
         color: colors.surface,
@@ -531,7 +536,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
           Text(
             day.toString(),
             style: TextStyle(
-              fontSize: widget.programType == 'takhassus' ? 11.sp : 13.sp,
+              fontSize: _effectiveProgramType == 'takhassus' ? 11.sp : 13.sp,
               fontWeight: FontWeight.w600,
               color: isFuture
                   ? colors.textSecondary.withValues(alpha: 0.6)
@@ -540,7 +545,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
             ),
           ),
           SizedBox(height: 2.h),
-          if (widget.programType == 'takhassus')
+          if (_effectiveProgramType == 'takhassus')
             Column(
               children: [
                 Row(

@@ -22,13 +22,11 @@ import 'package:my_halaqoh/src/modules/guru_laporan/presentation/widgets/laporan
 class RiwayatAbsensiScreen extends StatefulWidget {
   final String name;
   final String nis;
-  final String programType;
 
   const RiwayatAbsensiScreen({
     super.key,
     @PathParam('name') required this.name,
     @PathParam('nis') required this.nis,
-    @PathParam('programType') this.programType = 'reguler',
   });
 
   @override
@@ -51,15 +49,19 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
 
   late AbsensiCubit _absensiCubit;
 
+  // Resolved from the Halaqoh's program field in _loadData(). Defaults to
+  // 'reguler' until the Halaqoh is loaded.
+  String _effectiveProgramType = 'reguler';
+
   List<String> get _sessionKeys {
-    if (widget.programType == 'takhassus') {
+    if (_effectiveProgramType == 'takhassus') {
       return ['shubuh', 'dhuha', 'siang', 'ashar', 'maghrib'];
     }
     return ['shubuh', 'maghrib'];
   }
 
   List<String> get _sessionLabels {
-    if (widget.programType == 'takhassus') {
+    if (_effectiveProgramType == 'takhassus') {
       return ['P', 'D', 'S', 'A', 'M'];
     }
     return ['P', 'M'];
@@ -94,6 +96,11 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
 
     if (myHalaqoh != null) {
       _absensiCubit.watchByHalaqoh(myHalaqoh!.id);
+      // Resolve and cache the effective program type from the Halaqoh.
+      final derived = myHalaqoh!.program == 'T' ? 'takhassus' : 'reguler';
+      if (derived != _effectiveProgramType) {
+        setState(() => _effectiveProgramType = derived);
+      }
     }
   }
 
@@ -385,7 +392,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
 
                   // ── Day cards ──
                   SizedBox(
-                    height: widget.programType == 'takhassus' ? 350.h : 200.h,
+                    height: _effectiveProgramType == 'takhassus' ? 350.h : 200.h,
                     child: Builder(
                       builder: (context) {
                         final totalDays = DateUtils.getDaysInMonth(_currentYear, _currentMonth);
@@ -450,7 +457,6 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                           KalenderAbsensiRoute(
                             name: widget.name,
                             nis: widget.nis,
-                            programType: widget.programType,
                           ),
                         );
                       },
@@ -568,7 +574,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                           Wrap(
                             spacing: 16.w,
                             runSpacing: 6.h,
-                            children: widget.programType == 'takhassus'
+                            children: _effectiveProgramType == 'takhassus'
                                 ? [
                                     _buildSessionLabel(
                                       'P',
@@ -638,7 +644,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                           records:     allRecords,
                           santriName:  widget.name,
                           santriNis:   widget.nis,
-                          programType: widget.programType,
+                           programType: _effectiveProgramType,
                           halaqoh:     myHalaqoh,
                           initialMonth: _currentMonth,
                           initialYear:  _currentYear,
@@ -716,7 +722,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
     final labels = _sessionLabels;
 
     return Container(
-      width: widget.programType == 'takhassus' ? 80.w : 72.w,
+      width: _effectiveProgramType == 'takhassus' ? 80.w : 72.w,
       margin: EdgeInsets.only(right: 10.w),
       padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 6.w),
       decoration: BoxDecoration(

@@ -12,55 +12,18 @@ part of 'app_router.dart';
 
 /// generated route for
 /// [AbsensiHalaqohScreen]
-class AbsensiHalaqohRoute extends PageRouteInfo<AbsensiHalaqohRouteArgs> {
-  AbsensiHalaqohRoute({
-    Key? key,
-    String programType = 'reguler',
-    List<PageRouteInfo>? children,
-  }) : super(
-         AbsensiHalaqohRoute.name,
-         args: AbsensiHalaqohRouteArgs(key: key, programType: programType),
-         rawPathParams: {'programType': programType},
-         initialChildren: children,
-       );
+class AbsensiHalaqohRoute extends PageRouteInfo<void> {
+  const AbsensiHalaqohRoute({List<PageRouteInfo>? children})
+    : super(AbsensiHalaqohRoute.name, initialChildren: children);
 
   static const String name = 'AbsensiHalaqohRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final pathParams = data.inheritedPathParams;
-      final args = data.argsAs<AbsensiHalaqohRouteArgs>(
-        orElse: () => AbsensiHalaqohRouteArgs(
-          programType: pathParams.getString('programType', 'reguler'),
-        ),
-      );
-      return AbsensiHalaqohScreen(key: args.key, programType: args.programType);
+      return const AbsensiHalaqohScreen();
     },
   );
-}
-
-class AbsensiHalaqohRouteArgs {
-  const AbsensiHalaqohRouteArgs({this.key, this.programType = 'reguler'});
-
-  final Key? key;
-
-  final String programType;
-
-  @override
-  String toString() {
-    return 'AbsensiHalaqohRouteArgs{key: $key, programType: $programType}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! AbsensiHalaqohRouteArgs) return false;
-    return key == other.key && programType == other.programType;
-  }
-
-  @override
-  int get hashCode => key.hashCode ^ programType.hashCode;
 }
 
 /// generated route for
@@ -184,51 +147,18 @@ class AddHalaqohRouteArgs {
 
 /// generated route for
 /// [AttendanceScreen]
-class AttendanceRoute extends PageRouteInfo<AttendanceRouteArgs> {
-  AttendanceRoute({
-    Key? key,
-    String programType = 'reguler',
-    List<PageRouteInfo>? children,
-  }) : super(
-         AttendanceRoute.name,
-         args: AttendanceRouteArgs(key: key, programType: programType),
-         initialChildren: children,
-       );
+class AttendanceRoute extends PageRouteInfo<void> {
+  const AttendanceRoute({List<PageRouteInfo>? children})
+    : super(AttendanceRoute.name, initialChildren: children);
 
   static const String name = 'AttendanceRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<AttendanceRouteArgs>(
-        orElse: () => const AttendanceRouteArgs(),
-      );
-      return AttendanceScreen(key: args.key, programType: args.programType);
+      return const AttendanceScreen();
     },
   );
-}
-
-class AttendanceRouteArgs {
-  const AttendanceRouteArgs({this.key, this.programType = 'reguler'});
-
-  final Key? key;
-
-  final String programType;
-
-  @override
-  String toString() {
-    return 'AttendanceRouteArgs{key: $key, programType: $programType}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! AttendanceRouteArgs) return false;
-    return key == other.key && programType == other.programType;
-  }
-
-  @override
-  int get hashCode => key.hashCode ^ programType.hashCode;
 }
 
 /// generated route for
@@ -640,17 +570,11 @@ class KalenderAbsensiRoute extends PageRouteInfo<KalenderAbsensiRouteArgs> {
     Key? key,
     required String name,
     required String nis,
-    String programType = 'reguler',
     List<PageRouteInfo>? children,
   }) : super(
          KalenderAbsensiRoute.name,
-         args: KalenderAbsensiRouteArgs(
-           key: key,
-           name: name,
-           nis: nis,
-           programType: programType,
-         ),
-         rawPathParams: {'name': name, 'nis': nis, 'programType': programType},
+         args: KalenderAbsensiRouteArgs(key: key, name: name, nis: nis),
+         rawPathParams: {'name': name, 'nis': nis},
          initialChildren: children,
        );
 
@@ -664,14 +588,12 @@ class KalenderAbsensiRoute extends PageRouteInfo<KalenderAbsensiRouteArgs> {
         orElse: () => KalenderAbsensiRouteArgs(
           name: pathParams.getString('name'),
           nis: pathParams.getString('nis'),
-          programType: pathParams.getString('programType', 'reguler'),
         ),
       );
       return KalenderAbsensiScreen(
         key: args.key,
         name: args.name,
         nis: args.nis,
-        programType: args.programType,
       );
     },
   );
@@ -682,7 +604,6 @@ class KalenderAbsensiRouteArgs {
     this.key,
     required this.name,
     required this.nis,
-    this.programType = 'reguler',
   });
 
   final Key? key;
@@ -691,26 +612,20 @@ class KalenderAbsensiRouteArgs {
 
   final String nis;
 
-  final String programType;
-
   @override
   String toString() {
-    return 'KalenderAbsensiRouteArgs{key: $key, name: $name, nis: $nis, programType: $programType}';
+    return 'KalenderAbsensiRouteArgs{key: $key, name: $name, nis: $nis}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! KalenderAbsensiRouteArgs) return false;
-    return key == other.key &&
-        name == other.name &&
-        nis == other.nis &&
-        programType == other.programType;
+    return key == other.key && name == other.name && nis == other.nis;
   }
 
   @override
-  int get hashCode =>
-      key.hashCode ^ name.hashCode ^ nis.hashCode ^ programType.hashCode;
+  int get hashCode => key.hashCode ^ name.hashCode ^ nis.hashCode;
 }
 
 /// generated route for
@@ -1035,17 +950,11 @@ class RiwayatAbsensiRoute extends PageRouteInfo<RiwayatAbsensiRouteArgs> {
     Key? key,
     required String name,
     required String nis,
-    String programType = 'reguler',
     List<PageRouteInfo>? children,
   }) : super(
          RiwayatAbsensiRoute.name,
-         args: RiwayatAbsensiRouteArgs(
-           key: key,
-           name: name,
-           nis: nis,
-           programType: programType,
-         ),
-         rawPathParams: {'name': name, 'nis': nis, 'programType': programType},
+         args: RiwayatAbsensiRouteArgs(key: key, name: name, nis: nis),
+         rawPathParams: {'name': name, 'nis': nis},
          initialChildren: children,
        );
 
@@ -1059,14 +968,12 @@ class RiwayatAbsensiRoute extends PageRouteInfo<RiwayatAbsensiRouteArgs> {
         orElse: () => RiwayatAbsensiRouteArgs(
           name: pathParams.getString('name'),
           nis: pathParams.getString('nis'),
-          programType: pathParams.getString('programType', 'reguler'),
         ),
       );
       return RiwayatAbsensiScreen(
         key: args.key,
         name: args.name,
         nis: args.nis,
-        programType: args.programType,
       );
     },
   );
@@ -1077,7 +984,6 @@ class RiwayatAbsensiRouteArgs {
     this.key,
     required this.name,
     required this.nis,
-    this.programType = 'reguler',
   });
 
   final Key? key;
@@ -1086,26 +992,20 @@ class RiwayatAbsensiRouteArgs {
 
   final String nis;
 
-  final String programType;
-
   @override
   String toString() {
-    return 'RiwayatAbsensiRouteArgs{key: $key, name: $name, nis: $nis, programType: $programType}';
+    return 'RiwayatAbsensiRouteArgs{key: $key, name: $name, nis: $nis}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! RiwayatAbsensiRouteArgs) return false;
-    return key == other.key &&
-        name == other.name &&
-        nis == other.nis &&
-        programType == other.programType;
+    return key == other.key && name == other.name && nis == other.nis;
   }
 
   @override
-  int get hashCode =>
-      key.hashCode ^ name.hashCode ^ nis.hashCode ^ programType.hashCode;
+  int get hashCode => key.hashCode ^ name.hashCode ^ nis.hashCode;
 }
 
 /// generated route for
