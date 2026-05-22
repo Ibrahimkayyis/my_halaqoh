@@ -15,12 +15,15 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.da
 import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 
 /// Progress Hafalan Per Juz — shows juz-level progress cards for a santri
 @RoutePage()
-class ProgressHafalanPerJuzScreen extends StatefulWidget implements AutoRouteWrapper {
+class ProgressHafalanPerJuzScreen extends StatefulWidget
+    implements AutoRouteWrapper {
   final String santriId;
   final String name;
   final String nis;
@@ -34,8 +37,16 @@ class ProgressHafalanPerJuzScreen extends StatefulWidget implements AutoRouteWra
 
   @override
   Widget wrappedRoute(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<ProgressHafalanCubit>()..watchProgress(santriId),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => sl<ProgressHafalanCubit>()..watchProgress(santriId),
+        ),
+        BlocProvider(
+          create: (_) =>
+              sl<SantriExtraTargetCubit>()..watchExtraJuz(santriId),
+        ),
+      ],
       child: this,
     );
   }
@@ -47,9 +58,6 @@ class ProgressHafalanPerJuzScreen extends StatefulWidget implements AutoRouteWra
 
 class _ProgressHafalanPerJuzScreenState
     extends State<ProgressHafalanPerJuzScreen> {
-  /// Juz numbers added by the teacher beyond the admin-defined target.
-  final Set<int> _teacherAddedJuz = {};
-
   /// Check if all currently shown targets are 100% completed.
   /// Required before teacher can add new targets via FAB.
   bool _allTargetsCompleted(List<Map<String, dynamic>> juzData) {
@@ -64,6 +72,7 @@ class _ProgressHafalanPerJuzScreenState
   void _showTambahTargetBottomSheet(
     List<Map<String, dynamic>> currentJuzData,
     Set<int> allTargetJuzNums,
+    SantriExtraTargetCubit extraTargetCubit,
   ) {
     final colors = AppColors.of(context);
     final searchController = TextEditingController();
@@ -250,25 +259,36 @@ class _ProgressHafalanPerJuzScreenState
                               ),
                               GestureDetector(
                                 onTap: canAdd
-                                    ? () {
-                                        setState(() {
-                                          _teacherAddedJuz
-                                              .add(juzModel.number);
-                                        });
+                                    ? () async {
+                                        // Capture messenger before the async gap
+                                        final messenger =
+                                            ScaffoldMessenger.of(context);
+                                        final appColors = AppColors.of(context);
+
+                                        // Persist to Firestore via cubit
+                                        final success =
+                                            await extraTargetCubit
+                                                .addExtraJuz(
+                                          widget.santriId,
+                                          juzModel.number,
+                                        );
+
+                                        // Refresh the sheet's available list
                                         setSheetState(() {});
 
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
+                                        messenger.showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              'Juz ${juzModel.number} ditambahkan sebagai target',
+                                              success
+                                                  ? 'Juz ${juzModel.number} ditambahkan sebagai target'
+                                                  : 'Gagal menyimpan target, coba lagi',
                                               style: const TextStyle(
                                                 fontFamily: 'Poppins',
                                               ),
                                             ),
-                                            backgroundColor:
-                                                colors.primary,
+                                            backgroundColor: success
+                                                ? appColors.primary
+                                                : appColors.error,
                                             duration: const Duration(
                                               seconds: 2,
                                             ),
@@ -293,9 +313,7 @@ class _ProgressHafalanPerJuzScreenState
                                     color: canAdd
                                         ? colors.primary
                                         : colors.textSecondary
-                                            .withValues(
-                                            alpha: 0.4,
-                                          ),
+                                            .withValues(alpha: 0.4),
                                   ),
                                 ),
                               ),
@@ -308,7 +326,8 @@ class _ProgressHafalanPerJuzScreenState
 
                   // Tutup button
                   Padding(
-                    padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
+                    padding:
+                        EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
                     child: SizedBox(
                       width: double.infinity,
                       height: 50.h,
@@ -333,9 +352,11 @@ class _ProgressHafalanPerJuzScreenState
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    // Look up the santri by NIS to get their kelas and program
+    // ── Lookup santri ─────────────────────────────────────────────────────────
     final santriState = context.watch<SantriCubit>().state;
     final targetHafalanState = context.watch<TargetHafalanCubit>().state;
+    final extraTargetState = context.watch<SantriExtraTargetCubit>().state;
+    final extraTargetCubit = context.read<SantriExtraTargetCubit>();
 
     SantriModel? santri;
     santriState.maybeWhen(
@@ -347,7 +368,7 @@ class _ProgressHafalanPerJuzScreenState
       orElse: () {},
     );
 
-    // Find the admin-defined target for this santri's kelas + program
+    // ── Admin-defined target juz ──────────────────────────────────────────────
     TargetHafalanModel? target;
     targetHafalanState.maybeWhen(
       loaded: (targets) {
@@ -361,12 +382,19 @@ class _ProgressHafalanPerJuzScreenState
       },
       orElse: () {},
     );
+    final adminJuzList = target != null && santri != null
+        ? TargetHafalanHelper.getTargetJuzList(
+            target, santri!.kelas, santri!.program)
+        : <int>[];
 
-    // Combine admin juz + teacher-added juz (filter out invalid juz numbers)
-    final adminJuzList = target != null && santri != null ? TargetHafalanHelper.getTargetJuzList(target, santri!.kelas, santri!.program) : <int>[];
-    final allTargetJuzNums = <int>{...adminJuzList, ..._teacherAddedJuz};
+    // ── Teacher-added extra juz (Firestore-persisted) ─────────────────────────
+    final extraJuz = <int>[];
+    extraTargetState.maybeWhen(
+      loaded: (juzList) => extraJuz.addAll(juzList),
+      orElse: () {},
+    );
 
-    // Get progress data from ProgressHafalanCubit
+    // ── Get progress data ─────────────────────────────────────────────────────
     final progressState = context.watch<ProgressHafalanCubit>().state;
     OverallHafalanProgress? progressData;
     progressState.maybeWhen(
@@ -374,7 +402,23 @@ class _ProgressHafalanPerJuzScreenState
       orElse: () {},
     );
 
-    // Build display data using QuranService + real progress
+    // ── Part 1 fix: always surface juz that already have real memorized ayat ──
+    // This ensures progress is visible even when admin changes the semester
+    // or when no target is defined at all.
+    final progressJuzNums = progressData?.juzProgressList
+            .where((jp) => jp.memorizedAyat > 0)
+            .map((jp) => jp.juzNumber)
+            .toSet() ??
+        <int>{};
+
+    // ── Combine all juz sources ───────────────────────────────────────────────
+    final allTargetJuzNums = <int>{
+      ...adminJuzList,   // admin-defined curriculum targets
+      ...extraJuz,       // teacher-added (Firestore-persisted)
+      ...progressJuzNums,// any juz with actual progress (never hidden)
+    };
+
+    // ── Build display data ────────────────────────────────────────────────────
     final juzDisplayData = allTargetJuzNums.map((juzNum) {
       final juzModel = QuranService.instance.getJuzByNumber(juzNum);
       int totalAyat = juzModel?.totalAyat ?? 0;
@@ -401,8 +445,11 @@ class _ProgressHafalanPerJuzScreenState
     return Scaffold(
       backgroundColor: colors.background,
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            _showTambahTargetBottomSheet(juzDisplayData, allTargetJuzNums),
+        onPressed: () => _showTambahTargetBottomSheet(
+          juzDisplayData,
+          allTargetJuzNums,
+          extraTargetCubit,
+        ),
         backgroundColor: colors.primary,
         child: Icon(Icons.add, color: colors.textOnButton),
       ),
@@ -465,22 +512,9 @@ class _ProgressHafalanPerJuzScreenState
                     ),
                     SizedBox(height: 14.h),
 
-                    // Juz cards — empty state if no targets
+                    // Juz cards or contextual empty state
                     if (juzDisplayData.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 40.h),
-                          child: Text(
-                            'Belum ada target hafalan yang ditetapkan.',
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              color: colors.textSecondary,
-                              fontFamily: 'Poppins',
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      )
+                      _buildEmptyState(colors, target, santri)
                     else
                       ...juzDisplayData.map(
                         (juz) => _buildJuzCard(context, juz, colors),
@@ -490,6 +524,119 @@ class _ProgressHafalanPerJuzScreenState
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(
+    AppColorSet colors,
+    TargetHafalanModel? target,
+    SantriModel? santri,
+  ) {
+    final reason = TargetHafalanHelper.getEmptyStateReason(
+      target: target,
+      kelas: santri?.kelas,
+      programCode: santri?.program,
+    );
+
+    // Icon per reason kind — accent is always colors.primary (no hardcoded hex)
+    final IconData icon;
+    switch (reason.kind) {
+      case EmptyTargetKind.idadTahsin:
+        icon = Icons.auto_stories_outlined;
+        break;
+      case EmptyTargetKind.dauroh:
+        icon = Icons.bolt_outlined;
+        break;
+      case EmptyTargetKind.uat:
+        icon = Icons.verified_outlined;
+        break;
+      case EmptyTargetKind.unknownCurriculum:
+        icon = Icons.help_outline;
+        break;
+      case EmptyTargetKind.noAdminConfig:
+        icon = Icons.settings_outlined;
+        break;
+    }
+
+    final bool teacherCanAdd = reason.kind == EmptyTargetKind.idadTahsin ||
+        reason.kind == EmptyTargetKind.dauroh;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 24.h),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          color: colors.primary.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.25), width: 1),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 56.w,
+              height: 56.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.primary.withValues(alpha: 0.12),
+              ),
+              child: Icon(icon, size: 28.sp, color: colors.primary),
+            ),
+            SizedBox(height: 14.h),
+            Text(
+              reason.label,
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+                color: colors.primary,
+                fontFamily: 'Poppins',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              reason.description,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+                color: colors.textSecondary,
+                fontFamily: 'Poppins',
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (teacherCanAdd) ...[
+              SizedBox(height: 14.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Icon(Icons.add_circle_outline,
+                        size: 14.sp, color: colors.primary),
+                    SizedBox(width: 6.w),
+                    Flexible(
+                      child: Text(
+                        'Ketuk + untuk menambah target juz secara manual',
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                          color: colors.primary,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -574,7 +721,7 @@ class _ProgressHafalanPerJuzScreenState
     final juzNum = juz['juz'] as int;
     final total = juz['total'] as int;
     final completed = juz['completed'] as int;
-    
+
     final progressVal = total > 0 ? (completed / total * 100) : 0.0;
     String percentStr;
     if (progressVal == 0 || progressVal == 100) {
@@ -582,7 +729,7 @@ class _ProgressHafalanPerJuzScreenState
     } else {
       percentStr = progressVal.toStringAsFixed(1);
     }
-    
+
     final progress = total > 0 ? completed / total : 0.0;
 
     return GestureDetector(

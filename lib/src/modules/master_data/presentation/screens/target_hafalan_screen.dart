@@ -116,26 +116,35 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
                   style: TextStyle(color: colors.error, fontFamily: 'Poppins')),
             ),
             loaded: (targetList) {
-              return Column(
-                children: [
-                  SizedBox(height: 8.h),
-                  AppTabSelector(
-                    controller: _tabController,
-                    tabs: [t.targetHafalan.reguler, t.targetHafalan.takhassus],
-                  ),
-                  SizedBox(height: 16.h),
-                  _buildInfoBanner(colors),
-                  SizedBox(height: 12.h),
-                  Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildClassList(targetList, 'Reguler'),
-                        _buildClassList(targetList, 'Takhassus'),
-                      ],
+              return NestedScrollView(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return [
+                    SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          SizedBox(height: 8.h),
+                          AppTabSelector(
+                            controller: _tabController,
+                            tabs: [t.targetHafalan.reguler, t.targetHafalan.takhassus],
+                          ),
+                          SizedBox(height: 16.h),
+                          _buildInfoBanner(colors),
+                          SizedBox(height: 12.h),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ];
+                },
+                body: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildClassList(targetList, 'Reguler'),
+                    _buildClassList(targetList, 'Takhassus'),
+                  ],
+                ),
               );
             },
           );

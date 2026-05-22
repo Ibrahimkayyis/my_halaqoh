@@ -32,11 +32,11 @@ class ColorName {
   /// Color: #10B981
   static const Color green = Color(0xFF10B981);
 
-  /// Color: #10B981
-  static const Color primary = Color(0xFF10B981);
+  /// Color: #115d69
+  static const Color primary = Color(0xFF115D69);
 
-  /// Color: #059669
-  static const Color primaryDark = Color(0xFF059669);
+  /// Color: #115d69
+  static const Color primaryDark = Color(0xFF115D69);
 
   /// Color: #F43F5E
   static const Color red = Color(0xFFF43F5E);

@@ -1,6 +1,48 @@
 import 'package:my_halaqoh/src/modules/master_data/domain/helpers/curriculum_data.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
 
+// ── Empty state reason ────────────────────────────────────────────────────────
+
+/// Describes why a santri currently has no juz hafalan targets.
+enum EmptyTargetKind {
+  /// Admin hasn't configured the target record at all (no Firestore doc).
+  noAdminConfig,
+
+  /// Admin set semesterAktif but the curriculum for that semester has no juz
+  /// because it's I'dad Tahsin (preparation / reading correction).
+  idadTahsin,
+
+  /// Admin set semesterAktif but the curriculum for that semester has no juz
+  /// because it's Dauroh (intensive camp).
+  dauroh,
+
+  /// Admin set semesterAktif but the curriculum for that semester has no juz
+  /// because it's UAT (Ujian Akhir Tahfidz — final exam, no new targets).
+  uat,
+
+  /// semesterAktif is set but the kelas/program lookup returns no curriculum
+  /// data (e.g. kelas string mismatch or future class not yet defined).
+  unknownCurriculum,
+}
+
+/// Structured reason returned by [TargetHafalanHelper.getEmptyStateReason].
+class EmptyTargetReason {
+  final EmptyTargetKind kind;
+
+  /// Short label shown as heading, e.g. "I'dad Tahsin".
+  final String label;
+
+  /// Longer explanation shown as body text.
+  final String description;
+
+  const EmptyTargetReason({
+    required this.kind,
+    required this.label,
+    required this.description,
+  });
+}
+
+
 /// Utility helpers for working with [TargetHafalanModel] across modules.
 class TargetHafalanHelper {
   const TargetHafalanHelper._();
@@ -157,5 +199,103 @@ class TargetHafalanHelper {
     }
     groups.add(start == end ? '$start' : '$start-$end');
     return 'Juz ${groups.join(', ')}';
+  }
+
+  // ── Empty state diagnostics ───────────────────────────────────────────────
+
+  /// Returns an [EmptyTargetReason] describing WHY there are currently no juz
+  /// targets for this santri — useful for showing a contextual empty state UI.
+  ///
+  /// Call this ONLY when [getTargetJuzList] returns an empty list.
+  static EmptyTargetReason getEmptyStateReason({
+    required TargetHafalanModel? target,
+    required String? kelas,
+    required String? programCode,
+  }) {
+    // Case 1: no admin config record at all
+    if (target == null || kelas == null || programCode == null) {
+      return const EmptyTargetReason(
+        kind: EmptyTargetKind.noAdminConfig,
+        label: 'Target Belum Dikonfigurasi',
+        description:
+            'Admin belum menetapkan target hafalan untuk kelas dan program ini. '
+            'Silakan hubungi admin untuk mengatur target.',
+      );
+    }
+
+    // Case 2: admin hasn't chosen a semester yet
+    if (target.semesterAktif == null) {
+      return const EmptyTargetReason(
+        kind: EmptyTargetKind.noAdminConfig,
+        label: 'Semester Aktif Belum Dipilih',
+        description:
+            'Admin belum memilih semester aktif. '
+            'Target hafalan akan muncul setelah admin menentukan semester yang sedang berjalan.',
+      );
+    }
+
+    final fullProgram = programCodeToFullName(programCode);
+    final sem =
+        CurriculumData.getSemesterTarget(kelas, fullProgram, target.semesterAktif!);
+
+    // Case 3: curriculum not found (unknown kelas/program combination)
+    if (sem == null) {
+      return const EmptyTargetReason(
+        kind: EmptyTargetKind.unknownCurriculum,
+        label: 'Kurikulum Tidak Ditemukan',
+        description:
+            'Data kurikulum untuk kelas dan program ini belum tersedia. '
+            'Hubungi pengembang aplikasi jika masalah ini terus berlanjut.',
+      );
+    }
+
+    // Check what type the active semester periods are
+    final utsType = sem.uts.tipe;
+    final uasType = sem.uas.tipe;
+
+    // If both periods are idadTahsin
+    if (utsType == TipeHafalan.idadTahsin || uasType == TipeHafalan.idadTahsin) {
+      return EmptyTargetReason(
+        kind: EmptyTargetKind.idadTahsin,
+        label: "I'dad Tahsin",
+        description:
+            "Semester ${target.semesterAktif} ini adalah periode I'dad Tahsin — "
+            "masa persiapan dan perbaikan bacaan Al-Qur'an. "
+            "Belum ada target hafalan juz baru pada periode ini. "
+            "Guru dapat menambahkan target juz secara manual jika santri sudah siap.",
+      );
+    }
+
+    // If both periods are dauroh
+    if (utsType == TipeHafalan.dauroh || uasType == TipeHafalan.dauroh) {
+      return EmptyTargetReason(
+        kind: EmptyTargetKind.dauroh,
+        label: 'Dauroh',
+        description:
+            'Semester ${target.semesterAktif} ini adalah periode Dauroh — '
+            'program hafalan intensif kilat. '
+            'Target juz belum ditetapkan secara individual pada periode ini. '
+            'Guru dapat menambahkan target juz secara manual setelah Dauroh selesai.',
+      );
+    }
+
+    // If both periods are UAT
+    if (utsType == TipeHafalan.uat && uasType == TipeHafalan.uat) {
+      return const EmptyTargetReason(
+        kind: EmptyTargetKind.uat,
+        label: 'UAT — Ujian Akhir Tahfidz',
+        description:
+            'Semester ini adalah periode Ujian Akhir Tahfidz (UAT). '
+            'Tidak ada target hafalan baru — santri sedang dalam tahap ujian keseluruhan hafalan.',
+      );
+    }
+
+    // Fallback (juz list is empty for an unexpected reason)
+    return const EmptyTargetReason(
+      kind: EmptyTargetKind.noAdminConfig,
+      label: 'Belum Ada Target Hafalan',
+      description:
+          'Belum ada target hafalan yang ditetapkan untuk semester ini.',
+    );
   }
 }

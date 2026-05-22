@@ -46,6 +46,11 @@ import 'package:my_halaqoh/src/modules/master_data/data/repositories_impl/guru_r
 import 'package:my_halaqoh/src/modules/master_data/data/repositories_impl/santri_repository_impl.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/repositories_impl/halaqoh_repository_impl.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/repositories_impl/target_hafalan_repository_impl.dart';
+import 'package:my_halaqoh/src/modules/master_data/data/datasources/remote/source/abstract/santri_extra_target_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/master_data/data/datasources/remote/source/implementation/santri_extra_target_remote_datasource_impl.dart';
+import 'package:my_halaqoh/src/modules/master_data/data/repositories_impl/santri_extra_target_repository_impl.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/repositories/santri_extra_target_repository.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_cubit.dart';
 
 // Master Data — Presentation Layer (Cubits)
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_cubit.dart';
@@ -196,6 +201,17 @@ Future<void> initDependencies() async {
   sl.registerFactory<SantriCubit>(() => SantriCubit(sl()));
   sl.registerFactory<HalaqohCubit>(() => HalaqohCubit(sl()));
   sl.registerFactory<TargetHafalanCubit>(() => TargetHafalanCubit(sl()));
+
+  // ── Master Data — SantriExtraTarget (Firestore teacher-added targets) ──────
+  sl.registerLazySingleton<SantriExtraTargetRemoteDataSource>(
+    () => SantriExtraTargetRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<SantriExtraTargetRepository>(
+    () => SantriExtraTargetRepositoryImpl(sl()),
+  );
+  sl.registerFactory<SantriExtraTargetCubit>(
+    () => SantriExtraTargetCubit(sl()),
+  );
 
   // ── Guru Absensi — DataSources ─────────────────────────────────────────────
   sl.registerLazySingleton<AbsensiLocalDataSource>(

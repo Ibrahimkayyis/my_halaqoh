@@ -36,11 +36,21 @@ class $AssetsImagesGen {
   AssetGenImage get myHalaqohLogo =>
       const AssetGenImage('assets/images/my_halaqoh_logo.png');
 
+  /// File path: assets/images/my_halaqoh_logo_launcher.png
+  AssetGenImage get myHalaqohLogoLauncher =>
+      const AssetGenImage('assets/images/my_halaqoh_logo_launcher.png');
+
+  /// File path: assets/images/my_halaqoh_logo_new.png
+  AssetGenImage get myHalaqohLogoNew =>
+      const AssetGenImage('assets/images/my_halaqoh_logo_new.png');
+
   /// List of all assets
   List<AssetGenImage> get values => [
     logoLuqmanAlHakim,
     myHalaqohIconPadded,
     myHalaqohLogo,
+    myHalaqohLogoLauncher,
+    myHalaqohLogoNew,
   ];
 }
 

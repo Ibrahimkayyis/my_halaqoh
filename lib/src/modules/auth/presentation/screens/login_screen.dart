@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/assets.gen.dart';
+import 'package:my_halaqoh/gen/colors.gen.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
@@ -157,15 +158,14 @@ class _LoginScreenState extends State<LoginScreen> {
             width: 100.w,
             height: 100.w,
             decoration: BoxDecoration(
-              color: colors.surface.withValues(alpha: 0.2),
+              color: ColorName.background,
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Image.asset(
-                Assets.images.myHalaqohLogo.path,
-                width: 60.w,
-                height: 60.w,
-                color: colors.surface,
+                Assets.images.myHalaqohLogoNew.path,
+                width: 76.w,
+                height: 76.w,
               ),
             ),
           ),

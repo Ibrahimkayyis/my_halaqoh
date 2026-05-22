@@ -22,6 +22,8 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_ha
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/cubits/wali_santri_progress_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_state.dart';
 
 /// Progress Hafalan Per Juz — shows juz-level progress cards for a santri (Wali Santri view)
 @RoutePage()
@@ -43,17 +45,20 @@ class WaliSantriProgressPerJuzScreen extends StatefulWidget {
 class _WaliSantriProgressPerJuzScreenState
     extends State<WaliSantriProgressPerJuzScreen> {
   late WaliSantriProgressHafalanCubit _progressCubit;
+  late SantriExtraTargetCubit _extraTargetCubit;
   String? _loadedLinkedDocId;
 
   @override
   void initState() {
     super.initState();
     _progressCubit = sl<WaliSantriProgressHafalanCubit>();
+    _extraTargetCubit = sl<SantriExtraTargetCubit>();
   }
 
   @override
   void dispose() {
     _progressCubit.close();
+    _extraTargetCubit.close();
     super.dispose();
   }
 
@@ -61,6 +66,8 @@ class _WaliSantriProgressPerJuzScreenState
     if (linkedDocId.isNotEmpty && linkedDocId != _loadedLinkedDocId) {
       _loadedLinkedDocId = linkedDocId;
       _progressCubit.watchProgress(linkedDocId);
+      // linkedDocId == santriId for wali santri accounts
+      _extraTargetCubit.watchExtraJuz(linkedDocId);
     }
   }
 
@@ -116,7 +123,9 @@ class _WaliSantriProgressPerJuzScreenState
 
     return BlocProvider.value(
       value: _progressCubit,
-      child: BlocBuilder<WaliSantriProgressHafalanCubit, WaliSantriProgressHafalanState>(
+      child: BlocProvider.value(
+        value: _extraTargetCubit,
+        child: BlocBuilder<WaliSantriProgressHafalanCubit, WaliSantriProgressHafalanState>(
         builder: (context, progressState) {
           OverallHafalanProgress? progressData;
           progressState.maybeWhen(
@@ -124,9 +133,36 @@ class _WaliSantriProgressPerJuzScreenState
             orElse: () {},
           );
 
-          // Build juz display data from target's juzList + QuranService
-          final juzList = target != null && santri != null ? TargetHafalanHelper.getTargetJuzList(target, santri!.kelas, santri!.program) : <int>[];
-          final juzDisplayData = juzList.map((juzNum) {
+          // ── Extra juz added by teacher (Firestore-persisted) ─────────────
+          final extraJuzState = context.watch<SantriExtraTargetCubit>().state;
+          final extraJuz = <int>[];
+          extraJuzState.maybeWhen(
+            loaded: (juzList) => extraJuz.addAll(juzList),
+            orElse: () {},
+          );
+
+          // ── Part 1 fix: always surface juz with real memorized ayat ──────
+          // Keeps progress visible even when admin changes the semester.
+          final progressJuzNums = progressData?.juzProgressList
+                  .where((jp) => jp.memorizedAyat > 0)
+                  .map((jp) => jp.juzNumber)
+                  .toSet() ??
+              <int>{};
+
+          // ── Combine all juz sources ──────────────────────────────────────
+          final adminJuzList = target != null && santri != null
+              ? TargetHafalanHelper.getTargetJuzList(
+                  target, santri!.kelas, santri!.program)
+              : <int>[];
+
+          final allJuzNums = <int>{
+            ...adminJuzList,    // admin-defined curriculum targets
+            ...extraJuz,        // teacher-added (Firestore-persisted)
+            ...progressJuzNums, // any juz with actual progress (never hidden)
+          };
+
+          // Build juz display data from combined juz set + QuranService
+          final juzDisplayData = allJuzNums.map((juzNum) {
             final juzModel = QuranService.instance.getJuzByNumber(juzNum);
             int totalAyat = juzModel?.totalAyat ?? 0;
             int memorizedAyat = 0;
@@ -210,22 +246,9 @@ class _WaliSantriProgressPerJuzScreenState
                           ),
                           SizedBox(height: 14.h),
 
-                          // Juz cards — empty state if no targets
+                          // Juz cards or contextual empty state
                           if (juzDisplayData.isEmpty)
-                            Center(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 40.h),
-                                child: Text(
-                                  'Belum ada target hafalan yang ditetapkan.',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    color: colors.textSecondary,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            )
+                            _buildEmptyState(colors, target, santri)
                           else
                             ...juzDisplayData.map(
                               (juz) => _buildJuzCard(context, juz, colors),
@@ -240,6 +263,88 @@ class _WaliSantriProgressPerJuzScreenState
             ),
           );
         },
+      ),
+    ),
+  );
+}
+
+  Widget _buildEmptyState(
+    AppColorSet colors,
+    TargetHafalanModel? target,
+    SantriModel? santri,
+  ) {
+    final reason = TargetHafalanHelper.getEmptyStateReason(
+      target: target,
+      kelas: santri?.kelas,
+      programCode: santri?.program,
+    );
+
+    // Icon per reason kind — accent is always colors.primary (no hardcoded hex)
+    final IconData icon;
+    switch (reason.kind) {
+      case EmptyTargetKind.idadTahsin:
+        icon = Icons.auto_stories_outlined;
+        break;
+      case EmptyTargetKind.dauroh:
+        icon = Icons.bolt_outlined;
+        break;
+      case EmptyTargetKind.uat:
+        icon = Icons.verified_outlined;
+        break;
+      case EmptyTargetKind.unknownCurriculum:
+        icon = Icons.help_outline;
+        break;
+      case EmptyTargetKind.noAdminConfig:
+        icon = Icons.settings_outlined;
+        break;
+    }
+
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 24.h),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          color: colors.primary.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.25), width: 1),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 56.w,
+              height: 56.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.primary.withValues(alpha: 0.12),
+              ),
+              child: Icon(icon, size: 28.sp, color: colors.primary),
+            ),
+            SizedBox(height: 14.h),
+            Text(
+              reason.label,
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+                color: colors.primary,
+                fontFamily: 'Poppins',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              reason.description,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+                color: colors.textSecondary,
+                fontFamily: 'Poppins',
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
