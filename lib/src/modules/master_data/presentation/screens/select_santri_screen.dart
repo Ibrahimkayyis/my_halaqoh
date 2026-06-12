@@ -15,9 +15,16 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_st
 class SelectSantriScreen extends StatefulWidget {
   final Set<String> assignedSantriIds;
 
+  /// Jumlah santri yang SUDAH dipilih di halaqoh (sebelum layar ini dibuka).
+  /// Digunakan untuk menghitung batas maksimum 15 santri.
+  final int currentSantriCount;
+
+  static const int maxSantri = 15;
+
   const SelectSantriScreen({
     super.key,
     this.assignedSantriIds = const {},
+    this.currentSantriCount = 0,
   });
 
   @override
@@ -80,13 +87,30 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
   }
 
   void _toggleSelect(String id) {
-    setState(() {
-      if (_selectedIds.contains(id)) {
-        _selectedIds.remove(id);
-      } else {
-        _selectedIds.add(id);
-      }
-    });
+    if (_selectedIds.contains(id)) {
+      setState(() => _selectedIds.remove(id));
+      return;
+    }
+    // Cek batas maksimum 15 santri per halaqoh
+    final totalAfter = widget.currentSantriCount + _selectedIds.length + 1;
+    if (totalAfter > SelectSantriScreen.maxSantri) {
+      final colors = AppColors.of(context);
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Maksimal ${SelectSantriScreen.maxSantri} santri per halaqoh. '
+            'Hapus salah satu santri sebelum menambah yang baru.',
+            style: const TextStyle(fontFamily: 'Poppins'),
+          ),
+          backgroundColor: colors.error,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+    setState(() => _selectedIds.add(id));
   }
 
   void _confirmSelection(List<SantriModel> allSantri) {
@@ -178,7 +202,7 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                   _buildFilterRow(colors),
                   SizedBox(height: 10.h),
 
-                  // ── Count + assigned-hidden notice ───────────────────────
+                  // ── Count + assigned-hidden notice + slot limit ──────────
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     child: Row(
@@ -195,19 +219,41 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                         ),
                         if (widget.assignedSantriIds.isNotEmpty) ...[
                           SizedBox(width: 6.w),
-                          Expanded(
-                            child: Text(
-                              '(${widget.assignedSantriIds.length} sudah di halaqoh lain)',
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                color: colors.primary,
-                                fontStyle: FontStyle.italic,
-                                fontFamily: 'Poppins',
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                          Text(
+                            '(${widget.assignedSantriIds.length} sudah di halaqoh lain)',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: colors.primary,
+                              fontStyle: FontStyle.italic,
+                              fontFamily: 'Poppins',
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
+                        const Spacer(),
+                        // Slot tersisa
+                        Builder(builder: (context) {
+                          final slotUsed = widget.currentSantriCount + _selectedIds.length;
+                          final isOverLimit = slotUsed >= SelectSantriScreen.maxSantri;
+                          return Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                            decoration: BoxDecoration(
+                              color: isOverLimit
+                                  ? colors.error.withValues(alpha: 0.12)
+                                  : colors.primary.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Text(
+                              '$slotUsed/${SelectSantriScreen.maxSantri} santri',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color: isOverLimit ? colors.error : colors.primary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          );
+                        }),
                       ],
                     ),
                   ),

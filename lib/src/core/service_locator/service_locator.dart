@@ -148,6 +148,9 @@ Future<void> initDependencies() async {
     () => FirebaseAuth.instance,
   );
   sl.registerLazySingleton<FirebaseFunctions>(
+    // Functions createUserAccount, resetUserPassword, onDeleteUser are deployed
+    // to us-central1 (Firebase default). The notification functions run in
+    // asia-southeast2 but are triggered server-side, not called by the client.
     () => FirebaseFunctions.instance,
   );
   sl.registerLazySingleton<FirebaseMessaging>(
@@ -187,7 +190,7 @@ Future<void> initDependencies() async {
     () => GuruRepositoryImpl(sl(), sl()),
   );
   sl.registerLazySingleton<SantriRepository>(
-    () => SantriRepositoryImpl(sl(), sl()),
+    () => SantriRepositoryImpl(sl(), sl(), sl<FirebaseFirestore>()),
   );
   sl.registerLazySingleton<HalaqohRepository>(
     () => HalaqohRepositoryImpl(sl(), sl()),

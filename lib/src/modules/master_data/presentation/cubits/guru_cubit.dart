@@ -30,10 +30,23 @@ class GuruCubit extends Cubit<GuruState> {
     );
   }
 
-  /// Add a new guru.
-  Future<bool> addGuru(GuruModel model) async {
+  /// Add a new guru. Throws an exception on failure.
+  Future<void> addGuru(GuruModel model) async {
     final result = await _repository.add(model);
-    return result.isRight();
+    result.fold(
+      (error) => throw Exception(error),
+      (_) {},
+    );
+  }
+
+  /// Add multiple guru in bulk. Returns the number of successfully added guru.
+  /// Throws an exception if the entire operation fails.
+  Future<int> addBulkGuru(List<GuruModel> models) async {
+    final result = await _repository.addBulk(models);
+    return result.fold(
+      (error) => throw Exception(error),
+      (count) => count,
+    );
   }
 
   /// Update an existing guru.

@@ -125,12 +125,13 @@ class SantriModelAdapter extends TypeAdapter<SantriModel> {
       createdAt: DateTime.parse(fields[8] as String),
       updatedAt: DateTime.parse(fields[9] as String),
       profilePicture: fields[10] as String?,
+      isAlumni: fields[11] as bool? ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, SantriModel obj) {
-    writer.writeByte(11);
+    writer.writeByte(12); // field count: 0–11
     writer.writeByte(0);
     writer.write(obj.id);
     writer.writeByte(1);
@@ -153,6 +154,8 @@ class SantriModelAdapter extends TypeAdapter<SantriModel> {
     writer.write(obj.updatedAt.toIso8601String());
     writer.writeByte(10);
     writer.write(obj.profilePicture);
+    writer.writeByte(11);
+    writer.write(obj.isAlumni);
   }
 }
 

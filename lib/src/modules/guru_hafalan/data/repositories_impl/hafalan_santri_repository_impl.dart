@@ -125,4 +125,24 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
   Stream<void> watchAnyChanges() {
     return _local.watchAnyChanges();
   }
+
+  @override
+  Future<Either<String, void>> deleteHafalan(String id) async {
+    try {
+      // 1. Delete from local Hive
+      await _local.delete(id);
+
+      // 2. Try to delete from Firestore
+      try {
+        await _remote.delete(id);
+      } catch (e) {
+        _log.w('Failed to delete remote record immediately: $e');
+        // Fails silently for now, as is typical for offline-first actions
+      }
+      return const Right(null);
+    } catch (e, st) {
+      _log.e('Failed to delete hafalan locally', error: e, stackTrace: st);
+      return Left('Gagal menghapus data hafalan secara lokal: $e');
+    }
+  }
 }

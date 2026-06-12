@@ -501,7 +501,7 @@ class _WaliSantriProgressPerJuzScreenState
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      t.progressHafalanPerJuz.suratSelesai(
+                      t.progressHafalanPerJuz.ayatSelesai(
                         completed: '$completed',
                         total: '$total',
                       ),

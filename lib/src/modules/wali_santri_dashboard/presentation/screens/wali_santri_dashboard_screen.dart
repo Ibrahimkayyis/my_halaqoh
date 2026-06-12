@@ -15,6 +15,8 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_
 import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_state.dart';
 import 'package:intl/intl.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/cubits/wali_santri_progress_hafalan_cubit.dart';
@@ -42,6 +44,7 @@ class WaliSantriDashboardScreen extends StatefulWidget {
 class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
   late WaliSantriProgressHafalanCubit _progressHafalanCubit;
   late AbsensiCubit _absensiCubit;
+  late SantriExtraTargetCubit _extraTargetCubit;
   String? _loadedLinkedDocId;
   String? _loadedHalaqohId;
 
@@ -50,12 +53,14 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
     super.initState();
     _progressHafalanCubit = sl<WaliSantriProgressHafalanCubit>();
     _absensiCubit = sl<AbsensiCubit>();
+    _extraTargetCubit = sl<SantriExtraTargetCubit>();
   }
 
   @override
   void dispose() {
     _progressHafalanCubit.close();
     _absensiCubit.close();
+    _extraTargetCubit.close();
     super.dispose();
   }
 
@@ -63,6 +68,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
     if (linkedDocId.isNotEmpty && linkedDocId != _loadedLinkedDocId) {
       _loadedLinkedDocId = linkedDocId;
       _progressHafalanCubit.watchProgress(linkedDocId);
+      _extraTargetCubit.watchExtraJuz(linkedDocId);
     }
     if (halaqohId != null && halaqohId != _loadedHalaqohId) {
       _loadedHalaqohId = halaqohId;
@@ -173,6 +179,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
       providers: [
         BlocProvider.value(value: _progressHafalanCubit),
         BlocProvider.value(value: _absensiCubit),
+        BlocProvider.value(value: _extraTargetCubit),
       ],
       child: Scaffold(
       backgroundColor: colors.background,
@@ -198,18 +205,28 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
               child: GestureDetector(
                 onTap: () => widget.onNavigateToTab?.call(1),
                 child: BlocBuilder<WaliSantriProgressHafalanCubit, WaliSantriProgressHafalanState>(
-                  builder: (context, state) {
+                  builder: (context, progressState) {
                     OverallHafalanProgress? progressData;
-                    state.maybeWhen(
+                    progressState.maybeWhen(
                       loaded: (data) => progressData = data,
                       orElse: () {},
                     );
-                    return _buildProgressHafalanCard(
-                      context,
-                      colors,
-                      mySantri,
-                      myTarget,
-                      progressData,
+                    return BlocBuilder<SantriExtraTargetCubit, SantriExtraTargetState>(
+                      builder: (context, extraState) {
+                        final extraJuz = <int>[];
+                        extraState.maybeWhen(
+                          loaded: (juzList) => extraJuz.addAll(juzList),
+                          orElse: () {},
+                        );
+                        return _buildProgressHafalanCard(
+                          context,
+                          colors,
+                          mySantri,
+                          myTarget,
+                          progressData,
+                          extraJuz,
+                        );
+                      },
                     );
                   },
                 ),
@@ -356,23 +373,61 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
     SantriModel? santri,
     TargetHafalanModel? target,
     OverallHafalanProgress? progressData,
+    List<int> extraJuz,
   ) {
-    final int juzTarget = target != null && santri != null 
-        ? TargetHafalanHelper.getTargetJuzCount(target, santri.kelas, santri.program) 
-        : 0;
-    
+    // ── Admin-defined target juz ──────────────────────────────────────────────
+    final adminJuzList = target != null && santri != null
+        ? TargetHafalanHelper.getTargetJuzList(target, santri.kelas, santri.program)
+        : <int>[];
+
+    // ── Juz that already have real memorized ayat (never hide progress) ───────
+    final progressJuzNums = progressData?.juzProgressList
+            .where((jp) => jp.memorizedAyat > 0)
+            .map((jp) => jp.juzNumber)
+            .toSet() ??
+        <int>{};
+
+    // ── Combine: admin + guru extra + juz with real progress ──────────────────
+    final allTargetJuzNums = <int>{
+      ...adminJuzList,
+      ...extraJuz,
+      ...progressJuzNums,
+    };
+
+    final int juzTarget = allTargetJuzNums.length;
+
+    // ── Juz completed: sum fractional completion for each target juz ──────────
     double juzCompleted = 0.0;
     if (progressData != null) {
-      for (final jp in progressData.juzProgressList) {
-        if (jp.totalAyat > 0) {
+      for (final juzNum in allTargetJuzNums) {
+        final jp = progressData.juzProgressList
+            .where((j) => j.juzNumber == juzNum)
+            .firstOrNull;
+        if (jp != null && jp.totalAyat > 0) {
           juzCompleted += jp.memorizedAyat / jp.totalAyat;
         }
       }
     }
 
     final double progress = juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
-    final int percent = (progress * 100).round();
-    
+    final double percentValue = progress * 100;
+
+    // Format percentage accurately: show up to 2 decimal places, trim trailing zeros
+    String formatPercent(double v) {
+      if (v == 0) return '0';
+      if (v >= 1) {
+        // For values >= 1%, show integer if whole, otherwise 1 decimal
+        final rounded = double.parse(v.toStringAsFixed(1));
+        return rounded == rounded.roundToDouble()
+            ? rounded.toInt().toString()
+            : rounded.toStringAsFixed(1);
+      }
+      // For small values < 1%, show up to 2 decimal places, trim trailing zeros
+      final s = v.toStringAsFixed(2);
+      // Remove trailing zeros after decimal point
+      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+
     // Format juzCompleted to remove .0 if it's a whole number, otherwise show 2 decimals
     String formatJuz(double v) {
       if (v == 0) return '0';
@@ -450,7 +505,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
                 ),
               ),
               Text(
-                '$percent%',
+                '${formatPercent(percentValue)}%',
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.w800,

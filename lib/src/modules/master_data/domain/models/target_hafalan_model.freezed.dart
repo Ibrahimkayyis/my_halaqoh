@@ -220,7 +220,7 @@ return $default(_that.id,_that.kelas,_that.program,_that.tahunAjaran,_that.semes
 @JsonSerializable()
 
 class _TargetHafalanModel implements TargetHafalanModel {
-  const _TargetHafalanModel({required this.id, required this.kelas, required this.program, this.tahunAjaran = '', this.semesterAktif = null, required this.createdAt, required this.updatedAt});
+  const _TargetHafalanModel({required this.id, required this.kelas, required this.program, this.tahunAjaran = '', this.semesterAktif, required this.createdAt, required this.updatedAt});
   factory _TargetHafalanModel.fromJson(Map<String, dynamic> json) => _$TargetHafalanModelFromJson(json);
 
 /// Document ID: "{kelas}_{program}", e.g. "7_Reguler"
@@ -232,7 +232,7 @@ class _TargetHafalanModel implements TargetHafalanModel {
 /// Academic year, e.g. "2025 / 2026"
 @override@JsonKey() final  String tahunAjaran;
 /// Active semester set by admin: 1 or 2. Null = not yet set.
-@override@JsonKey() final  int? semesterAktif;
+@override final  int? semesterAktif;
 @override final  DateTime createdAt;
 @override final  DateTime updatedAt;
 

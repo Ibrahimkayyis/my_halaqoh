@@ -26,7 +26,7 @@ abstract class TargetHafalanModel with _$TargetHafalanModel {
     @Default('') String tahunAjaran,
 
     /// Active semester set by admin: 1 or 2. Null = not yet set.
-    @Default(null) int? semesterAktif,
+    int? semesterAktif,
 
     required DateTime createdAt,
     required DateTime updatedAt,

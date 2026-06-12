@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/repositories/santri_repository.dart';
 import 'santri_state.dart';
 
@@ -30,16 +31,33 @@ class SantriCubit extends Cubit<SantriState> {
     );
   }
 
-  /// Add a new santri.
-  Future<bool> addSantri(SantriModel model) async {
+  /// Add a new santri. Throws an exception on failure.
+  Future<void> addSantri(SantriModel model) async {
     final result = await _repository.add(model);
-    return result.isRight();
+    result.fold(
+      (error) => throw Exception(error),
+      (_) {}, // success: stream will push the new data automatically
+    );
   }
 
-  /// Update an existing santri.
-  Future<bool> updateSantri(SantriModel model) async {
+  /// Add multiple santri in bulk. Returns the number of successfully added santri.
+  /// Throws an exception if the entire operation fails.
+  Future<int> addBulkSantri(List<SantriModel> models) async {
+    final result = await _repository.addBulk(models);
+    return result.fold(
+      (error) => throw Exception(error),
+      (count) => count,
+    );
+  }
+
+
+  /// Update an existing santri. Throws an exception on failure.
+  Future<void> updateSantri(SantriModel model) async {
     final result = await _repository.update(model);
-    return result.isRight();
+    result.fold(
+      (error) => throw Exception(error),
+      (_) {},
+    );
   }
 
   /// Delete a santri by ID.
@@ -51,6 +69,27 @@ class SantriCubit extends Cubit<SantriState> {
   /// Reset a santri's password.
   Future<String?> resetPassword(String authUid) async {
     final result = await _repository.resetPassword(authUid);
+    return result.fold(
+      (error) => error,
+      (_) => null,
+    );
+  }
+
+  /// Proses kenaikan kelas — menaikkan kelas semua santri aktif sekaligus
+  /// memperbarui seluruh TargetHafalanModel dengan tahun ajaran + semester baru.
+  /// Mengembalikan pesan error jika gagal, atau null jika berhasil.
+  Future<String?> promoteAll({
+    required String tahunAjaran,
+    required int semesterAktif,
+    required List<SantriModel> aktivSantri,
+    required List<TargetHafalanModel> currentTargets,
+  }) async {
+    final result = await _repository.promoteAll(
+      tahunAjaran: tahunAjaran,
+      semesterAktif: semesterAktif,
+      aktivSantri: aktivSantri,
+      currentTargets: currentTargets,
+    );
     return result.fold(
       (error) => error,
       (_) => null,

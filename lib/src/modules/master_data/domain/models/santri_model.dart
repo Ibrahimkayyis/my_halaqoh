@@ -36,6 +36,10 @@ abstract class SantriModel with _$SantriModel {
     /// Firebase Auth UID (nullable — set after auth account is created)
     String? authUid,
 
+    /// Apakah santri ini sudah lulus (kelas 12 yang diarsipkan saat kenaikan kelas)?
+    /// Alumni disembunyikan dari daftar aktif tapi data tetap tersimpan di Firestore.
+    @Default(false) bool isAlumni,
+
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _SantriModel;

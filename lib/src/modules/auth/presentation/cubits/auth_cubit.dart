@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/modules/auth/domain/repositories/auth_repository.dart';
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_cubit.dart';
@@ -22,34 +23,51 @@ class AuthCubit extends Cubit<AuthState> {
       if (user == null) {
         emit(const AuthState.unauthenticated());
       } else {
-        // User is authenticated under Firebase, let's fetch their role metadata
-        _fetchUserMeta();
+        await _fetchUserMeta();
       }
     });
   }
 
   Future<void> _fetchUserMeta() async {
     final result = await _repository.getCurrentUserMeta();
-    result.fold(
-      (failure) {
-        // We log them out if we can't find metadata, meaning invalid state
-        _repository.signOut();
-        emit(AuthState.error(failure));
-        emit(const AuthState.unauthenticated());
-      },
-      (userMeta) => emit(AuthState.authenticated(userMeta)),
-    );
+    result.fold((failure) async {
+      // Sign out dari Firebase Auth terlebih dahulu
+      await _repository.signOut();
+
+      // Bersihkan semua Hive cache agar tidak ada data stale
+      // yang tertinggal saat database di-reset atau state tidak valid
+      try {
+        await Hive.deleteFromDisk();
+      } catch (_) {
+        // Abaikan error jika Hive belum terinisialisasi
+      }
+
+      emit(AuthState.error(failure));
+      emit(const AuthState.unauthenticated());
+    }, (userMeta) => emit(AuthState.authenticated(userMeta)));
   }
 
   Future<void> login(String identifier, String password) async {
+    // Pause the authStateChanges subscription during the login attempt.
+    // Without this, a failed signIn leaves Firebase Auth state unchanged
+    // (still null/unauthenticated). The active stream would then immediately
+    // re-emit unauthenticated, overwriting the error state before
+    // BlocListener on LoginScreen has a chance to show the error SnackBar.
+    _authSubscription?.pause();
+
     emit(const AuthState.loading());
     final result = await _repository.signIn(identifier, password);
 
     result.fold(
-      (failure) => emit(AuthState.error(failure)),
-      // If success, we don't need to manually emit authenticated here because
-      // the authStateChanges listener will trigger _fetchUserMeta automatically
-      (userMeta) {}, // listener handles it
+      (failure) {
+        // Resume the subscription first so future auth changes are tracked,
+        // then emit the error so BlocListener can display the SnackBar.
+        _authSubscription?.resume();
+        emit(AuthState.error(failure));
+      },
+      // On success: resume the subscription and let the authStateChanges
+      // stream fire _fetchUserMeta — it will emit authenticated automatically.
+      (_) => _authSubscription?.resume(),
     );
   }
 
@@ -74,7 +92,6 @@ class AuthCubit extends Cubit<AuthState> {
   /// so that the stale [AuthState.error] cannot re-trigger the snackbar if
   /// the widget tree is rebuilt (e.g. keyboard dismissal, orientation change).
   void reset() => emit(const AuthState.initial());
-
 
   @override
   Future<void> close() {

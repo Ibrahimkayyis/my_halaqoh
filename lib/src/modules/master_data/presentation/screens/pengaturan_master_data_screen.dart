@@ -67,17 +67,6 @@ class PengaturanMasterDataScreen extends StatelessWidget {
             // Logout card
             _buildLogoutCard(colors, context),
             SizedBox(height: 16.h),
-
-            // Version text
-            Text(
-              t.masterDataSettings.appVersion,
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w400,
-                color: colors.textSecondary.withValues(alpha: 0.6),
-                fontFamily: 'Poppins',
-              ),
-            ),
             SizedBox(height: 100.h), // space for bottom nav
           ],
         ),

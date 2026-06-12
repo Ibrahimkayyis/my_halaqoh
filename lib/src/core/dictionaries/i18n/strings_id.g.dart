@@ -582,7 +582,7 @@ class _TranslationsProgressHafalanPerJuzId implements TranslationsProgressHafala
 	@override String get title => 'Progress Hafalan';
 	@override String get targetHafalan => 'Target Hafalan';
 	@override String get pilihJuz => 'Pilih Juz untuk melihat detail progress per surat';
-	@override String suratSelesai({required Object completed, required Object total}) => '${completed} dari ${total} Surat Selesai';
+	@override String ayatSelesai({required Object completed, required Object total}) => '${completed} dari ${total} Ayat Selesai';
 }
 
 // Path: progressHafalanPerSurat
@@ -1086,7 +1086,7 @@ extension on TranslationsId {
 			case 'progressHafalanPerJuz.title': return 'Progress Hafalan';
 			case 'progressHafalanPerJuz.targetHafalan': return 'Target Hafalan';
 			case 'progressHafalanPerJuz.pilihJuz': return 'Pilih Juz untuk melihat detail progress per surat';
-			case 'progressHafalanPerJuz.suratSelesai': return ({required Object completed, required Object total}) => '${completed} dari ${total} Surat Selesai';
+			case 'progressHafalanPerJuz.ayatSelesai': return ({required Object completed, required Object total}) => '${completed} dari ${total} Ayat Selesai';
 			case 'progressHafalanPerSurat.title': return 'Progress Per Surat';
 			case 'progressHafalanPerSurat.detailJuz': return ({required Object juz}) => 'Detail Hafalan Juz ${juz}';
 			case 'progressHafalanPerSurat.ayatDari': return ({required Object memorized, required Object total}) => 'Ayat ${memorized} dari ${total}';

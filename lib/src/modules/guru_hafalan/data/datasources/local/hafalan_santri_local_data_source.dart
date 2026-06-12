@@ -117,4 +117,9 @@ class HafalanSantriLocalDataSource {
   Stream<void> watchAnyChanges() {
     return _box.watch().map((_) {});
   }
+
+  /// Delete a single record from Hive
+  Future<void> delete(String id) async {
+    await _box.delete(id);
+  }
 }

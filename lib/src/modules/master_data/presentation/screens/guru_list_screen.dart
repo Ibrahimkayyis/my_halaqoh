@@ -54,7 +54,7 @@ class _GuruListScreenState extends State<GuruListScreen> {
       initialPhone: guru.phone,
       initialProgram: guru.program,
       initialProfilePicture: guru.profilePicture,
-      onSave: (nip, nama, phone, program, profilePicture) {
+      onSave: (nip, nama, phone, program, profilePicture) async {
         final updated = guru.copyWith(
           nip: nip ?? guru.nip,
           nama: nama ?? guru.nama,
@@ -63,7 +63,10 @@ class _GuruListScreenState extends State<GuruListScreen> {
           profilePicture: profilePicture ?? guru.profilePicture,
           updatedAt: DateTime.now(),
         );
-        context.read<GuruCubit>().updateGuru(updated);
+        final success = await context.read<GuruCubit>().updateGuru(updated);
+        if (!success) {
+          throw Exception('Gagal memperbarui data guru');
+        }
       },
     );
   }
@@ -152,7 +155,7 @@ class _GuruListScreenState extends State<GuruListScreen> {
       context,
       onManualTap: () => AddManualGuruDialog.show(
         context,
-        onSave: (nip, nama, phone, program, profilePicture) {
+        onSave: (nip, nama, phone, program, profilePicture) async {
           final now = DateTime.now();
           final model = GuruModel(
             id: '', // will be set by Firestore
@@ -164,7 +167,7 @@ class _GuruListScreenState extends State<GuruListScreen> {
             createdAt: now,
             updatedAt: now,
           );
-          context.read<GuruCubit>().addGuru(model);
+          await context.read<GuruCubit>().addGuru(model);
         },
       ),
       onBulkUploadTap: () => BulkUploadDialog.show(context, importType: BulkImportType.guru),

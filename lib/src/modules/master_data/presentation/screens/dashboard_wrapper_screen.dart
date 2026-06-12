@@ -42,8 +42,6 @@ class _DashboardWrapperScreenState extends State<DashboardWrapperScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     final pages = <Widget>[
       DashboardScreen(onNavigateToTab: _navigateToTab),
       const SantriListScreen(),
@@ -122,46 +120,6 @@ class _DashboardWrapperScreenState extends State<DashboardWrapperScreen> {
         },
         kIconSize: 24.0,
       ),
-      ),
-    );
-  }
-
-  Widget _buildPlaceholderPage(String title, IconData icon) {
-    final colors = AppColors.of(context);
-
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 64.sp,
-              color: colors.textSecondary.withValues(alpha: 0.5),
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w600,
-                color: colors.textSecondary,
-                fontFamily: 'Poppins',
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'Coming Soon',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
-                color: colors.textSecondary.withValues(alpha: 0.6),
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

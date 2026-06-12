@@ -7,4 +7,7 @@ abstract class HafalanSantriRemoteDataSource {
   /// Fetch ALL hafalan records for a specific santri from Firestore.
   /// Used to seed the local Hive cache after a fresh install / Hive wipe.
   Future<List<HafalanSantriModel>> fetchBySantriId(String santriId);
+
+  /// Delete a hafalan record in Firestore.
+  Future<void> delete(String id);
 }

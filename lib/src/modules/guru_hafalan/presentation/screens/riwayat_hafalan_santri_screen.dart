@@ -765,11 +765,32 @@ class _RiwayatHafalanSantriScreenState
                       GestureDetector(
                         onTap: () async {
                           final confirmed = await ConfirmDeleteDialog.show(context);
-                          if (confirmed && context.mounted) {
+                          if (confirmed && mounted) {
                             setState(() {
                               _activeDeleteIndex = null;
                             });
-                            // TODO: Implement delete via Cubit when ready
+                            
+                            final messenger = ScaffoldMessenger.of(context);
+                            final appColors = AppColors.of(context);
+                            final cubit = context.read<RiwayatHafalanCubit>();
+
+                            final success = await cubit.deleteSubmissionGroup(group.records);
+
+                            if (mounted) {
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    success
+                                        ? 'Data hafalan berhasil dihapus!'
+                                        : 'Gagal menghapus data hafalan.',
+                                    style: const TextStyle(fontFamily: 'Poppins'),
+                                  ),
+                                  backgroundColor: success
+                                      ? appColors.primary
+                                      : appColors.error,
+                                ),
+                              );
+                            }
                           }
                         },
                         child: Container(

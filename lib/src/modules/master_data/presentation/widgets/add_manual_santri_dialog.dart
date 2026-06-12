@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/services/storage_service.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
 /// Dialog form for adding/editing a Santri manually
 class AddManualSantriDialog extends StatefulWidget {
@@ -16,7 +19,7 @@ class AddManualSantriDialog extends StatefulWidget {
   final String? initialNama;
   final String? initialKelas;
   final String? initialProfilePicture;
-  final void Function(
+  final Future<void> Function(
     String? nis,
     String? nama,
     String? kelas,
@@ -39,7 +42,7 @@ class AddManualSantriDialog extends StatefulWidget {
     String? initialNama,
     String? initialKelas,
     String? initialProfilePicture,
-    void Function(
+    Future<void> Function(
       String? nis,
       String? nama,
       String? kelas,
@@ -70,10 +73,12 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
   final _nisController = TextEditingController();
   final _namaController = TextEditingController();
   String? _selectedKelas;
+  String? _kelasError; // inline validation error for kelas dropdown
 
   File? _selectedImage;
   String? _currentProfilePicture;
   bool _isUploading = false;
+  bool _isSaving = false; // tracks the full save+upload+Firestore flow
 
   final List<String> _kelasList = [
     '7R',
@@ -106,11 +111,124 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
     }
   }
 
+  Future<void> _validateAndSubmit() async {
+    // 1. Validate NIS + Nama fields
+    final isFormValid = _formKey.currentState!.validate();
+
+    // 2. Validate kelas (inline error)
+    if (_selectedKelas == null) {
+      setState(() => _kelasError = 'Kelas wajib dipilih');
+    }
+
+    if (!isFormValid || _selectedKelas == null) return;
+
+    // 2.5. Validate if NIS already exists
+    final currentState = context.read<SantriCubit>().state;
+    bool nisExists = false;
+    currentState.maybeWhen(
+      loaded: (santriList) {
+        if (!_isEditMode || _nisController.text.trim() != widget.initialNis) {
+          nisExists = santriList.any((s) => s.nis == _nisController.text.trim());
+        }
+      },
+      orElse: () {},
+    );
+
+    if (nisExists) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(
+              'Peringatan',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.bold,
+                color: AppColors.of(context).error,
+              ),
+            ),
+            content: Text(
+              'Santri dengan NIS ${_nisController.text.trim()} sudah terdaftar di sistem.',
+              style: const TextStyle(fontFamily: 'Poppins'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Tutup', style: TextStyle(fontFamily: 'Poppins')),
+              ),
+            ],
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          ),
+        );
+      }
+      return;
+    }
+
+    // 3. Show confirmation dialog
+    final confirmed = await ConfirmSaveDialog.show(context);
+    if (!confirmed) return;
+    if (!mounted) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      String? uploadedUrl = _currentProfilePicture;
+
+      // 4. Upload photo if selected
+      if (_selectedImage != null) {
+        setState(() => _isUploading = true);
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final ext = _selectedImage!.path.split('.').last;
+        final fileName = 'santri_${_nisController.text}_$timestamp.$ext';
+        final service = sl<StorageService>();
+        final url = await service.uploadFile(
+          file: _selectedImage!,
+          path: 'profile_pictures/$fileName',
+        );
+        if (mounted) setState(() => _isUploading = false);
+        if (url != null) uploadedUrl = url;
+      }
+
+      // 5. Invoke onSave callback and await Firestore operation
+      if (widget.onSave != null) {
+        await widget.onSave!(
+          _nisController.text,
+          _namaController.text,
+          _selectedKelas,
+          uploadedUrl,
+        );
+      }
+
+      // 6. Close dialog only on success
+      if (mounted) Navigator.of(context).pop();
+
+    } catch (e) {
+      // Show error to user — previously errors were silently swallowed
+      if (mounted) {
+        final colors = AppColors.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString().replaceAll('Exception: ', ''),
+              style: const TextStyle(fontFamily: 'Poppins'),
+            ),
+            backgroundColor: colors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 70,
+      maxWidth: 256,
+      maxHeight: 256,
     );
     if (pickedFile != null) {
       setState(() {
@@ -282,8 +400,9 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
                 controller: _namaController,
                 hint: t.addData.namaSantriHint,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty)
+                  if (value == null || value.trim().isEmpty) {
                     return 'Nama wajib diisi';
+                  }
                   return null;
                 },
               ),
@@ -297,7 +416,10 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
                 items: _kelasList,
                 initialItem: _selectedKelas,
                 onChanged: (value) {
-                  setState(() => _selectedKelas = value);
+                  setState(() {
+                    _selectedKelas = value;
+                    _kelasError = null; // clear error on selection
+                  });
                 },
                 closedHeaderPadding: EdgeInsets.symmetric(
                   horizontal: 16.w,
@@ -327,59 +449,27 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
                   ),
                 ),
               ),
+              // Inline error for kelas
+              if (_kelasError != null)
+                Padding(
+                  padding: EdgeInsets.only(top: 6.h, left: 4.w),
+                  child: Text(
+                    _kelasError!,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: Colors.redAccent,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ),
               SizedBox(height: 28.h),
 
               // Simpan button
               PrimaryButton(
                 width: double.infinity,
-                onPressed: () async {
-                  if (!_formKey.currentState!.validate()) return;
-                  if (_selectedKelas == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Pilih kelas terlebih dahulu'),
-                      ),
-                    );
-                    return;
-                  }
-
-                  final confirmed = await ConfirmSaveDialog.show(context);
-                  if (!confirmed) return;
-
-                  if (widget.onSave != null) {
-                    String? uploadedUrl = _currentProfilePicture;
-
-                    // Upload process
-                    if (_selectedImage != null) {
-                      setState(() => _isUploading = true);
-                      final timestamp = DateTime.now().millisecondsSinceEpoch;
-                      final ext = _selectedImage!.path.split('.').last;
-                      final fileName =
-                          'santri_${_nisController.text}_$timestamp.$ext';
-                      final service = sl<StorageService>();
-                      final url = await service.uploadFile(
-                        file: _selectedImage!,
-                        path: 'profile_pictures/$fileName',
-                      );
-                      if (mounted) setState(() => _isUploading = false);
-                      if (url != null) {
-                        uploadedUrl = url;
-                      }
-                    }
-
-                    widget.onSave!(
-                      _nisController.text,
-                      _namaController.text,
-                      _selectedKelas,
-                      uploadedUrl,
-                    );
-                  }
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                  }
-                },
-                label: t.addData.simpan,
-                icon: Icons.check_circle,
+                onPressed: _isSaving ? null : _validateAndSubmit,
+                label: _isSaving ? 'Menyimpan...' : t.addData.simpan,
+                icon: _isSaving ? Icons.hourglass_top : Icons.check_circle,
                 borderRadius: 25.r,
               ),
             ],

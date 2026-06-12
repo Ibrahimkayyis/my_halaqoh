@@ -188,6 +188,12 @@ class PengaturanMasterDataSettingsScreen extends StatelessWidget {
     AppColorSet colors,
     AppThemeMode currentMode,
   ) {
+    final effectiveMode = currentMode == AppThemeMode.system
+        ? (Theme.of(context).brightness == Brightness.dark
+            ? AppThemeMode.dark
+            : AppThemeMode.light)
+        : currentMode;
+
     showDialog(
       context: context,
       builder: (dialogContext) {
@@ -212,7 +218,7 @@ class PengaturanMasterDataSettingsScreen extends StatelessWidget {
               _buildRadioOption(
                 colors,
                 title: t.pengaturanScreen.terangLight,
-                isSelected: currentMode == AppThemeMode.light,
+                isSelected: effectiveMode == AppThemeMode.light,
                 onTap: () {
                   context
                       .read<ThemeCubit>()
@@ -223,7 +229,7 @@ class PengaturanMasterDataSettingsScreen extends StatelessWidget {
               _buildRadioOption(
                 colors,
                 title: t.pengaturanScreen.gelapDark,
-                isSelected: currentMode == AppThemeMode.dark,
+                isSelected: effectiveMode == AppThemeMode.dark,
                 onTap: () {
                   context
                       .read<ThemeCubit>()

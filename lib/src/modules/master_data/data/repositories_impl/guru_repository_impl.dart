@@ -57,6 +57,16 @@ class GuruRepositoryImpl implements GuruRepository {
   }
 
   @override
+  Future<Either<String, int>> addBulk(List<GuruModel> models) async {
+    try {
+      final count = await _remote.addBulk(models);
+      return Right(count);
+    } catch (e) {
+      return Left('Gagal menambahkan guru bulk: $e');
+    }
+  }
+
+  @override
   Future<Either<String, void>> update(GuruModel model) async {
     try {
       await _remote.update(model);

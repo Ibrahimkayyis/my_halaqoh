@@ -12,7 +12,7 @@ _TargetHafalanModel _$TargetHafalanModelFromJson(Map<String, dynamic> json) =>
       kelas: json['kelas'] as String,
       program: json['program'] as String,
       tahunAjaran: json['tahunAjaran'] as String? ?? '',
-      semesterAktif: (json['semesterAktif'] as num?)?.toInt() ?? null,
+      semesterAktif: (json['semesterAktif'] as num?)?.toInt(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

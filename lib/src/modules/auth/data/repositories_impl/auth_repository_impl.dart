@@ -49,12 +49,20 @@ class AuthRepositoryImpl implements AuthRepository {
   String _mapFirebaseAuthError(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
-      case 'invalid-credential':
-      case 'invalid-email':
+        // Thrown by our Firestore pre-check in AuthRemoteDataSourceImpl.signIn
+        // when no document matches the given NIP/NIS identifier.
+        return 'Akun dengan NIP/NIS tersebut tidak ditemukan.';
       case 'wrong-password':
-        return 'NIP/NIS atau Password salah';
+      case 'invalid-credential':
+        // 'wrong-password' — classic Firebase Auth error for incorrect password.
+        // 'invalid-credential' — Firebase Auth v10+ consolidated code; since our
+        //   pre-check already confirmed the identifier exists, this can only mean
+        //   the password is wrong.
+        return 'Password yang Anda masukkan salah.';
+      case 'invalid-email':
+        return 'Format NIP/NIS tidak valid.';
       case 'network-request-failed':
-        return 'Tidak ada koneksi internet';
+        return 'Tidak ada koneksi internet.';
       case 'too-many-requests':
         return 'Terlalu banyak percobaan. Harap tunggu sesaat.';
       case 'user-disabled':

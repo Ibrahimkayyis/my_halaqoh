@@ -33,6 +33,18 @@ class RiwayatHafalanCubit extends Cubit<RiwayatHafalanState> {
     _repository.seedFromRemoteIfEmpty(santriId);
   }
 
+  /// Delete a submission group containing multiple hafalan records.
+  Future<bool> deleteSubmissionGroup(List<HafalanSantriModel> records) async {
+    bool allSuccess = true;
+    for (final r in records) {
+      final res = await _repository.deleteHafalan(r.id);
+      if (res.isLeft()) {
+        allSuccess = false;
+      }
+    }
+    return allSuccess;
+  }
+
   @override
   Future<void> close() {
     _subscription?.cancel();

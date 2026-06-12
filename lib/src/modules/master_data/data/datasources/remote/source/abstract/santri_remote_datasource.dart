@@ -17,8 +17,15 @@ abstract class SantriRemoteDataSource {
   /// Fetch santri filtered by kelas and/or program.
   Future<List<SantriModel>> getByFilter({String? kelas, String? program});
 
-  /// Add a new santri. Returns the created document ID.
+  /// Add a new santri via Cloud Function (creates Auth account + Firestore doc).
+  /// Returns the created document ID.
   Future<String> add(SantriModel model);
+
+  /// Add multiple santri directly to Firestore WITHOUT creating Auth accounts.
+  /// Intended for bulk CSV upload. Writes each document individually so partial
+  /// success is possible (failed rows are skipped, not the whole batch).
+  /// Returns the number of successfully written documents.
+  Future<int> addBulk(List<SantriModel> models);
 
   /// Update an existing santri.
   Future<void> update(SantriModel model);

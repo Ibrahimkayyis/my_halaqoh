@@ -39,4 +39,7 @@ abstract class HafalanSantriRepository {
   /// Stream that emits whenever any hafalan record changes in the local cache.
   /// Used by the dashboard to reactively update setoran data.
   Stream<void> watchAnyChanges();
+
+  /// Delete a hafalan record.
+  Future<Either<String, void>> deleteHafalan(String id);
 }

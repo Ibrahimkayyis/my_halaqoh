@@ -324,7 +324,7 @@
     "title": "Progress Hafalan",
     "targetHafalan": "Target Hafalan",
     "pilihJuz": "Pilih Juz untuk melihat detail progress per surat",
-    "suratSelesai": "$completed dari $total Surat Selesai"
+    "ayatSelesai": "$completed dari $total Ayat Selesai"
   },
   "progressHafalanPerSurat": {
     "title": "Progress Per Surat",

@@ -18,6 +18,7 @@ _SantriModel _$SantriModelFromJson(Map<String, dynamic> json) => _SantriModel(
       ? null
       : WaliSantriModel.fromJson(json['waliSantri'] as Map<String, dynamic>),
   authUid: json['authUid'] as String?,
+  isAlumni: json['isAlumni'] as bool? ?? false,
   createdAt: DateTime.parse(json['createdAt'] as String),
   updatedAt: DateTime.parse(json['updatedAt'] as String),
 );
@@ -33,6 +34,7 @@ Map<String, dynamic> _$SantriModelToJson(_SantriModel instance) =>
       'halaqohId': instance.halaqohId,
       'waliSantri': instance.waliSantri,
       'authUid': instance.authUid,
+      'isAlumni': instance.isAlumni,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };

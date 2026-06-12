@@ -41,7 +41,6 @@ class BulkUploadDialog extends StatefulWidget {
 
 class _BulkUploadDialogState extends State<BulkUploadDialog> {
   Uint8List? _selectedBytes;
-  String? _selectedFileName;
 
   bool _isProcessing = false;
   int _totalRows = 0;
@@ -50,17 +49,20 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
   int _failCount = 0;
   String _statusMessage = '';
 
+  // ---------------------------------------------------------------------------
+  // File picker
+  // ---------------------------------------------------------------------------
+
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['csv'],
-      withData: true, // ← kunci utama: paksa baca sebagai bytes
+      withData: true,
     );
 
     if (result != null && result.files.isNotEmpty) {
       final file = result.files.single;
 
-      // Validasi bytes berhasil terbaca
       if (file.bytes == null || file.bytes!.isEmpty) {
         setState(() {
           _statusMessage = 'Gagal membaca file. Coba pilih file lain.';
@@ -70,7 +72,6 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
 
       setState(() {
         _selectedBytes = file.bytes;
-        _selectedFileName = file.name;
         _statusMessage = 'File siap diproses: ${file.name}';
         _isProcessing = false;
         _totalRows = 0;
@@ -80,6 +81,12 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
       });
     }
   }
+
+
+
+  // ---------------------------------------------------------------------------
+  // Upload entry point
+  // ---------------------------------------------------------------------------
 
   Future<void> _processUpload() async {
     if (_selectedBytes == null) return;
@@ -93,23 +100,16 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
     });
 
     try {
-      // Decode bytes ke string dengan penanganan BOM (Byte Order Mark)
-      // BOM sering muncul di CSV yang di-export dari Excel
+      // Decode bytes — tangani BOM (Byte Order Mark) dari Excel
       String raw = utf8.decode(_selectedBytes!, allowMalformed: true);
-      if (raw.startsWith('\uFEFF')) {
-        raw = raw.substring(1); // hapus BOM jika ada
-      }
+      if (raw.startsWith('\uFEFF')) raw = raw.substring(1);
 
-      // Parse CSV — support delimiter koma dan titik koma
-      List<List<dynamic>> rows = [];
-
-      // Coba dengan koma dulu
-      rows = const CsvToListConverter(
+      // Coba delimiter koma dulu; jika hasilnya 1 kolom, coba titik koma
+      List<List<dynamic>> rows = const CsvToListConverter(
         eol: '\n',
         fieldDelimiter: ',',
       ).convert(raw);
 
-      // Kalau hanya 1 kolom per baris, kemungkinan delimiter-nya titik koma
       if (rows.isNotEmpty && rows.first.length == 1) {
         rows = const CsvToListConverter(
           eol: '\n',
@@ -125,14 +125,31 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
         return;
       }
 
-      final dataRows = rows.skip(1).toList();
-      _totalRows = dataRows.length;
+      final dataRows = rows.skip(1).toList(); // lewati baris header
+
+      // Filter baris yang benar-benar kosong (semua cell kosong/null)
+      final validRows = dataRows.where((row) {
+        if (row.isEmpty) return false;
+        final allEmpty = row.every((cell) => cell == null || cell.toString().trim().isEmpty);
+        return !allEmpty;
+      }).toList();
+
+      _totalRows = validRows.length;
+
+      if (_totalRows == 0) {
+        setState(() {
+          _isProcessing = false;
+          _statusMessage = 'Tidak ada baris data yang valid untuk diunggah!';
+        });
+        return;
+      }
+
       setState(() => _statusMessage = 'Memproses $_totalRows baris...');
 
       if (widget.importType == BulkImportType.guru) {
-        await _processGuruRows(dataRows);
+        await _processGuruRows(validRows);
       } else {
-        await _processSantriRows(dataRows);
+        await _processSantriRows(validRows);
       }
     } catch (e) {
       Logger().e('Error parsing csv', error: e);
@@ -143,93 +160,159 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Guru rows
+  // ---------------------------------------------------------------------------
+
   Future<void> _processGuruRows(List<List<dynamic>> rows) async {
     final cubit = context.read<GuruCubit>();
-    for (var row in rows) {
-      if (!mounted) break;
-      _currentRow++;
-      if (row.length >= 3 && row[0].toString().trim().isNotEmpty) {
-        final nip = row[0].toString().trim();
-        final nama = row[1].toString().trim();
-        final program = row[2].toString().trim().toUpperCase() == 'T'
-            ? 'T'
-            : 'R';
-        final phone = row.length > 3 ? row[3].toString().trim() : null;
+    final models = <GuruModel>[];
 
-        final model = GuruModel(
-          id: '',
-          nip: nip,
-          nama: nama,
-          phone: phone,
-          program: program,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
+    for (final row in rows) {
+      if (row.length >= 3 && row[0].toString().trim().isNotEmpty && row[1].toString().trim().isNotEmpty) {
+        models.add(
+          GuruModel(
+            id: '',
+            nip: row[0].toString().trim(),
+            nama: row[1].toString().trim(),
+            phone: row.length > 3 ? row[3].toString().trim() : null,
+            program: row[2].toString().trim().toUpperCase() == 'T' ? 'T' : 'R',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
         );
-
-        final success = await cubit.addGuru(model);
-        if (success) {
-          _successCount++;
-        } else {
-          _failCount++;
-        }
       } else {
+        // Baris tidak lengkap (misal NIP/Nama kosong) masuk hitungan gagal
         _failCount++;
       }
+    }
+
+    if (models.isNotEmpty) {
+      final int chunkSize = 50;
+      for (int i = 0; i < models.length; i += chunkSize) {
+        if (!mounted) break;
+        
+        final chunk = models.skip(i).take(chunkSize).toList();
+        final endIdx = (i + chunk.length).clamp(0, models.length);
+
+        if (mounted) {
+          setState(() {
+            _statusMessage = 'Menyimpan $endIdx / ${models.length} ke server...';
+          });
+        }
+        
+        try {
+          final successCount = await cubit.addBulkGuru(chunk);
+          _successCount += successCount;
+          _failCount += (chunk.length - successCount);
+        } catch (e) {
+          _failCount += chunk.length;
+          // Tampilkan snackbar untuk kegagalan utama
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(e.toString().replaceAll('Exception: ', '')),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+
+        _currentRow += chunk.length;
+        if (_currentRow > _totalRows) _currentRow = _totalRows;
+      }
+    }
+
+    if (mounted) {
       setState(() {
+        _isProcessing = false;
+        _currentRow = _totalRows;
         _statusMessage =
-            'Menyimpan $_currentRow / $_totalRows ...\n(Sukses: $_successCount, Gagal: $_failCount)';
+            'Selesai! Sukses: $_successCount, Gagal: $_failCount\n(Data Gagal biasanya karena NIP sudah terdaftar)';
       });
     }
-    setState(() {
-      _isProcessing = false;
-      _statusMessage =
-          'Selesai! Sukses: $_successCount, Gagal: $_failCount\n(Data Gagal biasanya karena NIP sudah terdaftar)';
-    });
   }
+
+  // ---------------------------------------------------------------------------
+  // Santri rows
+  // ---------------------------------------------------------------------------
 
   Future<void> _processSantriRows(List<List<dynamic>> rows) async {
     final cubit = context.read<SantriCubit>();
-    for (var row in rows) {
-      if (!mounted) break;
-      _currentRow++;
-      if (row.length >= 3 && row[0].toString().trim().isNotEmpty) {
-        final nis = row[0].toString().trim();
-        final nama = row[1].toString().trim();
-        final kelasRaw = row[2].toString().trim().toUpperCase();
+    final models = <SantriModel>[];
 
+    for (final row in rows) {
+      if (row.length >= 3 && row[0].toString().trim().isNotEmpty && row[1].toString().trim().isNotEmpty) {
+        final kelasRaw = row[2].toString().trim().toUpperCase();
         final k = kelasRaw.replaceAll(RegExp(r'[RT]'), '');
         final p = kelasRaw.endsWith('T') ? 'T' : 'R';
 
-        final model = SantriModel(
-          id: '',
-          nis: nis,
-          nama: nama,
-          kelas: k.isEmpty ? '7' : k,
-          program: p,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
+        models.add(
+          SantriModel(
+            id: '',
+            nis: row[0].toString().trim(),
+            nama: row[1].toString().trim(),
+            kelas: k.isEmpty ? '7' : k,
+            program: p,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
         );
-
-        final success = await cubit.addSantri(model);
-        if (success) {
-          _successCount++;
-        } else {
-          _failCount++;
-        }
       } else {
+        // Baris tidak lengkap (misal NIS/Nama kosong) masuk hitungan gagal
         _failCount++;
       }
+    }
+
+    if (models.isNotEmpty) {
+      final int chunkSize = 50;
+      for (int i = 0; i < models.length; i += chunkSize) {
+        if (!mounted) break;
+        
+        final chunk = models.skip(i).take(chunkSize).toList();
+        final endIdx = (i + chunk.length).clamp(0, models.length);
+
+        if (mounted) {
+          setState(() {
+            _statusMessage = 'Menyimpan $endIdx / ${models.length} ke server...';
+          });
+        }
+        
+        try {
+          final successCount = await cubit.addBulkSantri(chunk);
+          _successCount += successCount;
+          _failCount += (chunk.length - successCount);
+        } catch (e) {
+          _failCount += chunk.length;
+          // Tampilkan snackbar untuk kegagalan utama
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(e.toString().replaceAll('Exception: ', '')),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+
+        _currentRow += chunk.length;
+        if (_currentRow > _totalRows) _currentRow = _totalRows;
+      }
+    }
+
+    if (mounted) {
       setState(() {
+        _isProcessing = false;
+        _currentRow = _totalRows;
         _statusMessage =
-            'Menyimpan $_currentRow / $_totalRows ...\n(Sukses: $_successCount, Gagal: $_failCount)';
+            'Selesai! Sukses: $_successCount, Gagal: $_failCount\n(Data Gagal biasanya karena NIS sudah terdaftar)';
       });
     }
-    setState(() {
-      _isProcessing = false;
-      _statusMessage =
-          'Selesai! Sukses: $_successCount, Gagal: $_failCount\n(Data Gagal biasanya karena NIS sudah terdaftar)';
-    });
   }
+
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +336,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Title row
+          // ── Title row ──────────────────────────────────────────────────────
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,7 +381,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
           ),
           SizedBox(height: 24.h),
 
-          // Upload area
+          // ── Upload area ────────────────────────────────────────────────────
           GestureDetector(
             onTap: _isProcessing ? null : _pickFile,
             child: Container(
@@ -366,7 +449,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 40.w),
                       child: LinearProgressIndicator(
-                        value: _totalRows == 0
+                        value: (_currentRow == 0 && _isProcessing) || _totalRows == 0
                             ? null
                             : (_currentRow / _totalRows),
                         color: colors.primary,
@@ -380,16 +463,12 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
           ),
           SizedBox(height: 24.h),
 
-          // Action button
+          // ── Action button ──────────────────────────────────────────────────
           PrimaryButton(
             width: double.infinity,
             onPressed: () {
               if (_isProcessing) return;
-              if (_selectedBytes == null) {
-                Navigator.of(context).pop();
-                return;
-              }
-              if (isDone) {
+              if (_selectedBytes == null || isDone) {
                 Navigator.of(context).pop();
                 return;
               }

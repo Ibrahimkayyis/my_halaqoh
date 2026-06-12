@@ -1,4 +1,4 @@
-﻿import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -180,12 +180,18 @@ class WaliSantriPengaturanScreen extends StatelessWidget {
     );
   }
 
-  // â”€â”€ Theme selection dialog â”€â”€
+  // ── Theme selection dialog ──
   void _showThemeDialog(
     BuildContext context,
     AppColorSet colors,
     AppThemeMode currentMode,
   ) {
+    final effectiveMode = currentMode == AppThemeMode.system
+        ? (Theme.of(context).brightness == Brightness.dark
+            ? AppThemeMode.dark
+            : AppThemeMode.light)
+        : currentMode;
+
     showDialog(
       context: context,
       builder: (dialogContext) {
@@ -210,7 +216,7 @@ class WaliSantriPengaturanScreen extends StatelessWidget {
               _buildRadioOption(
                 colors,
                 title: t.WaliSantriPengaturanScreen.terangLight,
-                isSelected: currentMode == AppThemeMode.light,
+                isSelected: effectiveMode == AppThemeMode.light,
                 onTap: () {
                   context.read<ThemeCubit>().setThemeMode(AppThemeMode.light);
                   Navigator.of(dialogContext).pop();
@@ -219,7 +225,7 @@ class WaliSantriPengaturanScreen extends StatelessWidget {
               _buildRadioOption(
                 colors,
                 title: t.WaliSantriPengaturanScreen.gelapDark,
-                isSelected: currentMode == AppThemeMode.dark,
+                isSelected: effectiveMode == AppThemeMode.dark,
                 onTap: () {
                   context.read<ThemeCubit>().setThemeMode(AppThemeMode.dark);
                   Navigator.of(dialogContext).pop();

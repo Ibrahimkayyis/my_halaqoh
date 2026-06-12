@@ -75,15 +75,37 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
     super.dispose();
   }
 
-  Future<void> _navigateToSelectSantri(Set<String> assignedSantris) async {
+  static const int _maxSantri = 15;
+
+  Future<void> _navigateToSelectSantri(Set<String> assignedSantriIds) async {
+    if (_selectedSantri.length >= _maxSantri) {
+      if (!mounted) return;
+      final colors = AppColors.of(context);
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Halaqoh sudah mencapai batas maksimum $_maxSantri santri.',
+            style: const TextStyle(fontFamily: 'Poppins'),
+          ),
+          backgroundColor: colors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
     final result = await context.router.push<List<SantriModel>>(
-      SelectSantriRoute(assignedSantriIds: assignedSantris),
+      SelectSantriRoute(
+        assignedSantriIds: assignedSantriIds,
+        currentSantriCount: _selectedSantri.length,
+      ),
     );
     if (result != null && result.isNotEmpty) {
       setState(() {
         // Merge with existing, avoid duplicates by ID
         for (final santri in result) {
-          if (!_selectedSantri.any((s) => s.id == santri.id)) {
+          if (!_selectedSantri.any((s) => s.id == santri.id) &&
+              _selectedSantri.length < _maxSantri) {
             _selectedSantri.add(santri);
           }
         }
@@ -331,14 +353,34 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        t.addHalaqoh.daftarSantri,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colors.textPrimary,
-                          fontFamily: 'Poppins',
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.addHalaqoh.daftarSantri,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 2.h),
+                          // Slot counter
+                          Builder(builder: (_) {
+                            final count = _selectedSantri.length;
+                            final isFull = count >= _maxSantri;
+                            return Text(
+                              '$count/$_maxSantri santri',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color: isFull ? colors.error : colors.textSecondary,
+                                fontFamily: 'Poppins',
+                              ),
+                            );
+                          }),
+                        ],
                       ),
                       GestureDetector(
                         onTap: () => _navigateToSelectSantri(assignedSantriIds),
@@ -348,16 +390,25 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                             vertical: 6.h,
                           ),
                           decoration: BoxDecoration(
-                            color: colors.primary.withValues(alpha: 0.1),
+                            color: _selectedSantri.length >= _maxSantri
+                                ? colors.textSecondary.withValues(alpha: 0.08)
+                                : colors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(color: colors.primary, width: 1),
+                            border: Border.all(
+                              color: _selectedSantri.length >= _maxSantri
+                                  ? colors.textSecondary.withValues(alpha: 0.4)
+                                  : colors.primary,
+                              width: 1,
+                            ),
                           ),
                           child: Text(
                             t.addHalaqoh.tambahSantri,
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
-                              color: colors.primary,
+                              color: _selectedSantri.length >= _maxSantri
+                                  ? colors.textSecondary
+                                  : colors.primary,
                               fontFamily: 'Poppins',
                             ),
                           ),

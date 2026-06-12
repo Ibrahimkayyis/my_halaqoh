@@ -1134,8 +1134,8 @@ class TranslationsProgressHafalanPerJuzEn {
 	/// en: 'Select Juz to view detailed progress per surah'
 	String get pilihJuz => 'Select Juz to view detailed progress per surah';
 
-	/// en: '$completed of $total Surah Completed'
-	String suratSelesai({required Object completed, required Object total}) => '${completed} of ${total} Surah Completed';
+	/// en: '$completed of $total Verses Completed'
+	String ayatSelesai({required Object completed, required Object total}) => '${completed} of ${total} Verses Completed';
 }
 
 // Path: progressHafalanPerSurat
@@ -1867,7 +1867,7 @@ extension on Translations {
 			case 'progressHafalanPerJuz.title': return 'Memorization Progress';
 			case 'progressHafalanPerJuz.targetHafalan': return 'Memorization Target';
 			case 'progressHafalanPerJuz.pilihJuz': return 'Select Juz to view detailed progress per surah';
-			case 'progressHafalanPerJuz.suratSelesai': return ({required Object completed, required Object total}) => '${completed} of ${total} Surah Completed';
+			case 'progressHafalanPerJuz.ayatSelesai': return ({required Object completed, required Object total}) => '${completed} of ${total} Verses Completed';
 			case 'progressHafalanPerSurat.title': return 'Progress Per Surah';
 			case 'progressHafalanPerSurat.detailJuz': return ({required Object juz}) => 'Memorization Detail Juz ${juz}';
 			case 'progressHafalanPerSurat.ayatDari': return ({required Object memorized, required Object total}) => 'Ayat ${memorized} of ${total}';

@@ -8,7 +8,10 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/services/storage_service.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_state.dart';
 
 /// Dialog form for adding/editing a Guru manually
 class AddManualGuruDialog extends StatefulWidget {
@@ -17,7 +20,7 @@ class AddManualGuruDialog extends StatefulWidget {
   final String? initialPhone;
   final String? initialProgram;
   final String? initialProfilePicture;
-  final void Function(String? nip, String? nama, String? phone, String? program, String? profilePicture)? onSave;
+  final Future<void> Function(String? nip, String? nama, String? phone, String? program, String? profilePicture)? onSave;
 
   const AddManualGuruDialog({
     super.key,
@@ -36,7 +39,7 @@ class AddManualGuruDialog extends StatefulWidget {
     String? initialPhone,
     String? initialProgram,
     String? initialProfilePicture,
-    void Function(String? nip, String? nama, String? phone, String? program, String? profilePicture)? onSave,
+    Future<void> Function(String? nip, String? nama, String? phone, String? program, String? profilePicture)? onSave,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -67,6 +70,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
   File? _selectedImage;
   String? _currentProfilePicture;
   bool _isUploading = false;
+  bool _isSaving = false;
 
   final List<String> _programList = ['Reguler', 'Takhassus'];
 
@@ -90,11 +94,122 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+      maxWidth: 256,
+      maxHeight: 256,
+    );
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
+    }
+  }
+
+  Future<void> _validateAndSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    // Validate if NIP already exists (only on add, or when NIP has changed during edit)
+    final currentState = context.read<GuruCubit>().state;
+    bool nipExists = false;
+    currentState.maybeWhen(
+      loaded: (guruList) {
+        if (!_isEditMode || _nipController.text.trim() != widget.initialNip) {
+          nipExists = guruList.any((g) => g.nip == _nipController.text.trim());
+        }
+      },
+      orElse: () {},
+    );
+
+    if (nipExists) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(
+              'Peringatan',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.bold,
+                color: AppColors.of(context).error,
+              ),
+            ),
+            content: Text(
+              'Guru dengan NIP ${_nipController.text.trim()} sudah terdaftar di sistem.',
+              style: const TextStyle(fontFamily: 'Poppins'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Tutup', style: TextStyle(fontFamily: 'Poppins')),
+              ),
+            ],
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          ),
+        );
+      }
+      return;
+    }
+
+    final confirmed = await ConfirmSaveDialog.show(context);
+    if (!confirmed) return;
+    if (!mounted) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      final p = _selectedProgram == 'Takhassus' ? 'T' : 'R';
+      String? uploadedUrl = _currentProfilePicture;
+
+      // Upload process
+      if (_selectedImage != null) {
+        setState(() => _isUploading = true);
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final ext = _selectedImage!.path.split('.').last;
+        final fileName = 'guru_${_nipController.text}_$timestamp.$ext';
+        final service = sl<StorageService>();
+        final url = await service.uploadFile(
+          file: _selectedImage!,
+          path: 'profile_pictures/$fileName',
+        );
+        if (mounted) setState(() => _isUploading = false);
+        if (url != null) {
+          uploadedUrl = url;
+        }
+      }
+
+      if (widget.onSave != null) {
+        await widget.onSave!(
+          _nipController.text,
+          _namaController.text,
+          _phoneController.text,
+          p,
+          uploadedUrl,
+        );
+      }
+      
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        final colors = AppColors.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString().replaceAll('Exception: ', ''),
+              style: const TextStyle(fontFamily: 'Poppins'),
+            ),
+            backgroundColor: colors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -316,47 +431,9 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
             // Simpan button
             PrimaryButton(
               width: double.infinity,
-              onPressed: () async {
-                if (!_formKey.currentState!.validate()) return;
-
-                final confirmed = await ConfirmSaveDialog.show(context);
-                if (!confirmed) return;
-
-                if (widget.onSave != null) {
-                  final p = _selectedProgram == 'Takhassus' ? 'T' : 'R';
-                  String? uploadedUrl = _currentProfilePicture;
-
-                  // Upload process
-                  if (_selectedImage != null) {
-                    setState(() => _isUploading = true);
-                    final timestamp = DateTime.now().millisecondsSinceEpoch;
-                    final ext = _selectedImage!.path.split('.').last;
-                    final fileName = 'guru_${_nipController.text}_$timestamp.$ext';
-                    final service = sl<StorageService>();
-                    final url = await service.uploadFile(
-                      file: _selectedImage!,
-                      path: 'profile_pictures/$fileName',
-                    );
-                    if (mounted) setState(() => _isUploading = false);
-                    if (url != null) {
-                      uploadedUrl = url;
-                    }
-                  }
-
-                  widget.onSave!(
-                    _nipController.text,
-                    _namaController.text,
-                    _phoneController.text,
-                    p,
-                    uploadedUrl,
-                  );
-                }
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-              label: t.addData.simpan,
-              icon: Icons.check_circle,
+              onPressed: _isSaving ? null : _validateAndSubmit,
+              label: _isSaving ? 'Menyimpan...' : t.addData.simpan,
+              icon: _isSaving ? Icons.hourglass_top : Icons.check_circle,
               borderRadius: 25.r,
             ),
           ],

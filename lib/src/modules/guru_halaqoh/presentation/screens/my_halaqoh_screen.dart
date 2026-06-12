@@ -74,21 +74,6 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
       orElse: () {},
     );
 
-    // Look up the admin-defined target for this halaqoh's kelas + program
-    TargetHafalanModel? myTarget;
-    if (myHalaqoh != null) {
-      targetHafalanState.maybeWhen(
-        loaded: (targets) {
-          myTarget = TargetHafalanHelper.findTarget(
-            targets,
-            myHalaqoh!.kelas,
-            myHalaqoh!.program,
-          );
-        },
-        orElse: () {},
-      );
-    }
-
     List<SantriModel> mySantriList = [];
     bool isSantriLoading = false;
     if (myHalaqoh != null || isHalaqohLoading) {
@@ -97,12 +82,46 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
         loading: () => isSantriLoading = true,
         loaded: (sList) {
           mySantriList = sList
-              .where((s) => myHalaqoh!.santriIds.contains(s.id))
+              .where((s) => myHalaqoh!.santriIds.contains(s.id) && !s.isAlumni)
               .toList();
         },
         orElse: () {},
       );
     }
+
+    // Derive effective kelas/program from actual santri data.
+    // halaqoh.kelas is NOT updated during promoteAll(), so we use santri.kelas
+    // (which IS updated) as the source of truth. All santri in a halaqoh move
+    // up together, so the first active santri's kelas represents the whole group.
+    final effectiveKelas = mySantriList.isNotEmpty
+        ? mySantriList.first.kelas
+        : (myHalaqoh?.kelas ?? '');
+    final effectiveProgram = mySantriList.isNotEmpty
+        ? mySantriList.first.program
+        : (myHalaqoh?.program ?? 'R');
+
+    // Look up the admin-defined target using the effective (up-to-date) kelas.
+    // Used for HalaqohInfoCard summary display.
+    TargetHafalanModel? myTarget;
+    if (myHalaqoh != null) {
+      targetHafalanState.maybeWhen(
+        loaded: (targets) {
+          myTarget = TargetHafalanHelper.findTarget(
+            targets,
+            effectiveKelas,
+            effectiveProgram,
+          );
+        },
+        orElse: () {},
+      );
+    }
+
+    // Extract the full targets list for per-santri lookup in the list
+    final List<TargetHafalanModel> allTargets = [];
+    targetHafalanState.maybeWhen(
+      loaded: (targets) => allTargets.addAll(targets),
+      orElse: () {},
+    );
 
     final filtered = mySantriList.where((sanitize) {
       if (_searchQuery.isEmpty) return true;
@@ -149,9 +168,9 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                       const ShimmerHalaqohInfoCard()
                     else if (myHalaqoh != null)
                       HalaqohInfoCard(
-                        kelas: t.myHalaqohScreen.kelas(kelas: myHalaqoh!.kelas),
+                        kelas: t.myHalaqohScreen.kelas(kelas: effectiveKelas),
                         program: t.myHalaqohScreen.program(
-                          program: myHalaqoh!.program == 'T'
+                          program: effectiveProgram == 'T'
                               ? 'Takhassus'
                               : 'Reguler',
                         ),
@@ -160,11 +179,11 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                             ? myHalaqoh!.guruNama
                             : t.myHalaqohScreen.pengampu,
                         target: t.myHalaqohScreen.target(
-                          count: myTarget != null && myHalaqoh != null
-                              ? '${TargetHafalanHelper.getTargetJuzCount(myTarget!, myHalaqoh!.kelas, myHalaqoh!.program)}'
+                          count: myTarget != null
+                              ? '${TargetHafalanHelper.getTargetJuzCount(myTarget!, effectiveKelas, effectiveProgram)}'
                               : '0',
-                          range: myTarget != null && myHalaqoh != null
-                              ? TargetHafalanHelper.getActiveSemesterSummary(myTarget!, myHalaqoh!.kelas, myHalaqoh!.program) ?? '-'
+                          range: myTarget != null
+                              ? TargetHafalanHelper.getActiveSemesterSummary(myTarget!, effectiveKelas, effectiveProgram) ?? '-'
                               : '-',
                         ),
                         totalSantri: t.myHalaqohScreen.total(
@@ -330,6 +349,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                     final santri = filtered[index];
 
                     return BlocProvider(
+                      key: ValueKey(santri.id),
                       create: (_) =>
                           sl<ProgressHafalanCubit>()..watchProgress(santri.id),
                       child:
@@ -352,8 +372,21 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                                 orElse: () {},
                               );
 
-                              final targetJuz = myTarget != null && myHalaqoh != null
-                                  ? TargetHafalanHelper.getTargetJuzCount(myTarget!, myHalaqoh!.kelas, myHalaqoh!.program).toDouble()
+                              // ── Per-santri target lookup ──────────────────
+                              // Use santri.kelas & santri.program (updated on
+                              // promotion) NOT myHalaqoh.kelas which is stale.
+                              final santriTarget = TargetHafalanHelper
+                                  .findTarget(
+                                allTargets,
+                                santri.kelas,
+                                santri.program,
+                              );
+                              final targetJuz = santriTarget != null
+                                  ? TargetHafalanHelper.getTargetJuzCount(
+                                      santriTarget,
+                                      santri.kelas,
+                                      santri.program,
+                                    ).toDouble()
                                   : 0.0;
                               final progress = targetJuz > 0
                                   ? completed / targetJuz

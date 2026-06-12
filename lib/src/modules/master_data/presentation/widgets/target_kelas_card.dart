@@ -93,7 +93,7 @@ class TargetKelasCard extends StatelessWidget {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        'TA: ${config?.tahunAjaran?.isNotEmpty == true ? config!.tahunAjaran : t.targetHafalan.belumDitetapkan} • Sem: ${activeSem ?? t.targetHafalan.belumDitetapkan}',
+                        'TA: ${config?.tahunAjaran.isNotEmpty == true ? config!.tahunAjaran : t.targetHafalan.belumDitetapkan} • Sem: ${activeSem ?? t.targetHafalan.belumDitetapkan}',
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w500,

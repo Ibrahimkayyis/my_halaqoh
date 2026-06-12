@@ -254,21 +254,26 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
   Future<void> _onSave() async {
     if (_myHalaqoh == null) return;
 
-    if (!_isEditing) {
-      final existing = await _absensiCubit.findExisting(
-        _myHalaqoh!.id,
-        widget.selectedDate,
-        _currentSesi,
-      );
+    bool confirmed = false;
 
-      if (existing != null && mounted) {
-        final shouldOverwrite = await _showDuplicateWarning();
-        if (!shouldOverwrite) return;
+    final existing = await _absensiCubit.findExisting(
+      _myHalaqoh!.id,
+      widget.selectedDate,
+      _currentSesi,
+    );
+
+    if (existing != null && mounted) {
+      final shouldOverwrite = await _showDuplicateWarning();
+      if (!shouldOverwrite) return;
+      _existingSession = existing;
+      _isEditing = true;
+      confirmed = true;
+    } else {
+      if (mounted) {
+        confirmed = await ConfirmSaveDialog.show(context);
       }
     }
 
-    if (!mounted) return;
-    final confirmed = await ConfirmSaveDialog.show(context);
     if (!confirmed || !mounted) return;
 
     final records = <AbsensiRecordEntry>[];

@@ -324,7 +324,7 @@
     "title": "Memorization Progress",
     "targetHafalan": "Memorization Target",
     "pilihJuz": "Select Juz to view detailed progress per surah",
-    "suratSelesai": "$completed of $total Surah Completed"
+    "ayatSelesai": "$completed of $total Verses Completed"
   },
   "progressHafalanPerSurat": {
     "title": "Progress Per Surah",

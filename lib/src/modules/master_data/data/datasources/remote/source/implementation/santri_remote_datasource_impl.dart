@@ -51,37 +51,55 @@ class SantriRemoteDataSourceImpl implements SantriRemoteDataSource {
 
   @override
   Future<String> add(SantriModel model) async {
-    // 1. Get document reference first to obtain ID
+    // 1. Pre-generate a document ID so we can pass linkedDocId to the Cloud Function
     final docRef = _col.doc();
-    
-    // 2. Call Cloud Function to create User Account mapped to this ID
+
+    // 2. Call Cloud Function — it creates Auth user + writes /users + writes /santri atomically
     try {
       final callable = _functions.httpsCallable('createUserAccount');
-      final response = await callable.call({
+      await callable.call({
         'identifier': model.nis,
         'name': model.nama,
         'role': 'santri',
         'program': model.program,
         'linkedDocId': docRef.id,
+        // Additional santri fields written server-side to bypass Security Rules
+        'kelas': model.kelas,
+        'profilePicture': model.profilePicture,
+        'createdAt': model.createdAt.millisecondsSinceEpoch,
       });
 
-      // 3. Extract the created Auth UID from response
-      final String uid = response.data['uid'];
-      
-      // Update model with the Auth UID and explicit generated ID
-      final updatedModel = model.copyWith(
-        id: docRef.id,
-        authUid: uid,
-      );
-
-      // 4. Save to Firestore
-      await docRef.set(SantriMapper.toFirestore(updatedModel));
+      // Cloud Function succeeded — santri doc was written server-side
       return docRef.id;
 
     } on FirebaseFunctionsException catch (error) {
       throw Exception('Gagal membuat akun autentikasi: ${error.message}');
     } catch (error) {
       throw Exception('Gagal membuat data santri: $error');
+    }
+  }
+
+  @override
+  Future<int> addBulk(List<SantriModel> models) async {
+    try {
+      final callable = _functions.httpsCallable('bulkCreateUserAccounts');
+      
+      // Map to expected CF payload
+      final users = models.map((m) => {
+        'identifier': m.nis,
+        'name': m.nama,
+        'role': 'santri',
+        'program': m.program,
+        'kelas': m.kelas,
+      }).toList();
+
+      final response = await callable.call({'users': users});
+      return response.data['successCount'] as int;
+
+    } on FirebaseFunctionsException catch (error) {
+      throw Exception('Gagal membuat akun bulk: ${error.message}');
+    } catch (error) {
+      throw Exception('Gagal memproses data bulk: $error');
     }
   }
 

@@ -7,14 +7,21 @@ import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ForgotPasswordBottomSheet extends StatefulWidget {
-  const ForgotPasswordBottomSheet({super.key});
+  /// [rootContext] is the BuildContext from LoginScreen — used to show
+  /// SnackBars on the LoginScreen's Scaffold (not the BottomSheet overlay).
+  const ForgotPasswordBottomSheet({super.key, required this.rootContext});
+
+  final BuildContext rootContext;
 
   static Future<void> show(BuildContext context) {
+    // Capture the root context BEFORE opening the bottom sheet so that
+    // SnackBars shown inside the sheet target LoginScreen's Scaffold.
+    final rootContext = context;
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const ForgotPasswordBottomSheet(),
+      builder: (_) => ForgotPasswordBottomSheet(rootContext: rootContext),
     );
   }
 
@@ -24,25 +31,35 @@ class ForgotPasswordBottomSheet extends StatefulWidget {
 
 class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
   final _nipController = TextEditingController();
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _nipController.addListener(_onNipChanged);
+  }
 
   @override
   void dispose() {
+    _nipController.removeListener(_onNipChanged);
     _nipController.dispose();
     super.dispose();
+  }
+
+  void _onNipChanged() {
+    if (_errorText != null && _nipController.text.trim().isNotEmpty) {
+      setState(() {
+        _errorText = null;
+      });
+    }
   }
 
   Future<void> _openWhatsApp(String phoneNumber) async {
     final nip = _nipController.text.trim();
     if (nip.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'Harap isi NIP/NIS Anda terlebih dahulu.',
-            style: TextStyle(fontFamily: 'Poppins'),
-          ),
-          backgroundColor: AppColors.of(context).error,
-        ),
-      );
+      setState(() {
+        _errorText = 'Harap isi NIP/NIS Anda terlebih dahulu.';
+      });
       return;
     }
 
@@ -75,13 +92,17 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(widget.rootContext).showSnackBar(
           SnackBar(
             content: const Text(
               'Gagal membuka WhatsApp. Pastikan WhatsApp terinstal di perangkat Anda.',
               style: TextStyle(fontFamily: 'Poppins'),
             ),
-            backgroundColor: AppColors.of(context).error,
+            backgroundColor: AppColors.of(widget.rootContext).error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       }
@@ -152,6 +173,12 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
                 color: colors.textSecondary.withValues(alpha: 0.5),
                 fontFamily: 'Poppins',
               ),
+              errorText: _errorText,
+              errorStyle: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 12.sp,
+                color: colors.error,
+              ),
               prefixIcon: Icon(
                 Icons.person_outline,
                 color: colors.textSecondary,
@@ -163,6 +190,14 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: colors.primary),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: colors.error),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: colors.error, width: 1.5.w),
                 borderRadius: BorderRadius.circular(12.r),
               ),
               contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -185,7 +220,7 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
           CustomOutlinedButton(
             width: double.infinity,
             height: 50.h,
-            onPressed: () => _openWhatsApp("+6281334885528"),
+            onPressed: () => _openWhatsApp("+6285338844410"),
             label: 'HUBUNGI ADMIN 2',
             borderRadius: 14.r,
           ),

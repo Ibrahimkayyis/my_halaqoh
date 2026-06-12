@@ -27,4 +27,9 @@ class HafalanSantriRemoteDataSourceImpl implements HafalanSantriRemoteDataSource
         .map((doc) => HafalanSantriMapper.fromFirestore(doc as DocumentSnapshot))
         .toList();
   }
+
+  @override
+  Future<void> delete(String id) async {
+    await _collection.doc(id).delete();
+  }
 }

@@ -58,20 +58,28 @@ class ProgressHafalanPerJuzScreen extends StatefulWidget
 
 class _ProgressHafalanPerJuzScreenState
     extends State<ProgressHafalanPerJuzScreen> {
-  /// Check if all currently shown targets are 100% completed.
-  /// Required before teacher can add new targets via FAB.
-  bool _allTargetsCompleted(List<Map<String, dynamic>> juzData) {
-    if (juzData.isEmpty) return true;
-    return juzData.every((juz) {
-      final total = juz['total'] as int;
-      final completed = juz['completed'] as int;
-      return total > 0 && completed >= total;
-    });
+  /// Returns the juz numbers from official targets (admin + guru) that are
+  /// not yet 100% complete. Used only for the warning banner — never to block.
+  List<int> _getIncompleteTargetJuz(
+    List<Map<String, dynamic>> juzData,
+    Set<int> officialTargetJuzNums,
+  ) {
+    return juzData
+        .where((juz) {
+          final juzNum = juz['juz'] as int;
+          if (!officialTargetJuzNums.contains(juzNum)) return false;
+          final total = juz['total'] as int;
+          final completed = juz['completed'] as int;
+          return total == 0 || completed < total;
+        })
+        .map((juz) => juz['juz'] as int)
+        .toList();
   }
 
   void _showTambahTargetBottomSheet(
     List<Map<String, dynamic>> currentJuzData,
     Set<int> allTargetJuzNums,
+    Set<int> officialTargetJuzNums,
     SantriExtraTargetCubit extraTargetCubit,
   ) {
     final colors = AppColors.of(context);
@@ -124,42 +132,59 @@ class _ProgressHafalanPerJuzScreenState
                   ),
                   SizedBox(height: 14.h),
 
-                  // Info banner
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(14.w),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF3E0),
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 18.sp,
-                            color: const Color(0xFFE65100),
+                  // Warning banner — ditampilkan hanya jika ada target resmi yg belum selesai
+                  Builder(builder: (ctx) {
+                    final incompleteJuz = _getIncompleteTargetJuz(
+                      currentJuzData,
+                      officialTargetJuzNums,
+                    );
+                    if (incompleteJuz.isEmpty) return const SizedBox.shrink();
+
+                    final juzLabels = incompleteJuz
+                        .map((n) => 'Juz $n')
+                        .join(', ');
+                    return Padding(
+                      padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 16.h),
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(14.w),
+                        decoration: BoxDecoration(
+                          color: colors.warning.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: colors.warning.withValues(alpha: 0.4),
                           ),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: Text(
-                              'Penambahan target baru hanya dapat dilakukan jika semua target sebelumnya telah mencapai 100%',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFFE65100),
-                                fontFamily: 'Poppins',
-                                height: 1.4,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              size: 18.sp,
+                              color: colors.warning,
+                            ),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                'Perhatian: $juzLabels belum diselesaikan. '
+                                'Pastikan santri tetap menyelesaikan target '
+                                'hafalan semester ini. Anda tetap dapat '
+                                'menambah target baru, namun target yang '
+                                'sudah ditetapkan wajib diselesaikan terlebih dahulu.',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: colors.warning,
+                                  fontFamily: 'Poppins',
+                                  height: 1.4,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
+                    );
+                  }),
 
                   // Search field
                   Padding(
@@ -210,8 +235,11 @@ class _ProgressHafalanPerJuzScreenState
                       itemCount: available.length,
                       itemBuilder: (_, idx) {
                         final juzModel = available[idx];
-                        final canAdd =
-                            _allTargetsCompleted(currentJuzData);
+                        final incompleteJuz = _getIncompleteTargetJuz(
+                          currentJuzData,
+                          officialTargetJuzNums,
+                        );
+                        final hasWarning = incompleteJuz.isNotEmpty;
 
                         return Container(
                           margin: EdgeInsets.only(bottom: 10.h),
@@ -258,62 +286,133 @@ class _ProgressHafalanPerJuzScreenState
                                 ),
                               ),
                               GestureDetector(
-                                onTap: canAdd
-                                    ? () async {
-                                        // Capture messenger before the async gap
-                                        final messenger =
-                                            ScaffoldMessenger.of(context);
-                                        final appColors = AppColors.of(context);
+                                onTap: () async {
+                                  // Capture context-dependent values BEFORE any async gap
+                                  final messenger =
+                                      ScaffoldMessenger.of(context);
+                                  final appColors = AppColors.of(context);
 
-                                        // Persist to Firestore via cubit
-                                        final success =
-                                            await extraTargetCubit
-                                                .addExtraJuz(
-                                          widget.santriId,
-                                          juzModel.number,
-                                        );
-
-                                        // Refresh the sheet's available list
-                                        setSheetState(() {});
-
-                                        messenger.showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              success
-                                                  ? 'Juz ${juzModel.number} ditambahkan sebagai target'
-                                                  : 'Gagal menyimpan target, coba lagi',
-                                              style: const TextStyle(
-                                                fontFamily: 'Poppins',
+                                  // Jika ada target resmi yang belum selesai,
+                                  // tampilkan dialog konfirmasi terlebih dahulu
+                                  if (hasWarning) {
+                                    final juzLabels = incompleteJuz
+                                        .map((n) => 'Juz $n')
+                                        .join(', ');
+                                    final confirmed =
+                                        await showDialog<bool>(
+                                      context: context,
+                                      builder: (dialogCtx) {
+                                        final dColors =
+                                            AppColors.of(dialogCtx);
+                                        return AlertDialog(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(
+                                                    16.r),
+                                          ),
+                                          backgroundColor: dColors.surface,
+                                          title: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.warning_amber_rounded,
+                                                color: dColors.warning,
+                                                size: 20.sp,
                                               ),
-                                            ),
-                                            backgroundColor: success
-                                                ? appColors.primary
-                                                : appColors.error,
-                                            duration: const Duration(
-                                              seconds: 2,
+                                              SizedBox(width: 8.w),
+                                              Text(
+                                                'Target Belum Selesai',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 15.sp,
+                                                  color: dColors.textPrimary,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          content: Text(
+                                            '$juzLabels belum diselesaikan semester ini.\n\n'
+                                            'Ingatkan santri untuk tetap menyelesaikan '
+                                            'target yang sudah ditetapkan. Apakah Anda '
+                                            'yakin ingin menambahkan Juz ${juzModel.number} '
+                                            'sebagai target tambahan?',
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              fontSize: 13.sp,
+                                              color: dColors.textSecondary,
+                                              height: 1.6,
                                             ),
                                           ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(
+                                                      dialogCtx, false),
+                                              child: Text(
+                                                'Batal',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  color: dColors.textSecondary,
+                                                ),
+                                              ),
+                                            ),
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(
+                                                      dialogCtx, true),
+                                              child: Text(
+                                                'Ya, Tambahkan',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w700,
+                                                  color: dColors.primary,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         );
-                                      }
-                                    : null,
+                                      },
+                                    );
+                                    if (confirmed != true) return;
+                                  }
+
+                                  final success =
+                                      await extraTargetCubit.addExtraJuz(
+                                    widget.santriId,
+                                    juzModel.number,
+                                  );
+
+                                  setSheetState(() {});
+
+                                  messenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        success
+                                            ? 'Juz ${juzModel.number} ditambahkan sebagai target'
+                                            : 'Gagal menyimpan target, coba lagi',
+                                        style: const TextStyle(
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                      backgroundColor: success
+                                          ? appColors.primary
+                                          : appColors.error,
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
                                 child: Container(
                                   width: 34.w,
                                   height: 34.w,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: canAdd
-                                        ? colors.primary
-                                            .withValues(alpha: 0.1)
-                                        : colors.border
-                                            .withValues(alpha: 0.3),
+                                    color: colors.primary
+                                        .withValues(alpha: 0.1),
                                   ),
                                   child: Icon(
                                     Icons.add,
                                     size: 20.sp,
-                                    color: canAdd
-                                        ? colors.primary
-                                        : colors.textSecondary
-                                            .withValues(alpha: 0.4),
+                                    color: colors.primary,
                                   ),
                                 ),
                               ),
@@ -448,6 +547,7 @@ class _ProgressHafalanPerJuzScreenState
         onPressed: () => _showTambahTargetBottomSheet(
           juzDisplayData,
           allTargetJuzNums,
+          {...adminJuzList, ...extraJuz},
           extraTargetCubit,
         ),
         backgroundColor: colors.primary,

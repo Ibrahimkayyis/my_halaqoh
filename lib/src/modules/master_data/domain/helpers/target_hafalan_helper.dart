@@ -133,14 +133,17 @@ class TargetHafalanHelper {
   }
 
   /// Returns the cumulative list of target juz up to the active semester.
-  /// Falls back to full-year cumulative list for the current class if semester not set.
+  /// Returns empty list if semester is not set (e.g. "Belum ditetapkan").
   static List<int> getTargetJuzList(
     TargetHafalanModel? targetModel,
     String kelas,
     String programCode,
   ) {
+    if (targetModel == null || targetModel.semesterAktif == null) {
+      return const [];
+    }
     final program = programCodeToFullName(programCode);
-    final semAktif = targetModel?.semesterAktif ?? 2; // default to full year (sem 2)
+    final semAktif = targetModel.semesterAktif!;
     return _getCumulativeJuzList(kelas, program, semAktif);
   }
 

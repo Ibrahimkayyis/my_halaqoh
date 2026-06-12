@@ -18,10 +18,8 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VS Code
+.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -43,3 +41,45 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ============================================================
+# KRITIS: Firebase & Secret Keys
+# JANGAN commit file ini ke repository publik!
+# ============================================================
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+
+# ============================================================
+# Files Generated / Temporary
+# ============================================================
+# Hive local database files (runtime data)
+*.hive
+*.lock
+
+# Test directories & scripts di luar folder test/ resmi
+test_hive/
+test_hive2/
+test_hive3/
+
+# Temporary analysis output files
+analyze_output.txt
+analyze_result.txt
+
+# ============================================================
+# Editor & AI Tool Configurations (lokal)
+# ============================================================
+# Windsurf editor config
+.windsurf/
+
+# Claude AI local config
+.claude/
+Claude.local.md
+Claude.md
+AGENTS.md
+
+# Flutter DevTools preferences (lokal per-developer)
+devtools_options.yaml
+
+# Antigravity Agent lock file
+skills-lock.json

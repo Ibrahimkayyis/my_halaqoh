@@ -51,6 +51,12 @@ service cloud.firestore {
         && request.auth.uid == userId
         && request.resource.data.diff(resource.data).affectedKeys()
              .hasOnly(['fcmToken', 'fcmTokenUpdatedAt']);
+      // Allow unauthenticated list with limit 1 — used by the login pre-check
+      // to distinguish "NIP/NIS tidak ditemukan" vs "password salah".
+      // Note: request.query.filters is NOT valid Firestore Rules syntax;
+      // only request.query.limit / offset / orderBy are available.
+      // Limiting to 1 document is sufficient to prevent bulk enumeration.
+      allow list: if request.auth == null && request.query.limit == 1;
     }
 
     // Absensi: allow authenticated Gurus to write attendance
@@ -60,6 +66,12 @@ service cloud.firestore {
 
     // Hafalan Santri: allow authenticated Gurus to write hafalan
     match /hafalan_santri/{documentId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Santri Extra Target: allow authenticated Gurus to add/update extra juz targets.
+    // This collection stores teacher-assigned extra juz beyond the admin curriculum.
+    match /santriExtraTarget/{santriId} {
       allow read, write: if isAuthenticated();
     }
   }

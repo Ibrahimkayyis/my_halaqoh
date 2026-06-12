@@ -13,6 +13,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_lis
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_data_method_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_manual_santri_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/bulk_upload_dialog.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/kenaikan_kelas_bottom_sheet.dart';
 
 /// Santri list screen (Tab 1 & Menu Card)
 class SantriListScreen extends StatefulWidget {
@@ -31,6 +32,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
   // Filter values
   String? _filterKelas;
   String? _filterProgram;
+  bool _showAlumni = false; // default: alumni disembunyikan
 
   final List<String> _kelasOptions = ['Semua', '7', '8', '9', '10', '11', '12'];
   final List<String> _programOptions = ['Semua', 'Reguler', 'Takhassus'];
@@ -47,6 +49,10 @@ class _SantriListScreenState extends State<SantriListScreen> {
 
   List<SantriModel> _applyFilter(List<SantriModel> allSantri) {
     return allSantri.where((s) {
+      // Filter alumni: tampilkan hanya alumni ATAU hanya aktif
+      if (_showAlumni && !s.isAlumni) return false;
+      if (!_showAlumni && s.isAlumni) return false;
+
       final matchesSearch = _searchQuery.isEmpty ||
           s.nama.toLowerCase().contains(_searchQuery) ||
           s.nis.contains(_searchQuery);
@@ -76,7 +82,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
       initialNama: santri.nama,
       initialKelas: '${santri.kelas}${santri.program}',
       initialProfilePicture: santri.profilePicture,
-      onSave: (nis, nama, kelas, profilePicture) {
+      onSave: (nis, nama, kelas, profilePicture) async {
         final k = kelas?.replaceAll(RegExp(r'[RT]'), '') ?? santri.kelas;
         final p = kelas != null && kelas.endsWith('T') ? 'T' : 'R';
         final updated = santri.copyWith(
@@ -87,7 +93,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
           profilePicture: profilePicture ?? santri.profilePicture,
           updatedAt: DateTime.now(),
         );
-        context.read<SantriCubit>().updateSantri(updated);
+        await context.read<SantriCubit>().updateSantri(updated);
       },
     );
   }
@@ -176,7 +182,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
       context,
       onManualTap: () => AddManualSantriDialog.show(
         context,
-        onSave: (nis, nama, kelas, profilePicture) {
+        onSave: (nis, nama, kelas, profilePicture) async {
           final k = kelas?.replaceAll(RegExp(r'[RT]'), '') ?? '7';
           final p = kelas != null && kelas.endsWith('T') ? 'T' : 'R';
           final now = DateTime.now();
@@ -190,7 +196,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
             createdAt: now,
             updatedAt: now,
           );
-          context.read<SantriCubit>().addSantri(model);
+          await context.read<SantriCubit>().addSantri(model);
         },
       ),
       onBulkUploadTap: () => BulkUploadDialog.show(context, importType: BulkImportType.santri),
@@ -219,6 +225,95 @@ class _SantriListScreenState extends State<SantriListScreen> {
           ),
         ),
         centerTitle: false,
+        actions: [
+          // Toggle alumni
+          BlocBuilder<SantriCubit, SantriState>(
+            builder: (context, state) {
+              final alumniCount = state.maybeWhen(
+                loaded: (list) => list.where((s) => s.isAlumni).length,
+                orElse: () => 0,
+              );
+              if (alumniCount == 0) return const SizedBox.shrink();
+              return IconButton(
+                tooltip: _showAlumni
+                    ? 'Sembunyikan Alumni ($alumniCount)'
+                    : 'Tampilkan Alumni ($alumniCount)',
+                icon: Icon(
+                  _showAlumni
+                      ? Icons.unarchive_outlined
+                      : Icons.archive_outlined,
+                  color: _showAlumni ? colors.primary : colors.textSecondary,
+                ),
+                onPressed: () => setState(() => _showAlumni = !_showAlumni),
+              );
+            },
+          ),
+          // Kenaikan Kelas
+          BlocBuilder<SantriCubit, SantriState>(
+            builder: (context, state) {
+              return Padding(
+                padding: EdgeInsets.only(right: 8.w),
+                child: Tooltip(
+                  message: 'Proses Kenaikan Kelas',
+                  child: InkWell(
+                    onTap: () {
+                      final aktivSantri = state.maybeWhen(
+                        loaded: (list) =>
+                            list.where((s) => !s.isAlumni).toList(),
+                        orElse: () => <SantriModel>[],
+                      );
+                      if (aktivSantri.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text(
+                              'Tidak ada santri aktif untuk diproses.',
+                              style: TextStyle(fontFamily: 'Poppins'),
+                            ),
+                            backgroundColor: colors.error,
+                          ),
+                        );
+                        return;
+                      }
+                      KenaikanKelasBottomSheet.show(
+                        context,
+                        aktivSantri: aktivSantri,
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(10.r),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.upgrade_rounded,
+                            color: colors.primary,
+                            size: 18.sp,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            'Naik Kelas',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w600,
+                              color: colors.primary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: BlocBuilder<SantriCubit, SantriState>(
         builder: (context, state) {

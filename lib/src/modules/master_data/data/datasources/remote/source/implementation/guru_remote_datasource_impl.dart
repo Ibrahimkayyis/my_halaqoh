@@ -77,6 +77,29 @@ class GuruRemoteDataSourceImpl implements GuruRemoteDataSource {
   }
 
   @override
+  Future<int> addBulk(List<GuruModel> models) async {
+    try {
+      final callable = _functions.httpsCallable('bulkCreateUserAccounts');
+      
+      final users = models.map((m) => {
+        'identifier': m.nip,
+        'name': m.nama,
+        'role': 'guru',
+        'program': m.program,
+        'phone': m.phone,
+      }).toList();
+
+      final response = await callable.call({'users': users});
+      return response.data['successCount'] as int;
+
+    } on FirebaseFunctionsException catch (error) {
+      throw Exception('Gagal membuat akun bulk: ${error.message}');
+    } catch (error) {
+      throw Exception('Gagal memproses data bulk: $error');
+    }
+  }
+
+  @override
   Future<void> update(GuruModel model) async {
     await _col.doc(model.id).update(GuruMapper.toFirestore(model));
   }

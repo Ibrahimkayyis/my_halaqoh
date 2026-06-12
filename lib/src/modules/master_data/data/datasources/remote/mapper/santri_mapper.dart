@@ -21,6 +21,7 @@ class SantriMapper {
               Map<String, dynamic>.from(data['waliSantri'] as Map))
           : null,
       authUid: data['authUid'] as String?,
+      isAlumni: (data['isAlumni'] as bool?) ?? false,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
@@ -36,6 +37,7 @@ class SantriMapper {
       'halaqohId': model.halaqohId,
       'waliSantri': model.waliSantri?.toJson(),
       'authUid': model.authUid,
+      'isAlumni': model.isAlumni,
       'createdAt': Timestamp.fromDate(model.createdAt),
       'updatedAt': Timestamp.fromDate(model.updatedAt),
     };

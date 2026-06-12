@@ -17,6 +17,7 @@ import 'firebase_options.dart';
 import 'src/core/quran/quran_service.dart';
 import 'src/core/router/app_router.dart';
 import 'src/core/service_locator/service_locator.dart';
+import 'src/core/notifications/notification_tap_handler.dart';
 import 'src/core/theme/cubit/theme_cubit.dart';
 import 'src/core/theme/app_theme.dart';
 import 'src/core/theme/theme_mode.dart';
@@ -73,12 +74,71 @@ Future<void> _initNotificationChannels() async {
   const initSettings = InitializationSettings(
     android: AndroidInitializationSettings('@mipmap/ic_launcher'),
   );
-  await plugin.initialize(initSettings);
+  await plugin.initialize(
+    initSettings,
+    onDidReceiveNotificationResponse: (NotificationResponse response) {
+      // Foreground local-notification tap.
+      // Writes to the global ValueNotifier so the dashboard widget can navigate.
+      final payload = response.payload;
+      if (payload == 'absensi') pendingNotificationTab.value = 2;
+      if (payload == 'hafalan') pendingNotificationTab.value = 1;
+    },
+  );
   final androidImpl =
       plugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
   await androidImpl?.createNotificationChannel(absensiChannel);
   await androidImpl?.createNotificationChannel(hafalanChannel);
+}
+
+void _setupNotificationTapHandlers() {
+  FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    if (message != null) {
+      _handleRemoteMessageTap(message);
+    }
+  });
+
+  FirebaseMessaging.onMessageOpenedApp.listen(_handleRemoteMessageTap);
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    final notification = message.notification;
+    if (notification == null) return;
+
+    final type = message.data['type'] as String? ?? '';
+    final channelId = type == 'hafalan'
+        ? 'my_halaqoh_hafalan'
+        : 'my_halaqoh_absensi';
+    final channelName = type == 'hafalan'
+        ? 'Notifikasi Hafalan MyHalaqoh'
+        : 'Notifikasi Absensi MyHalaqoh';
+
+    final plugin = FlutterLocalNotificationsPlugin();
+    plugin.show(
+      notification.hashCode,
+      notification.title,
+      notification.body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          channelName,
+          icon: '@mipmap/ic_launcher',
+          importance: Importance.high,
+          priority: Priority.high,
+          showWhen: true,
+        ),
+      ),
+      payload: type,
+    );
+  });
+}
+
+void _handleRemoteMessageTap(RemoteMessage message) {
+  final type = message.data['type'] as String?;
+  if (type == 'absensi') {
+    pendingNotificationTab.value = 2;
+  } else if (type == 'hafalan') {
+    pendingNotificationTab.value = 1;
+  }
 }
 
 // ── Parallel helper: Hive initialization ──────────────────────────────────────
@@ -105,6 +165,11 @@ void main() async {
   // Register FCM background handler immediately after Firebase init.
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+  // Register notification-tap handlers as early as possible.
+  // These write to the global [pendingNotificationTab] ValueNotifier,
+  // which the WaliSantriDashboardWrapperScreen listens to.
+  _setupNotificationTapHandlers();
+
   // ── 2. Parallel initialization ────────────────────────────────────────────
   // These three tasks are completely independent of each other:
   //   • _initNotificationChannels() — uses only flutter_local_notifications
@@ -124,22 +189,18 @@ void main() async {
   // Security is preserved: Firestore Security Rules remain the primary guard.
   // If App Check enforcement is enabled in Firebase Console, all requests
   // automatically include the token once activation resolves in the background.
-  unawaited(
-    FirebaseAppCheck.instance
-        .activate(
-          providerAndroid: kDebugMode
-              ? AndroidDebugProvider()
-              : AndroidPlayIntegrityProvider(),
-          providerApple: kDebugMode
-              ? AppleDebugProvider()
-              : AppleAppAttestProvider(),
-        )
-        .catchError((Object e) {
-          // Non-fatal — App Check is a secondary security layer.
-          // The app continues normally using Firestore Security Rules.
-          debugPrint('[AppCheck] Activation warning: $e');
-        }),
-  );
+  // FirebaseAppCheck.instance
+  //     .activate(
+  //       providerAndroid: kDebugMode
+  //           ? AndroidDebugProvider()
+  //           : AndroidPlayIntegrityProvider(),
+  //       providerApple: kDebugMode
+  //           ? AppleDebugProvider()
+  //           : AppleAppAttestProvider(),
+  //     )
+  //     .catchError((Object e) {
+  //       debugPrint('[AppCheck] Activation warning: $e');
+  //     });
 
   // ── 4. GetIt Dependencies ─────────────────────────────────────────────────
   // Requires: Firebase (step 1) + Hive adapters registered (step 2).

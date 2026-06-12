@@ -1089,12 +1089,14 @@ class SelectSantriRoute extends PageRouteInfo<SelectSantriRouteArgs> {
   SelectSantriRoute({
     Key? key,
     Set<String> assignedSantriIds = const {},
+    int currentSantriCount = 0,
     List<PageRouteInfo>? children,
   }) : super(
          SelectSantriRoute.name,
          args: SelectSantriRouteArgs(
            key: key,
            assignedSantriIds: assignedSantriIds,
+           currentSantriCount: currentSantriCount,
          ),
          initialChildren: children,
        );
@@ -1110,21 +1112,28 @@ class SelectSantriRoute extends PageRouteInfo<SelectSantriRouteArgs> {
       return SelectSantriScreen(
         key: args.key,
         assignedSantriIds: args.assignedSantriIds,
+        currentSantriCount: args.currentSantriCount,
       );
     },
   );
 }
 
 class SelectSantriRouteArgs {
-  const SelectSantriRouteArgs({this.key, this.assignedSantriIds = const {}});
+  const SelectSantriRouteArgs({
+    this.key,
+    this.assignedSantriIds = const {},
+    this.currentSantriCount = 0,
+  });
 
   final Key? key;
 
   final Set<String> assignedSantriIds;
 
+  final int currentSantriCount;
+
   @override
   String toString() {
-    return 'SelectSantriRouteArgs{key: $key, assignedSantriIds: $assignedSantriIds}';
+    return 'SelectSantriRouteArgs{key: $key, assignedSantriIds: $assignedSantriIds, currentSantriCount: $currentSantriCount}';
   }
 
   @override
@@ -1132,12 +1141,18 @@ class SelectSantriRouteArgs {
     if (identical(this, other)) return true;
     if (other is! SelectSantriRouteArgs) return false;
     return key == other.key &&
-        const SetEquality().equals(assignedSantriIds, other.assignedSantriIds);
+        const SetEquality().equals(
+          assignedSantriIds,
+          other.assignedSantriIds,
+        ) &&
+        currentSantriCount == other.currentSantriCount;
   }
 
   @override
   int get hashCode =>
-      key.hashCode ^ const SetEquality().hash(assignedSantriIds);
+      key.hashCode ^
+      const SetEquality().hash(assignedSantriIds) ^
+      currentSantriCount.hashCode;
 }
 
 /// generated route for
