@@ -14,6 +14,11 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_data
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/add_manual_santri_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/bulk_upload_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/kenaikan_kelas_bottom_sheet.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/program_model.dart';
 
 /// Santri list screen (Tab 1 & Menu Card)
 class SantriListScreen extends StatefulWidget {
@@ -33,9 +38,6 @@ class _SantriListScreenState extends State<SantriListScreen> {
   String? _filterKelas;
   String? _filterProgram;
   bool _showAlumni = false; // default: alumni disembunyikan
-
-  List<String> get _kelasOptions => [t.santri.all, '7', '8', '9', '10', '11', '12'];
-  List<String> get _programOptions => [t.santri.all, t.targetHafalan.reguler, t.targetHafalan.takhassus];
 
   @override
   void dispose() {
@@ -59,8 +61,20 @@ class _SantriListScreenState extends State<SantriListScreen> {
 
       final matchesKelas = _filterKelas == null || _filterKelas == t.santri.all || s.kelas == _filterKelas;
       final matchesProgram = _filterProgram == null || _filterProgram == t.santri.all ||
-          (_filterProgram == t.targetHafalan.reguler && s.program == 'R') ||
-          (_filterProgram == t.targetHafalan.takhassus && s.program == 'T');
+          (() {
+            final programs = context.read<ProgramCubit>().state.maybeWhen(
+              loaded: (list) => list,
+              orElse: () => <ProgramModel>[],
+            );
+            try {
+              final selectedProg = programs.firstWhere((p) => p.nama == _filterProgram);
+              return s.program == selectedProg.id;
+            } catch (_) {
+              if (_filterProgram == t.targetHafalan.reguler && s.program == 'R') return true;
+              if (_filterProgram == t.targetHafalan.takhassus && s.program == 'T') return true;
+              return false;
+            }
+          })();
 
       return matchesSearch && matchesKelas && matchesProgram;
     }).toList();
@@ -399,6 +413,24 @@ class _SantriListScreenState extends State<SantriListScreen> {
   }
 
   Widget _buildFilterRow(AppColorSet colors) {
+    final kelasState = context.watch<KelasCubit>().state;
+    final kelasOptions = [
+      t.santri.all,
+      ...kelasState.maybeWhen(
+        loaded: (list) => list.map((k) => k.nama).toList(),
+        orElse: () => <String>[],
+      ),
+    ];
+
+    final programState = context.watch<ProgramCubit>().state;
+    final programOptions = [
+      t.santri.all,
+      ...programState.maybeWhen(
+        loaded: (list) => list.map((p) => p.nama).toList(),
+        orElse: () => <String>[],
+      ),
+    ];
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Row(
@@ -406,8 +438,8 @@ class _SantriListScreenState extends State<SantriListScreen> {
           Expanded(
             child: CustomDropdown<String>(
               hintText: t.addData.kelas,
-              items: _kelasOptions,
-              initialItem: _filterKelas,
+              items: kelasOptions,
+              initialItem: kelasOptions.contains(_filterKelas) ? _filterKelas : null,
               onChanged: (value) {
                 setState(() => _filterKelas = value);
               },
@@ -444,8 +476,8 @@ class _SantriListScreenState extends State<SantriListScreen> {
           Expanded(
             child: CustomDropdown<String>(
               hintText: t.addHalaqoh.program,
-              items: _programOptions,
-              initialItem: _filterProgram,
+              items: programOptions,
+              initialItem: programOptions.contains(_filterProgram) ? _filterProgram : null,
               onChanged: (value) {
                 setState(() => _filterProgram = value);
               },

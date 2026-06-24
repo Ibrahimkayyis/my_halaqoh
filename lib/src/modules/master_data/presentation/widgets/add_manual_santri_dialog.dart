@@ -12,6 +12,12 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/kelas_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/program_model.dart';
 
 /// Dialog form for adding/editing a Santri manually
 class AddManualSantriDialog extends StatefulWidget {
@@ -54,12 +60,18 @@ class AddManualSantriDialog extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => AddManualSantriDialog(
-        initialNis: initialNis,
-        initialNama: initialNama,
-        initialKelas: initialKelas,
-        initialProfilePicture: initialProfilePicture,
-        onSave: onSave,
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<KelasCubit>()),
+          BlocProvider.value(value: context.read<ProgramCubit>()),
+        ],
+        child: AddManualSantriDialog(
+          initialNis: initialNis,
+          initialNama: initialNama,
+          initialKelas: initialKelas,
+          initialProfilePicture: initialProfilePicture,
+          onSave: onSave,
+        ),
       ),
     );
   }
@@ -80,21 +92,6 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
   bool _isUploading = false;
   bool _isSaving = false; // tracks the full save+upload+Firestore flow
 
-  final List<String> _kelasList = [
-    '7R',
-    '7T',
-    '8R',
-    '8T',
-    '9R',
-    '9T',
-    '10R',
-    '10T',
-    '11R',
-    '11T',
-    '12R',
-    '12T',
-  ];
-
   bool get _isEditMode => widget.initialNis != null;
 
   @override
@@ -102,13 +99,14 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
     super.initState();
     if (widget.initialNis != null) _nisController.text = widget.initialNis!;
     if (widget.initialNama != null) _namaController.text = widget.initialNama!;
-    if (widget.initialKelas != null &&
-        _kelasList.contains(widget.initialKelas)) {
+    if (widget.initialKelas != null) {
       _selectedKelas = widget.initialKelas;
     }
     if (widget.initialProfilePicture != null) {
       _currentProfilePicture = widget.initialProfilePicture;
     }
+    context.read<KelasCubit>().loadAll();
+    context.read<ProgramCubit>().loadAll();
   }
 
   Future<void> _validateAndSubmit() async {
@@ -248,6 +246,25 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    final kelasState = context.watch<KelasCubit>().state;
+    final programState = context.watch<ProgramCubit>().state;
+
+    final kelasList = kelasState.maybeWhen(
+      loaded: (list) => list,
+      orElse: () => <KelasModel>[],
+    );
+    final programList = programState.maybeWhen(
+      loaded: (list) => list,
+      orElse: () => <ProgramModel>[],
+    );
+
+    final dynamicKelasList = <String>[];
+    for (final k in kelasList) {
+      for (final p in programList) {
+        dynamicKelasList.add('${k.nama}${p.id}');
+      }
+    }
 
     return Container(
       padding: EdgeInsets.only(
@@ -413,8 +430,8 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
               SizedBox(height: 8.h),
               CustomDropdown<String>(
                 hintText: t.addData.kelasHint,
-                items: _kelasList,
-                initialItem: _selectedKelas,
+                items: dynamicKelasList,
+                initialItem: dynamicKelasList.contains(_selectedKelas) ? _selectedKelas : null,
                 onChanged: (value) {
                   setState(() {
                     _selectedKelas = value;

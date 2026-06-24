@@ -79,6 +79,7 @@ class TranslationsId extends Translations {
 	@override late final _TranslationsGeneralId general = _TranslationsGeneralId._(_root);
 	@override late final _TranslationsCalendarId calendar = _TranslationsCalendarId._(_root);
 	@override late final _TranslationsLaporanConfigId laporanConfig = _TranslationsLaporanConfigId._(_root);
+	@override late final _TranslationsKelasProgramId kelasProgram = _TranslationsKelasProgramId._(_root);
 }
 
 // Path: app
@@ -1164,6 +1165,54 @@ class _TranslationsLaporanConfigId extends TranslationsLaporanConfigEn {
 	@override late final _TranslationsLaporanConfigPdfId pdf = _TranslationsLaporanConfigPdfId._(_root);
 }
 
+// Path: kelasProgram
+class _TranslationsKelasProgramId extends TranslationsKelasProgramEn {
+	_TranslationsKelasProgramId._(TranslationsId root) : this._root = root, super.internal(root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Kelola Kelas & Program';
+	@override String get kelasTab => 'Kelas';
+	@override String get programTab => 'Program';
+	@override String get belumAdaKelas => 'Belum ada data kelas';
+	@override String kelasNama({required Object nama}) => 'Kelas ${nama}';
+	@override String urutanPromosi({required Object urutan, required Object nextKelas}) => 'Urutan: ${urutan} | Promosi ke: ${nextKelas}';
+	@override String get lulusAlumni => 'Lulus (Alumni)';
+	@override String get belumAdaProgram => 'Belum ada data program';
+	@override String programId({required Object id}) => 'ID: ${id}';
+	@override String get tambahKelas => 'Tambah Kelas';
+	@override String get editKelas => 'Edit Kelas';
+	@override String get namaKelas => 'Nama Kelas';
+	@override String get namaKelasHint => 'e.g. 7, 8, atau A, B';
+	@override String get namaKelasRequired => 'Nama kelas harus diisi';
+	@override String get urutanKelas => 'Urutan Kelas';
+	@override String get urutanKelasHint => 'e.g. Angka urutan kelas untuk promosi';
+	@override String get urutanRequired => 'Urutan harus diisi';
+	@override String get urutanNumeric => 'Urutan harus berupa angka';
+	@override String get kelasSelanjutnya => 'Kelas Selanjutnya';
+	@override String get pilihKelasSelanjutnya => 'Pilih Kelas Selanjutnya';
+	@override String get batal => 'Batal';
+	@override String get simpan => 'Simpan';
+	@override String gagalMenyimpan({required Object error}) => 'Gagal menyimpan: ${error}';
+	@override String get hapusKelas => 'Hapus Kelas';
+	@override String hapusKelasConfirm({required Object nama}) => 'Apakah Anda yakin ingin menghapus Kelas ${nama}? Tindakan ini tidak dapat dibatalkan.';
+	@override String get hapus => 'Hapus';
+	@override String get gagalMenghapusKelas => 'Gagal menghapus kelas';
+	@override String get tambahProgram => 'Tambah Program';
+	@override String get editProgram => 'Edit Program';
+	@override String get kodeProgram => 'Kode Program';
+	@override String get kodeProgramHint => 'e.g. R, T, atau TH';
+	@override String get kodeProgramRequired => 'Kode program harus diisi';
+	@override String get namaProgram => 'Nama Program';
+	@override String get namaProgramHint => 'e.g. Reguler, Takhassus, atau Tahfidz';
+	@override String get namaProgramRequired => 'Nama program harus diisi';
+	@override String get hapusProgram => 'Hapus Program';
+	@override String hapusProgramConfirm({required Object nama, required Object id}) => 'Apakah Anda yakin ingin menghapus program "${nama}" (${id})? Tindakan ini tidak dapat dibatalkan.';
+	@override String get gagalMenghapusProgram => 'Gagal menghapus program';
+	@override String get aturKelasProgram => 'Atur kelas & program';
+}
+
 // Path: absensi.barcodeScanner
 class _TranslationsAbsensiBarcodeScannerId extends TranslationsAbsensiBarcodeScannerEn {
 	_TranslationsAbsensiBarcodeScannerId._(TranslationsId root) : this._root = root, super.internal(root);
@@ -2081,6 +2130,45 @@ extension on TranslationsId {
 			case 'laporanConfig.pdf.statusLegenda': return 'H = Hadir  |  S = Sakit  |  I = Izin  |  A = Alfa';
 			case 'laporanConfig.pdf.predikatLegenda': return 'Mumtaz: 85 - 100  |  Jayyid: 70 - 84  |  Maqbul: < 70';
 			case 'laporanConfig.pdf.pekanShort': return ({required Object index}) => 'Pekan ke-${index}';
+			case 'kelasProgram.title': return 'Kelola Kelas & Program';
+			case 'kelasProgram.kelasTab': return 'Kelas';
+			case 'kelasProgram.programTab': return 'Program';
+			case 'kelasProgram.belumAdaKelas': return 'Belum ada data kelas';
+			case 'kelasProgram.kelasNama': return ({required Object nama}) => 'Kelas ${nama}';
+			case 'kelasProgram.urutanPromosi': return ({required Object urutan, required Object nextKelas}) => 'Urutan: ${urutan} | Promosi ke: ${nextKelas}';
+			case 'kelasProgram.lulusAlumni': return 'Lulus (Alumni)';
+			case 'kelasProgram.belumAdaProgram': return 'Belum ada data program';
+			case 'kelasProgram.programId': return ({required Object id}) => 'ID: ${id}';
+			case 'kelasProgram.tambahKelas': return 'Tambah Kelas';
+			case 'kelasProgram.editKelas': return 'Edit Kelas';
+			case 'kelasProgram.namaKelas': return 'Nama Kelas';
+			case 'kelasProgram.namaKelasHint': return 'e.g. 7, 8, atau A, B';
+			case 'kelasProgram.namaKelasRequired': return 'Nama kelas harus diisi';
+			case 'kelasProgram.urutanKelas': return 'Urutan Kelas';
+			case 'kelasProgram.urutanKelasHint': return 'e.g. Angka urutan kelas untuk promosi';
+			case 'kelasProgram.urutanRequired': return 'Urutan harus diisi';
+			case 'kelasProgram.urutanNumeric': return 'Urutan harus berupa angka';
+			case 'kelasProgram.kelasSelanjutnya': return 'Kelas Selanjutnya';
+			case 'kelasProgram.pilihKelasSelanjutnya': return 'Pilih Kelas Selanjutnya';
+			case 'kelasProgram.batal': return 'Batal';
+			case 'kelasProgram.simpan': return 'Simpan';
+			case 'kelasProgram.gagalMenyimpan': return ({required Object error}) => 'Gagal menyimpan: ${error}';
+			case 'kelasProgram.hapusKelas': return 'Hapus Kelas';
+			case 'kelasProgram.hapusKelasConfirm': return ({required Object nama}) => 'Apakah Anda yakin ingin menghapus Kelas ${nama}? Tindakan ini tidak dapat dibatalkan.';
+			case 'kelasProgram.hapus': return 'Hapus';
+			case 'kelasProgram.gagalMenghapusKelas': return 'Gagal menghapus kelas';
+			case 'kelasProgram.tambahProgram': return 'Tambah Program';
+			case 'kelasProgram.editProgram': return 'Edit Program';
+			case 'kelasProgram.kodeProgram': return 'Kode Program';
+			case 'kelasProgram.kodeProgramHint': return 'e.g. R, T, atau TH';
+			case 'kelasProgram.kodeProgramRequired': return 'Kode program harus diisi';
+			case 'kelasProgram.namaProgram': return 'Nama Program';
+			case 'kelasProgram.namaProgramHint': return 'e.g. Reguler, Takhassus, atau Tahfidz';
+			case 'kelasProgram.namaProgramRequired': return 'Nama program harus diisi';
+			case 'kelasProgram.hapusProgram': return 'Hapus Program';
+			case 'kelasProgram.hapusProgramConfirm': return ({required Object nama, required Object id}) => 'Apakah Anda yakin ingin menghapus program "${nama}" (${id})? Tindakan ini tidak dapat dibatalkan.';
+			case 'kelasProgram.gagalMenghapusProgram': return 'Gagal menghapus program';
+			case 'kelasProgram.aturKelasProgram': return 'Atur kelas & program';
 			default: return null;
 		}
 	}

@@ -12,6 +12,11 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_s
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/data_search_bar.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/halaqoh_card.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/program_model.dart';
 
 /// Halaqoh list screen (Tab 3 & Menu Card)
 class HalaqohListScreen extends StatefulWidget {
@@ -31,9 +36,6 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
   String? _filterKelas;
   String? _filterProgram;
 
-  List<String> get _kelasOptions => [t.halaqoh.all, '7', '8', '9', '10', '11', '12'];
-  List<String> get _programOptions => [t.halaqoh.all, t.targetHafalan.reguler, t.targetHafalan.takhassus];
-
   @override
   void dispose() {
     _searchController.dispose();
@@ -52,8 +54,20 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
 
       final matchesKelas = _filterKelas == null || _filterKelas == t.halaqoh.all || h.kelas == _filterKelas;
       final matchesProgram = _filterProgram == null || _filterProgram == t.halaqoh.all ||
-          (_filterProgram == t.targetHafalan.reguler && h.program == 'R') ||
-          (_filterProgram == t.targetHafalan.takhassus && h.program == 'T');
+          (() {
+            final programs = context.read<ProgramCubit>().state.maybeWhen(
+              loaded: (list) => list,
+              orElse: () => <ProgramModel>[],
+            );
+            try {
+              final selectedProg = programs.firstWhere((p) => p.nama == _filterProgram);
+              return h.program == selectedProg.id;
+            } catch (_) {
+              if (_filterProgram == t.targetHafalan.reguler && h.program == 'R') return true;
+              if (_filterProgram == t.targetHafalan.takhassus && h.program == 'T') return true;
+              return false;
+            }
+          })();
 
       return matchesSearch && matchesKelas && matchesProgram;
     }).toList();
@@ -184,6 +198,24 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
   }
 
   Widget _buildFilterRow(AppColorSet colors) {
+    final kelasState = context.watch<KelasCubit>().state;
+    final kelasOptions = [
+      t.halaqoh.all,
+      ...kelasState.maybeWhen(
+        loaded: (list) => list.map((k) => k.nama).toList(),
+        orElse: () => <String>[],
+      ),
+    ];
+
+    final programState = context.watch<ProgramCubit>().state;
+    final programOptions = [
+      t.halaqoh.all,
+      ...programState.maybeWhen(
+        loaded: (list) => list.map((p) => p.nama).toList(),
+        orElse: () => <String>[],
+      ),
+    ];
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Row(
@@ -191,8 +223,8 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
           Expanded(
             child: CustomDropdown<String>(
               hintText: t.addData.kelas,
-              items: _kelasOptions,
-              initialItem: _filterKelas,
+              items: kelasOptions,
+              initialItem: kelasOptions.contains(_filterKelas) ? _filterKelas : null,
               onChanged: (value) {
                 setState(() => _filterKelas = value);
               },
@@ -229,8 +261,8 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
           Expanded(
             child: CustomDropdown<String>(
               hintText: t.addHalaqoh.program,
-              items: _programOptions,
-              initialItem: _filterProgram,
+              items: programOptions,
+              initialItem: programOptions.contains(_filterProgram) ? _filterProgram : null,
               onChanged: (value) {
                 setState(() => _filterProgram = value);
               },

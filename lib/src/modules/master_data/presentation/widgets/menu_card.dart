@@ -51,7 +51,6 @@ class MenuCard extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               maxLines: 2,
-              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
@@ -64,8 +63,7 @@ class MenuCard extends StatelessWidget {
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w400,

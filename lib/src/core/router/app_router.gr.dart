@@ -629,6 +629,22 @@ class KalenderAbsensiRouteArgs {
 }
 
 /// generated route for
+/// [KelolaKelasProgramScreen]
+class KelolaKelasProgramRoute extends PageRouteInfo<void> {
+  const KelolaKelasProgramRoute({List<PageRouteInfo>? children})
+    : super(KelolaKelasProgramRoute.name, initialChildren: children);
+
+  static const String name = 'KelolaKelasProgramRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const KelolaKelasProgramScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [LoginScreen]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})

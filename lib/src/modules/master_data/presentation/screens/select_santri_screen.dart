@@ -9,6 +9,11 @@ import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/program_model.dart';
 
 /// Screen for selecting santri to add to a halaqoh
 @RoutePage()
@@ -45,13 +50,6 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
   // ── Filter state ─────────────────────────────────────────────────────────
   String? _filterKelas;
   String? _filterProgram;
-
-  List<String> get _kelasOptions => [
-    t.selectSantri.allClasses, '7', '8', '9', '10', '11', '12',
-  ];
-  List<String> get _programOptions => [
-    t.selectSantri.allPrograms, t.targetHafalan.reguler, t.targetHafalan.takhassus,
-  ];
 
   @override
   void initState() {
@@ -92,7 +90,16 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
 
     // Program filter
     if (_filterProgram != null && _filterProgram != t.selectSantri.allPrograms) {
-      final code = _filterProgram == t.targetHafalan.takhassus ? 'T' : 'R';
+      final programs = context.read<ProgramCubit>().state.maybeWhen(
+        loaded: (list) => list,
+        orElse: () => <ProgramModel>[],
+      );
+      String code = 'R';
+      try {
+        code = programs.firstWhere((p) => p.nama == _filterProgram).id;
+      } catch (_) {
+        code = _filterProgram == t.targetHafalan.takhassus ? 'T' : 'R';
+      }
       result = result.where((s) => s.program == code).toList();
     }
 
@@ -342,6 +349,24 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
 
   // ── Filter row ─────────────────────────────────────────────────────────────
   Widget _buildFilterRow(AppColorSet colors) {
+    final kelasState = context.watch<KelasCubit>().state;
+    final kelasOptions = [
+      t.selectSantri.allClasses,
+      ...kelasState.maybeWhen(
+        loaded: (list) => list.map((k) => k.nama).toList(),
+        orElse: () => <String>[],
+      ),
+    ];
+
+    final programState = context.watch<ProgramCubit>().state;
+    final programOptions = [
+      t.selectSantri.allPrograms,
+      ...programState.maybeWhen(
+        loaded: (list) => list.map((p) => p.nama).toList(),
+        orElse: () => <String>[],
+      ),
+    ];
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Row(
@@ -349,8 +374,8 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
           Expanded(
             child: CustomDropdown<String>(
               hintText: t.addData.kelas,
-              items: _kelasOptions,
-              initialItem: _filterKelas,
+              items: kelasOptions,
+              initialItem: kelasOptions.contains(_filterKelas) ? _filterKelas : null,
               onChanged: (value) {
                 setState(() =>
                     _filterKelas =
@@ -389,8 +414,8 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
           Expanded(
             child: CustomDropdown<String>(
               hintText: t.addHalaqoh.program,
-              items: _programOptions,
-              initialItem: _filterProgram,
+              items: programOptions,
+              initialItem: programOptions.contains(_filterProgram) ? _filterProgram : null,
               onChanged: (value) {
                 setState(() => _filterProgram =
                     (value == t.selectSantri.allPrograms) ? null : value);

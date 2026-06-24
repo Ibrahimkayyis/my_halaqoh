@@ -80,6 +80,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsGeneralEn general = TranslationsGeneralEn.internal(_root);
 	late final TranslationsCalendarEn calendar = TranslationsCalendarEn.internal(_root);
 	late final TranslationsLaporanConfigEn laporanConfig = TranslationsLaporanConfigEn.internal(_root);
+	late final TranslationsKelasProgramEn kelasProgram = TranslationsKelasProgramEn.internal(_root);
 }
 
 // Path: app
@@ -2434,6 +2435,132 @@ class TranslationsLaporanConfigEn {
 	late final TranslationsLaporanConfigPdfEn pdf = TranslationsLaporanConfigPdfEn.internal(_root);
 }
 
+// Path: kelasProgram
+class TranslationsKelasProgramEn {
+	TranslationsKelasProgramEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Manage Class & Program'
+	String get title => 'Manage Class & Program';
+
+	/// en: 'Class'
+	String get kelasTab => 'Class';
+
+	/// en: 'Program'
+	String get programTab => 'Program';
+
+	/// en: 'No class data yet'
+	String get belumAdaKelas => 'No class data yet';
+
+	/// en: 'Class $nama'
+	String kelasNama({required Object nama}) => 'Class ${nama}';
+
+	/// en: 'Order: $urutan | Promote to: $nextKelas'
+	String urutanPromosi({required Object urutan, required Object nextKelas}) => 'Order: ${urutan} | Promote to: ${nextKelas}';
+
+	/// en: 'Graduated (Alumni)'
+	String get lulusAlumni => 'Graduated (Alumni)';
+
+	/// en: 'No program data yet'
+	String get belumAdaProgram => 'No program data yet';
+
+	/// en: 'ID: $id'
+	String programId({required Object id}) => 'ID: ${id}';
+
+	/// en: 'Add Class'
+	String get tambahKelas => 'Add Class';
+
+	/// en: 'Edit Class'
+	String get editKelas => 'Edit Class';
+
+	/// en: 'Class Name'
+	String get namaKelas => 'Class Name';
+
+	/// en: 'e.g. 7, 8, or A, B'
+	String get namaKelasHint => 'e.g. 7, 8, or A, B';
+
+	/// en: 'Class name must be filled'
+	String get namaKelasRequired => 'Class name must be filled';
+
+	/// en: 'Class Order'
+	String get urutanKelas => 'Class Order';
+
+	/// en: 'e.g. Class order number for promotion'
+	String get urutanKelasHint => 'e.g. Class order number for promotion';
+
+	/// en: 'Order must be filled'
+	String get urutanRequired => 'Order must be filled';
+
+	/// en: 'Order must be a number'
+	String get urutanNumeric => 'Order must be a number';
+
+	/// en: 'Next Class'
+	String get kelasSelanjutnya => 'Next Class';
+
+	/// en: 'Choose Next Class'
+	String get pilihKelasSelanjutnya => 'Choose Next Class';
+
+	/// en: 'Cancel'
+	String get batal => 'Cancel';
+
+	/// en: 'Save'
+	String get simpan => 'Save';
+
+	/// en: 'Failed to save: $error'
+	String gagalMenyimpan({required Object error}) => 'Failed to save: ${error}';
+
+	/// en: 'Delete Class'
+	String get hapusKelas => 'Delete Class';
+
+	/// en: 'Are you sure you want to delete Class $nama? This action cannot be undone.'
+	String hapusKelasConfirm({required Object nama}) => 'Are you sure you want to delete Class ${nama}? This action cannot be undone.';
+
+	/// en: 'Delete'
+	String get hapus => 'Delete';
+
+	/// en: 'Failed to delete class'
+	String get gagalMenghapusKelas => 'Failed to delete class';
+
+	/// en: 'Add Program'
+	String get tambahProgram => 'Add Program';
+
+	/// en: 'Edit Program'
+	String get editProgram => 'Edit Program';
+
+	/// en: 'Program Code'
+	String get kodeProgram => 'Program Code';
+
+	/// en: 'e.g. R, T, or TH'
+	String get kodeProgramHint => 'e.g. R, T, or TH';
+
+	/// en: 'Program code must be filled'
+	String get kodeProgramRequired => 'Program code must be filled';
+
+	/// en: 'Program Name'
+	String get namaProgram => 'Program Name';
+
+	/// en: 'e.g. Regular, Special, or Memorization'
+	String get namaProgramHint => 'e.g. Regular, Special, or Memorization';
+
+	/// en: 'Program name must be filled'
+	String get namaProgramRequired => 'Program name must be filled';
+
+	/// en: 'Delete Program'
+	String get hapusProgram => 'Delete Program';
+
+	/// en: 'Are you sure you want to delete program "$nama" ($id)? This action cannot be undone.'
+	String hapusProgramConfirm({required Object nama, required Object id}) => 'Are you sure you want to delete program "${nama}" (${id})? This action cannot be undone.';
+
+	/// en: 'Failed to delete program'
+	String get gagalMenghapusProgram => 'Failed to delete program';
+
+	/// en: 'Manage classes & programs'
+	String get aturKelasProgram => 'Manage classes & programs';
+}
+
 // Path: absensi.barcodeScanner
 class TranslationsAbsensiBarcodeScannerEn {
 	TranslationsAbsensiBarcodeScannerEn.internal(this._root);
@@ -3530,6 +3657,45 @@ extension on Translations {
 			case 'laporanConfig.pdf.statusLegenda': return 'H = Present  |  S = Sick  |  I = Permit  |  A = Absent';
 			case 'laporanConfig.pdf.predikatLegenda': return 'Mumtaz: 85 - 100  |  Jayyid: 70 - 84  |  Maqbul: < 70';
 			case 'laporanConfig.pdf.pekanShort': return ({required Object index}) => 'Week ${index}';
+			case 'kelasProgram.title': return 'Manage Class & Program';
+			case 'kelasProgram.kelasTab': return 'Class';
+			case 'kelasProgram.programTab': return 'Program';
+			case 'kelasProgram.belumAdaKelas': return 'No class data yet';
+			case 'kelasProgram.kelasNama': return ({required Object nama}) => 'Class ${nama}';
+			case 'kelasProgram.urutanPromosi': return ({required Object urutan, required Object nextKelas}) => 'Order: ${urutan} | Promote to: ${nextKelas}';
+			case 'kelasProgram.lulusAlumni': return 'Graduated (Alumni)';
+			case 'kelasProgram.belumAdaProgram': return 'No program data yet';
+			case 'kelasProgram.programId': return ({required Object id}) => 'ID: ${id}';
+			case 'kelasProgram.tambahKelas': return 'Add Class';
+			case 'kelasProgram.editKelas': return 'Edit Class';
+			case 'kelasProgram.namaKelas': return 'Class Name';
+			case 'kelasProgram.namaKelasHint': return 'e.g. 7, 8, or A, B';
+			case 'kelasProgram.namaKelasRequired': return 'Class name must be filled';
+			case 'kelasProgram.urutanKelas': return 'Class Order';
+			case 'kelasProgram.urutanKelasHint': return 'e.g. Class order number for promotion';
+			case 'kelasProgram.urutanRequired': return 'Order must be filled';
+			case 'kelasProgram.urutanNumeric': return 'Order must be a number';
+			case 'kelasProgram.kelasSelanjutnya': return 'Next Class';
+			case 'kelasProgram.pilihKelasSelanjutnya': return 'Choose Next Class';
+			case 'kelasProgram.batal': return 'Cancel';
+			case 'kelasProgram.simpan': return 'Save';
+			case 'kelasProgram.gagalMenyimpan': return ({required Object error}) => 'Failed to save: ${error}';
+			case 'kelasProgram.hapusKelas': return 'Delete Class';
+			case 'kelasProgram.hapusKelasConfirm': return ({required Object nama}) => 'Are you sure you want to delete Class ${nama}? This action cannot be undone.';
+			case 'kelasProgram.hapus': return 'Delete';
+			case 'kelasProgram.gagalMenghapusKelas': return 'Failed to delete class';
+			case 'kelasProgram.tambahProgram': return 'Add Program';
+			case 'kelasProgram.editProgram': return 'Edit Program';
+			case 'kelasProgram.kodeProgram': return 'Program Code';
+			case 'kelasProgram.kodeProgramHint': return 'e.g. R, T, or TH';
+			case 'kelasProgram.kodeProgramRequired': return 'Program code must be filled';
+			case 'kelasProgram.namaProgram': return 'Program Name';
+			case 'kelasProgram.namaProgramHint': return 'e.g. Regular, Special, or Memorization';
+			case 'kelasProgram.namaProgramRequired': return 'Program name must be filled';
+			case 'kelasProgram.hapusProgram': return 'Delete Program';
+			case 'kelasProgram.hapusProgramConfirm': return ({required Object nama, required Object id}) => 'Are you sure you want to delete program "${nama}" (${id})? This action cannot be undone.';
+			case 'kelasProgram.gagalMenghapusProgram': return 'Failed to delete program';
+			case 'kelasProgram.aturKelasProgram': return 'Manage classes & programs';
 			default: return null;
 		}
 	}

@@ -30,6 +30,8 @@ import 'src/modules/master_data/presentation/cubits/guru_cubit.dart';
 import 'src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'src/modules/master_data/presentation/cubits/kelas_cubit.dart';
+import 'src/modules/master_data/presentation/cubits/program_cubit.dart';
 
 // Guru Absensi — Hive & Sync
 import 'src/modules/guru_absensi/data/datasources/local/absensi_hive_adapters.dart';
@@ -247,6 +249,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<SantriCubit>()..watchAll()),
         BlocProvider(create: (_) => sl<HalaqohCubit>()..watchAll()),
         BlocProvider(create: (_) => sl<TargetHafalanCubit>()..watchAll()),
+        BlocProvider(create: (_) => sl<KelasCubit>()..watchAll()),
+        BlocProvider(create: (_) => sl<ProgramCubit>()..watchAll()),
       ],
       child: BlocListener<AuthCubit, AuthState>(
         // Only trigger routing when the state genuinely changes type.

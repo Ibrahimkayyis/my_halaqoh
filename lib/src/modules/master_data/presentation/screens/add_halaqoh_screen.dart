@@ -16,6 +16,11 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_c
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/program_model.dart';
 
 /// Screen for creating or editing a Halaqoh group
 @RoutePage()
@@ -34,9 +39,6 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
   String? _selectedProgram;
   GuruModel? _selectedGuru;
 
-  final List<String> _kelasList = ['7', '8', '9', '10', '11', '12'];
-  List<String> get _programList => [t.targetHafalan.reguler, t.targetHafalan.takhassus];
-
   // Selected santri for this halaqoh (now using SantriModel)
   final List<SantriModel> _selectedSantri = [];
 
@@ -47,7 +49,16 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
       final existing = widget.existingHalaqoh!;
       _namaController.text = existing.nama;
       _selectedKelas = existing.kelas;
-      _selectedProgram = existing.program == 'T' ? t.targetHafalan.takhassus : t.targetHafalan.reguler;
+
+      final programs = context.read<ProgramCubit>().state.maybeWhen(
+        loaded: (list) => list,
+        orElse: () => <ProgramModel>[],
+      );
+      try {
+        _selectedProgram = programs.firstWhere((p) => p.id == existing.program).nama;
+      } catch (_) {
+        _selectedProgram = existing.program == 'T' ? t.targetHafalan.takhassus : t.targetHafalan.reguler;
+      }
 
       final guruList = context.read<GuruCubit>().state.maybeWhen(
         loaded: (list) => list,
@@ -141,11 +152,21 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
       return;
     }
 
+    final programCubit = context.read<ProgramCubit>();
     final confirmed = await ConfirmSaveDialog.show(context);
     if (!confirmed) return;
 
     final now = DateTime.now();
-    final programCode = _selectedProgram == t.targetHafalan.takhassus ? 'T' : 'R';
+    final programs = programCubit.state.maybeWhen(
+      loaded: (list) => list,
+      orElse: () => <ProgramModel>[],
+    );
+    String programCode = 'R';
+    try {
+      programCode = programs.firstWhere((p) => p.nama == _selectedProgram).id;
+    } catch (_) {
+      programCode = _selectedProgram == t.targetHafalan.takhassus ? 'T' : 'R';
+    }
 
     final isEdit = widget.existingHalaqoh != null;
 
@@ -177,6 +198,18 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+
+    final kelasState = context.watch<KelasCubit>().state;
+    final kelasList = kelasState.maybeWhen(
+      loaded: (list) => list.map((k) => k.nama).toList(),
+      orElse: () => <String>[],
+    );
+
+    final programState = context.watch<ProgramCubit>().state;
+    final programList = programState.maybeWhen(
+      loaded: (list) => list.map((p) => p.nama).toList(),
+      orElse: () => <String>[],
+    );
 
     // Track assigned Halqoh
     final halaqohState = context.watch<HalaqohCubit>().state;
@@ -247,8 +280,8 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                             SizedBox(height: 8.h),
                             CustomDropdown<String>(
                               hintText: t.addHalaqoh.kelasHint,
-                              items: _kelasList,
-                              initialItem: _selectedKelas,
+                              items: kelasList,
+                              initialItem: kelasList.contains(_selectedKelas) ? _selectedKelas : null,
                               onChanged: (v) =>
                                   setState(() => _selectedKelas = v),
                               closedHeaderPadding: EdgeInsets.symmetric(
@@ -269,8 +302,8 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                             SizedBox(height: 8.h),
                             CustomDropdown<String>(
                               hintText: t.addHalaqoh.programHint,
-                              items: _programList,
-                              initialItem: _selectedProgram,
+                              items: programList,
+                              initialItem: programList.contains(_selectedProgram) ? _selectedProgram : null,
                               onChanged: (v) =>
                                   setState(() => _selectedProgram = v),
                               closedHeaderPadding: EdgeInsets.symmetric(

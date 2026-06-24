@@ -2003,8 +2003,8 @@ class TranslationsWaliSantriDashboardEn {
 	/// en: 'Extra : $count Juz'
 	String extraJuzTarget({required Object count}) => 'Extra : ${count} Juz';
 
-	/// en: 'Class $kelas | Halaqoh $halaqoh'
-	String halaqohInfo({required Object kelas, required Object halaqoh}) => 'Class ${kelas} | Halaqoh ${halaqoh}';
+	/// en: 'Class $kelas | $halaqoh'
+	String halaqohInfo({required Object kelas, required Object halaqoh}) => 'Class ${kelas} | ${halaqoh}';
 }
 
 // Path: waliSantriNav
@@ -3325,7 +3325,7 @@ extension on Translations {
 			case 'waliSantriDashboard.extraMemorization': return 'Extra Memorization';
 			case 'waliSantriDashboard.juzList': return ({required Object juz}) => 'Juz: ${juz}';
 			case 'waliSantriDashboard.extraJuzTarget': return ({required Object count}) => 'Extra : ${count} Juz';
-			case 'waliSantriDashboard.halaqohInfo': return ({required Object kelas, required Object halaqoh}) => 'Class ${kelas} | Halaqoh ${halaqoh}';
+			case 'waliSantriDashboard.halaqohInfo': return ({required Object kelas, required Object halaqoh}) => 'Class ${kelas} | ${halaqoh}';
 			case 'waliSantriNav.home': return 'Home';
 			case 'waliSantriNav.hafalan': return 'Hafalan';
 			case 'waliSantriNav.absensi': return 'Attendance';

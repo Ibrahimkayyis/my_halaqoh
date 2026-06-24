@@ -27,6 +27,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/screens/add_hala
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/pengaturan_master_data_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/pengaturan_master_data_settings_screen.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/screens/select_santri_screen.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/screens/kelola_kelas_program_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/screens/guru_dashboard_wrapper_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_dashboard/presentation/screens/wali_santri_dashboard_wrapper_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/screens/my_halaqoh_screen.dart';
@@ -91,6 +92,13 @@ class AppRouter extends RootStackRouter {
     ),
     AutoRoute(
       page: PengaturanMasterDataRoute.page,
+      guards: [
+        AuthGuard(_authCubit),
+        RoleGuard(_authCubit, allowedRoles: ['admin']),
+      ],
+    ),
+    AutoRoute(
+      page: KelolaKelasProgramRoute.page,
       guards: [
         AuthGuard(_authCubit),
         RoleGuard(_authCubit, allowedRoles: ['admin']),

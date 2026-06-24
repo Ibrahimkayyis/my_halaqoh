@@ -132,66 +132,91 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildMenuGrid(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final padding = 24.w;
+    final spacing = 12.w;
+    final cardWidth = (screenWidth - padding * 2 - spacing) / 2;
+    final cardHeight = cardWidth / 0.95;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 2,
-        crossAxisSpacing: 12.w,
-        mainAxisSpacing: 12.h,
-        childAspectRatio: 0.95,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Santri count in subtitle
-          BlocBuilder<SantriCubit, SantriState>(
-            builder: (context, state) {
-              final subtitle = state.maybeWhen(
-                loaded: (list) => t.dashboard.santriCountDynamic(count: list.length),
-                orElse: () => t.dashboard.santriCount,
-              );
-              return MenuCard(
-                icon: Icons.groups,
-                title: t.dashboard.kelolaSantri,
-                subtitle: subtitle,
-                onTap: () => onNavigateToTab?.call(1),
-              );
-            },
+          GridView.count(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            crossAxisSpacing: 12.w,
+            mainAxisSpacing: 12.h,
+            childAspectRatio: 0.95,
+            children: [
+              // Santri count in subtitle
+              BlocBuilder<SantriCubit, SantriState>(
+                builder: (context, state) {
+                  final subtitle = state.maybeWhen(
+                    loaded: (list) => t.dashboard.santriCountDynamic(count: list.length),
+                    orElse: () => t.dashboard.santriCount,
+                  );
+                  return MenuCard(
+                    icon: Icons.groups,
+                    title: t.dashboard.kelolaSantri,
+                    subtitle: subtitle,
+                    onTap: () => onNavigateToTab?.call(1),
+                  );
+                },
+              ),
+              // Guru count in subtitle
+              BlocBuilder<GuruCubit, GuruState>(
+                builder: (context, state) {
+                  final subtitle = state.maybeWhen(
+                    loaded: (list) => t.dashboard.guruCountDynamic(count: list.length),
+                    orElse: () => t.dashboard.guruCount,
+                  );
+                  return MenuCard(
+                    icon: Icons.school,
+                    title: t.dashboard.kelolaGuru,
+                    subtitle: subtitle,
+                    onTap: () => onNavigateToTab?.call(2),
+                  );
+                },
+              ),
+              // Halaqoh count in subtitle
+              BlocBuilder<HalaqohCubit, HalaqohState>(
+                builder: (context, state) {
+                  final subtitle = state.maybeWhen(
+                    loaded: (list) => t.dashboard.halaqohCountDynamic(count: list.length),
+                    orElse: () => t.dashboard.halaqohCount,
+                  );
+                  return MenuCard(
+                    icon: Icons.auto_stories,
+                    title: t.dashboard.kelolaHalaqoh,
+                    subtitle: subtitle,
+                    onTap: () => onNavigateToTab?.call(3),
+                  );
+                },
+              ),
+              MenuCard(
+                icon: Icons.track_changes,
+                title: t.dashboard.kelolaTarget,
+                subtitle: t.dashboard.perKelas,
+                onTap: () => onNavigateToTab?.call(4),
+              ),
+            ],
           ),
-          // Guru count in subtitle
-          BlocBuilder<GuruCubit, GuruState>(
-            builder: (context, state) {
-              final subtitle = state.maybeWhen(
-                loaded: (list) => t.dashboard.guruCountDynamic(count: list.length),
-                orElse: () => t.dashboard.guruCount,
-              );
-              return MenuCard(
-                icon: Icons.school,
-                title: t.dashboard.kelolaGuru,
-                subtitle: subtitle,
-                onTap: () => onNavigateToTab?.call(2),
-              );
-            },
-          ),
-          // Halaqoh count in subtitle
-          BlocBuilder<HalaqohCubit, HalaqohState>(
-            builder: (context, state) {
-              final subtitle = state.maybeWhen(
-                loaded: (list) => t.dashboard.halaqohCountDynamic(count: list.length),
-                orElse: () => t.dashboard.halaqohCount,
-              );
-              return MenuCard(
-                icon: Icons.auto_stories,
-                title: t.dashboard.kelolaHalaqoh,
-                subtitle: subtitle,
-                onTap: () => onNavigateToTab?.call(3),
-              );
-            },
-          ),
-          MenuCard(
-            icon: Icons.track_changes,
-            title: t.dashboard.kelolaTarget,
-            subtitle: t.dashboard.perKelas,
-            onTap: () => onNavigateToTab?.call(4),
+          SizedBox(height: 12.h),
+          Center(
+            child: SizedBox(
+              width: cardWidth,
+              height: cardHeight,
+              child: MenuCard(
+                icon: Icons.class_outlined,
+                title: t.kelasProgram.title,
+                subtitle: t.kelasProgram.aturKelasProgram,
+                onTap: () => context.router.push(const KelolaKelasProgramRoute()),
+              ),
+            ),
           ),
         ],
       ),

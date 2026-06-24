@@ -947,7 +947,7 @@ class _TranslationsWaliSantriDashboardId implements TranslationsWaliSantriDashbo
 	@override String get extraMemorization => 'Hafalan Tambahan (Ekstra)';
 	@override String juzList({required Object juz}) => 'Juz: ${juz}';
 	@override String extraJuzTarget({required Object count}) => 'Tambahan : ${count} Juz';
-	@override String halaqohInfo({required Object kelas, required Object halaqoh}) => 'Kelas ${kelas} | Halaqoh ${halaqoh}';
+	@override String halaqohInfo({required Object kelas, required Object halaqoh}) => 'Kelas ${kelas} | ${halaqoh}';
 }
 
 // Path: waliSantriNav
@@ -1874,7 +1874,7 @@ extension on TranslationsId {
 			case 'waliSantriDashboard.extraMemorization': return 'Hafalan Tambahan (Ekstra)';
 			case 'waliSantriDashboard.juzList': return ({required Object juz}) => 'Juz: ${juz}';
 			case 'waliSantriDashboard.extraJuzTarget': return ({required Object count}) => 'Tambahan : ${count} Juz';
-			case 'waliSantriDashboard.halaqohInfo': return ({required Object kelas, required Object halaqoh}) => 'Kelas ${kelas} | Halaqoh ${halaqoh}';
+			case 'waliSantriDashboard.halaqohInfo': return ({required Object kelas, required Object halaqoh}) => 'Kelas ${kelas} | ${halaqoh}';
 			case 'waliSantriNav.home': return 'Home';
 			case 'waliSantriNav.hafalan': return 'Hafalan';
 			case 'waliSantriNav.absensi': return 'Absensi';

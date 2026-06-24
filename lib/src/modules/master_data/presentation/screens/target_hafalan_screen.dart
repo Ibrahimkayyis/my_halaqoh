@@ -10,6 +10,8 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_ha
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/edit_target_dialog.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/widgets/target_kelas_card.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_state.dart';
 
 /// Target Hafalan screen (Tab 4 & Menu Card)
 class TargetHafalanScreen extends StatefulWidget {
@@ -24,8 +26,6 @@ class TargetHafalanScreen extends StatefulWidget {
 class _TargetHafalanScreenState extends State<TargetHafalanScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  final List<String> _kelasLevels = ['7', '8', '9', '10', '11', '12'];
 
   @override
   void initState() {
@@ -190,11 +190,17 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
 
   Widget _buildClassList(
       List<TargetHafalanModel> allTargets, String program) {
+    final kelasState = context.watch<KelasCubit>().state;
+    final kelasLevels = kelasState.maybeWhen(
+      loaded: (list) => list.map((k) => k.nama).toList(),
+      orElse: () => <String>[],
+    );
+
     return ListView.builder(
       padding: EdgeInsets.only(top: 4.h, bottom: 80.h),
-      itemCount: _kelasLevels.length,
+      itemCount: kelasLevels.length,
       itemBuilder: (context, index) {
-        final kelas = _kelasLevels[index];
+        final kelas = kelasLevels[index];
         final kurikulum = CurriculumData.getKurikulum(kelas, program);
         if (kurikulum == null) return const SizedBox.shrink();
 
