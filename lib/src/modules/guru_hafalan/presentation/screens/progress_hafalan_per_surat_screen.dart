@@ -61,7 +61,7 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
       );
 
       return {
-        'name': surah?.name ?? 'Unknown',
+        'name': surah?.name ?? t.progressHafalanPerSurat.unknownSurah,
         'totalAyat': totalAyat,
         'memorized': memorized,
       };
@@ -93,7 +93,7 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
                   ),
                   SizedBox(width: 4.w),
                   Text(
-                    'Juz $juzNumber',
+                    t.progressHafalanPerSurat.juzTitle(juz: juzNumber),
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
@@ -192,7 +192,7 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'NIS: $nis',
+                  t.progressHafalanPerSurat.nisLabel(nis: nis),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
@@ -212,13 +212,21 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
     final surahName = surah['name'] as String;
     final totalAyat = surah['totalAyat'] as int;
     final memorized = surah['memorized'] as int;
-    final progressVal = totalAyat > 0 ? (memorized / totalAyat * 100) : 0.0;
-    String percentStr;
-    if (progressVal == 0 || progressVal == 100) {
-      percentStr = progressVal.toInt().toString();
-    } else {
-      percentStr = progressVal.toStringAsFixed(1);
+
+    String formatPercent(double v) {
+      if (v == 0) return '0';
+      if (v >= 1) {
+        final rounded = double.parse(v.toStringAsFixed(1));
+        return rounded == rounded.roundToDouble()
+            ? rounded.toInt().toString()
+            : rounded.toStringAsFixed(1);
+      }
+      final s = v.toStringAsFixed(2);
+      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
     }
+
+    final progressVal = totalAyat > 0 ? (memorized / totalAyat * 100) : 0.0;
+    final percentStr = formatPercent(progressVal);
     final progress = totalAyat > 0 ? memorized / totalAyat : 0.0;
 
     String statusLabel;
@@ -268,7 +276,7 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    '$totalAyat Ayat',
+                    t.progressHafalanPerSurat.ayatCount(count: totalAyat),
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w400,
@@ -279,7 +287,7 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
                 ],
               ),
               Text(
-                '$percentStr%',
+                t.progressHafalanPerSurat.percent(percent: percentStr),
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w800,

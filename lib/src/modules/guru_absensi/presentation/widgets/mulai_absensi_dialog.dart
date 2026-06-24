@@ -43,16 +43,16 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
   List<_SessionDef> get _sessionDefs {
     if (widget.programType == 'takhassus') {
       return [
-        _SessionDef('shubuh', 'Shubuh', Icons.wb_twilight),
-        _SessionDef('dhuha', 'Dhuha', Icons.wb_sunny_outlined),
-        _SessionDef('siang', 'Siang', Icons.wb_sunny),
-        _SessionDef('ashar', 'Sore/Ashar', Icons.wb_sunny),
-        _SessionDef('maghrib', 'Maghrib', Icons.nights_stay_outlined),
+        _SessionDef('shubuh', t.absensi.mulaiAbsensi.shubuh, Icons.wb_twilight),
+        _SessionDef('dhuha', t.absensi.mulaiAbsensi.dhuha, Icons.wb_sunny_outlined),
+        _SessionDef('siang', t.absensi.mulaiAbsensi.siang, Icons.wb_sunny),
+        _SessionDef('ashar', t.absensi.mulaiAbsensi.soreAshar, Icons.wb_sunny),
+        _SessionDef('maghrib', t.absensi.mulaiAbsensi.maghrib, Icons.nights_stay_outlined),
       ];
     }
     return [
-      _SessionDef('shubuh', 'Shubuh', Icons.wb_twilight),
-      _SessionDef('maghrib', 'Maghrib', Icons.nights_stay_outlined),
+      _SessionDef('shubuh', t.absensi.mulaiAbsensi.shubuh, Icons.wb_twilight),
+      _SessionDef('maghrib', t.absensi.mulaiAbsensi.maghrib, Icons.nights_stay_outlined),
     ];
   }
 
@@ -186,7 +186,7 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
                   );
                 },
                 icon: Icons.checklist,
-                label: 'Tandai Semua Hadir',
+                label: t.absensi.mulaiAbsensi.markAllPresent,
               ),
             ],
           ),

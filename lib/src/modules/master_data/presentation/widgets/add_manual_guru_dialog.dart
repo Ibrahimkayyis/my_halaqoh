@@ -72,7 +72,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
   bool _isUploading = false;
   bool _isSaving = false;
 
-  final List<String> _programList = ['Reguler', 'Takhassus'];
+  List<String> get _programList => [t.targetHafalan.reguler, t.targetHafalan.takhassus];
 
   bool get _isEditMode => widget.initialNip != null;
 
@@ -85,7 +85,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
       _phoneController.text = widget.initialPhone!;
     }
     if (widget.initialProgram != null) {
-      _selectedProgram = widget.initialProgram == 'T' ? 'Takhassus' : 'Reguler';
+      _selectedProgram = widget.initialProgram == 'T' ? t.targetHafalan.takhassus : t.targetHafalan.reguler;
     }
     if (widget.initialProfilePicture != null) {
       _currentProfilePicture = widget.initialProfilePicture;
@@ -128,7 +128,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
           context: context,
           builder: (ctx) => AlertDialog(
             title: Text(
-              'Peringatan',
+              t.general.warning,
               style: TextStyle(
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.bold,
@@ -136,13 +136,13 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
               ),
             ),
             content: Text(
-              'Guru dengan NIP ${_nipController.text.trim()} sudah terdaftar di sistem.',
+              t.guru.nipExistsError(nip: _nipController.text.trim()),
               style: const TextStyle(fontFamily: 'Poppins'),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Tutup', style: TextStyle(fontFamily: 'Poppins')),
+                child: Text(t.general.close, style: const TextStyle(fontFamily: 'Poppins')),
               ),
             ],
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
@@ -159,7 +159,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
     setState(() => _isSaving = true);
 
     try {
-      final p = _selectedProgram == 'Takhassus' ? 'T' : 'R';
+      final p = _selectedProgram == t.targetHafalan.takhassus ? 'T' : 'R';
       String? uploadedUrl = _currentProfilePicture;
 
       // Upload process
@@ -252,7 +252,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  _isEditMode ? 'Edit Data Guru' : t.addData.addGuruManual,
+                  _isEditMode ? t.guru.editTitle : t.addData.addGuruManual,
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
@@ -347,8 +347,8 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
               keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(13)],
               validator: (value) {
-                if (value == null || value.isEmpty) return 'NIP wajib diisi';
-                if (value.length < 12 || value.length > 13) return 'NIP harus 12 atau 13 digit';
+                if (value == null || value.isEmpty) return t.guru.nipRequired;
+                if (value.length < 12 || value.length > 13) return t.guru.nipDigitsError;
                 return null;
               },
             ),
@@ -362,7 +362,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
               controller: _namaController,
               hint: t.addData.namaGuruHint,
               validator: (value) {
-                if (value == null || value.trim().isEmpty) return 'Nama wajib diisi';
+                if (value == null || value.trim().isEmpty) return t.guru.nameRequired;
                 return null;
               },
             ),
@@ -379,7 +379,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(13)],
               validator: (value) {
                 if (value != null && value.isNotEmpty) {
-                  if (value.length < 10 || value.length > 13) return 'Nomor HP harus 10-13 digit (jika diisi)';
+                  if (value.length < 10 || value.length > 13) return t.guru.phoneDigitsError;
                 }
                 return null;
               },
@@ -387,10 +387,10 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
             SizedBox(height: 18.h),
 
             // Program field
-            _buildLabel(colors, 'Program Halaqoh'),
+            _buildLabel(colors, t.guru.programHalaqohLabel),
             SizedBox(height: 8.h),
             CustomDropdown<String>(
-              hintText: 'Pilih Program',
+              hintText: t.guru.chooseProgramHint,
               items: _programList,
               initialItem: _selectedProgram,
               onChanged: (value) {
@@ -421,7 +421,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Program wajib dipilih';
+                  return t.guru.programRequired;
                 }
                 return null;
               },
@@ -432,7 +432,7 @@ class _AddManualGuruDialogState extends State<AddManualGuruDialog> {
             PrimaryButton(
               width: double.infinity,
               onPressed: _isSaving ? null : _validateAndSubmit,
-              label: _isSaving ? 'Menyimpan...' : t.addData.simpan,
+              label: _isSaving ? t.general.saving : t.addData.simpan,
               icon: _isSaving ? Icons.hourglass_top : Icons.check_circle,
               borderRadius: 25.r,
             ),

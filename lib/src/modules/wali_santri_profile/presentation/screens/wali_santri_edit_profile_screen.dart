@@ -41,7 +41,22 @@ class _WaliSantriEditProfileScreenState
   String? _selectedHubungan;
 
   /// Dropdown options for guardian relationship
-  static const List<String> _hubunganOptions = ['Ayah', 'Ibu', 'Saudara'];
+  List<String> get _hubunganOptions => t.editProfile.hubunganOptions;
+
+  String? _toDisplayHubungan(String? dbHub) {
+    if (dbHub == 'Ayah') return t.editProfile.hubunganOptions[0];
+    if (dbHub == 'Ibu') return t.editProfile.hubunganOptions[1];
+    if (dbHub == 'Saudara') return t.editProfile.hubunganOptions[2];
+    return dbHub;
+  }
+
+  String? _toDbHubungan(String? displayHub) {
+    if (displayHub == null) return null;
+    if (displayHub == t.editProfile.hubunganOptions[0]) return 'Ayah';
+    if (displayHub == t.editProfile.hubunganOptions[1]) return 'Ibu';
+    if (displayHub == t.editProfile.hubunganOptions[2]) return 'Saudara';
+    return displayHub;
+  }
 
   late final WaliSantriProfileCubit _profileCubit;
   String _linkedDocId = '';
@@ -77,20 +92,19 @@ class _WaliSantriEditProfileScreenState
 
     _namaController.text = santri.nama;
     _nisController.text = santri.nis;
-    _kelasController.text = 'Kelas ${santri.kelas}';
+    _kelasController.text = t.progressHafalanPerJuz.kelasLabel(kelas: santri.kelas);
     _programController.text =
-        santri.program == 'T' ? 'Takhassus' : 'Reguler';
+        santri.program == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler;
     _currentProfilePictureUrl = santri.profilePicture;
 
     // Guardian info (waliSantri)
     if (santri.waliSantri != null) {
       _waliNamaController.text = santri.waliSantri!.nama;
       _waliPhoneController.text = santri.waliSantri!.phone;
-      // Pre-select hubungan in dropdown — fallback to null if value not in list
+      // Pre-select hubungan in dropdown
       final hub = santri.waliSantri!.hubungan;
       setState(() {
-        _selectedHubungan =
-            _hubunganOptions.contains(hub) ? hub : null;
+        _selectedHubungan = _toDisplayHubungan(hub);
       });
     }
   }
@@ -142,7 +156,7 @@ class _WaliSantriEditProfileScreenState
     final updatedWaliSantri = WaliSantriModel(
       nama: _waliNamaController.text.trim(),
       phone: _waliPhoneController.text.trim(),
-      hubungan: _selectedHubungan ??
+      hubungan: _toDbHubungan(_selectedHubungan) ??
           (currentSantri.waliSantri?.hubungan ?? 'Ayah'),
     );
 
@@ -162,7 +176,7 @@ class _WaliSantriEditProfileScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Profil berhasil diperbarui',
+              t.editProfile.successMessage,
               style: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp),
             ),
             backgroundColor: Colors.green,
@@ -178,7 +192,7 @@ class _WaliSantriEditProfileScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Gagal memperbarui profil',
+              t.editProfile.failedMessage,
               style: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp),
             ),
             backgroundColor: Colors.redAccent,
@@ -260,7 +274,7 @@ class _WaliSantriEditProfileScreenState
                         }
                       },
                       child: Text(
-                        'Coba Lagi',
+                        t.editProfile.tryAgain,
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           color: colors.primary,
@@ -300,7 +314,7 @@ class _WaliSantriEditProfileScreenState
                               SizedBox(height: 14.h),
                               _buildTextField(
                                 colors,
-                                label: 'NIS',
+                                label: t.editProfile.nis,
                                 controller: _nisController,
                                 suffixIcon: Icons.lock,
                                 iconColor:
@@ -310,7 +324,7 @@ class _WaliSantriEditProfileScreenState
                               SizedBox(height: 14.h),
                               _buildTextField(
                                 colors,
-                                label: 'Kelas',
+                                label: t.editProfile.kelas,
                                 controller: _kelasController,
                                 suffixIcon: Icons.lock,
                                 iconColor:
@@ -320,7 +334,7 @@ class _WaliSantriEditProfileScreenState
                               SizedBox(height: 14.h),
                               _buildTextField(
                                 colors,
-                                label: 'Program',
+                                label: t.editProfile.program,
                                 controller: _programController,
                                 suffixIcon: Icons.lock,
                                 iconColor:
@@ -334,11 +348,11 @@ class _WaliSantriEditProfileScreenState
                           // KONTAK WALI section
                           _buildSectionCard(
                             colors,
-                            title: 'Kontak Wali',
+                            title: t.editProfile.kontakWali,
                             children: [
                               _buildTextField(
                                 colors,
-                                label: 'Nama Wali',
+                                label: t.editProfile.namaWali,
                                 controller: _waliNamaController,
                                 suffixIcon: Icons.edit,
                                 iconColor: colors.textSecondary,
@@ -623,7 +637,7 @@ class _WaliSantriEditProfileScreenState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Hubungan',
+          t.editProfile.hubungan,
           style: TextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
@@ -633,7 +647,7 @@ class _WaliSantriEditProfileScreenState
         ),
         SizedBox(height: 6.h),
         CustomDropdown<String>(
-          hintText: 'Pilih hubungan',
+          hintText: t.editProfile.pilihHubungan,
           items: _hubunganOptions,
           initialItem: _selectedHubungan,
           onChanged: (value) => setState(() => _selectedHubungan = value),

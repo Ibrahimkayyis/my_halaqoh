@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
@@ -171,34 +172,6 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  static const _monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'Mei',
-    'Jun',
-    'Jul',
-    'Agu',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Des',
-  ];
-  static const _monthNamesFull = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
 
   void _switchRange(ReportRange r) {
     setState(() => _range = r);
@@ -230,10 +203,10 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
           : (_customEnd ?? DateTime(_year, _month + 1, 0)),
       firstDate: DateTime(2020),
       lastDate: DateTime(2030, 12, 31),
-      locale: const Locale('id', 'ID'),
-      helpText: isStart ? 'Pilih Tanggal Awal' : 'Pilih Tanggal Akhir',
-      confirmText: 'Pilih',
-      cancelText: 'Batal',
+      locale: Locale(t.$meta.locale.languageCode),
+      helpText: isStart ? t.laporanConfig.chooseStartDate : t.laporanConfig.chooseEndDate,
+      confirmText: t.laporanConfig.btnSelect,
+      cancelText: t.laporanConfig.btnCancel,
     );
     if (picked == null) return;
     setState(() {
@@ -329,7 +302,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
       children: [
         // Title
         Text(
-          'Unduh Laporan Absensi',
+          t.laporanConfig.titleAbsensi,
           style: TextStyle(
             fontSize: 17.sp,
             fontWeight: FontWeight.w700,
@@ -339,7 +312,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
         ),
         SizedBox(height: 4.h),
         Text(
-          'Pilih periode & konfigurasi laporan PDF santri.',
+          t.laporanConfig.subtitleAbsensi,
           style: TextStyle(
             fontSize: 12.sp,
             color: colors.textSecondary,
@@ -357,13 +330,13 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
         SizedBox(height: 20.h),
 
         // ── Range type cards ─────────────────────────────────────────
-        _SectionLabel(label: 'Rentang Waktu', colors: colors),
+        _SectionLabel(label: t.laporanConfig.timeRange, colors: colors),
         SizedBox(height: 8.h),
         Row(
           children: [
             _RangeCard(
               icon: Icons.view_week_rounded,
-              label: 'Mingguan',
+              label: t.laporanConfig.weekly,
               selected: _range == ReportRange.weekly,
               colors: colors,
               onTap: () => _switchRange(ReportRange.weekly),
@@ -371,7 +344,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
             SizedBox(width: 8.w),
             _RangeCard(
               icon: Icons.calendar_month_rounded,
-              label: 'Bulanan',
+              label: t.laporanConfig.monthly,
               selected: _range == ReportRange.monthly,
               colors: colors,
               onTap: () => _switchRange(ReportRange.monthly),
@@ -379,7 +352,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
             SizedBox(width: 8.w),
             _RangeCard(
               icon: Icons.tune_rounded,
-              label: 'Kustom',
+              label: t.laporanConfig.custom,
               selected: _range == ReportRange.semester,
               colors: colors,
               onTap: () => _switchRange(ReportRange.semester),
@@ -432,7 +405,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
                       ),
                       SizedBox(width: 10.w),
                       Text(
-                        'Membuat laporan...',
+                        t.laporanConfig.generatingReport,
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 14.sp,
@@ -447,7 +420,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
                       Icon(Icons.picture_as_pdf_rounded, size: 20.sp),
                       SizedBox(width: 8.w),
                       Text(
-                        'Buat Laporan PDF',
+                        t.laporanConfig.btnGeneratePdf,
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 14.sp,
@@ -497,7 +470,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
             ),
             Expanded(
               child: Text(
-                '${_monthNamesFull[_weekMonth - 1]} $_weekYear',
+                '${t.calendar.months[_weekMonth - 1]} $_weekYear',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13.sp,
@@ -587,7 +560,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
           itemBuilder: (_, i) {
             final selected = (i + 1) == _month;
             return _MonthChip(
-              label: _monthNames[i],
+              label: t.calendar.months[i].substring(0, 3),
               selected: selected,
               colors: colors,
               onTap: () => setState(() => _month = i + 1),
@@ -603,13 +576,13 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionLabel(label: 'Pilih Rentang Tanggal', colors: colors),
+        _SectionLabel(label: t.laporanConfig.selectDateRange, colors: colors),
         SizedBox(height: 10.h),
         Row(
           children: [
             Expanded(
               child: _DatePickerField(
-                label: 'Tanggal Awal',
+                label: t.laporanConfig.startDate,
                 date: _customStart,
                 icon: Icons.event_available_rounded,
                 colors: colors,
@@ -626,7 +599,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
             ),
             Expanded(
               child: _DatePickerField(
-                label: 'Tanggal Akhir',
+                label: t.laporanConfig.endDate,
                 date: _customEnd,
                 icon: Icons.event_rounded,
                 colors: colors,
@@ -657,7 +630,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
       children: [
         // Header
         Text(
-          'Laporan Siap!',
+          t.laporanConfig.readyTitle,
           style: TextStyle(
             fontSize: 17.sp,
             fontWeight: FontWeight.w700,
@@ -667,7 +640,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
         ),
         SizedBox(height: 4.h),
         Text(
-          'PDF berhasil dibuat. Pratinjau atau bagikan sekarang.',
+          t.laporanConfig.readySubtitle,
           style: TextStyle(
             fontSize: 12.sp,
             color: colors.textSecondary,
@@ -709,7 +682,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Laporan Absensi',
+                      t.laporanConfig.attendanceReport,
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -756,7 +729,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
             Expanded(
               child: _ActionButton(
                 icon: Icons.visibility_outlined,
-                label: 'Pratinjau',
+                label: t.laporanConfig.btnPreview,
                 isPrimary: false,
                 colors: colors,
                 onTap: () => context.read<LaporanAbsensiCubit>().previewPdf(
@@ -769,7 +742,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
             Expanded(
               child: _ActionButton(
                 icon: Icons.share_rounded,
-                label: 'Bagikan',
+                label: t.laporanConfig.btnShare,
                 isPrimary: true,
                 colors: colors,
                 onTap: () => context.read<LaporanAbsensiCubit>().sharePdf(
@@ -791,7 +764,7 @@ class _LaporanKonfigurasiSheetState extends State<LaporanKonfigurasiSheet>
               color: colors.textSecondary,
             ),
             label: Text(
-              'Buat laporan baru',
+              t.laporanConfig.btnCreateNewReport,
               style: TextStyle(
                 fontSize: 12.sp,
                 color: colors.textSecondary,
@@ -977,7 +950,7 @@ class _WeekChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmt = DateFormat('dd MMM', 'id');
+    final fmt = DateFormat('dd MMM', t.$meta.locale.languageCode);
     final label = '${fmt.format(weekStart)} – ${fmt.format(weekEnd)}';
     // Week number approximation
     final weekNum =
@@ -1106,8 +1079,8 @@ class _DatePickerField extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasDate = date != null;
     final text = hasDate
-        ? DateFormat('dd MMM yyyy', 'id').format(date!)
-        : 'Pilih tanggal';
+        ? DateFormat('dd MMM yyyy', t.$meta.locale.languageCode).format(date!)
+        : t.laporanConfig.selectDateHint;
 
     return GestureDetector(
       onTap: onTap,
@@ -1181,7 +1154,7 @@ class _DurationBadge extends StatelessWidget {
           Icon(Icons.info_outline_rounded, size: 13.sp, color: colors.primary),
           SizedBox(width: 5.w),
           Text(
-            'Total $days hari dipilih',
+            t.laporanConfig.totalDaysSelected(days: days),
             style: TextStyle(
               fontSize: 11.sp,
               color: colors.primary,
@@ -1207,7 +1180,7 @@ class _PreviewBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmt = DateFormat('dd MMM yyyy', 'id');
+    final fmt = DateFormat('dd MMM yyyy', t.$meta.locale.languageCode);
     final days = endDate.difference(startDate).inDays + 1;
     return Container(
       width: double.infinity,
@@ -1226,7 +1199,7 @@ class _PreviewBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Periode Laporan',
+                  t.laporanConfig.reportPeriod,
                   style: TextStyle(
                     fontSize: 9.sp,
                     color: colors.textSecondary,
@@ -1253,7 +1226,7 @@ class _PreviewBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(6.r),
             ),
             child: Text(
-              '$days hr',
+              t.laporanConfig.daysShort(days: days),
               style: TextStyle(
                 fontSize: 10.sp,
                 fontWeight: FontWeight.w700,

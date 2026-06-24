@@ -37,15 +37,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
   int _currentMonth = DateTime.now().month;
   int _currentYear = DateTime.now().year;
 
-  final List<String> _dayNames = [
-    'AHA',
-    'SEN',
-    'SEL',
-    'RAB',
-    'KAM',
-    'JUM',
-    'SAB',
-  ];
+  List<String> get _dayNames => t.calendar.daysAbbrSundayFirst;
 
   late AbsensiCubit _absensiCubit;
 
@@ -224,7 +216,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
               appBar: AppBar(title: Text(t.riwayatAbsensi.title)),
               body: Center(
                 child: Text(
-                  'Error: $errorMsg',
+                  t.riwayatAbsensi.error(message: errorMsg!),
                   style: TextStyle(color: Colors.red),
                 ),
               ),
@@ -308,7 +300,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                                 ),
                                 SizedBox(height: 2.h),
                                 Text(
-                                  'NIS: ${widget.nis}',
+                                  t.riwayatAbsensi.nisLabel(nis: widget.nis),
                                   style: TextStyle(
                                     fontSize: 13.sp,
                                     color: Colors.white.withValues(alpha: 0.85),
@@ -562,7 +554,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                           ),
                           SizedBox(height: 14.h),
                           Text(
-                            'Keterangan Sesi',
+                            t.riwayatAbsensi.sessionKeterangan,
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
@@ -577,32 +569,40 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                             children: _effectiveProgramType == 'takhassus'
                                 ? [
                                     _buildSessionLabel(
-                                      'P',
-                                      'Pagi (Shubuh)',
-                                      colors,
-                                    ),
-                                    _buildSessionLabel('D', 'Dhuha', colors),
-                                    _buildSessionLabel('S', 'Siang', colors),
-                                    _buildSessionLabel(
-                                      'A',
-                                      'Sore (Ashar)',
+                                      t.riwayatAbsensi.abbrTakhassus[0],
+                                      t.riwayatAbsensi.sessionPagiShubuh,
                                       colors,
                                     ),
                                     _buildSessionLabel(
-                                      'M',
-                                      'Malam (Maghrib)',
+                                      t.riwayatAbsensi.abbrTakhassus[1],
+                                      t.riwayatAbsensi.sessionDhuha,
+                                      colors,
+                                    ),
+                                    _buildSessionLabel(
+                                      t.riwayatAbsensi.abbrTakhassus[2],
+                                      t.riwayatAbsensi.sessionSiang,
+                                      colors,
+                                    ),
+                                    _buildSessionLabel(
+                                      t.riwayatAbsensi.abbrTakhassus[3],
+                                      t.riwayatAbsensi.sessionSoreAshar,
+                                      colors,
+                                    ),
+                                    _buildSessionLabel(
+                                      t.riwayatAbsensi.abbrTakhassus[4],
+                                      t.riwayatAbsensi.sessionMalamMaghrib,
                                       colors,
                                     ),
                                   ]
                                 : [
                                     _buildSessionLabel(
-                                      'P',
-                                      'Pagi (Shubuh)',
+                                      t.riwayatAbsensi.abbrReguler[0],
+                                      t.riwayatAbsensi.sessionPagiShubuh,
                                       colors,
                                     ),
                                     _buildSessionLabel(
-                                      'M',
-                                      'Malam (Maghrib)',
+                                      t.riwayatAbsensi.abbrReguler[1],
+                                      t.riwayatAbsensi.sessionMalamMaghrib,
                                       colors,
                                     ),
                                   ],

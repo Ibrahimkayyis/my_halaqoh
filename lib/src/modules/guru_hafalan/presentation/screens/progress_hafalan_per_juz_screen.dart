@@ -98,7 +98,7 @@ class _ProgressHafalanPerJuzScreenState
             final available = allJuz.where((j) {
               if (allTargetJuzNums.contains(j.number)) return false;
               if (searchQuery.isEmpty) return true;
-              return 'Juz ${j.number}'.toLowerCase().contains(
+              return t.progressHafalanPerJuz.juzLabel(juz: j.number).toLowerCase().contains(
                     searchQuery.toLowerCase(),
                   );
             }).toList();
@@ -120,7 +120,7 @@ class _ProgressHafalanPerJuzScreenState
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Tambah Target Hafalan',
+                        t.progressHafalanPerJuz.tambahTargetHafalan,
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w700,
@@ -166,11 +166,7 @@ class _ProgressHafalanPerJuzScreenState
                             SizedBox(width: 8.w),
                             Expanded(
                               child: Text(
-                                'Perhatian: $juzLabels belum diselesaikan. '
-                                'Pastikan santri tetap menyelesaikan target '
-                                'hafalan semester ini. Anda tetap dapat '
-                                'menambah target baru, namun target yang '
-                                'sudah ditetapkan wajib diselesaikan terlebih dahulu.',
+                                t.progressHafalanPerJuz.warningBanner(juzLabels: juzLabels),
                                 style: TextStyle(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
@@ -205,7 +201,7 @@ class _ProgressHafalanPerJuzScreenState
                           color: colors.textPrimary,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Cari Juz (contoh: Juz 1)',
+                          hintText: t.progressHafalanPerJuz.cariJuz,
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
                             fontFamily: 'Poppins',
@@ -264,7 +260,7 @@ class _ProgressHafalanPerJuzScreenState
                                       CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Juz ${juzModel.number}',
+                                      t.progressHafalanPerJuz.juzLabel(juz: juzModel.number),
                                       style: TextStyle(
                                         fontSize: 15.sp,
                                         fontWeight: FontWeight.w700,
@@ -274,7 +270,7 @@ class _ProgressHafalanPerJuzScreenState
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
-                                      '${juzModel.surahs.length} Surat',
+                                      t.progressHafalanPerJuz.surahCount(count: juzModel.surahs.length),
                                       style: TextStyle(
                                         fontSize: 12.sp,
                                         fontWeight: FontWeight.w400,
@@ -296,7 +292,7 @@ class _ProgressHafalanPerJuzScreenState
                                   // tampilkan dialog konfirmasi terlebih dahulu
                                   if (hasWarning) {
                                     final juzLabels = incompleteJuz
-                                        .map((n) => 'Juz $n')
+                                        .map((n) => t.progressHafalanPerJuz.juzLabel(juz: n))
                                         .join(', ');
                                     final confirmed =
                                         await showDialog<bool>(
@@ -320,7 +316,7 @@ class _ProgressHafalanPerJuzScreenState
                                               ),
                                               SizedBox(width: 8.w),
                                               Text(
-                                                'Target Belum Selesai',
+                                                t.progressHafalanPerJuz.targetBelumSelesai,
                                                 style: TextStyle(
                                                   fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.w700,
@@ -331,11 +327,7 @@ class _ProgressHafalanPerJuzScreenState
                                             ],
                                           ),
                                           content: Text(
-                                            '$juzLabels belum diselesaikan semester ini.\n\n'
-                                            'Ingatkan santri untuk tetap menyelesaikan '
-                                            'target yang sudah ditetapkan. Apakah Anda '
-                                            'yakin ingin menambahkan Juz ${juzModel.number} '
-                                            'sebagai target tambahan?',
+                                            t.progressHafalanPerJuz.confirmAddExtraJuzMessage(juzLabels: juzLabels, nextJuz: juzModel.number),
                                             style: TextStyle(
                                               fontFamily: 'Poppins',
                                               fontSize: 13.sp,
@@ -349,7 +341,7 @@ class _ProgressHafalanPerJuzScreenState
                                                   Navigator.pop(
                                                       dialogCtx, false),
                                               child: Text(
-                                                'Batal',
+                                                t.progressHafalanPerJuz.batal,
                                                 style: TextStyle(
                                                   fontFamily: 'Poppins',
                                                   color: dColors.textSecondary,
@@ -361,7 +353,7 @@ class _ProgressHafalanPerJuzScreenState
                                                   Navigator.pop(
                                                       dialogCtx, true),
                                               child: Text(
-                                                'Ya, Tambahkan',
+                                                t.progressHafalanPerJuz.yaTambahkan,
                                                 style: TextStyle(
                                                   fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.w700,
@@ -388,8 +380,8 @@ class _ProgressHafalanPerJuzScreenState
                                     SnackBar(
                                       content: Text(
                                         success
-                                            ? 'Juz ${juzModel.number} ditambahkan sebagai target'
-                                            : 'Gagal menyimpan target, coba lagi',
+                                            ? t.progressHafalanPerJuz.successAddTarget(juz: juzModel.number)
+                                            : t.progressHafalanPerJuz.failedSaveTarget,
                                         style: const TextStyle(
                                           fontFamily: 'Poppins',
                                         ),
@@ -433,7 +425,7 @@ class _ProgressHafalanPerJuzScreenState
                       child: CustomOutlinedButton(
                         height: 50.h,
                         onPressed: () => Navigator.pop(ctx),
-                        label: 'Tutup',
+                        label: t.progressHafalanPerJuz.tutup,
                         borderRadius: 14.r,
                       ),
                     ),
@@ -724,7 +716,7 @@ class _ProgressHafalanPerJuzScreenState
                     SizedBox(width: 6.w),
                     Flexible(
                       child: Text(
-                        'Ketuk + untuk menambah target juz secara manual',
+                        t.progressHafalanPerJuz.teacherCanAddHint,
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w500,
@@ -787,7 +779,7 @@ class _ProgressHafalanPerJuzScreenState
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'NIS: ${widget.nis}',
+                  t.progressHafalanPerJuz.nisLabel(nis: widget.nis),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
@@ -822,13 +814,20 @@ class _ProgressHafalanPerJuzScreenState
     final total = juz['total'] as int;
     final completed = juz['completed'] as int;
 
-    final progressVal = total > 0 ? (completed / total * 100) : 0.0;
-    String percentStr;
-    if (progressVal == 0 || progressVal == 100) {
-      percentStr = progressVal.toInt().toString();
-    } else {
-      percentStr = progressVal.toStringAsFixed(1);
+    String formatPercent(double v) {
+      if (v == 0) return '0';
+      if (v >= 1) {
+        final rounded = double.parse(v.toStringAsFixed(1));
+        return rounded == rounded.roundToDouble()
+            ? rounded.toInt().toString()
+            : rounded.toStringAsFixed(1);
+      }
+      final s = v.toStringAsFixed(2);
+      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
     }
+
+    final progressVal = total > 0 ? (completed / total * 100) : 0.0;
+    final percentStr = formatPercent(progressVal);
 
     final progress = total > 0 ? completed / total : 0.0;
 
@@ -866,7 +865,7 @@ class _ProgressHafalanPerJuzScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Juz $juzNum',
+                      t.progressHafalanPerJuz.juzLabel(juz: juzNum),
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -876,7 +875,7 @@ class _ProgressHafalanPerJuzScreenState
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      '$completed dari $total Ayat Selesai',
+                      t.progressHafalanPerJuz.ayatCompletedInfo(completed: completed, total: total),
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
@@ -887,7 +886,7 @@ class _ProgressHafalanPerJuzScreenState
                   ],
                 ),
                 Text(
-                  '$percentStr %',
+                  t.progressHafalanPerJuz.percent(percent: percentStr),
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w800,

@@ -18,6 +18,10 @@ abstract class AbsensiRemoteDataSource {
   /// Create a new attendance document. Returns the document ID.
   Future<String> add(AbsensiModel model);
 
+  /// Create or update an attendance document using the model's own ID.
+  /// Preferred over [add] for offline-first writes with client-generated IDs.
+  Future<void> put(AbsensiModel model);
+
   /// Update an existing attendance document.
   Future<void> update(AbsensiModel model);
 

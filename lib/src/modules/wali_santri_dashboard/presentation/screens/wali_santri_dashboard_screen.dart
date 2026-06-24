@@ -72,7 +72,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
     }
     if (halaqohId != null && halaqohId != _loadedHalaqohId) {
       _loadedHalaqohId = halaqohId;
-      _absensiCubit.watchByHalaqoh(halaqohId);
+      _absensiCubit.watchByHalaqohFromRemote(halaqohId);
     }
   }
 
@@ -189,11 +189,11 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
             // ── Green gradient profile header ──
             _buildProfileHeader(
               colors: colors,
-              santriName: santriName.isNotEmpty ? santriName : 'Memuat...',
+              santriName: santriName.isNotEmpty ? santriName : t.waliSantriDashboard.loading,
               nis: nis,
               halaqohInfo: myHalaqoh != null
-                  ? 'Kelas ${myHalaqoh!.kelas}${myHalaqoh!.program} | Halaqoh ${myHalaqoh!.nama}'
-                  : 'Belum terdaftar di Halaqoh mana pun',
+                  ? t.waliSantriDashboard.halaqohInfo(kelas: '${myHalaqoh!.kelas}${myHalaqoh!.program}', halaqoh: myHalaqoh!.nama)
+                  : t.waliSantriDashboard.notRegisteredHalaqoh,
               guruName: myHalaqoh?.guruNama,
               profilePictureUrl: mySantri?.profilePicture,
             ),
@@ -326,7 +326,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
               // NIS
               if (nis.isNotEmpty)
                 Text(
-                  'NIS: $nis',
+                  t.waliSantriDashboard.nis(nis: nis),
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
@@ -352,7 +352,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
               // Guru
               if (guruName != null)
                 Text(
-                  'Guru: $guruName',
+                  t.waliSantriDashboard.guru(name: guruName),
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w400,
@@ -380,37 +380,50 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
         ? TargetHafalanHelper.getTargetJuzList(target, santri.kelas, santri.program)
         : <int>[];
 
-    // ── Juz that already have real memorized ayat (never hide progress) ───────
+    // ── Admin progress calculation ────────────────────────────────────────────
+    final int juzTargetAdmin = adminJuzList.length;
+    double juzCompletedAdmin = 0.0;
+    if (progressData != null) {
+      for (final juzNum in adminJuzList) {
+        final jp = progressData.juzProgressList
+            .where((j) => j.juzNumber == juzNum)
+            .firstOrNull;
+        if (jp != null && jp.totalAyat > 0) {
+          juzCompletedAdmin += jp.memorizedAyat / jp.totalAyat;
+        }
+      }
+    }
+
+    final double progressAdmin = juzTargetAdmin > 0 ? juzCompletedAdmin / juzTargetAdmin : 0.0;
+    final double percentValueAdmin = progressAdmin * 100;
+
+    // ── Extra juz calculation (not in admin list) ─────────────────────────────
     final progressJuzNums = progressData?.juzProgressList
             .where((jp) => jp.memorizedAyat > 0)
             .map((jp) => jp.juzNumber)
             .toSet() ??
         <int>{};
 
-    // ── Combine: admin + guru extra + juz with real progress ──────────────────
-    final allTargetJuzNums = <int>{
-      ...adminJuzList,
+    final extraJuzList = <int>{
       ...extraJuz,
       ...progressJuzNums,
-    };
+    }.difference(adminJuzList.toSet()).toList()..sort();
 
-    final int juzTarget = allTargetJuzNums.length;
-
-    // ── Juz completed: sum fractional completion for each target juz ──────────
-    double juzCompleted = 0.0;
+    final int juzTargetExtra = extraJuzList.length;
+    double extraJuzCompleted = 0.0;
     if (progressData != null) {
-      for (final juzNum in allTargetJuzNums) {
+      for (final juzNum in extraJuzList) {
         final jp = progressData.juzProgressList
             .where((j) => j.juzNumber == juzNum)
             .firstOrNull;
         if (jp != null && jp.totalAyat > 0) {
-          juzCompleted += jp.memorizedAyat / jp.totalAyat;
+          extraJuzCompleted += jp.memorizedAyat / jp.totalAyat;
         }
       }
     }
 
-    final double progress = juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
-    final double percentValue = progress * 100;
+    final double progressExtra = juzTargetExtra > 0 ? extraJuzCompleted / juzTargetExtra : 0.0;
+    final double percentValueExtra = progressExtra * 100;
 
     // Format percentage accurately: show up to 2 decimal places, trim trailing zeros
     String formatPercent(double v) {
@@ -484,7 +497,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '${formatJuz(juzCompleted)} ',
+                      text: '${formatJuz(juzCompletedAdmin)} ',
                       style: TextStyle(
                         fontSize: 28.sp,
                         fontWeight: FontWeight.w800,
@@ -505,7 +518,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
                 ),
               ),
               Text(
-                '${formatPercent(percentValue)}%',
+                '${formatPercent(percentValueAdmin)}%',
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.w800,
@@ -521,7 +534,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(6.r),
             child: LinearProgressIndicator(
-              value: progress,
+              value: progressAdmin,
               minHeight: 10.h,
               backgroundColor: colors.border.withValues(alpha: 0.3),
               valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
@@ -530,10 +543,11 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
           SizedBox(height: 8.h),
 
           // Target text
+          SizedBox(height: 8.h),
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              t.waliSantriDashboard.target(target: '$juzTarget'),
+              t.waliSantriDashboard.target(target: '$juzTargetAdmin'),
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
@@ -542,6 +556,96 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
               ),
             ),
           ),
+
+          // ── BLOCK 2: TARGET EKSTRA (Only shown if has extra targets) ──
+          if (extraJuzList.isNotEmpty) ...[
+            SizedBox(height: 16.h),
+            const Divider(),
+            SizedBox(height: 12.h),
+            Text(
+              t.waliSantriDashboard.extraMemorization,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: colors.blue,
+                fontFamily: 'Poppins',
+                letterSpacing: 0.3,
+              ),
+            ),
+            SizedBox(height: 10.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${formatJuz(extraJuzCompleted)} ',
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w800,
+                          color: colors.textPrimary,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      TextSpan(
+                        text: t.waliSantriDashboard.juzTerselesaikan,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w400,
+                          color: colors.textSecondary,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '${formatPercent(percentValueExtra)}%',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w800,
+                    color: colors.blue,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6.r),
+              child: LinearProgressIndicator(
+                value: progressExtra,
+                minHeight: 8.h,
+                backgroundColor: colors.border.withValues(alpha: 0.3),
+                valueColor: AlwaysStoppedAnimation<Color>(colors.blue),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  t.waliSantriDashboard.juzList(juz: extraJuzList.join(', ')),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w500,
+                    color: colors.textSecondary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                Text(
+                  t.waliSantriDashboard.extraJuzTarget(count: juzTargetExtra),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w500,
+                    color: colors.textSecondary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -559,7 +663,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
       now.month,
       now.year,
     );
-    final periodName = DateFormat.yMMMM('id').format(now);
+    final periodName = DateFormat.yMMMM(t.$meta.locale.languageCode).format(now);
 
     return Container(
       width: double.infinity,

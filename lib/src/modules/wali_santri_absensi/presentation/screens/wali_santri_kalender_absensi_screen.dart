@@ -43,6 +43,7 @@ class _WaliSantriKalenderAbsensiScreenState
   int _currentYear = DateTime.now().year;
 
   late AbsensiCubit _absensiCubit;
+  String? _watchedHalaqohId;
 
   List<String> get _sessionKeys {
     if (widget.programType == 'takhassus') {
@@ -53,15 +54,9 @@ class _WaliSantriKalenderAbsensiScreenState
 
   List<String> get _sessionLabels {
     if (widget.programType == 'takhassus') {
-      return [
-        'P = Pagi (Shubuh)',
-        'D = Dhuha',
-        'S = Siang',
-        'A = Sore (Ashar)',
-        'M = Malam (Maghrib)',
-      ];
+      return t.kalenderAbsensi.sessionsTakhassus;
     }
-    return ['Pagi (Kiri)', 'Malam (Kanan)'];
+    return t.kalenderAbsensi.sessionsReguler;
   }
 
   @override
@@ -78,6 +73,7 @@ class _WaliSantriKalenderAbsensiScreenState
   }
 
   void _loadData() {
+    if (!mounted) return;
     final authState = context.read<AuthCubit>().state;
     final halaqohState = context.read<HalaqohCubit>().state;
 
@@ -99,8 +95,12 @@ class _WaliSantriKalenderAbsensiScreenState
       orElse: () {},
     );
 
-    if (myHalaqoh != null) {
-      _absensiCubit.watchByHalaqoh(myHalaqoh!.id);
+    if (myHalaqoh != null && _watchedHalaqohId != myHalaqoh!.id) {
+      _watchedHalaqohId = myHalaqoh!.id;
+      // watchByHalaqohFromRemote: stream dari Firestore langsung.
+      // Wali santri berada di device berbeda dari guru — Hive lokal tidak
+      // diupdate oleh guru, sehingga harus stream dari Firestore agar realtime.
+      _absensiCubit.watchByHalaqohFromRemote(myHalaqoh!.id);
     }
   }
 
@@ -231,10 +231,19 @@ class _WaliSantriKalenderAbsensiScreenState
 
     final halaqohLabel = myHalaqoh?.nama ?? '-';
 
-    return BlocProvider.value(
-      value: _absensiCubit,
-      child: BlocBuilder<AbsensiCubit, AbsensiState>(
-        builder: (context, absensiState) {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) => _loadData(),
+        ),
+        BlocListener<HalaqohCubit, HalaqohState>(
+          listener: (context, state) => _loadData(),
+        ),
+      ],
+      child: BlocProvider.value(
+        value: _absensiCubit,
+        child: BlocBuilder<AbsensiCubit, AbsensiState>(
+          builder: (context, absensiState) {
           List<AbsensiModel> allRecords = [];
           absensiState.maybeWhen(
             loaded: (data) => allRecords = data,
@@ -457,7 +466,7 @@ class _WaliSantriKalenderAbsensiScreenState
                               SizedBox(width: 30.w),
                               _buildLegendDot(
                                 colors.yellow,
-                                'Sakit',
+                                t.kalenderAbsensi.sakit,
                                 colors,
                               ),
                             ],
@@ -465,7 +474,7 @@ class _WaliSantriKalenderAbsensiScreenState
                           SizedBox(height: 10.h),
                           Row(
                             children: [
-                              _buildLegendDot(colors.blue, 'Izin', colors),
+                              _buildLegendDot(colors.blue, t.kalenderAbsensi.izin, colors),
                               SizedBox(width: 30.w),
                               _buildLegendDot(
                                 colors.red,
@@ -531,8 +540,9 @@ class _WaliSantriKalenderAbsensiScreenState
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
   List<Widget> _buildCalendarRows(
     int daysInMonth,

@@ -65,14 +65,14 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
 
       if (file.bytes == null || file.bytes!.isEmpty) {
         setState(() {
-          _statusMessage = 'Gagal membaca file. Coba pilih file lain.';
+          _statusMessage = t.addData.bulkErrorFileRead;
         });
         return;
       }
 
       setState(() {
         _selectedBytes = file.bytes;
-        _statusMessage = 'File siap diproses: ${file.name}';
+        _statusMessage = t.addData.bulkFileReady(name: file.name);
         _isProcessing = false;
         _totalRows = 0;
         _currentRow = 0;
@@ -93,7 +93,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
 
     setState(() {
       _isProcessing = true;
-      _statusMessage = 'Membaca file...';
+      _statusMessage = t.addData.bulkStatusReading;
       _successCount = 0;
       _failCount = 0;
       _currentRow = 0;
@@ -120,7 +120,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
       if (rows.isEmpty || rows.length < 2) {
         setState(() {
           _isProcessing = false;
-          _statusMessage = 'File kosong atau tidak memiliki baris data!';
+          _statusMessage = t.addData.bulkErrorFileEmpty;
         });
         return;
       }
@@ -139,12 +139,12 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
       if (_totalRows == 0) {
         setState(() {
           _isProcessing = false;
-          _statusMessage = 'Tidak ada baris data yang valid untuk diunggah!';
+          _statusMessage = t.addData.bulkErrorNoValidRows;
         });
         return;
       }
 
-      setState(() => _statusMessage = 'Memproses $_totalRows baris...');
+      setState(() => _statusMessage = t.addData.bulkStatusProcessing(count: _totalRows));
 
       if (widget.importType == BulkImportType.guru) {
         await _processGuruRows(validRows);
@@ -197,7 +197,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
 
         if (mounted) {
           setState(() {
-            _statusMessage = 'Menyimpan $endIdx / ${models.length} ke server...';
+            _statusMessage = t.addData.bulkStatusSaving(current: endIdx, total: models.length);
           });
         }
         
@@ -228,7 +228,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
         _isProcessing = false;
         _currentRow = _totalRows;
         _statusMessage =
-            'Selesai! Sukses: $_successCount, Gagal: $_failCount\n(Data Gagal biasanya karena NIP sudah terdaftar)';
+            t.addData.bulkGuruFinished(success: _successCount, fail: _failCount);
       });
     }
   }
@@ -305,7 +305,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
         _isProcessing = false;
         _currentRow = _totalRows;
         _statusMessage =
-            'Selesai! Sukses: $_successCount, Gagal: $_failCount\n(Data Gagal biasanya karena NIS sudah terdaftar)';
+            t.addData.bulkSantriFinished(success: _successCount, fail: _failCount);
       });
     }
   }
@@ -475,7 +475,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
               _processUpload();
             },
             icon: isDone ? Icons.check_circle : Icons.cloud_upload,
-            label: isDone ? 'Selesai' : t.addData.bulkUploadButton,
+            label: isDone ? t.general.done : t.addData.bulkUploadButton,
             borderRadius: 25.r,
           ),
         ],

@@ -82,7 +82,7 @@ class _GuruListScreenState extends State<GuruListScreen> {
     if (guru.authUid == null || guru.authUid!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Guru ini belum memiliki akun yang terhubung.', style: TextStyle(fontFamily: 'Poppins')),
+          content: Text(t.guru.noAccountError, style: const TextStyle(fontFamily: 'Poppins')),
           backgroundColor: AppColors.of(context).error,
         ),
       );
@@ -97,21 +97,21 @@ class _GuruListScreenState extends State<GuruListScreen> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           backgroundColor: colors.surface,
           title: Text(
-            'Reset Password',
+            t.guru.resetPasswordTitle,
             style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: colors.textPrimary),
           ),
           content: Text(
-            'Apakah Anda yakin ingin mereset password untuk ${guru.nama}? Password akan dikembalikan ke default "generasi554".',
+            t.guru.resetPasswordConfirm(name: guru.nama),
             style: TextStyle(fontFamily: 'Poppins', color: colors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('Batal', style: TextStyle(fontFamily: 'Poppins', color: colors.textSecondary)),
+              child: Text(t.dialogs.batal, style: TextStyle(fontFamily: 'Poppins', color: colors.textSecondary)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text('Ya, Reset', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: colors.primary)),
+              child: Text(t.guru.resetPasswordButton, style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: colors.primary)),
             ),
           ],
         );
@@ -136,7 +136,7 @@ class _GuruListScreenState extends State<GuruListScreen> {
     if (error == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Password berhasil direset ke "generasi554".', style: TextStyle(fontFamily: 'Poppins')),
+          content: Text(t.guru.resetPasswordSuccess, style: const TextStyle(fontFamily: 'Poppins')),
           backgroundColor: AppColors.of(context).success,
         ),
       );
@@ -226,7 +226,7 @@ class _GuruListScreenState extends State<GuruListScreen> {
                     child: filtered.isEmpty
                         ? Center(
                             child: Text(
-                              'Belum ada data guru',
+                              t.guru.emptyList,
                               style: TextStyle(
                                 color: colors.textSecondary,
                                 fontFamily: 'Poppins',

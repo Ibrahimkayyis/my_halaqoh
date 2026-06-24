@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:printing/printing.dart';
 
 import '../../domain/models/laporan_absensi_halaqoh_config.dart';
@@ -47,7 +48,7 @@ class LaporanAbsensiHalaqohCubit extends Cubit<LaporanAbsensiHalaqohState> {
       _log.e('Halaqoh PDF generation failed', error: e, stackTrace: st);
       emit(
         LaporanAbsensiHalaqohState.error(
-          'Gagal membuat laporan: ${e.toString()}',
+          t.laporanConfig.errGenerate(error: e.toString()),
         ),
       );
     }
@@ -64,7 +65,7 @@ class LaporanAbsensiHalaqohCubit extends Cubit<LaporanAbsensiHalaqohState> {
       _log.e('Halaqoh PDF preview failed', error: e, stackTrace: st);
       emit(
         LaporanAbsensiHalaqohState.error(
-          'Gagal membuka pratinjau: ${e.toString()}',
+          t.laporanConfig.errPreview(error: e.toString()),
         ),
       );
     }
@@ -78,7 +79,7 @@ class LaporanAbsensiHalaqohCubit extends Cubit<LaporanAbsensiHalaqohState> {
       _log.e('Halaqoh PDF share failed', error: e, stackTrace: st);
       emit(
         LaporanAbsensiHalaqohState.error(
-          'Gagal berbagi laporan: ${e.toString()}',
+          t.laporanConfig.errShare(error: e.toString()),
         ),
       );
     }

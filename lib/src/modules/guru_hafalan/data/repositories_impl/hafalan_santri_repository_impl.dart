@@ -99,9 +99,7 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
         _log.i('seedFromRemoteIfEmpty: no records in Firestore for santriId=$santriId.');
         return;
       }
-      for (final record in remoteRecords) {
-        await _local.put(record); // isSynced: true via fromFirestore in mapper
-      }
+      await _local.putAll(remoteRecords); // isSynced: true via fromFirestore in mapper
       _log.i('seedFromRemoteIfEmpty: seeded ${remoteRecords.length} records into Hive for santriId=$santriId.');
     } catch (e, st) {
       // Non-fatal: screen shows empty state; user can retry by re-opening the screen.
@@ -110,10 +108,19 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
   }
 
   @override
+  Stream<List<HafalanSantriModel>> watchByHalaqohFromRemote(String halaqohId) {
+    return _remote.watchByHalaqoh(halaqohId).asyncMap((list) async {
+      await _local.putAll(list);
+      return list;
+    });
+  }
+
+  @override
   List<HafalanSantriModel> getHafalanByHalaqohAndDate(
       List<String> santriIds, DateTime date) {
     return _local.getHafalanByHalaqohAndDate(santriIds, date);
   }
+
 
   @override
   List<HafalanSantriModel> getRecentHafalanBySantriIds(

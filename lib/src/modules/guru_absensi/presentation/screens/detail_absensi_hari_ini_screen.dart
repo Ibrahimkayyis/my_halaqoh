@@ -93,10 +93,10 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
 
     if (_myHalaqoh?.program == 'T') {
       _sessionKeys = ['shubuh', 'dhuha', 'siang', 'ashar', 'maghrib'];
-      _sessionLabels = ['Pagi', 'Dhuha', 'Siang', 'Sore', 'Malam'];
+      _sessionLabels = t.detailAbsensiHariIni.sessionsTakhassus;
     } else {
       _sessionKeys = ['shubuh', 'maghrib'];
-      _sessionLabels = ['Pagi', 'Malam'];
+      _sessionLabels = t.detailAbsensiHariIni.sessionsReguler;
     }
 
     int initialIndex = _sessionKeys.indexOf(_currentSesi);
@@ -236,15 +236,15 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
   String _getSessionLabel(String sesi) {
     switch (sesi) {
       case 'shubuh':
-        return 'Pagi';
+        return t.detailAbsensiHariIni.sessions.pagi;
       case 'dhuha':
-        return 'Dhuha';
+        return t.detailAbsensiHariIni.sessions.dhuha;
       case 'siang':
-        return 'Siang';
+        return t.detailAbsensiHariIni.sessions.siang;
       case 'ashar':
-        return 'Ashar';
+        return t.detailAbsensiHariIni.sessions.ashar;
       case 'maghrib':
-        return 'Malam';
+        return t.detailAbsensiHariIni.sessions.malam;
       default:
         return sesi;
     }
@@ -253,6 +253,13 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
   // ── Save handler ──────────────────────────────────────────────────────────
   Future<void> _onSave() async {
     if (_myHalaqoh == null) return;
+
+    // ── STEP 0: Periksa apakah ada santri yang masih 'belum' diabsen ──
+    final belumCount = _stats['belum'] ?? 0;
+    if (belumCount > 0 && mounted) {
+      final proceed = await _showBelumWarning(belumCount);
+      if (!proceed) return;
+    }
 
     bool confirmed = false;
 
@@ -298,10 +305,14 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
       widget.selectedDate.day,
     );
 
+    // ID deterministik: halaqohId + tanggal + sesi → stabil online/offline.
+    // Tidak berubah saat sync, tidak perlu replace local_ ID seperti sebelumnya.
+    final docId = _isEditing
+        ? _existingSession!.id
+        : '${_myHalaqoh!.id}_${dateOnly.millisecondsSinceEpoch}_$_currentSesi';
+
     final model = AbsensiModel(
-      id: _isEditing
-          ? _existingSession!.id
-          : 'local_${now.millisecondsSinceEpoch}',
+      id: docId,
       halaqohId: _myHalaqoh!.id,
       guruId: _guruId,
       tanggal: dateOnly,
@@ -319,9 +330,9 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
         final colors = AppColors.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(
-              'Absensi berhasil disimpan!',
-              style: TextStyle(fontFamily: 'Poppins'),
+            content: Text(
+              t.detailAbsensiHariIni.saveSuccess,
+              style: const TextStyle(fontFamily: 'Poppins'),
             ),
             backgroundColor: colors.primary,
           ),
@@ -329,16 +340,94 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
         context.router.maybePop();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Gagal menyimpan absensi',
-              style: TextStyle(fontFamily: 'Poppins'),
+              t.detailAbsensiHariIni.saveFailed,
+              style: const TextStyle(fontFamily: 'Poppins'),
             ),
             backgroundColor: Colors.red,
           ),
         );
       }
     }
+  }
+
+  // ── Warning: masih ada santri 'belum' diabsen ──────────────────────────────
+  // Mengembalikan true  = guru tetap ingin simpan (santri 'belum' dilewati)
+  //              false = guru ingin kembali dan melengkapi terlebih dahulu
+  Future<bool> _showBelumWarning(int belumCount) async {
+    final colors = AppColors.of(context);
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: colors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.r),
+            ),
+            title: Row(
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: colors.yellow,
+                  size: 26.sp,
+                ),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    t.detailAbsensiHariIni.warningBelumTitle,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: colors.textPrimary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: Text(
+              t.detailAbsensiHariIni.warningBelumBody(count: belumCount.toString()),
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: colors.textSecondary,
+                fontFamily: 'Poppins',
+                height: 1.5,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: Text(
+                  t.detailAbsensiHariIni.keepSaving,
+                  style: TextStyle(
+                    color: colors.textSecondary,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: colors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                ),
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(
+                  t.detailAbsensiHariIni.completeFirst,
+                  style: TextStyle(
+                    color: colors.textOnButton,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   Future<bool> _showDuplicateWarning() async {
@@ -363,7 +452,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    'Data Sudah Ada',
+                    t.detailAbsensiHariIni.warningDuplicateTitle,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -375,7 +464,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
               ],
             ),
             content: Text(
-              'Data absensi untuk sesi $sessionLabel pada tanggal $dateStr sudah ada. Apakah Anda ingin menimpa data tersebut?',
+              t.detailAbsensiHariIni.warningDuplicateBody(session: sessionLabel, date: dateStr),
               style: TextStyle(
                 fontSize: 13.sp,
                 color: colors.textSecondary,
@@ -386,7 +475,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
                 child: Text(
-                  'Batal',
+                  t.detailAbsensiHariIni.cancel,
                   style: TextStyle(
                     color: colors.textSecondary,
                     fontFamily: 'Poppins',
@@ -397,7 +486,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
                 child: Text(
-                  'Timpa',
+                  t.detailAbsensiHariIni.overwrite,
                   style: TextStyle(
                     color: colors.red,
                     fontFamily: 'Poppins',
@@ -512,26 +601,6 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                                     style: TextStyle(
                                       fontSize: 13.sp,
                                       color: colors.textSecondary,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 12.h),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.qr_code_scanner,
-                                    size: 14.sp,
-                                    color: colors.primary,
-                                  ),
-                                  SizedBox(width: 6.w),
-                                  Text(
-                                    '${widget.scannedNisList.length} santri berhasil di-scan',
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: colors.primary,
                                       fontFamily: 'Poppins',
                                     ),
                                   ),

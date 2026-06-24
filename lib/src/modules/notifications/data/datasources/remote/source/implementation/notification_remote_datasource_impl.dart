@@ -42,9 +42,26 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
       return null;
     }
 
-    // Step 2: Retrieve the current FCM registration token.
-    // getToken() returns null if the device has no FCM support (e.g., some
-    // Android emulators without Google Play Services).
+    return _getTokenInternal();
+  }
+
+  @override
+  Future<AuthorizationStatus> checkPermissionStatus() async {
+    // getNotificationSettings() hanya membaca status — TIDAK memunculkan
+    // dialog baru kepada user.
+    final settings = await _messaging.getNotificationSettings();
+    _log.d(
+      'NotificationRemoteDataSource: permission status = ${settings.authorizationStatus}',
+    );
+    return settings.authorizationStatus;
+  }
+
+  @override
+  Future<String?> getTokenOnly() => _getTokenInternal();
+
+  // ── Internal helper ───────────────────────────────────────────────────────
+
+  Future<String?> _getTokenInternal() async {
     final token = await _messaging.getToken();
     if (token == null) {
       _log.w(

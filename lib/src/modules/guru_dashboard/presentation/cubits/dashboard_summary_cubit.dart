@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/repositories/absensi_repository.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/domain/models/latest_setoran_item.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/domain/models/hafalan_santri_model.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/domain/repositories/hafalan_santri_repository.dart';
 import 'dashboard_summary_state.dart';
 
@@ -19,6 +20,8 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
   final HafalanSantriRepository _hafalanRepo;
   StreamSubscription<List<AbsensiModel>>? _absensiSub;
   StreamSubscription<void>? _hafalanSub;
+  StreamSubscription<List<AbsensiModel>>? _absensiRemoteSub;
+  StreamSubscription<List<HafalanSantriModel>>? _hafalanRemoteSub;
 
   // Store latest data for recomputation when either stream fires
   List<AbsensiModel> _latestAbsensiList = [];
@@ -54,6 +57,13 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
       onError: (e) => emit(DashboardSummaryState.error(e.toString())),
     );
 
+    // Background stream to sync remote attendance updates to local Hive cache
+    _absensiRemoteSub?.cancel();
+    _absensiRemoteSub = _absensiRepo.watchByHalaqohFromRemote(halaqohId).listen(
+      (_) {},
+      onError: (e) {}, // Silently fail/ignore in background
+    );
+
     // ── Stream 2: Hafalan (Hive box changes) ──
     // Reactive updates when a new setoran is saved locally
     _hafalanSub?.cancel();
@@ -62,6 +72,13 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
         // Recompute with the latest absensi data + fresh hafalan reads
         _computeAndEmit();
       },
+    );
+
+    // Background stream to sync remote hafalan updates to local Hive cache
+    _hafalanRemoteSub?.cancel();
+    _hafalanRemoteSub = _hafalanRepo.watchByHalaqohFromRemote(halaqohId).listen(
+      (_) {},
+      onError: (e) {}, // Silently fail/ignore in background
     );
   }
 
@@ -147,7 +164,9 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
   @override
   Future<void> close() {
     _absensiSub?.cancel();
+    _absensiRemoteSub?.cancel();
     _hafalanSub?.cancel();
+    _hafalanRemoteSub?.cancel();
     return super.close();
   }
 }

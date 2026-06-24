@@ -191,18 +191,51 @@ class SantriRepositoryImpl implements SantriRepository {
         );
       }
 
-      // 3. Update semua TargetHafalanModel dengan tahun ajaran + semester baru
-      for (final target in currentTargets) {
-        final updated = target.copyWith(
-          tahunAjaran: tahunAjaran,
-          semesterAktif: semesterAktif,
-          updatedAt: now,
-        );
-        batch.set(
-          targetCol.doc(target.id),
-          TargetHafalanMapper.toFirestore(updated),
-          SetOptions(merge: true),
-        );
+      // 3. Upsert SEMUA kombinasi kelas+program dengan tahun ajaran + semester baru.
+      //
+      // BUG FIX: Sebelumnya hanya mengupdate target yang sudah ada di Firestore
+      // (iterasi atas currentTargets). Kelas yang belum pernah disetup semesternya
+      // (dokumen belum ada) dilewati — setelah kenaikan kelas, kelas tersebut tetap
+      // tidak memiliki semesterAktif.
+      //
+      // Fix: iterasi SEMUA 12 kombinasi valid (kelas 7–12 × Reguler/Takhassus).
+      // Jika dokumen sudah ada → copyWith (preserves id, createdAt, etc.).
+      // Jika belum ada → buat dokumen baru dengan id deterministik '{kelas}_{program}'.
+      const allKelas = ['7', '8', '9', '10', '11', '12'];
+      const allPrograms = ['Reguler', 'Takhassus'];
+
+      // Build lookup map dari currentTargets untuk preserve data yang sudah ada
+      final existingMap = {
+        for (final t in currentTargets) '${t.kelas}_${t.program}': t,
+      };
+
+      for (final kelas in allKelas) {
+        for (final program in allPrograms) {
+          final docId = '${kelas}_$program';
+          final existing = existingMap[docId];
+
+          final updated = existing != null
+              ? existing.copyWith(
+                  tahunAjaran: tahunAjaran,
+                  semesterAktif: semesterAktif,
+                  updatedAt: now,
+                )
+              : TargetHafalanModel(
+                  id: docId,
+                  kelas: kelas,
+                  program: program,
+                  tahunAjaran: tahunAjaran,
+                  semesterAktif: semesterAktif,
+                  createdAt: now,
+                  updatedAt: now,
+                );
+
+          batch.set(
+            targetCol.doc(docId),
+            TargetHafalanMapper.toFirestore(updated),
+            SetOptions(merge: true),
+          );
+        }
       }
 
       await batch.commit();

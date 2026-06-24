@@ -154,7 +154,7 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
                 GuruDashboardHeader(
                   greeting: t.guruDashboard.greeting,
                   name: displayName,
-                  subtitle: 'Awali Halaqoh dengan Do\'a Agar Selalu Diberkahi Allah SWT',
+                  subtitle: t.guruDashboard.subtitle,
                   profilePictureUrl: profilePictureUrl,
                 ),
               SizedBox(height: 24.h),
@@ -378,7 +378,7 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Belum ada setoran',
+            t.guruDashboard.belumAdaSetoran,
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w500,

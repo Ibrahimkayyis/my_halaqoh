@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -198,8 +199,8 @@ class AbsensiHalaqohPdfBuilder {
     }
 
     // 5. Period label for document header
-    final fmtFull = DateFormat('dd MMMM yyyy', 'id');
-    final fmtMonth = DateFormat('MMMM yyyy', 'id');
+    final fmtFull = DateFormat('dd MMMM yyyy', t.$meta.locale.languageCode);
+    final fmtMonth = DateFormat('MMMM yyyy', t.$meta.locale.languageCode);
     final String period;
     if (config.range == ReportRange.monthly) {
       period = fmtMonth.format(config.startDate);
@@ -219,7 +220,7 @@ class AbsensiHalaqohPdfBuilder {
 
     // 7. Build document
     final doc = pw.Document(
-      title: 'Laporan Absensi Halaqoh – ${config.halaqohName}',
+      title: '${t.laporanConfig.recapAttendance} – ${config.halaqohName}',
       author: 'MyHalaqoh',
     );
 
@@ -234,6 +235,7 @@ class AbsensiHalaqohPdfBuilder {
           _buildHalaqohInfo(config, semiBold, regular, bold),
           pw.SizedBox(height: 16),
           for (int i = 0; i < blocks.length; i++) ...[
+            if ((config.range == ReportRange.monthly || config.range == ReportRange.semester) && i > 0) pw.NewPage(),
             _buildBlockTable(
               blockIndex: i,
               blockStart: blocks[i].$1,
@@ -256,7 +258,7 @@ class AbsensiHalaqohPdfBuilder {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                'MyHalaqoh — Sistem Manajemen Halaqoh',
+                t.laporanConfig.pdf.systemName,
                 style: pw.TextStyle(
                   font: regular,
                   fontSize: 7,
@@ -264,7 +266,7 @@ class AbsensiHalaqohPdfBuilder {
                 ),
               ),
               pw.Text(
-                'Halaman ${ctx.pageNumber} dari ${ctx.pagesCount}',
+                t.laporanConfig.pdf.pageLabel(page: '${ctx.pageNumber}', total: '${ctx.pagesCount}'),
                 style: pw.TextStyle(
                   font: semiBold,
                   fontSize: 7,
@@ -325,7 +327,7 @@ class AbsensiHalaqohPdfBuilder {
                 ),
                 pw.SizedBox(height: 2),
                 pw.Text(
-                  'Laporan Rekapitulasi Absensi Halaqoh',
+                  t.laporanConfig.pdf.titleHalaqohRecap,
                   style: pw.TextStyle(
                     font: regular,
                     fontSize: 8.5,
@@ -360,7 +362,7 @@ class AbsensiHalaqohPdfBuilder {
               ),
               pw.SizedBox(height: 4),
               pw.Text(
-                'Dicetak: $printedOn',
+                t.laporanConfig.pdf.printedAt(date: printedOn),
                 style: pw.TextStyle(
                   font: regular,
                   fontSize: 7,
@@ -395,7 +397,7 @@ class AbsensiHalaqohPdfBuilder {
               border: pw.Border.all(color: _border, width: 0.5),
             ),
             child: pw.Text(
-              'Informasi Halaqoh',
+              t.laporanConfig.pdf.halaqohInfo,
               style: pw.TextStyle(font: bold, fontSize: 9, color: _textPrimary),
             ),
           ),
@@ -409,8 +411,8 @@ class AbsensiHalaqohPdfBuilder {
               children: [
                 pw.TableRow(
                   children: [
-                    _infoCell('Halaqoh', config.halaqohName, semiBold, regular),
-                    _infoCell('Musyrif', config.guruNama, semiBold, regular),
+                    _infoCell(t.laporanConfig.pdf.halaqoh, config.halaqohName, semiBold, regular),
+                    _infoCell(t.laporanConfig.pdf.musyrif, config.guruNama, semiBold, regular),
                   ],
                 ),
                 pw.TableRow(
@@ -419,7 +421,7 @@ class AbsensiHalaqohPdfBuilder {
                 pw.TableRow(
                   children: [
                     _infoCell(
-                      'Program',
+                      t.laporanConfig.pdf.program,
                       config.programType == 'takhassus'
                           ? 'Takhassus'
                           : 'Reguler',
@@ -427,7 +429,7 @@ class AbsensiHalaqohPdfBuilder {
                       regular,
                     ),
                     _infoCell(
-                      'Jenis Laporan',
+                      t.laporanConfig.pdf.reportType,
                       _rangeLabel(config.range),
                       semiBold,
                       regular,
@@ -445,11 +447,11 @@ class AbsensiHalaqohPdfBuilder {
   static String _rangeLabel(ReportRange r) {
     switch (r) {
       case ReportRange.weekly:
-        return 'Mingguan';
+        return t.laporanConfig.weekly;
       case ReportRange.monthly:
-        return 'Bulanan';
+        return t.laporanConfig.monthly;
       case ReportRange.semester:
-        return 'Semester';
+        return t.laporanConfig.custom;
     }
   }
 
@@ -472,19 +474,14 @@ class AbsensiHalaqohPdfBuilder {
     required bool isSemester,
   }) {
     // Block title label
-    final fmtFull = DateFormat('dd MMM', 'id');
-    final fmtMonth = DateFormat('MMMM yyyy', 'id');
+    final fmtFull = DateFormat('dd MMM', t.$meta.locale.languageCode);
+    final fmtMonth = DateFormat('MMMM yyyy', t.$meta.locale.languageCode);
     final String blockTitle = isSemester
         ? fmtMonth.format(blockStart)
-        : 'Pekan ke-${blockIndex + 1}'
-              '  (${fmtFull.format(blockStart)} – ${fmtFull.format(blockEnd)})';
+        : '${t.laporanConfig.pdf.pekanShort(index: blockIndex + 1)}  (${fmtFull.format(blockStart)} – ${fmtFull.format(blockEnd)})';
 
     // Max sessions: uses the real per-weekday schedule (see ScheduleHelper)
-    final maxSessions = _computeMax(
-      config.programType,
-      blockStart,
-      blockEnd,
-    );
+    final maxSessions = _computeMax(config.programType, blockStart, blockEnd);
 
     // Per-santri attendance counts for this block
     final statsMap = _aggregate(
@@ -633,10 +630,10 @@ class AbsensiHalaqohPdfBuilder {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         // ── "No." — spans all 3 header rows ──────────────────────────────
-        hCell(width: noWidth, height: totalH, text: 'No.', font: semiBold),
+        hCell(width: noWidth, height: totalH, text: t.laporanConfig.pdf.no, font: semiBold),
 
         // ── "Nama" — spans all 3 header rows ─────────────────────────────
-        hCell(width: namaWidth, height: totalH, text: 'Nama', font: semiBold),
+        hCell(width: namaWidth, height: totalH, text: t.laporanConfig.pdf.nameHeader, font: semiBold),
 
         // ── "Kehadiran" group — 3 stacked sub-rows ────────────────────────
         pw.SizedBox(
@@ -648,7 +645,7 @@ class AbsensiHalaqohPdfBuilder {
               hCell(
                 width: colWidth * 5,
                 height: h1,
-                text: 'Kehadiran',
+                text: t.laporanConfig.pdf.kehadiranHeader,
                 font: bold,
                 fontSize: 8,
               ),
@@ -659,14 +656,14 @@ class AbsensiHalaqohPdfBuilder {
                   hCell(
                     width: colWidth * 2,
                     height: h2,
-                    text: 'Halaqoh',
+                    text: t.laporanConfig.pdf.halaqoh,
                     font: semiBold,
                     fontSize: 7,
                   ),
                   hCell(
                     width: colWidth * 3,
                     height: h2,
-                    text: 'Keterangan',
+                    text: t.laporanConfig.pdf.keteranganLabel,
                     font: semiBold,
                     fontSize: 7,
                   ),
@@ -679,34 +676,34 @@ class AbsensiHalaqohPdfBuilder {
                   hCell(
                     width: colWidth,
                     height: h3,
-                    text: 'Max',
+                    text: t.laporanConfig.pdf.maxHeader,
                     font: semiBold,
                   ),
                   hCell(
                     width: colWidth,
                     height: h3,
-                    text: 'Hdr',
+                    text: t.laporanConfig.pdf.hdrHeader,
                     font: semiBold,
                     textColor: _green,
                   ),
                   hCell(
                     width: colWidth,
                     height: h3,
-                    text: 'Sakit',
+                    text: t.laporanConfig.pdf.sick,
                     font: semiBold,
                     textColor: _yellow,
                   ),
                   hCell(
                     width: colWidth,
                     height: h3,
-                    text: 'Izin',
+                    text: t.laporanConfig.pdf.permit,
                     font: semiBold,
                     textColor: _blue,
                   ),
                   hCell(
                     width: colWidth,
                     height: h3,
-                    text: 'Alpa',
+                    text: t.laporanConfig.pdf.absent,
                     font: semiBold,
                     textColor: _red,
                   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -46,9 +47,9 @@ class HafalanPdfBuilder {
   static final _orangeBg = PdfColor.fromHex('#FFF7ED');
 
   static String _predikat(int score) {
-    if (score >= 85) return 'Mumtaz';
-    if (score >= 70) return 'Jayyid';
-    return 'Maqbul';
+    if (score >= 85) return t.laporanConfig.pdf.predikat.mumtaz;
+    if (score >= 70) return t.laporanConfig.pdf.predikat.jayyid;
+    return t.laporanConfig.pdf.predikat.maqbul;
   }
 
   static PdfColor _predikatColor(int score) {
@@ -91,16 +92,14 @@ class HafalanPdfBuilder {
   }
 
   static String _surahDisplay(List<HafalanSantriModel> recs) {
-    if (recs.length == 1)
+    if (recs.length == 1) {
       return '${recs.first.surahName} (${recs.first.ayatMulai}-${recs.first.ayatSelesai})';
+    }
     final sorted = [...recs]..sort((a, b) => a.surahId.compareTo(b.surahId));
     return '${sorted.first.surahName} — ${sorted.last.surahName}';
   }
 
-  static final _fmtFull = DateFormat('dd MMMM yyyy', 'id');
-  static final _fmtMon = DateFormat('MMMM yyyy', 'id');
   static final _fmtDate = DateFormat('dd/MM/yy');
-  static const _days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
   static Future<Uint8List> build(
     LaporanHafalanConfig config,
@@ -148,13 +147,15 @@ class HafalanPdfBuilder {
     }
     final total = groups.length;
 
+    final fmtFull = DateFormat('dd MMMM yyyy', t.$meta.locale.languageCode);
+    final fmtMon = DateFormat('MMMM yyyy', t.$meta.locale.languageCode);
     final period = config.range == ReportRange.monthly
-        ? _fmtMon.format(config.startDate)
-        : '${_fmtFull.format(config.startDate)} – ${_fmtFull.format(config.endDate)}';
-    final printedOn = _fmtFull.format(DateTime.now());
+        ? fmtMon.format(config.startDate)
+        : '${fmtFull.format(config.startDate)} – ${fmtFull.format(config.endDate)}';
+    final printedOn = fmtFull.format(DateTime.now());
 
     final doc = pw.Document(
-      title: 'Laporan Hafalan – ${config.santriName}',
+      title: '${t.laporanConfig.memorizationReport} – ${config.santriName}',
       author: 'MyHalaqoh',
     );
     doc.addPage(
@@ -180,7 +181,7 @@ class HafalanPdfBuilder {
             regular,
           ),
           pw.SizedBox(height: 16),
-          _sectionTitle('Detail Setoran Hafalan', bold),
+          _sectionTitle(t.laporanConfig.pdf.setoranDetailTitle, bold),
           pw.SizedBox(height: 6),
           _detailTable(groups, semiBold, regular),
           pw.SizedBox(height: 10),
@@ -192,7 +193,7 @@ class HafalanPdfBuilder {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                'MyHalaqoh — Sistem Manajemen Halaqoh',
+                t.laporanConfig.pdf.systemName,
                 style: pw.TextStyle(
                   font: regular,
                   fontSize: 7,
@@ -200,7 +201,7 @@ class HafalanPdfBuilder {
                 ),
               ),
               pw.Text(
-                'Halaman ${ctx.pageNumber} dari ${ctx.pagesCount}',
+                t.laporanConfig.pdf.pageLabel(page: '${ctx.pageNumber}', total: '${ctx.pagesCount}'),
                 style: pw.TextStyle(
                   font: semiBold,
                   fontSize: 7,
@@ -258,7 +259,7 @@ class HafalanPdfBuilder {
                 ),
                 pw.SizedBox(height: 2),
                 pw.Text(
-                  'Laporan Hafalan Santri',
+                  t.laporanConfig.pdf.titleMemorization,
                   style: pw.TextStyle(
                     font: regular,
                     fontSize: 8.5,
@@ -293,7 +294,7 @@ class HafalanPdfBuilder {
               ),
               pw.SizedBox(height: 4),
               pw.Text(
-                'Dicetak: $printedOn',
+                t.laporanConfig.pdf.printedAt(date: printedOn),
                 style: pw.TextStyle(
                   font: regular,
                   fontSize: 7,
@@ -328,7 +329,7 @@ class HafalanPdfBuilder {
               border: pw.Border.all(color: _border, width: 0.5),
             ),
             child: pw.Text(
-              'Informasi Santri',
+              t.laporanConfig.pdf.studentInfo,
               style: pw.TextStyle(font: bold, fontSize: 9, color: _textPri),
             ),
           ),
@@ -343,12 +344,12 @@ class HafalanPdfBuilder {
                 pw.TableRow(
                   children: [
                     _infoCell(
-                      'Nama Santri',
+                      t.laporanConfig.pdf.studentName,
                       config.santriName,
                       semiBold,
                       regular,
                     ),
-                    _infoCell('NIS', config.santriNis, semiBold, regular),
+                    _infoCell(t.laporanConfig.pdf.nis, config.santriNis, semiBold, regular),
                   ],
                 ),
                 pw.TableRow(
@@ -356,8 +357,8 @@ class HafalanPdfBuilder {
                 ),
                 pw.TableRow(
                   children: [
-                    _infoCell('Halaqoh', config.halaqohName, semiBold, regular),
-                    _infoCell('Pembimbing', config.guruNama, semiBold, regular),
+                    _infoCell(t.laporanConfig.pdf.halaqoh, config.halaqohName, semiBold, regular),
+                    _infoCell(t.laporanConfig.pdf.pembimbing, config.guruNama, semiBold, regular),
                   ],
                 ),
               ],
@@ -381,8 +382,8 @@ class HafalanPdfBuilder {
     pw.Font regular,
   ) {
     final predikatLabel = avgScore >= 85
-        ? 'Mumtaz'
-        : (avgScore >= 70 ? 'Jayyid' : 'Maqbul');
+        ? t.laporanConfig.pdf.predikat.mumtaz
+        : (avgScore >= 70 ? t.laporanConfig.pdf.predikat.jayyid : t.laporanConfig.pdf.predikat.maqbul);
     final predikatColor = _predikatColor(avgScore);
 
     return pw.Container(
@@ -402,7 +403,7 @@ class HafalanPdfBuilder {
               ),
             ),
             child: pw.Text(
-              'Ringkasan Hafalan',
+              t.laporanConfig.pdf.summaryMemorization,
               style: pw.TextStyle(font: bold, fontSize: 9, color: _textPri),
             ),
           ),
@@ -423,7 +424,7 @@ class HafalanPdfBuilder {
                       children: [
                         _statCard(
                           '$baru',
-                          'Hafalan Baru',
+                          t.laporanConfig.pdf.ziyadah,
                           _green,
                           _greenBg,
                           bold,
@@ -432,7 +433,7 @@ class HafalanPdfBuilder {
                         ),
                         _statCard(
                           '$ulang',
-                          "Muraja'ah",
+                          t.laporanConfig.pdf.murajaah,
                           _blue,
                           _blueBg,
                           bold,
@@ -441,7 +442,7 @@ class HafalanPdfBuilder {
                         ),
                         _statCard(
                           '$avgScore',
-                          'Rata-rata Nilai',
+                          t.laporanConfig.pdf.avgScore,
                           _yellow,
                           _yellowBg,
                           bold,
@@ -450,7 +451,7 @@ class HafalanPdfBuilder {
                         ),
                         _statCard(
                           predikatLabel,
-                          'Predikat Rata-rata',
+                          t.laporanConfig.pdf.predikatHeader,
                           predikatColor,
                           _predikatBg(avgScore),
                           bold,
@@ -498,14 +499,14 @@ class HafalanPdfBuilder {
     final headerRow = pw.TableRow(
       decoration: pw.BoxDecoration(color: _textPri),
       children: [
-        _th('Tanggal', semiBold),
-        _th('Hari', semiBold),
-        _th('Jenis', semiBold),
-        _th('Surah / Ayat', semiBold, align: pw.TextAlign.left),
-        _th('Juz', semiBold),
-        _th('Kelancaran', semiBold, fontSize: 6),
-        _th('Tajwid', semiBold, fontSize: 6),
-        _th('Predikat', semiBold),
+        _th(t.laporanConfig.pdf.dateShort, semiBold),
+        _th(t.laporanConfig.pdf.dayHeader, semiBold),
+        _th(t.laporanConfig.pdf.typeHeader, semiBold),
+        _th(t.laporanConfig.pdf.surahAyatHeader, semiBold, align: pw.TextAlign.left),
+        _th(t.laporanConfig.pdf.juzHeader, semiBold),
+        _th(t.laporanConfig.pdf.kelancaranHeader, semiBold, fontSize: 6),
+        _th(t.laporanConfig.pdf.tajwidHeader, semiBold, fontSize: 6),
+        _th(t.laporanConfig.pdf.predikatHeader, semiBold),
       ],
     );
 
@@ -524,12 +525,12 @@ class HafalanPdfBuilder {
         children: [
           _td(_fmtDate.format(g.tanggal), regular, align: pw.TextAlign.center),
           _td(
-            _days[(g.tanggal.weekday - 1) % 7],
+            t.calendar.daysAbbr[(g.tanggal.weekday - 1) % 7],
             regular,
             align: pw.TextAlign.center,
           ),
           _tdBadge(
-            isZiyadah ? 'Baru' : 'Ulang',
+            isZiyadah ? t.laporanConfig.pdf.baruCode : t.laporanConfig.pdf.ulangCode,
             semiBold,
             isZiyadah ? _green : _blue,
             isZiyadah ? _greenBg : _blueBg,
@@ -587,11 +588,11 @@ class HafalanPdfBuilder {
 
   static pw.Widget _legend(pw.Font regular, pw.Font semiBold) {
     final items = [
-      ('Baru', 'Ziyadah (Hafalan Baru)', _green, _greenBg),
-      ('Ulang', "Murajaah (Muraja'ah)", _blue, _blueBg),
-      ('Mumtaz', '≥ 85', _green, _greenBg),
-      ('Jayyid', '≥ 70', _yellow, _yellowBg),
-      ('Maqbul', '< 70', _orange, _orangeBg),
+      (t.laporanConfig.pdf.baruCode, t.laporanConfig.pdf.ziyadahLabel, _green, _greenBg),
+      (t.laporanConfig.pdf.ulangCode, t.laporanConfig.pdf.murajaahLabel, _blue, _blueBg),
+      (t.laporanConfig.pdf.predikat.mumtaz, '≥ 85', _green, _greenBg),
+      (t.laporanConfig.pdf.predikat.jayyid, '≥ 70', _yellow, _yellowBg),
+      (t.laporanConfig.pdf.predikat.maqbul, '< 70', _orange, _orangeBg),
     ];
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 9),
@@ -604,7 +605,7 @@ class HafalanPdfBuilder {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            'Keterangan',
+            t.laporanConfig.pdf.keteranganLabel,
             style: pw.TextStyle(font: semiBold, fontSize: 7.5, color: _textSec),
           ),
           pw.SizedBox(height: 6),

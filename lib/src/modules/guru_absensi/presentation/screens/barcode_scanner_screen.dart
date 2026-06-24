@@ -63,7 +63,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   // Debounce: barcode terakhir yang berhasil di-scan (agar tidak re-proses)
   String? _lastAcceptedBarcode;
   DateTime _lastAcceptedTime = DateTime(2000);
-
+  String? _lastSuccessfulNis;
+  DateTime _lastSuccessfulScanTime = DateTime(2000);
+  static const _postSuccessUnrecognizedGrace = Duration(milliseconds: 1800);
   static const double _cardAspectRatio = 1.586;
 
   @override
@@ -71,8 +73,20 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     super.initState();
 
     _scannerController = MobileScannerController(
-      detectionSpeed: DetectionSpeed.normal,
+      cameraResolution: const Size(1280, 720),
+      detectionSpeed: DetectionSpeed.unrestricted,
       facing: CameraFacing.back,
+      formats: const [
+        BarcodeFormat.codabar,
+        BarcodeFormat.code39,
+        BarcodeFormat.code93,
+        BarcodeFormat.code128,
+        BarcodeFormat.ean8,
+        BarcodeFormat.ean13,
+        BarcodeFormat.itf,
+        BarcodeFormat.upcA,
+        BarcodeFormat.upcE,
+      ],
     );
 
     _animController = AnimationController(
@@ -152,25 +166,51 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   //    Tidak ada global cooldown yang memblokir semua scan.
   //
   void _onDetect(BarcodeCapture capture) {
-    final rawValue = capture.barcodes.firstOrNull?.rawValue;
-    if (rawValue == null || rawValue.isEmpty) return;
+    final candidates = capture.barcodes
+        .map((barcode) => barcode.rawValue?.trim())
+        .whereType<String>()
+        .where((value) => value.isNotEmpty && _nisPattern.hasMatch(value))
+        .toSet()
+        .toList();
 
-    final cleanValue = rawValue.trim();
+    if (candidates.isEmpty) return;
 
+    final knownCandidates = candidates.where(
+      (value) => _santriList.any((s) => s.nis == value),
+    );
+
+    for (final cleanValue in [...knownCandidates, ...candidates]) {
+      if (_handleDetectedNis(cleanValue)) return;
+    }
+  }
+
+  bool _handleDetectedNis(String cleanValue) {
     // ── STEP 1: Format filter — buang ghost read instan ──────────────────
-    if (!_nisPattern.hasMatch(cleanValue)) return;
+    if (!_nisPattern.hasMatch(cleanValue)) return false;
 
     // ── STEP 2: Debounce — abaikan barcode yang baru saja diproses ───────
     final now = DateTime.now();
     if (_lastAcceptedBarcode == cleanValue &&
         now.difference(_lastAcceptedTime).inMilliseconds < 1000) {
-      return;
+      if (_scannedNisSet.contains(cleanValue)) {
+        _lastSuccessfulNis = cleanValue;
+        _lastSuccessfulScanTime = now;
+      }
+      return true;
     }
 
     // ── STEP 3: Cek apakah NIS ada di daftar santri halaqoh ─────────────
     final index = _santriList.indexWhere((s) => s.nis == cleanValue);
 
     if (index == -1) {
+      if (_lastSuccessfulNis != null &&
+          now.difference(_lastSuccessfulScanTime) <
+              _postSuccessUnrecognizedGrace) {
+        _lastUnrecognizedNis = null;
+        _unrecognizedCount = 0;
+        return true;
+      }
+
       // Format NIS valid tapi bukan anggota halaqoh.
       // Konfirmasi 2x pembacaan konsisten sebelum tampilkan error.
       if (_lastUnrecognizedNis == cleanValue) {
@@ -190,9 +230,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
         if (_errorMessage == null) {
           HapticFeedback.heavyImpact();
           setState(() {
-            _errorMessage =
-                'Santri dengan NIS $cleanValue bukan anggota halaqoh Anda';
+            _errorMessage = t.absensi.barcodeScanner.notMember(nis: cleanValue);
             _flashNis = null;
+            // Paksa hapus success message agar tidak ada kilatan hijau
             _successMessage = null;
           });
           Future.delayed(const Duration(seconds: 3), () {
@@ -200,15 +240,23 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
           });
         }
       }
-      return;
+      return true;
     }
 
     // ── STEP 4: NIS dikenali — sudah pernah di-scan? ────────────────────
-    if (_scannedNisSet.contains(cleanValue)) return;
+    if (_scannedNisSet.contains(cleanValue)) {
+      _lastSuccessfulNis = cleanValue;
+      _lastSuccessfulScanTime = now;
+      _lastUnrecognizedNis = null;
+      _unrecognizedCount = 0;
+      return true;
+    }
 
     // ── STEP 5: SUKSES — terima langsung tanpa delay ────────────────────
     _lastAcceptedBarcode = cleanValue;
     _lastAcceptedTime = now;
+    _lastSuccessfulNis = cleanValue;
+    _lastSuccessfulScanTime = now;
     _lastUnrecognizedNis = null;
     _unrecognizedCount = 0;
 
@@ -229,6 +277,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) setState(() => _successMessage = null);
     });
+
+    return true;
   }
 
   // ── Navigate to detail screen ─────────────────────────────────────────────
@@ -258,11 +308,15 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
           // Camera
           MobileScanner(
             controller: _scannerController,
+            // No scanWindow: decoder processes the full camera frame.
+            // The overlay is only a visual guide for positioning the card.
             onDetect: _onDetect,
             errorBuilder: (context, error) {
               return Center(
                 child: Text(
-                  'Gagal memuat kamera:\n${error.errorCode}',
+                  t.absensi.barcodeScanner.cameraError(
+                    error: error.errorCode.toString(),
+                  ),
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.white),
                 ),
@@ -279,8 +333,21 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
           // Error banner
           if (_errorMessage != null) _buildErrorBanner(colors),
 
-          // Success banner
-          _buildSuccessBanner(colors),
+          // Success banner — Positioned harus selalu jadi direct child Stack.
+          // AnimatedSwitcher dipindah ke DALAM Positioned agar layout tidak rusak.
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 70.h,
+            left: 20.w,
+            right: 20.w,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              transitionBuilder: (child, anim) =>
+                  FadeTransition(opacity: anim, child: child),
+              child: _successMessage != null
+                  ? _buildSuccessBannerContent(colors)
+                  : const SizedBox.shrink(key: ValueKey('empty')),
+            ),
+          ),
 
           // Instruction text (Hanya tampil jika tidak ada error)
           if (_errorMessage == null)
@@ -312,7 +379,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        'Pastikan barcode berada dalam posisi yang jelas',
+                        t.absensi.barcodeScanner.clearPosition,
                         style: TextStyle(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w400,
@@ -488,53 +555,47 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   }
 
   // ── Success Pop-up Banner ─────────────────────────────────────────────────
-  Widget _buildSuccessBanner(AppColorSet colors) {
-    return Positioned(
-      top: MediaQuery.of(context).padding.top + 70.h,
-      left: 20.w,
-      right: 20.w,
-      child: AnimatedOpacity(
-        opacity: _successMessage != null ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 300),
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: Colors.green.shade600.withValues(alpha: 0.95),
-              borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green.withValues(alpha: 0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+  // Hanya mengembalikan konten banner (Container) — bukan Positioned.
+  // Positioned ada di build() sebagai direct child Stack agar layout tidak rusak.
+  Widget _buildSuccessBannerContent(AppColorSet colors) {
+    return Center(
+      key: ValueKey(
+        _successMessage,
+      ), // key agar AnimatedSwitcher deteksi perubahan
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: Colors.green.shade600.withValues(alpha: 0.95),
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.check_circle_rounded,
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(Icons.check_circle_rounded, color: Colors.white, size: 20.sp),
+            SizedBox(width: 10.w),
+            Flexible(
+              child: Text(
+                t.absensi.barcodeScanner.scannedSuccess(
+                  name: _successMessage ?? '',
+                ),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
                   color: Colors.white,
-                  size: 20.sp,
+                  fontFamily: 'Poppins',
+                  height: 1.3,
                 ),
-                SizedBox(width: 10.w),
-                Flexible(
-                  child: Text(
-                    _successMessage != null ? '$_successMessage hadir' : '',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      fontFamily: 'Poppins',
-                      height: 1.3,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -649,7 +710,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                           ),
                           SizedBox(height: 2.h),
                           Text(
-                            'Total $_totalCount Santri',
+                            t.absensi.barcodeScanner.totalSantri(
+                              count: _totalCount.toString(),
+                            ),
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w400,
@@ -685,7 +748,10 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                           ),
                           SizedBox(width: 6.w),
                           Text(
-                            '$_scannedCount / $_totalCount',
+                            t.absensi.barcodeScanner.progress(
+                              scanned: _scannedCount.toString(),
+                              total: _totalCount.toString(),
+                            ),
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w700,
@@ -801,7 +867,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                   ),
                 ),
                 Text(
-                  'NIS: ${santri.nis}',
+                  t.absensi.barcodeScanner.nisLabel(nis: santri.nis),
                   style: TextStyle(
                     fontSize: 11.sp,
                     color: colors.textSecondary,

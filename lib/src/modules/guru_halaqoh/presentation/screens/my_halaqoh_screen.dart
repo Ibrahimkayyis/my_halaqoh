@@ -171,8 +171,8 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                         kelas: t.myHalaqohScreen.kelas(kelas: effectiveKelas),
                         program: t.myHalaqohScreen.program(
                           program: effectiveProgram == 'T'
-                              ? 'Takhassus'
-                              : 'Reguler',
+                              ? t.myHalaqohScreen.programTakhassus
+                              : t.myHalaqohScreen.programReguler,
                         ),
                         halaqohName: myHalaqoh!.nama,
                         pengampu: myHalaqoh!.guruNama.isNotEmpty
@@ -197,7 +197,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                           vertical: 12.h,
                         ),
                         child: Text(
-                          'Anda belum ditugaskan ke Halaqoh manapun.',
+                          t.myHalaqohScreen.noHalaqohAssigned,
                           style: TextStyle(
                             color: colors.textSecondary,
                             fontFamily: 'Poppins',
@@ -326,7 +326,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                   child: Padding(
                     padding: EdgeInsets.only(top: 32.h),
                     child: Text(
-                      'Santri tidak ditemukan.',
+                      t.myHalaqohScreen.santriNotFound,
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: colors.textSecondary,
@@ -388,10 +388,22 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                                       santri.program,
                                     ).toDouble()
                                   : 0.0;
+                              String formatPercent(double v) {
+                                if (v == 0) return '0';
+                                if (v >= 1) {
+                                  final rounded = double.parse(v.toStringAsFixed(1));
+                                  return rounded == rounded.roundToDouble()
+                                      ? rounded.toInt().toString()
+                                      : rounded.toStringAsFixed(1);
+                                }
+                                final s = v.toStringAsFixed(2);
+                                return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+                              }
+
                               final progress = targetJuz > 0
                                   ? completed / targetJuz
                                   : 0.0;
-                              final pct = (progress * 100).round();
+                              final pct = formatPercent(progress * 100);
 
                               String formatJuz(double v) {
                                 if (v == 0) return '0';

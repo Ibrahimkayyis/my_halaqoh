@@ -349,7 +349,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   child: Padding(
                     padding: EdgeInsets.only(top: 32.h),
                     child: Text(
-                      'Santri tidak ditemukan.',
+                      t.myHalaqohScreen.santriNotFound,
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: colors.textSecondary,

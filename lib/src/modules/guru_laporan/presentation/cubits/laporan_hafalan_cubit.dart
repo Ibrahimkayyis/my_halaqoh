@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:printing/printing.dart';
 
 import '../../domain/models/laporan_hafalan_config.dart';
@@ -40,7 +41,7 @@ class LaporanHafalanCubit extends Cubit<LaporanHafalanState> {
     } catch (e, st) {
       _log.e('Hafalan PDF generation failed', error: e, stackTrace: st);
       emit(
-        LaporanHafalanState.error('Gagal membuat laporan: ${e.toString()}'),
+        LaporanHafalanState.error(t.laporanConfig.errGenerate(error: e.toString())),
       );
     }
   }
@@ -53,7 +54,7 @@ class LaporanHafalanCubit extends Cubit<LaporanHafalanState> {
       _log.e('Hafalan PDF preview failed', error: e, stackTrace: st);
       emit(
         LaporanHafalanState.error(
-          'Gagal membuka pratinjau: ${e.toString()}',
+          t.laporanConfig.errPreview(error: e.toString()),
         ),
       );
     }
@@ -66,7 +67,7 @@ class LaporanHafalanCubit extends Cubit<LaporanHafalanState> {
     } catch (e, st) {
       _log.e('Hafalan PDF share failed', error: e, stackTrace: st);
       emit(
-        LaporanHafalanState.error('Gagal berbagi laporan: ${e.toString()}'),
+        LaporanHafalanState.error(t.laporanConfig.errShare(error: e.toString())),
       );
     }
   }

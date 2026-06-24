@@ -55,9 +55,9 @@ class _SubmissionGroup {
   String get ayatDisplay {
     if (records.length == 1) {
       final r = records.first;
-      return 'Ayat ${r.ayatMulai} - ${r.ayatSelesai}';
+      return t.riwayatHafalanSantri.ayatRange(start: r.ayatMulai, end: r.ayatSelesai);
     }
-    return '${records.length} surat';
+    return t.riwayatHafalanSantri.suratCount(count: records.length);
   }
 
   /// Returns detailed per-surah lines for expanded view
@@ -132,29 +132,21 @@ class _RiwayatHafalanSantriScreenState
   late int _currentMonth;
   late int _currentYear;
 
-  final List<String> _dayNames = [
-    'AHA',
-    'SEN',
-    'SEL',
-    'RAB',
-    'KAM',
-    'JUM',
-    'SAB',
-  ];
+  List<String> get _dayNames => t.mutabaahSantri.dayNames;
 
   int? _activeDeleteIndex;
   int? _expandedIndex;
 
-  final List<String> _filterOptions = [
-    'Semua Tipe',
-    'Hafalan Baru',
-    "Muraja'ah",
+  List<String> get _filterOptions => [
+    t.riwayatHafalanSantri.filterSemuaTipe,
+    t.riwayatHafalanSantri.filterHafalanBaru,
+    t.riwayatHafalanSantri.filterMurajaah,
   ];
-  String _selectedFilterLabel = 'Semua Tipe';
+  int _selectedFilterIndex = 0;
 
   String get _filterKey {
-    if (_selectedFilterLabel == 'Hafalan Baru') return 'Ziyadah';
-    if (_selectedFilterLabel == "Muraja'ah") return 'Murajaah';
+    if (_selectedFilterIndex == 1) return 'Ziyadah';
+    if (_selectedFilterIndex == 2) return 'Murajaah';
     return 'semua';
   }
 
@@ -307,40 +299,44 @@ class _RiwayatHafalanSantriScreenState
                             ),
                             SizedBox(height: 16.h),
 
-                            // Stats cards
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildStatCard(
-                                    '$totalBaru',
-                                    t.riwayatHafalanSantri.totalHafalanBaru,
-                                    colors,
+                            // Stats cards — IntrinsicHeight memastikan kedua card
+                            // sama tingginya meski label berbeda panjang.
+                            IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(
+                                    child: _buildStatCard(
+                                      '$totalBaru',
+                                      t.riwayatHafalanSantri.totalHafalanBaru,
+                                      colors,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Expanded(
-                                  child: _buildStatCard(
-                                    '$totalMurajaah',
-                                    t.riwayatHafalanSantri.totalMurajaah,
-                                    colors,
+                                  SizedBox(width: 12.w),
+                                  Expanded(
+                                    child: _buildStatCard(
+                                      '$totalMurajaah',
+                                      t.riwayatHafalanSantri.totalMurajaah,
+                                      colors,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             SizedBox(height: 16.h),
 
                             // Filter + Buka Mutaba'ah
                             Row(
                               children: [
-                                SizedBox(
-                                  width: 150.w,
+                                Flexible(
                                   child: CustomDropdown<String>(
                                     items: _filterOptions,
-                                    initialItem: _selectedFilterLabel,
+                                    initialItem: _filterOptions[_selectedFilterIndex],
                                     onChanged: (value) {
                                       if (value != null) {
+                                        final idx = _filterOptions.indexOf(value);
                                         setState(() {
-                                          _selectedFilterLabel = value;
+                                          _selectedFilterIndex = idx >= 0 ? idx : 0;
                                           _expandedIndex = null;
                                         });
                                       }
@@ -432,7 +428,7 @@ class _RiwayatHafalanSantriScreenState
                                 padding: EdgeInsets.symmetric(vertical: 40.h),
                                 child: Center(
                                   child: Text(
-                                    'Belum ada data hafalan bulan ini',
+                                    t.riwayatHafalanSantri.belumAdaDataBulanIni,
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       color: colors.textSecondary,
@@ -551,7 +547,7 @@ class _RiwayatHafalanSantriScreenState
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'NIS: ${widget.nis}',
+                  t.riwayatHafalanSantri.nisLabel(nis: widget.nis),
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: Colors.white.withValues(alpha: 0.85),
@@ -575,9 +571,12 @@ class _RiwayatHafalanSantriScreenState
         border: Border.all(color: colors.border, width: 1),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             value,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 28.sp,
               fontWeight: FontWeight.w800,
@@ -781,8 +780,8 @@ class _RiwayatHafalanSantriScreenState
                                 SnackBar(
                                   content: Text(
                                     success
-                                        ? 'Data hafalan berhasil dihapus!'
-                                        : 'Gagal menghapus data hafalan.',
+                                        ? t.riwayatHafalanSantri.deleteSuccess
+                                        : t.riwayatHafalanSantri.deleteFailed,
                                     style: const TextStyle(fontFamily: 'Poppins'),
                                   ),
                                   backgroundColor: success

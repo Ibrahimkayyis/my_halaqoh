@@ -34,8 +34,8 @@ class _SantriListScreenState extends State<SantriListScreen> {
   String? _filterProgram;
   bool _showAlumni = false; // default: alumni disembunyikan
 
-  final List<String> _kelasOptions = ['Semua', '7', '8', '9', '10', '11', '12'];
-  final List<String> _programOptions = ['Semua', 'Reguler', 'Takhassus'];
+  List<String> get _kelasOptions => [t.santri.all, '7', '8', '9', '10', '11', '12'];
+  List<String> get _programOptions => [t.santri.all, t.targetHafalan.reguler, t.targetHafalan.takhassus];
 
   @override
   void dispose() {
@@ -57,10 +57,10 @@ class _SantriListScreenState extends State<SantriListScreen> {
           s.nama.toLowerCase().contains(_searchQuery) ||
           s.nis.contains(_searchQuery);
 
-      final matchesKelas = _filterKelas == null || _filterKelas == 'Semua' || s.kelas == _filterKelas;
-      final matchesProgram = _filterProgram == null || _filterProgram == 'Semua' ||
-          (_filterProgram == 'Reguler' && s.program == 'R') ||
-          (_filterProgram == 'Takhassus' && s.program == 'T');
+      final matchesKelas = _filterKelas == null || _filterKelas == t.santri.all || s.kelas == _filterKelas;
+      final matchesProgram = _filterProgram == null || _filterProgram == t.santri.all ||
+          (_filterProgram == t.targetHafalan.reguler && s.program == 'R') ||
+          (_filterProgram == t.targetHafalan.takhassus && s.program == 'T');
 
       return matchesSearch && matchesKelas && matchesProgram;
     }).toList();
@@ -109,7 +109,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
     if (santri.authUid == null || santri.authUid!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Santri ini belum memiliki akun yang terhubung.', style: TextStyle(fontFamily: 'Poppins')),
+          content: Text(t.santri.noAccountError, style: const TextStyle(fontFamily: 'Poppins')),
           backgroundColor: AppColors.of(context).error,
         ),
       );
@@ -124,21 +124,21 @@ class _SantriListScreenState extends State<SantriListScreen> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           backgroundColor: colors.surface,
           title: Text(
-            'Reset Password',
+            t.santri.resetPasswordTitle,
             style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: colors.textPrimary),
           ),
           content: Text(
-            'Apakah Anda yakin ingin mereset password untuk ${santri.nama}? Password akan dikembalikan ke default "generasi554".',
+            t.santri.resetPasswordConfirm(name: santri.nama),
             style: TextStyle(fontFamily: 'Poppins', color: colors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('Batal', style: TextStyle(fontFamily: 'Poppins', color: colors.textSecondary)),
+              child: Text(t.dialogs.batal, style: TextStyle(fontFamily: 'Poppins', color: colors.textSecondary)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text('Ya, Reset', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: colors.primary)),
+              child: Text(t.santri.resetPasswordButton, style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: colors.primary)),
             ),
           ],
         );
@@ -163,7 +163,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
     if (error == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Password berhasil direset ke "generasi554".', style: TextStyle(fontFamily: 'Poppins')),
+          content: Text(t.santri.resetPasswordSuccess, style: const TextStyle(fontFamily: 'Poppins')),
           backgroundColor: AppColors.of(context).success,
         ),
       );
@@ -236,8 +236,8 @@ class _SantriListScreenState extends State<SantriListScreen> {
               if (alumniCount == 0) return const SizedBox.shrink();
               return IconButton(
                 tooltip: _showAlumni
-                    ? 'Sembunyikan Alumni ($alumniCount)'
-                    : 'Tampilkan Alumni ($alumniCount)',
+                    ? t.santri.hideAlumniTooltip(count: alumniCount)
+                    : t.santri.showAlumniTooltip(count: alumniCount),
                 icon: Icon(
                   _showAlumni
                       ? Icons.unarchive_outlined
@@ -254,7 +254,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
               return Padding(
                 padding: EdgeInsets.only(right: 8.w),
                 child: Tooltip(
-                  message: 'Proses Kenaikan Kelas',
+                  message: t.santri.processUpgradeTooltip,
                   child: InkWell(
                     onTap: () {
                       final aktivSantri = state.maybeWhen(
@@ -265,9 +265,9 @@ class _SantriListScreenState extends State<SantriListScreen> {
                       if (aktivSantri.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Text(
-                              'Tidak ada santri aktif untuk diproses.',
-                              style: TextStyle(fontFamily: 'Poppins'),
+                            content: Text(
+                              t.santri.noActiveSantri,
+                              style: const TextStyle(fontFamily: 'Poppins'),
                             ),
                             backgroundColor: colors.error,
                           ),
@@ -297,7 +297,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            'Naik Kelas',
+                            t.santri.upgradeClass,
                             style: TextStyle(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
@@ -347,7 +347,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
                     child: filtered.isEmpty
                         ? Center(
                             child: Text(
-                              'Belum ada data santri',
+                              t.santri.emptyList,
                               style: TextStyle(
                                 color: colors.textSecondary,
                                 fontFamily: 'Poppins',
@@ -405,7 +405,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
         children: [
           Expanded(
             child: CustomDropdown<String>(
-              hintText: 'Kelas',
+              hintText: t.addData.kelas,
               items: _kelasOptions,
               initialItem: _filterKelas,
               onChanged: (value) {
@@ -443,7 +443,7 @@ class _SantriListScreenState extends State<SantriListScreen> {
           SizedBox(width: 10.w),
           Expanded(
             child: CustomDropdown<String>(
-              hintText: 'Program',
+              hintText: t.addHalaqoh.program,
               items: _programOptions,
               initialItem: _filterProgram,
               onChanged: (value) {

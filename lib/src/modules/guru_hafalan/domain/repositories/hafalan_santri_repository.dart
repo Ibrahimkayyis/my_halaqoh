@@ -26,7 +26,11 @@ abstract class HafalanSantriRepository {
   /// ensure historical data is present after a fresh install or cache wipe.
   Future<void> seedFromRemoteIfEmpty(String santriId);
 
+  /// Watch hafalan records for a specific halaqoh from Firestore, updating the local Hive cache.
+  Stream<List<HafalanSantriModel>> watchByHalaqohFromRemote(String halaqohId);
+
   /// Get all hafalan records for students in a halaqoh on a specific date.
+
   /// Reads from local Hive cache (synchronous).
   List<HafalanSantriModel> getHafalanByHalaqohAndDate(
       List<String> santriIds, DateTime date);

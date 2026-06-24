@@ -220,7 +220,7 @@ class _HafalanScreenState extends State<HafalanScreen> {
                   child: Padding(
                     padding: EdgeInsets.only(top: 32.h),
                     child: Text(
-                      'Santri tidak ditemukan.',
+                      t.hafalan.santriNotFound,
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: colors.textSecondary,
@@ -248,8 +248,11 @@ class _HafalanScreenState extends State<HafalanScreen> {
                       santri.kelas,
                       santri.program,
                     );
-                    final targetInfoText = santriTarget != null
-                        ? 'Target: ${TargetHafalanHelper.getActiveSemesterSummary(santriTarget, santri.kelas, santri.program)}'
+                    final summary = santriTarget != null
+                        ? TargetHafalanHelper.getActiveSemesterSummary(santriTarget, santri.kelas, santri.program)
+                        : null;
+                    final targetInfoText = (santriTarget != null && summary != null)
+                        ? t.hafalan.targetLabel(target: summary)
                         : null;
 
                     return Padding(
@@ -286,9 +289,9 @@ class _HafalanScreenState extends State<HafalanScreen> {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: const Text(
-                                    'Hafalan berhasil disimpan!',
-                                    style: TextStyle(fontFamily: 'Poppins'),
+                                  content: Text(
+                                    t.hafalan.successSave,
+                                    style: const TextStyle(fontFamily: 'Poppins'),
                                   ),
                                   backgroundColor: colors.primary,
                                 ),

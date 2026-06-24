@@ -8,6 +8,7 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 
 /// Bottom sheet untuk memproses kenaikan kelas seluruh santri aktif.
 /// Menggabungkan kenaikan kelas + pembaruan target hafalan dalam satu alur.
@@ -86,7 +87,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
                   color: dColors.primary, size: 20.sp),
               SizedBox(width: 8.w),
               Text(
-                'Konfirmasi',
+                t.general.confirmation,
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w700,
@@ -97,12 +98,11 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
             ],
           ),
           content: Text(
-            'Proses ini akan:\n'
-            '• Menaikkan kelas $_totalNaik santri\n'
-            '• Mengarsipkan $_totalAlumni santri kelas 12 sebagai alumni\n'
-            '• Memperbarui target hafalan ke tahun ajaran '
-            '$_tahunAjaranString\n\n'
-            'Tindakan ini tidak dapat dibatalkan. Lanjutkan?',
+            t.santri.upgradeClassConfirmMessage(
+              naikCount: _totalNaik,
+              alumniCount: _totalAlumni,
+              tahunAjaran: _tahunAjaranString,
+            ),
             style: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 13.sp,
@@ -114,7 +114,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, false),
               child: Text(
-                'Batal',
+                t.dialogs.batal,
                 style: TextStyle(
                     fontFamily: 'Poppins', color: dColors.textSecondary),
               ),
@@ -122,7 +122,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx, true),
               child: Text(
-                'Ya, Proses',
+                t.general.yesProcess,
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w700,
@@ -156,8 +156,10 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            'Kenaikan kelas berhasil diproses. '
-            '$_totalNaik santri naik kelas, $_totalAlumni alumni baru.',
+            t.santri.upgradeClassSuccessMessage(
+              naikCount: _totalNaik,
+              alumniCount: _totalAlumni,
+            ),
             style: const TextStyle(fontFamily: 'Poppins'),
           ),
           backgroundColor: colors.success,
@@ -227,7 +229,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Proses Kenaikan Kelas',
+                            t.santri.upgradeClassProcessTitle,
                             style: TextStyle(
                               fontSize: 17.sp,
                               fontWeight: FontWeight.w700,
@@ -236,7 +238,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
                             ),
                           ),
                           Text(
-                            'Semua santri aktif akan dinaikkan kelasnya',
+                            t.santri.upgradeClassProcessSubtitle,
                             style: TextStyle(
                               fontSize: 11.sp,
                               color: colors.textSecondary,
@@ -261,7 +263,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
 
                 // ── Tahun Ajaran Picker ────────────────────────────────────
                 Text(
-                  'Tahun Ajaran Baru',
+                  t.santri.newSchoolYear,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -275,7 +277,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
 
                 // ── Semester Aktif ─────────────────────────────────────────
                 Text(
-                  'Semester Aktif',
+                  t.targetHafalan.semesterAktif,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -286,9 +288,9 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
                 SizedBox(height: 10.h),
                 Row(
                   children: [
-                    _buildSemesterChip(colors, 1, 'Semester 1'),
+                    _buildSemesterChip(colors, 1, t.targetHafalan.semester1),
                     SizedBox(width: 12.w),
-                    _buildSemesterChip(colors, 2, 'Semester 2'),
+                    _buildSemesterChip(colors, 2, t.targetHafalan.semester2),
                   ],
                 ),
                 SizedBox(height: 20.h),
@@ -310,8 +312,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
                       SizedBox(width: 8.w),
                       Expanded(
                         child: Text(
-                          'Tindakan ini tidak dapat dibatalkan. '
-                          'Pastikan data sudah benar sebelum memproses.',
+                          t.santri.upgradeClassWarning,
                           style: TextStyle(
                             fontSize: 12.sp,
                             color: colors.error,
@@ -408,7 +409,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
                 ],
               ),
               Text(
-                'Tahun Ajaran',
+                t.editTarget.tahunAjaran,
                 style: TextStyle(
                   fontSize: 10.sp,
                   color: colors.textSecondary,
@@ -475,7 +476,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Yang akan terjadi',
+            t.santri.upgradeClassEffectsTitle,
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,
@@ -489,7 +490,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
             colors,
             icon: Icons.arrow_circle_up_rounded,
             iconColor: colors.primary,
-            text: '$_totalNaik santri aktif akan naik kelas',
+            text: t.santri.upgradeClassEffectNaik(count: _totalNaik),
           ),
           if (_totalAlumni > 0) ...[
             SizedBox(height: 8.h),
@@ -498,7 +499,7 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
               icon: Icons.archive_outlined,
               iconColor: colors.primary,
               text:
-                  '$_totalAlumni santri kelas 12 diarsipkan sebagai alumni',
+                  t.santri.upgradeClassEffectAlumni(count: _totalAlumni),
             ),
           ],
           SizedBox(height: 8.h),
@@ -506,21 +507,21 @@ class _KenaikanKelasBottomSheetState extends State<KenaikanKelasBottomSheet> {
             colors,
             icon: Icons.flag_rounded,
             iconColor: colors.primary,
-            text: 'Target hafalan semua kelas diperbarui',
+            text: t.santri.upgradeClassEffectTarget,
           ),
           SizedBox(height: 8.h),
           _buildSummaryRow(
             colors,
             icon: Icons.lock_outline_rounded,
             iconColor: Colors.green,
-            text: 'Data hafalan & halaqoh tidak berubah',
+            text: t.santri.upgradeClassEffectDataSafe,
           ),
           SizedBox(height: 8.h),
           _buildSummaryRow(
             colors,
             icon: Icons.lock_outline_rounded,
             iconColor: Colors.green,
-            text: 'Riwayat absensi tidak berubah',
+            text: t.santri.upgradeClassEffectAttendanceSafe,
           ),
         ],
       ),

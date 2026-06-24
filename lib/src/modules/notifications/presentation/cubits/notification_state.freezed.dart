@@ -55,14 +55,17 @@ extension NotificationStatePatterns on NotificationState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _TokenSaved value)?  tokenSaved,TResult Function( _PermissionDenied value)?  permissionDenied,TResult Function( _Error value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _TokenSaved value)?  tokenSaved,TResult Function( _PermissionDenied value)?  permissionDenied,TResult Function( _NotificationEnabled value)?  notificationEnabled,TResult Function( _NotificationDisabled value)?  notificationDisabled,TResult Function( _NeedsSystemSettings value)?  needsSystemSettings,TResult Function( _Error value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _TokenSaved() when tokenSaved != null:
 return tokenSaved(_that);case _PermissionDenied() when permissionDenied != null:
-return permissionDenied(_that);case _Error() when error != null:
+return permissionDenied(_that);case _NotificationEnabled() when notificationEnabled != null:
+return notificationEnabled(_that);case _NotificationDisabled() when notificationDisabled != null:
+return notificationDisabled(_that);case _NeedsSystemSettings() when needsSystemSettings != null:
+return needsSystemSettings(_that);case _Error() when error != null:
 return error(_that);case _:
   return orElse();
 
@@ -81,14 +84,17 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _TokenSaved value)  tokenSaved,required TResult Function( _PermissionDenied value)  permissionDenied,required TResult Function( _Error value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _TokenSaved value)  tokenSaved,required TResult Function( _PermissionDenied value)  permissionDenied,required TResult Function( _NotificationEnabled value)  notificationEnabled,required TResult Function( _NotificationDisabled value)  notificationDisabled,required TResult Function( _NeedsSystemSettings value)  needsSystemSettings,required TResult Function( _Error value)  error,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Loading():
 return loading(_that);case _TokenSaved():
 return tokenSaved(_that);case _PermissionDenied():
-return permissionDenied(_that);case _Error():
+return permissionDenied(_that);case _NotificationEnabled():
+return notificationEnabled(_that);case _NotificationDisabled():
+return notificationDisabled(_that);case _NeedsSystemSettings():
+return needsSystemSettings(_that);case _Error():
 return error(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -106,14 +112,17 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _TokenSaved value)?  tokenSaved,TResult? Function( _PermissionDenied value)?  permissionDenied,TResult? Function( _Error value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _TokenSaved value)?  tokenSaved,TResult? Function( _PermissionDenied value)?  permissionDenied,TResult? Function( _NotificationEnabled value)?  notificationEnabled,TResult? Function( _NotificationDisabled value)?  notificationDisabled,TResult? Function( _NeedsSystemSettings value)?  needsSystemSettings,TResult? Function( _Error value)?  error,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _TokenSaved() when tokenSaved != null:
 return tokenSaved(_that);case _PermissionDenied() when permissionDenied != null:
-return permissionDenied(_that);case _Error() when error != null:
+return permissionDenied(_that);case _NotificationEnabled() when notificationEnabled != null:
+return notificationEnabled(_that);case _NotificationDisabled() when notificationDisabled != null:
+return notificationDisabled(_that);case _NeedsSystemSettings() when needsSystemSettings != null:
+return needsSystemSettings(_that);case _Error() when error != null:
 return error(_that);case _:
   return null;
 
@@ -131,13 +140,16 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  tokenSaved,TResult Function()?  permissionDenied,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  tokenSaved,TResult Function()?  permissionDenied,TResult Function()?  notificationEnabled,TResult Function()?  notificationDisabled,TResult Function()?  needsSystemSettings,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _TokenSaved() when tokenSaved != null:
 return tokenSaved();case _PermissionDenied() when permissionDenied != null:
-return permissionDenied();case _Error() when error != null:
+return permissionDenied();case _NotificationEnabled() when notificationEnabled != null:
+return notificationEnabled();case _NotificationDisabled() when notificationDisabled != null:
+return notificationDisabled();case _NeedsSystemSettings() when needsSystemSettings != null:
+return needsSystemSettings();case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -156,13 +168,16 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  tokenSaved,required TResult Function()  permissionDenied,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  tokenSaved,required TResult Function()  permissionDenied,required TResult Function()  notificationEnabled,required TResult Function()  notificationDisabled,required TResult Function()  needsSystemSettings,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _TokenSaved():
 return tokenSaved();case _PermissionDenied():
-return permissionDenied();case _Error():
+return permissionDenied();case _NotificationEnabled():
+return notificationEnabled();case _NotificationDisabled():
+return notificationDisabled();case _NeedsSystemSettings():
+return needsSystemSettings();case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -180,13 +195,16 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  tokenSaved,TResult? Function()?  permissionDenied,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  tokenSaved,TResult? Function()?  permissionDenied,TResult? Function()?  notificationEnabled,TResult? Function()?  notificationDisabled,TResult? Function()?  needsSystemSettings,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _TokenSaved() when tokenSaved != null:
 return tokenSaved();case _PermissionDenied() when permissionDenied != null:
-return permissionDenied();case _Error() when error != null:
+return permissionDenied();case _NotificationEnabled() when notificationEnabled != null:
+return notificationEnabled();case _NotificationDisabled() when notificationDisabled != null:
+return notificationDisabled();case _NeedsSystemSettings() when needsSystemSettings != null:
+return needsSystemSettings();case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -315,6 +333,102 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'NotificationState.permissionDenied()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _NotificationEnabled implements NotificationState {
+  const _NotificationEnabled();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationEnabled);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'NotificationState.notificationEnabled()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _NotificationDisabled implements NotificationState {
+  const _NotificationDisabled();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationDisabled);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'NotificationState.notificationDisabled()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _NeedsSystemSettings implements NotificationState {
+  const _NeedsSystemSettings();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NeedsSystemSettings);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'NotificationState.needsSystemSettings()';
 }
 
 

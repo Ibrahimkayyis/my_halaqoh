@@ -19,12 +19,18 @@ class SelectSantriScreen extends StatefulWidget {
   /// Digunakan untuk menghitung batas maksimum 15 santri.
   final int currentSantriCount;
 
+  /// ID santri yang SUDAH dipilih sebelumnya di form halaqoh.
+  /// Digunakan untuk menampilkan checklist yang sudah tercentang
+  /// saat layar ini dibuka kembali (tambah santri lagi).
+  final Set<String> preSelectedIds;
+
   static const int maxSantri = 15;
 
   const SelectSantriScreen({
     super.key,
     this.assignedSantriIds = const {},
     this.currentSantriCount = 0,
+    this.preSelectedIds = const {},
   });
 
   @override
@@ -40,12 +46,19 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
   String? _filterKelas;
   String? _filterProgram;
 
-  final List<String> _kelasOptions = [
-    'Semua Kelas', '7', '8', '9', '10', '11', '12',
+  List<String> get _kelasOptions => [
+    t.selectSantri.allClasses, '7', '8', '9', '10', '11', '12',
   ];
-  final List<String> _programOptions = [
-    'Semua Program', 'Reguler', 'Takhassus',
+  List<String> get _programOptions => [
+    t.selectSantri.allPrograms, t.targetHafalan.reguler, t.targetHafalan.takhassus,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-populate checklist dari santri yang sudah dipilih sebelumnya di form
+    _selectedIds.addAll(widget.preSelectedIds);
+  }
 
   @override
   void dispose() {
@@ -73,13 +86,13 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
     }
 
     // Kelas filter
-    if (_filterKelas != null && _filterKelas != 'Semua Kelas') {
+    if (_filterKelas != null && _filterKelas != t.selectSantri.allClasses) {
       result = result.where((s) => s.kelas == _filterKelas).toList();
     }
 
     // Program filter
-    if (_filterProgram != null && _filterProgram != 'Semua Program') {
-      final code = _filterProgram == 'Takhassus' ? 'T' : 'R';
+    if (_filterProgram != null && _filterProgram != t.selectSantri.allPrograms) {
+      final code = _filterProgram == t.targetHafalan.takhassus ? 'T' : 'R';
       result = result.where((s) => s.program == code).toList();
     }
 
@@ -99,8 +112,7 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Maksimal ${SelectSantriScreen.maxSantri} santri per halaqoh. '
-            'Hapus salah satu santri sebelum menambah yang baru.',
+            t.selectSantri.maxSantriNotice(max: SelectSantriScreen.maxSantri),
             style: const TextStyle(fontFamily: 'Poppins'),
           ),
           backgroundColor: colors.error,
@@ -220,7 +232,7 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                         if (widget.assignedSantriIds.isNotEmpty) ...[
                           SizedBox(width: 6.w),
                           Text(
-                            '(${widget.assignedSantriIds.length} sudah di halaqoh lain)',
+                            t.selectSantri.assignedElsewhereNotice(count: widget.assignedSantriIds.length),
                             style: TextStyle(
                               fontSize: 11.sp,
                               color: colors.primary,
@@ -244,7 +256,7 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                               borderRadius: BorderRadius.circular(6.r),
                             ),
                             child: Text(
-                              '$slotUsed/${SelectSantriScreen.maxSantri} santri',
+                              t.selectSantri.slotLimitCounter(count: slotUsed, max: SelectSantriScreen.maxSantri),
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w600,
@@ -268,7 +280,7 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
                     child: filtered.isEmpty
                         ? Center(
                             child: Text(
-                              'Tidak ada santri',
+                              t.selectSantri.emptyList,
                               style: TextStyle(
                                 color: colors.textSecondary,
                                 fontFamily: 'Poppins',
@@ -336,13 +348,13 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
         children: [
           Expanded(
             child: CustomDropdown<String>(
-              hintText: 'Kelas',
+              hintText: t.addData.kelas,
               items: _kelasOptions,
               initialItem: _filterKelas,
               onChanged: (value) {
                 setState(() =>
                     _filterKelas =
-                        (value == 'Semua Kelas') ? null : value);
+                        (value == t.selectSantri.allClasses) ? null : value);
               },
               closedHeaderPadding: EdgeInsets.symmetric(
                 horizontal: 12.w,
@@ -376,12 +388,12 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
           SizedBox(width: 10.w),
           Expanded(
             child: CustomDropdown<String>(
-              hintText: 'Program',
+              hintText: t.addHalaqoh.program,
               items: _programOptions,
               initialItem: _filterProgram,
               onChanged: (value) {
                 setState(() => _filterProgram =
-                    (value == 'Semua Program') ? null : value);
+                    (value == t.selectSantri.allPrograms) ? null : value);
               },
               closedHeaderPadding: EdgeInsets.symmetric(
                 horizontal: 12.w,

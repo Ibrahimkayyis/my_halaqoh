@@ -105,11 +105,11 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
               children: [
                 _buildHeader(
                   colors: colors,
-                  name: santriName.isNotEmpty ? santriName : 'Memuat...',
+                  name: santriName.isNotEmpty ? santriName : t.guruProfile.loading,
                   nis: nis,
                   badge: myHalaqoh != null
-                      ? 'Kelas ${myHalaqoh!.kelas} | ${myHalaqoh!.program == 'T' ? 'Takhassus' : 'Reguler'}'
-                      : 'Kelas ? | ?',
+                      ? '${t.progressHafalanPerJuz.kelasLabel(kelas: myHalaqoh!.kelas)} | ${myHalaqoh!.program == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler}'
+                      : '${t.progressHafalanPerJuz.kelasLabel(kelas: '?')} | ?',
                   profilePictureUrl: santri?.profilePicture,
                 ),
                 // ── Menu sections ──
@@ -255,7 +255,7 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
               // NIS
               if (nis.isNotEmpty)
                 Text(
-                  'NIS: $nis',
+                  t.progressHafalanPerJuz.nisLabel(nis: nis),
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w400,

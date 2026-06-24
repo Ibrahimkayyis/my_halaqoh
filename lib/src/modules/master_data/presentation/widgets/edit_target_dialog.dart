@@ -1,4 +1,3 @@
-import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
@@ -50,36 +49,18 @@ class EditTargetDialog extends StatefulWidget {
 }
 
 class _EditTargetDialogState extends State<EditTargetDialog> {
-  late String _selectedTahun;
-  late List<String> _tahunList;
+  late final String _tahunAjaran;
   int? _selectedSemester;
-
-  /// Auto-compute academic year list based on current date.
-  static List<String> _buildTahunList() {
-    final now = DateTime.now();
-    // Academic year starts in July
-    final baseYear = now.month >= 7 ? now.year : now.year - 1;
-    return [
-      for (int y = baseYear - 2; y <= baseYear + 2; y++) '$y / ${y + 1}',
-    ];
-  }
-
-  static String _currentTahunAjaran() {
-    final now = DateTime.now();
-    final baseYear = now.month >= 7 ? now.year : now.year - 1;
-    return '$baseYear / ${baseYear + 1}';
-  }
 
   @override
   void initState() {
     super.initState();
     _selectedSemester = widget.initialSemesterAktif;
-    _tahunList = _buildTahunList();
     final initial = widget.initialTahunAjaran;
-    if (initial != null && initial.isNotEmpty && _tahunList.contains(initial)) {
-      _selectedTahun = initial;
+    if (initial != null && initial.isNotEmpty) {
+      _tahunAjaran = initial;
     } else {
-      _selectedTahun = _currentTahunAjaran();
+      _tahunAjaran = '2026 / 2027';
     }
   }
 
@@ -170,40 +151,28 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                     ),
                   ),
                   SizedBox(height: 6.h),
-                  CustomDropdown<String>(
-                    hintText: 'Pilih Tahun Ajaran',
-                    items: _tahunList,
-                    initialItem: _selectedTahun,
-                    onChanged: (v) {
-                      if (v != null) setState(() => _selectedTahun = v);
-                    },
-                    closedHeaderPadding: EdgeInsets.symmetric(
-                      horizontal: 14.w,
-                      vertical: 12.h,
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
                     ),
-                    decoration: CustomDropdownDecoration(
-                      closedBorderRadius: BorderRadius.circular(10.r),
-                      closedBorder: Border.all(color: colors.border),
-                      closedFillColor: colors.surface,
-                      expandedBorderRadius: BorderRadius.circular(10.r),
-                      expandedBorder: Border.all(color: colors.primary),
-                      expandedFillColor: colors.surface,
-                      headerStyle: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: colors.textPrimary,
-                        fontFamily: 'Poppins',
-                      ),
-                      hintStyle: TextStyle(
-                        fontSize: 14.sp,
-                        color: colors.textSecondary,
-                        fontFamily: 'Poppins',
-                      ),
-                      listItemStyle: TextStyle(
-                        fontSize: 14.sp,
-                        color: colors.textPrimary,
-                        fontFamily: 'Poppins',
-                      ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.calendar_today_rounded, size: 16.sp, color: colors.primary),
+                        SizedBox(width: 10.w),
+                        Text(
+                          _tahunAjaran,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(height: 24.h),
@@ -271,7 +240,7 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
                   if (!confirmed) return;
 
                   if (widget.onSave != null) {
-                    widget.onSave!(_selectedSemester, _selectedTahun);
+                    widget.onSave!(_selectedSemester, _tahunAjaran);
                   }
 
                   if (context.mounted) {
@@ -288,6 +257,8 @@ class _EditTargetDialogState extends State<EditTargetDialog> {
       ),
     );
   }
+
+
 
   Widget _buildSemesterOption(
     AppColorSet colors, {

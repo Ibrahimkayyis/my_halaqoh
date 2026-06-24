@@ -22,7 +22,7 @@ class TargetKelasCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final isSma = int.parse(kurikulum.kelas) >= 10;
-    final jenjang = isSma ? 'SMA' : 'SMP';
+    final jenjang = isSma ? t.targetHafalan.sma : t.targetHafalan.smp;
     final activeSem = config?.semesterAktif;
 
     return Container(
@@ -83,7 +83,7 @@ class TargetKelasCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Kelas ${kurikulum.kelas} $jenjang',
+                        t.targetHafalan.kelasTitleJenjang(kelas: kurikulum.kelas, jenjang: jenjang),
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
@@ -93,7 +93,10 @@ class TargetKelasCard extends StatelessWidget {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        'TA: ${config?.tahunAjaran.isNotEmpty == true ? config!.tahunAjaran : t.targetHafalan.belumDitetapkan} • Sem: ${activeSem ?? t.targetHafalan.belumDitetapkan}',
+                        t.targetHafalan.taSemLabel(
+                          ta: config?.tahunAjaran.isNotEmpty == true ? config!.tahunAjaran : t.targetHafalan.belumDitetapkan,
+                          sem: activeSem?.toString() ?? t.targetHafalan.belumDitetapkan,
+                        ),
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w500,
@@ -161,7 +164,7 @@ class TargetKelasCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                'SEMESTER $semesterNum',
+                t.targetHafalan.semesterNumber(number: semesterNum),
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
@@ -179,7 +182,7 @@ class TargetKelasCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                   child: Text(
-                    'AKTIF',
+                    t.general.active,
                     style: TextStyle(
                       fontSize: 8.sp,
                       fontWeight: FontWeight.w700,
@@ -191,9 +194,9 @@ class TargetKelasCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.h),
-          _buildPeriodeRow(colors, 'UTS', target.uts),
+          _buildPeriodeRow(colors, t.targetHafalan.periodeUTS, target.uts),
           SizedBox(height: 6.h),
-          _buildPeriodeRow(colors, 'UAS', target.uas),
+          _buildPeriodeRow(colors, t.targetHafalan.periodeUAS, target.uas),
         ],
       ),
     );
@@ -260,7 +263,7 @@ class TargetKelasCard extends StatelessWidget {
   String _getTypeName(TipeHafalan tipe) {
     switch (tipe) {
       case TipeHafalan.ziyadah:
-        return 'Ziyadah';
+        return t.targetHafalan.tipeZiyadah;
       case TipeHafalan.murajaah:
         return t.targetHafalan.tipeMurajaah;
       case TipeHafalan.idadTahsin:

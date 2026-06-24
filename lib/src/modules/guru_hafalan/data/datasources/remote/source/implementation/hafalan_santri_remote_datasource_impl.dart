@@ -29,7 +29,22 @@ class HafalanSantriRemoteDataSourceImpl implements HafalanSantriRemoteDataSource
   }
 
   @override
+  Stream<List<HafalanSantriModel>> watchByHalaqoh(String halaqohId) {
+    return _collection
+        .where('halaqohId', isEqualTo: halaqohId)
+        .snapshots()
+        .map((snap) {
+      final list = snap.docs
+          .map((doc) => HafalanSantriMapper.fromFirestore(doc as DocumentSnapshot))
+          .toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
+    });
+  }
+
+  @override
   Future<void> delete(String id) async {
     await _collection.doc(id).delete();
   }
 }
+

@@ -40,8 +40,8 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
   }
 
   String _getKelasTitle(String kelas) {
-    final jenjang = int.parse(kelas) <= 9 ? 'SMP' : 'SMA';
-    return 'Kelas $kelas $jenjang';
+    final jenjang = int.parse(kelas) <= 9 ? t.targetHafalan.smp : t.targetHafalan.sma;
+    return t.targetHafalan.kelasTitleJenjang(kelas: kelas, jenjang: jenjang);
   }
 
   TargetHafalanModel? _findTarget(
@@ -66,7 +66,9 @@ class _TargetHafalanScreenState extends State<TargetHafalanScreen>
       kelasTitle: _getKelasTitle(kelas),
       programLabel: programLabel,
       initialSemesterAktif: existing?.semesterAktif,
-      initialTahunAjaran: existing?.tahunAjaran,
+      initialTahunAjaran: (existing?.tahunAjaran.isNotEmpty == true)
+          ? existing!.tahunAjaran
+          : '2026 / 2027',
       onSave: (semesterAktif, tahunAjaran) {
         final now = DateTime.now();
         final model = TargetHafalanModel(

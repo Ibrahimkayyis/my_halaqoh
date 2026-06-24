@@ -43,17 +43,18 @@ class _WaliSantriRiwayatAbsensiScreenState
   int _currentMonth = DateTime.now().month;
   int _currentYear = DateTime.now().year;
 
-  final List<String> _dayNames = [
-    'AHA',
-    'SEN',
-    'SEL',
-    'RAB',
-    'KAM',
-    'JUM',
-    'SAB',
-  ];
+  List<String> get _dayNames => [
+        t.kalenderAbsensi.aha,
+        t.kalenderAbsensi.sen,
+        t.kalenderAbsensi.sel,
+        t.kalenderAbsensi.rab,
+        t.kalenderAbsensi.kam,
+        t.kalenderAbsensi.jum,
+        t.kalenderAbsensi.sab,
+      ];
 
   late AbsensiCubit _absensiCubit;
+  String? _watchedHalaqohId;
 
   List<String> get _sessionKeys {
     if (widget.programType == 'takhassus') {
@@ -64,9 +65,9 @@ class _WaliSantriRiwayatAbsensiScreenState
 
   List<String> get _sessionLabels {
     if (widget.programType == 'takhassus') {
-      return ['P', 'D', 'S', 'A', 'M'];
+      return t.riwayatAbsensi.abbrTakhassus;
     }
-    return ['P', 'M'];
+    return t.riwayatAbsensi.abbrReguler;
   }
 
   @override
@@ -83,6 +84,7 @@ class _WaliSantriRiwayatAbsensiScreenState
   }
 
   void _loadData() {
+    if (!mounted) return;
     final authState = context.read<AuthCubit>().state;
     final halaqohState = context.read<HalaqohCubit>().state;
 
@@ -104,8 +106,12 @@ class _WaliSantriRiwayatAbsensiScreenState
       orElse: () {},
     );
 
-    if (myHalaqoh != null) {
-      _absensiCubit.watchByHalaqoh(myHalaqoh!.id);
+    if (myHalaqoh != null && _watchedHalaqohId != myHalaqoh!.id) {
+      _watchedHalaqohId = myHalaqoh!.id;
+      // watchByHalaqohFromRemote: stream dari Firestore langsung.
+      // Wali santri berada di device berbeda dari guru — Hive lokal tidak
+      // diupdate oleh guru, sehingga harus stream dari Firestore agar realtime.
+      _absensiCubit.watchByHalaqohFromRemote(myHalaqoh!.id);
     }
   }
 
@@ -242,10 +248,19 @@ class _WaliSantriRiwayatAbsensiScreenState
       orElse: () {},
     );
 
-    return BlocProvider.value(
-      value: _absensiCubit,
-      child: BlocBuilder<AbsensiCubit, AbsensiState>(
-        builder: (context, absensiState) {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) => _loadData(),
+        ),
+        BlocListener<HalaqohCubit, HalaqohState>(
+          listener: (context, state) => _loadData(),
+        ),
+      ],
+      child: BlocProvider.value(
+        value: _absensiCubit,
+        child: BlocBuilder<AbsensiCubit, AbsensiState>(
+          builder: (context, absensiState) {
           List<AbsensiModel> allRecords = [];
           absensiState.maybeWhen(
             loaded: (data) => allRecords = data,
@@ -328,7 +343,7 @@ class _WaliSantriRiwayatAbsensiScreenState
                                 ),
                                 SizedBox(height: 2.h),
                                 Text(
-                                  'NIS: $displayNis',
+                                  t.riwayatAbsensi.nisLabel(nis: displayNis),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -345,7 +360,7 @@ class _WaliSantriRiwayatAbsensiScreenState
                                           halaqoh: myHalaqoh!.nama,
                                           kelas: myHalaqoh!.kelas,
                                         )
-                                      : 'Belum Terdaftar Halaqoh',
+                                      : t.riwayatAbsensi.belumTerdaftarHalaqoh,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -432,7 +447,7 @@ class _WaliSantriRiwayatAbsensiScreenState
 
                   // Day cards — ALL days in month, empty data shown as '-'
                   SizedBox(
-                    height: widget.programType == 'takhassus' ? 280.h : 180.h,
+                    height: widget.programType == 'takhassus' ? 315.h : 180.h,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -599,7 +614,7 @@ class _WaliSantriRiwayatAbsensiScreenState
                           ),
                           SizedBox(height: 14.h),
                           Text(
-                            'Keterangan Sesi',
+                            t.riwayatAbsensi.sessionKeterangan,
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
@@ -614,32 +629,40 @@ class _WaliSantriRiwayatAbsensiScreenState
                             children: widget.programType == 'takhassus'
                                 ? [
                                     _buildSessionLabel(
-                                      'P',
-                                      'Pagi (Shubuh)',
-                                      colors,
-                                    ),
-                                    _buildSessionLabel('D', 'Dhuha', colors),
-                                    _buildSessionLabel('S', 'Siang', colors),
-                                    _buildSessionLabel(
-                                      'A',
-                                      'Sore (Ashar)',
+                                      _sessionLabels[0],
+                                      t.riwayatAbsensi.sessionPagiShubuh,
                                       colors,
                                     ),
                                     _buildSessionLabel(
-                                      'M',
-                                      'Malam (Maghrib)',
+                                      _sessionLabels[1],
+                                      t.riwayatAbsensi.sessionDhuha,
+                                      colors,
+                                    ),
+                                    _buildSessionLabel(
+                                      _sessionLabels[2],
+                                      t.riwayatAbsensi.sessionSiang,
+                                      colors,
+                                    ),
+                                    _buildSessionLabel(
+                                      _sessionLabels[3],
+                                      t.riwayatAbsensi.sessionSoreAshar,
+                                      colors,
+                                    ),
+                                    _buildSessionLabel(
+                                      _sessionLabels[4],
+                                      t.riwayatAbsensi.sessionMalamMaghrib,
                                       colors,
                                     ),
                                   ]
                                 : [
                                     _buildSessionLabel(
-                                      'P',
-                                      'Pagi (Shubuh)',
+                                      _sessionLabels[0],
+                                      t.riwayatAbsensi.sessionPagiShubuh,
                                       colors,
                                     ),
                                     _buildSessionLabel(
-                                      'M',
-                                      'Malam (Maghrib)',
+                                      _sessionLabels[1],
+                                      t.riwayatAbsensi.sessionMalamMaghrib,
                                       colors,
                                     ),
                                   ],
@@ -655,8 +678,9 @@ class _WaliSantriRiwayatAbsensiScreenState
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStat(
     String value,

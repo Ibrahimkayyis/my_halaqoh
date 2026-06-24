@@ -59,11 +59,11 @@ class GuruProfileScreen extends StatelessWidget {
       orElse: () {},
     );
 
-    final guruName = currentGuru?.nama ?? 'Memuat...';
+    final guruName = currentGuru?.nama ?? t.guruProfile.loading;
     final guruNip = currentGuru?.nip ?? '';
     final profilePictureUrl = currentGuru?.profilePicture;
     final roleBadge = myHalaqoh != null
-        ? 'Pengampu ${myHalaqoh!.nama}'
+        ? t.guruProfile.pengampu(halaqoh: myHalaqoh!.nama)
         : t.guruProfile.guruHalaqoh;
 
     return Scaffold(
@@ -218,7 +218,7 @@ class GuruProfileScreen extends StatelessWidget {
               if (nip.isNotEmpty) ...[
                 SizedBox(height: 2.h),
                 Text(
-                  'NIP: $nip',
+                  t.guruProfile.nipLabel(nip: nip),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,

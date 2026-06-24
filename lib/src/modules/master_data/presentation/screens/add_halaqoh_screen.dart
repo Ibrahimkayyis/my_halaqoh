@@ -35,7 +35,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
   GuruModel? _selectedGuru;
 
   final List<String> _kelasList = ['7', '8', '9', '10', '11', '12'];
-  final List<String> _programList = ['Reguler', 'Takhassus'];
+  List<String> get _programList => [t.targetHafalan.reguler, t.targetHafalan.takhassus];
 
   // Selected santri for this halaqoh (now using SantriModel)
   final List<SantriModel> _selectedSantri = [];
@@ -47,7 +47,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
       final existing = widget.existingHalaqoh!;
       _namaController.text = existing.nama;
       _selectedKelas = existing.kelas;
-      _selectedProgram = existing.program == 'T' ? 'Takhassus' : 'Reguler';
+      _selectedProgram = existing.program == 'T' ? t.targetHafalan.takhassus : t.targetHafalan.reguler;
 
       final guruList = context.read<GuruCubit>().state.maybeWhen(
         loaded: (list) => list,
@@ -85,7 +85,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Halaqoh sudah mencapai batas maksimum $_maxSantri santri.',
+            t.addHalaqoh.maxSantriReached(max: _maxSantri),
             style: const TextStyle(fontFamily: 'Poppins'),
           ),
           backgroundColor: colors.error,
@@ -94,30 +94,37 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
       );
       return;
     }
+
+    // ID santri yang sudah ada di form saat ini — diteruskan ke SelectSantriScreen
+    // agar checklist tampil tercentang saat layar dibuka kembali.
+    final preSelectedIds = _selectedSantri.map((s) => s.id).toSet();
+
     final result = await context.router.push<List<SantriModel>>(
       SelectSantriRoute(
         assignedSantriIds: assignedSantriIds,
-        currentSantriCount: _selectedSantri.length,
+        // currentSantriCount = 0 karena semua santri terpilih sudah ditrack
+        // via preSelectedIds di dalam SelectSantriScreen itu sendiri.
+        currentSantriCount: 0,
+        preSelectedIds: preSelectedIds,
       ),
     );
-    if (result != null && result.isNotEmpty) {
+    if (result != null) {
       setState(() {
-        // Merge with existing, avoid duplicates by ID
-        for (final santri in result) {
-          if (!_selectedSantri.any((s) => s.id == santri.id) &&
-              _selectedSantri.length < _maxSantri) {
-            _selectedSantri.add(santri);
-          }
-        }
+        // Ganti seluruh daftar dengan hasil baru dari SelectSantriScreen
+        // (mencakup santri lama yang di-toggle ulang + santri baru).
+        _selectedSantri
+          ..clear()
+          ..addAll(result);
       });
     }
   }
 
+
   Future<void> _removeSantri(int index) async {
     final confirmed = await ConfirmDeleteDialog.show(
       context,
-      title: 'Hapus Santri?',
-      message: 'Apakah Anda yakin ingin menghapus santri ini dari halaqoh?',
+      title: t.addHalaqoh.deleteSantriTitle,
+      message: t.addHalaqoh.deleteSantriMessage,
     );
     if (!confirmed) return;
 
@@ -129,7 +136,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
   Future<void> _saveHalaqoh() async {
     if (_namaController.text.isEmpty || _selectedGuru == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lengkapi nama dan pengampu halaqoh')),
+        SnackBar(content: Text(t.addHalaqoh.validationEmptyFields)),
       );
       return;
     }
@@ -138,7 +145,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
     if (!confirmed) return;
 
     final now = DateTime.now();
-    final programCode = _selectedProgram == 'Takhassus' ? 'T' : 'R';
+    final programCode = _selectedProgram == t.targetHafalan.takhassus ? 'T' : 'R';
 
     final isEdit = widget.existingHalaqoh != null;
 
@@ -334,7 +341,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                           if (filteredCount > 0) ...[
                             SizedBox(height: 6.h),
                             Text(
-                              '* $filteredCount guru disembunyikan karena telah mengampu halaqoh lain.',
+                              t.addHalaqoh.guruFilteredNotice(count: filteredCount),
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 color: colors.primary,
@@ -371,7 +378,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                             final count = _selectedSantri.length;
                             final isFull = count >= _maxSantri;
                             return Text(
-                              '$count/$_maxSantri santri',
+                              t.addHalaqoh.santriLimitCounter(count: count, max: _maxSantri),
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w600,

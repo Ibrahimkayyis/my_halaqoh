@@ -55,9 +55,9 @@ class _SubmissionGroup {
   String get ayatDisplay {
     if (records.length == 1) {
       final r = records.first;
-      return 'Ayat ${r.ayatMulai} - ${r.ayatSelesai}';
+      return t.riwayatHafalanSantri.ayatRange(start: '${r.ayatMulai}', end: '${r.ayatSelesai}');
     }
-    return '${records.length} surat';
+    return t.riwayatHafalanSantri.suratCount(count: records.length);
   }
 
   /// Detail per-surah — sorted by surahId.
@@ -129,32 +129,23 @@ class _WaliSantriRiwayatHafalanScreenState
   // State untuk melacak card mana yang sedang di-expand
   int? _expandedIndex;
 
-  final List<String> _dayNames = [
-    'SEN',
-    'SEL',
-    'RAB',
-    'KAM',
-    'JUM',
-    'SAB',
-    'AHA',
-  ];
+  List<String> get _dayNames => t.mutabaahSantri.dayNames;
 
-  final List<String> _filterOptions = [
-    'Semua Tipe',
-    'Hafalan Baru',
-    "Muraja'ah",
-  ];
-  String _selectedFilterLabel = 'Semua Tipe';
+  List<String> get _filterOptions => [
+        t.riwayatHafalanSantri.filterSemuaTipe,
+        t.riwayatHafalanSantri.filterHafalanBaru,
+        t.riwayatHafalanSantri.filterMurajaah,
+      ];
+  int _selectedFilterIndex = 0;
 
   String get _filterKey {
-    if (_selectedFilterLabel == 'Hafalan Baru') return 'Ziyadah';
-    if (_selectedFilterLabel == "Muraja'ah") return 'Murajaah';
+    if (_selectedFilterIndex == 1) return 'Ziyadah';
+    if (_selectedFilterIndex == 2) return 'Murajaah';
     return 'semua';
   }
 
-  String _getDayName(int day) {
-    final date = DateTime(_currentYear, _currentMonth, day);
-    return _dayNames[date.weekday - 1];
+  String _getDayName(DateTime date) {
+    return _dayNames[date.weekday % 7];
   }
 
   void _prevMonth() {
@@ -359,7 +350,7 @@ class _WaliSantriRiwayatHafalanScreenState
                                       ),
                                       SizedBox(height: 2.h),
                                       Text(
-                                        'NIS: $displayNis',
+                                        t.riwayatHafalanSantri.nisLabel(nis: displayNis),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
@@ -378,7 +369,7 @@ class _WaliSantriRiwayatHafalanScreenState
                                                     halaqoh: myHalaqoh!.nama,
                                                     kelas: myHalaqoh!.kelas,
                                                   )
-                                            : 'Belum Terdaftar Halaqoh',
+                                            : t.waliSantriDashboard.notRegisteredHalaqoh,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
@@ -426,40 +417,44 @@ class _WaliSantriRiwayatHafalanScreenState
                           ),
                           SizedBox(height: 16.h),
 
-                          // Stats cards
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildStatCard(
-                                  '$totalBaru',
-                                  t.riwayatHafalanSantri.totalHafalanBaru,
-                                  colors,
+                          // Stats cards — IntrinsicHeight memastikan kedua card
+                          // sama tingginya meski label berbeda panjang.
+                          IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(
+                                  child: _buildStatCard(
+                                    '$totalBaru',
+                                    t.riwayatHafalanSantri.totalHafalanBaru,
+                                    colors,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: 12.w),
-                              Expanded(
-                                child: _buildStatCard(
-                                  '$totalMurajaah',
-                                  t.riwayatHafalanSantri.totalMurajaah,
-                                  colors,
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: _buildStatCard(
+                                    '$totalMurajaah',
+                                    t.riwayatHafalanSantri.totalMurajaah,
+                                    colors,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           SizedBox(height: 16.h),
 
                           // Filter + Buka Mutaba'ah
                           Row(
                             children: [
-                              SizedBox(
-                                width: 150.w,
+                              Flexible(
                                 child: CustomDropdown<String>(
                                   items: _filterOptions,
-                                  initialItem: _selectedFilterLabel,
+                                  initialItem: _filterOptions[_selectedFilterIndex],
                                   onChanged: (value) {
                                     if (value != null) {
+                                      final idx = _filterOptions.indexOf(value);
                                       setState(() {
-                                        _selectedFilterLabel = value;
+                                        _selectedFilterIndex = idx;
                                         _expandedIndex = null;
                                       });
                                     }
@@ -559,7 +554,7 @@ class _WaliSantriRiwayatHafalanScreenState
                               child: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 20.h),
                                 child: Text(
-                                  'Tidak ada hafalan untuk filter ini',
+                                  t.riwayatHafalanSantri.tidakAdaHafalanFilter,
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontFamily: 'Poppins',
@@ -619,9 +614,12 @@ class _WaliSantriRiwayatHafalanScreenState
         border: Border.all(color: colors.border, width: 1),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             value,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 28.sp,
               fontWeight: FontWeight.w800,
@@ -652,7 +650,7 @@ class _WaliSantriRiwayatHafalanScreenState
     AppColorSet colors,
   ) {
     final dayStr = group.tanggalSetoran.day.toString().padLeft(2, '0');
-    final dayName = _getDayName(group.tanggalSetoran.day);
+    final dayName = _getDayName(group.tanggalSetoran);
     final isBaru = group.jenis == 'Ziyadah';
     final isExpanded = _expandedIndex == index;
     final hasMultiple = group.records.length > 1;
@@ -739,7 +737,7 @@ class _WaliSantriRiwayatHafalanScreenState
                                 borderRadius: BorderRadius.circular(4.r),
                               ),
                               child: Text(
-                                '${group.records.length} surat',
+                                t.riwayatHafalanSantri.suratCount(count: group.records.length),
                                 style: TextStyle(
                                   fontSize: 9.sp,
                                   fontWeight: FontWeight.w600,

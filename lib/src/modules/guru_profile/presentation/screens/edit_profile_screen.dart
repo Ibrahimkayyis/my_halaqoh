@@ -85,7 +85,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       orElse: () {},
     );
     _jabatanController.text = myHalaqoh != null
-        ? 'Pengampu ${myHalaqoh!.nama}'
+        ? t.editProfile.pengampu(halaqoh: myHalaqoh!.nama)
         : t.guruProfile.guruHalaqoh;
   }
 
@@ -156,7 +156,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Profil berhasil diperbarui',
+              t.editProfile.successMessage,
               style: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp),
             ),
             backgroundColor: Colors.green,
@@ -172,7 +172,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Gagal memperbarui profil',
+              t.editProfile.failedMessage,
               style: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp),
             ),
             backgroundColor: Colors.redAccent,
@@ -251,7 +251,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       onPressed: () =>
                           _profileCubit.loadProfile(_linkedDocId),
                       child: Text(
-                        'Coba Lagi',
+                        t.editProfile.tryAgain,
                         style: TextStyle(
                           color: colors.primary,
                           fontFamily: 'Poppins',
@@ -357,7 +357,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     onPressed: (_isSaving || _isUploading) ? null : _saveProfile,
                     icon: _isSaving ? null : Icons.save,
                     label: _isSaving
-                        ? 'Menyimpan...'
+                        ? t.editProfile.saving
                         : t.editProfile.simpanPerubahan,
                     borderRadius: 26.r,
                   ),

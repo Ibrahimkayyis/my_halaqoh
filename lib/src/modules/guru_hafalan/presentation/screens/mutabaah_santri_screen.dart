@@ -44,7 +44,7 @@ class _SubmissionGroup {
       final r = records.first;
       return '${r.ayatMulai}-${r.ayatSelesai}';
     }
-    return '${records.length} surat';
+    return t.mutabaahSantri.suratCount(count: records.length);
   }
 
   /// Detailed per-surah lines
@@ -111,7 +111,7 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
 
   static const int _itemsPerPage = 5;
 
-  final List<String> _dayNames = ['AHA', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB'];
+  List<String> get _dayNames => t.mutabaahSantri.dayNames;
 
   // Track which groups are expanded (by section + index)
   final Set<String> _expandedKeys = {};
@@ -279,7 +279,7 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
                             ),
                             SizedBox(height: 10.h),
                             if (hafalanBaruGroups.isEmpty)
-                              _buildEmptyState('Belum ada hafalan baru', colors)
+                              _buildEmptyState(t.mutabaahSantri.belumAdaHafalanBaru, colors)
                             else
                               _buildPaginatedTable(
                                 allGroups: hafalanBaruGroups,
@@ -298,7 +298,7 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
                             ),
                             SizedBox(height: 10.h),
                             if (murajaahGroups.isEmpty)
-                              _buildEmptyState("Belum ada muraja'ah", colors)
+                              _buildEmptyState(t.mutabaahSantri.belumAdaMurajaah, colors)
                             else
                               _buildPaginatedTable(
                                 allGroups: murajaahGroups,

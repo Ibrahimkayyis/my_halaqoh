@@ -1090,6 +1090,7 @@ class SelectSantriRoute extends PageRouteInfo<SelectSantriRouteArgs> {
     Key? key,
     Set<String> assignedSantriIds = const {},
     int currentSantriCount = 0,
+    Set<String> preSelectedIds = const {},
     List<PageRouteInfo>? children,
   }) : super(
          SelectSantriRoute.name,
@@ -1097,6 +1098,7 @@ class SelectSantriRoute extends PageRouteInfo<SelectSantriRouteArgs> {
            key: key,
            assignedSantriIds: assignedSantriIds,
            currentSantriCount: currentSantriCount,
+           preSelectedIds: preSelectedIds,
          ),
          initialChildren: children,
        );
@@ -1113,6 +1115,7 @@ class SelectSantriRoute extends PageRouteInfo<SelectSantriRouteArgs> {
         key: args.key,
         assignedSantriIds: args.assignedSantriIds,
         currentSantriCount: args.currentSantriCount,
+        preSelectedIds: args.preSelectedIds,
       );
     },
   );
@@ -1123,6 +1126,7 @@ class SelectSantriRouteArgs {
     this.key,
     this.assignedSantriIds = const {},
     this.currentSantriCount = 0,
+    this.preSelectedIds = const {},
   });
 
   final Key? key;
@@ -1131,9 +1135,11 @@ class SelectSantriRouteArgs {
 
   final int currentSantriCount;
 
+  final Set<String> preSelectedIds;
+
   @override
   String toString() {
-    return 'SelectSantriRouteArgs{key: $key, assignedSantriIds: $assignedSantriIds, currentSantriCount: $currentSantriCount}';
+    return 'SelectSantriRouteArgs{key: $key, assignedSantriIds: $assignedSantriIds, currentSantriCount: $currentSantriCount, preSelectedIds: $preSelectedIds}';
   }
 
   @override
@@ -1145,14 +1151,16 @@ class SelectSantriRouteArgs {
           assignedSantriIds,
           other.assignedSantriIds,
         ) &&
-        currentSantriCount == other.currentSantriCount;
+        currentSantriCount == other.currentSantriCount &&
+        const SetEquality().equals(preSelectedIds, other.preSelectedIds);
   }
 
   @override
   int get hashCode =>
       key.hashCode ^
       const SetEquality().hash(assignedSantriIds) ^
-      currentSantriCount.hashCode;
+      currentSantriCount.hashCode ^
+      const SetEquality().hash(preSelectedIds);
 }
 
 /// generated route for

@@ -117,7 +117,7 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
 
     // 2. Validate kelas (inline error)
     if (_selectedKelas == null) {
-      setState(() => _kelasError = 'Kelas wajib dipilih');
+      setState(() => _kelasError = t.santri.kelasRequired);
     }
 
     if (!isFormValid || _selectedKelas == null) return;
@@ -140,7 +140,7 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
           context: context,
           builder: (ctx) => AlertDialog(
             title: Text(
-              'Peringatan',
+              t.general.warning,
               style: TextStyle(
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.bold,
@@ -148,13 +148,13 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
               ),
             ),
             content: Text(
-              'Santri dengan NIS ${_nisController.text.trim()} sudah terdaftar di sistem.',
+              t.santri.nisExistsError(nis: _nisController.text.trim()),
               style: const TextStyle(fontFamily: 'Poppins'),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Tutup', style: TextStyle(fontFamily: 'Poppins')),
+                child: Text(t.general.close, style: const TextStyle(fontFamily: 'Poppins')),
               ),
             ],
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
@@ -276,7 +276,7 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
                 children: [
                   Text(
                     _isEditMode
-                        ? 'Edit Data Santri'
+                        ? t.santri.editTitle
                         : t.addData.addSantriManual,
                     style: TextStyle(
                       fontSize: 18.sp,
@@ -386,7 +386,7 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
                   LengthLimitingTextInputFormatter(12),
                 ],
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'NIS wajib diisi';
+                  if (value == null || value.isEmpty) return t.santri.nisRequired;
                   return null;
                 },
               ),
@@ -401,7 +401,7 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
                 hint: t.addData.namaSantriHint,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Nama wajib diisi';
+                    return t.santri.nameRequired;
                   }
                   return null;
                 },
@@ -468,7 +468,7 @@ class _AddManualSantriDialogState extends State<AddManualSantriDialog> {
               PrimaryButton(
                 width: double.infinity,
                 onPressed: _isSaving ? null : _validateAndSubmit,
-                label: _isSaving ? 'Menyimpan...' : t.addData.simpan,
+                label: _isSaving ? t.general.saving : t.addData.simpan,
                 icon: _isSaving ? Icons.hourglass_top : Icons.check_circle,
                 borderRadius: 25.r,
               ),

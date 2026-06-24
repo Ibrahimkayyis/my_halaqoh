@@ -111,9 +111,9 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
     // Use real data with fallbacks to route params
     final displayName = santri?.nama ?? name;
     final displayNis = santri?.nis ?? nis;
-    final displayKelas = santri != null ? 'Kelas ${santri!.kelas}' : '-';
+    final displayKelas = santri != null ? t.myHalaqohScreen.kelas(kelas: santri!.kelas) : '-';
     final displayProgram = santri != null
-        ? TargetHafalanHelper.programCodeToFullName(santri!.program)
+        ? (santri!.program == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler)
         : '-';
     final displayHalaqoh = halaqoh?.nama ?? '-';
     final displayPembimbing = halaqoh?.guruNama ?? '-';
@@ -338,7 +338,7 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
           SizedBox(height: 4.h),
           // NIS
           Text(
-            'NIS: $displayNis',
+            t.absensi.nis(nis: displayNis),
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w400,
@@ -365,8 +365,20 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
       }
     }
 
+    String formatPercent(double v) {
+      if (v == 0) return '0';
+      if (v >= 1) {
+        final rounded = double.parse(v.toStringAsFixed(1));
+        return rounded == rounded.roundToDouble()
+            ? rounded.toInt().toString()
+            : rounded.toStringAsFixed(1);
+      }
+      final s = v.toStringAsFixed(2);
+      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+
     final double progress = juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
-    final int percent = (progress * 100).round();
+    final String percent = formatPercent(progress * 100);
     
     // Format juzCompleted to remove .0 if it's a whole number, otherwise show 2 decimals
     String formatJuz(double v) {

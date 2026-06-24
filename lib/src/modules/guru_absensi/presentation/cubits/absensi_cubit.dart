@@ -14,11 +14,24 @@ class AbsensiCubit extends Cubit<AbsensiState> {
 
   AbsensiCubit(this._repository) : super(const AbsensiState.initial());
 
-  /// Start streaming attendance records for the given halaqoh.
+  /// Start streaming attendance records for the given halaqoh from Hive.
+  /// Used by guru (offline-first, same device as writer).
   void watchByHalaqoh(String halaqohId) {
     emit(const AbsensiState.loading());
     _subscription?.cancel();
     _subscription = _repository.watchByHalaqoh(halaqohId).listen(
+      (data) => emit(AbsensiState.loaded(data)),
+      onError: (e) => emit(AbsensiState.error(e.toString())),
+    );
+  }
+
+  /// Start streaming attendance records for the given halaqoh from Firestore.
+  /// Used by wali santri (read-only consumer on a different device).
+  /// Updates Hive as a side-effect so offline data stays fresh.
+  void watchByHalaqohFromRemote(String halaqohId) {
+    emit(const AbsensiState.loading());
+    _subscription?.cancel();
+    _subscription = _repository.watchByHalaqohFromRemote(halaqohId).listen(
       (data) => emit(AbsensiState.loaded(data)),
       onError: (e) => emit(AbsensiState.error(e.toString())),
     );

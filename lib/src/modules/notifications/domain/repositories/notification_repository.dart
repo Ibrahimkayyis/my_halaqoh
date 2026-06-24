@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 /// Contract for FCM device token management.
 ///
@@ -12,6 +13,15 @@ abstract class NotificationRepository {
   /// token. Returns `null` if the user denies permission or if FCM is
   /// unavailable on this device.
   Future<String?> requestPermissionAndGetToken();
+
+  /// Cek status permission notifikasi OS saat ini tanpa memunculkan dialog.
+  /// Digunakan oleh [NotificationCubit.enableNotification] untuk memutuskan
+  /// apakah token bisa langsung diambil atau user perlu diarahkan ke Settings.
+  Future<AuthorizationStatus> checkPermissionStatus();
+
+  /// Ambil FCM token tanpa request permission baru.
+  /// Hanya panggil setelah dipastikan permission sudah authorized.
+  Future<String?> getTokenOnly();
 
   /// Persists [token] to Firestore at `/users/{uid}` under the `fcmToken`
   /// and `fcmTokenUpdatedAt` fields.

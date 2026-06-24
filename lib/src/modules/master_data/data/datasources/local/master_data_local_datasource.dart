@@ -53,9 +53,8 @@ class MasterDataLocalDataSource {
 
   Future<void> cacheGuru(List<GuruModel> list) async {
     await guruBox.clear();
-    for (final item in list) {
-      await guruBox.put(item.id, item);
-    }
+    final map = {for (final item in list) item.id: item};
+    await guruBox.putAll(map);
   }
 
   Future<void> putGuru(GuruModel model) => guruBox.put(model.id, model);
@@ -67,9 +66,8 @@ class MasterDataLocalDataSource {
 
   Future<void> cacheSantri(List<SantriModel> list) async {
     await santriBox.clear();
-    for (final item in list) {
-      await santriBox.put(item.id, item);
-    }
+    final map = {for (final item in list) item.id: item};
+    await santriBox.putAll(map);
   }
 
   Future<void> putSantri(SantriModel model) => santriBox.put(model.id, model);
@@ -81,9 +79,8 @@ class MasterDataLocalDataSource {
 
   Future<void> cacheHalaqoh(List<HalaqohModel> list) async {
     await halaqohBox.clear();
-    for (final item in list) {
-      await halaqohBox.put(item.id, item);
-    }
+    final map = {for (final item in list) item.id: item};
+    await halaqohBox.putAll(map);
   }
 
   Future<void> putHalaqoh(HalaqohModel model) =>
@@ -97,9 +94,8 @@ class MasterDataLocalDataSource {
 
   Future<void> cacheTargetHafalan(List<TargetHafalanModel> list) async {
     await targetHafalanBox.clear();
-    for (final item in list) {
-      await targetHafalanBox.put(item.id, item);
-    }
+    final map = {for (final item in list) item.id: item};
+    await targetHafalanBox.putAll(map);
   }
 
   Future<void> putTargetHafalan(TargetHafalanModel model) =>

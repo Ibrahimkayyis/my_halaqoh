@@ -10,6 +10,13 @@ class HafalanSantriLocalDataSource {
     await _box.put(model.id, model);
   }
 
+  /// Put multiple records in batch
+  Future<void> putAll(List<HafalanSantriModel> list) async {
+    if (list.isEmpty) return;
+    final map = {for (final item in list) item.id: item};
+    await _box.putAll(map);
+  }
+
   /// Watch all records for a specific santri, month, and year.
   /// Emits current data immediately, then on every Hive change.
   Stream<List<HafalanSantriModel>> watchHafalanBySantriId(String santriId, int month, int year) async* {

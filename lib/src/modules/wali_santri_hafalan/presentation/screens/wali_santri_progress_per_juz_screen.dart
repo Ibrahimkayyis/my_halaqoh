@@ -373,7 +373,7 @@ class _WaliSantriProgressPerJuzScreenState
     final halaqohInfo = myHalaqoh != null
         ? t.riwayatHafalanSantri.halaqohKelas(
             halaqoh: myHalaqoh!.nama, kelas: myHalaqoh!.kelas)
-        : (santri != null ? 'Kelas ${santri.kelas}' : '');
+        : (santri != null ? t.progressHafalanPerJuz.kelasLabel(kelas: santri.kelas) : '');
 
     return Container(
       width: double.infinity,
@@ -421,7 +421,7 @@ class _WaliSantriProgressPerJuzScreenState
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'NIS: $displayNis',
+                  t.progressHafalanPerJuz.nisLabel(nis: displayNis),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
@@ -455,7 +455,21 @@ class _WaliSantriProgressPerJuzScreenState
     final juzNum = juz['juz'] as int;
     final total = juz['total'] as int;
     final completed = juz['completed'] as int;
-    final percent = total > 0 ? (completed / total * 100).round() : 0;
+
+    String formatPercent(double v) {
+      if (v == 0) return '0';
+      if (v >= 1) {
+        final rounded = double.parse(v.toStringAsFixed(1));
+        return rounded == rounded.roundToDouble()
+            ? rounded.toInt().toString()
+            : rounded.toStringAsFixed(1);
+      }
+      final s = v.toStringAsFixed(2);
+      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+
+    final progressVal = total > 0 ? (completed / total * 100) : 0.0;
+    final percentStr = formatPercent(progressVal);
     final progress = total > 0 ? completed / total : 0.0;
 
     return GestureDetector(
@@ -491,7 +505,7 @@ class _WaliSantriProgressPerJuzScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Juz $juzNum',
+                      t.progressHafalanPerJuz.juzLabel(juz: juzNum),
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -515,7 +529,7 @@ class _WaliSantriProgressPerJuzScreenState
                   ],
                 ),
                 Text(
-                  '$percent %',
+                  t.progressHafalanPerJuz.percent(percent: percentStr),
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w800,

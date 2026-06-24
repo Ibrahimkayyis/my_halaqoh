@@ -49,9 +49,9 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
 
   List<String> get _sessionLabels {
     if (_effectiveProgramType == 'takhassus') {
-      return ['1. Shubuh', '2. Dhuha', '3. Siang', '4. Ashar', '5. Maghrib'];
+      return t.kalenderAbsensi.sessionsTakhassus;
     }
-    return ['Pagi (Kiri)', 'Malam (Kanan)'];
+    return t.kalenderAbsensi.sessionsReguler;
   }
 
   @override
@@ -269,7 +269,7 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
                                 ),
                                 SizedBox(height: 2.h),
                                 Text(
-                                  'NIS: ${widget.nis}',
+                                  t.kalenderAbsensi.nisLabel(nis: widget.nis),
                                   style: TextStyle(
                                     fontSize: 13.sp,
                                     color: Colors.white.withValues(alpha: 0.85),
@@ -391,13 +391,21 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
                                 colors,
                               ),
                               SizedBox(width: 30.w),
-                              _buildLegendDot(colors.yellow, 'Sakit', colors),
+                              _buildLegendDot(
+                                colors.yellow,
+                                t.kalenderAbsensi.sakit,
+                                colors,
+                              ),
                             ],
                           ),
                           SizedBox(height: 10.h),
                           Row(
                             children: [
-                              _buildLegendDot(colors.blue, 'Izin', colors),
+                              _buildLegendDot(
+                                colors.blue,
+                                t.kalenderAbsensi.izin,
+                                colors,
+                              ),
                               SizedBox(width: 30.w),
                               _buildLegendDot(
                                 colors.red,

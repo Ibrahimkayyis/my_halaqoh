@@ -36,7 +36,10 @@
     "santriCount": "261 Santri",
     "guruCount": "28 Guru",
     "halaqohCount": "20 Halaqoh",
-    "perKelas": "Per Kelas"
+    "perKelas": "Per Kelas",
+    "santriCountDynamic": "$count santri",
+    "guruCountDynamic": "$count guru",
+    "halaqohCountDynamic": "$count halaqoh"
   },
   "santri": {
     "title": "Data Santri",
@@ -45,7 +48,36 @@
     "identitas": "IDENTITAS",
     "kelas": "KELAS",
     "aksi": "AKSI",
-    "filter": "Filter"
+    "filter": "Filter",
+    "all": "Semua",
+    "noAccountError": "Santri ini belum memiliki akun yang terhubung.",
+    "resetPasswordTitle": "Reset Password",
+    "resetPasswordConfirm": "Apakah Anda yakin ingin mereset password untuk $name? Password akan dikembalikan ke default \"generasi554\".",
+    "resetPasswordButton": "Ya, Reset",
+    "resetPasswordSuccess": "Password berhasil direset ke \"generasi554\".",
+    "hideAlumniTooltip": "Sembunyikan Alumni ($count)",
+    "showAlumniTooltip": "Tampilkan Alumni ($count)",
+    "processUpgradeTooltip": "Proses Kenaikan Kelas",
+    "noActiveSantri": "Tidak ada santri aktif untuk diproses.",
+    "upgradeClass": "Naik Kelas",
+    "emptyList": "Belum ada data santri",
+    "upgradeClassConfirmMessage": "Proses ini akan:\n• Menaikkan kelas $naikCount santri\n• Mengarsipkan $alumniCount santri kelas 12 sebagai alumni\n• Memperbarui target hafalan ke tahun ajaran $tahunAjaran\n\nTindakan ini tidak dapat dibatalkan. Lanjutkan?",
+    "upgradeClassSuccessMessage": "Kenaikan kelas berhasil diproses. $naikCount santri naik kelas, $alumniCount alumni baru.",
+    "upgradeClassProcessTitle": "Proses Kenaikan Kelas",
+    "upgradeClassProcessSubtitle": "Semua santri aktif akan dinaikkan kelasnya",
+    "newSchoolYear": "Tahun Ajaran Baru",
+    "upgradeClassWarning": "Tindakan ini tidak dapat dibatalkan. Pastikan data sudah benar sebelum memproses.",
+    "upgradeClassEffectsTitle": "Yang akan terjadi",
+    "upgradeClassEffectNaik": "$count santri aktif akan naik kelas",
+    "upgradeClassEffectAlumni": "$count santri kelas 12 diarsipkan sebagai alumni",
+    "upgradeClassEffectTarget": "Target hafalan semua kelas diperbarui",
+    "upgradeClassEffectDataSafe": "Data hafalan & halaqoh tidak berubah",
+    "upgradeClassEffectAttendanceSafe": "Riwayat absensi tidak berubah",
+    "nisExistsError": "Santri dengan NIS $nis sudah terdaftar di sistem.",
+    "kelasRequired": "Kelas wajib dipilih",
+    "editTitle": "Edit Data Santri",
+    "nisRequired": "NIS wajib diisi",
+    "nameRequired": "Nama wajib diisi"
   },
   "guru": {
     "title": "Data Guru",
@@ -53,7 +85,22 @@
     "showCount": "Menampilkan $count Guru",
     "identitas": "IDENTITAS",
     "aksi": "AKSI",
-    "filter": "Filter"
+    "filter": "Filter",
+    "noAccountError": "Guru ini belum memiliki akun yang terhubung.",
+    "resetPasswordTitle": "Reset Password",
+    "resetPasswordConfirm": "Apakah Anda yakin ingin mereset password untuk $name? Password akan dikembalikan ke default \"generasi554\".",
+    "resetPasswordButton": "Ya, Reset",
+    "resetPasswordSuccess": "Password berhasil direset ke \"generasi554\".",
+    "emptyList": "Belum ada data guru",
+    "nipExistsError": "Guru dengan NIP $nip sudah terdaftar di sistem.",
+    "editTitle": "Edit Data Guru",
+    "nipRequired": "NIP wajib diisi",
+    "nipDigitsError": "NIP harus 12 atau 13 digit",
+    "nameRequired": "Nama wajib diisi",
+    "phoneDigitsError": "Nomor HP harus 10-13 digit (jika diisi)",
+    "programHalaqohLabel": "Program Halaqoh",
+    "chooseProgramHint": "Pilih Program",
+    "programRequired": "Program wajib dipilih"
   },
   "halaqoh": {
     "title": "Data Halaqoh",
@@ -61,14 +108,17 @@
     "showCount": "Menampilkan $count Halaqoh",
     "sort": "Urutkan",
     "santriCount": "$count Santri",
-    "kelasLabel": "Kelas $kelas"
+    "kelasLabel": "Kelas $kelas",
+    "all": "Semua",
+    "kelasProgramLabel": "Kelas $kelas$program",
+    "emptyList": "Belum ada data halaqoh"
   },
   "targetHafalan": {
     "title": "Target Hafalan",
     "reguler": "REGULER",
     "takhassus": "TAKHASSUS",
     "infoText": "Atur target hafalan untuk setiap kelas, target akan diterapkan untuk seluruh santri pada kelas tersebut.",
-    "infoTextNew": "Kurikulum hafalan sesuai program pesantren. Tetapkan tahun ajaran dan semester yang sedang berjalan.",
+    "infoTextNew": "Kurikulum hafalan sesuai program pesantren. Semester aktif dapat diatur di sini, sedangkan Tahun Ajaran diperbarui melalui Kenaikan Kelas.",
     "kelasLabel": "Kelas",
     "smp": "SMP",
     "semesterAktif": "Semester Aktif",
@@ -81,7 +131,12 @@
     "tipeDauroh": "Dauroh",
     "tipeMurajaah": "Muraja'ah",
     "tipeUAT": "UAT (Ujian Akhir Tahfidz)",
-    "editPengaturan": "Edit Pengaturan"
+    "editPengaturan": "Edit Pengaturan",
+    "sma": "SMA",
+    "kelasTitleJenjang": "Kelas $kelas $jenjang",
+    "taSemLabel": "TA: $ta • Sem: $sem",
+    "semesterNumber": "SEMESTER $number",
+    "tipeZiyadah": "Ziyadah"
   },
   "editTarget": {
     "title": "Pengaturan Target Kelas",
@@ -123,7 +178,16 @@
     "bulkSubtitle": "Import Data secara otomatis menggunakan file excel.",
     "bulkTapUpload": "Tap untuk upload file CSV",
     "bulkFormat": "Format .csv (Maks. 5MB)",
-    "bulkUploadButton": "Upload Sekarang"
+    "bulkUploadButton": "Upload Sekarang",
+    "bulkErrorFileRead": "Gagal membaca file. Coba pilih file lain.",
+    "bulkFileReady": "File siap diproses: $name",
+    "bulkStatusReading": "Membaca file...",
+    "bulkErrorFileEmpty": "File kosong atau tidak memiliki baris data!",
+    "bulkErrorNoValidRows": "Tidak ada baris data yang valid untuk diunggah!",
+    "bulkStatusProcessing": "Memproses $count baris...",
+    "bulkStatusSaving": "Menyimpan $current / $total ke server...",
+    "bulkGuruFinished": "Selesai! Sukses: $success, Gagal: $fail\n(Data Gagal biasanya karena NIP sudah terdaftar)",
+    "bulkSantriFinished": "Selesai! Sukses: $success, Gagal: $fail\n(Data Gagal biasanya karena NIS sudah terdaftar)"
   },
   "addHalaqoh": {
     "title": "Tambah Halaqoh Baru",
@@ -141,7 +205,13 @@
     "namaSantri": "NAMA SANTRI",
     "aksi": "AKSI",
     "totalTerpilih": "Total: $count Santri terpilih",
-    "simpanHalaqoh": "SIMPAN HALAQOH"
+    "simpanHalaqoh": "SIMPAN HALAQOH",
+    "maxSantriReached": "Halaqoh sudah mencapai batas maksimum $max santri.",
+    "deleteSantriTitle": "Hapus Santri?",
+    "deleteSantriMessage": "Apakah Anda yakin ingin menghapus santri ini dari halaqoh?",
+    "validationEmptyFields": "Lengkapi nama dan pengampu halaqoh",
+    "guruFilteredNotice": "* $count guru disembunyikan karena telah mengampu halaqoh lain.",
+    "santriLimitCounter": "$count/$max santri"
   },
   "selectSantri": {
     "title": "Pilih Santri",
@@ -151,7 +221,13 @@
     "nis": "NIS",
     "nama": "NAMA",
     "kelas": "KELAS",
-    "tambahkanButton": "TAMBAHKAN ($count) SANTRI"
+    "tambahkanButton": "TAMBAHKAN ($count) SANTRI",
+    "allClasses": "Semua Kelas",
+    "allPrograms": "Semua Program",
+    "maxSantriNotice": "Maksimal $max santri per halaqoh. Hapus salah satu santri sebelum menambah yang baru.",
+    "assignedElsewhereNotice": "($count sudah di halaqoh lain)",
+    "slotLimitCounter": "$count/$max santri",
+    "emptyList": "Tidak ada santri"
   },
   "guruDashboard": {
     "greeting": "AHLAN WA SAHLAN",
@@ -165,7 +241,8 @@
     "scanAbsensi": "Scan Absensi",
     "inputHafalan": "Input Hafalan",
     "laporan": "Laporan",
-    "setoranTerakhir": "Setoran Terakhir"
+    "setoranTerakhir": "Setoran Terakhir",
+    "belumAdaSetoran": "Belum ada setoran"
   },
   "guruNav": {
     "home": "Home",
@@ -184,7 +261,11 @@
     "target": "Target: $count Juz ($range)",
     "total": "Total: $count Santri",
     "pengampu": "Ustadz Kayyis",
-    "progressText": "$completed Juz terselesaikan dari $target Juz"
+    "progressText": "$completed Juz terselesaikan dari $target Juz",
+    "noHalaqohAssigned": "Anda belum ditugaskan ke Halaqoh manapun.",
+    "santriNotFound": "Santri tidak ditemukan.",
+    "programReguler": "Reguler",
+    "programTakhassus": "Takhassus"
   },
   "detailSantri": {
     "title": "Profil Santri",
@@ -222,7 +303,24 @@
     "alfa": "Alfa",
     "keterangan": "Keterangan (opsional)",
     "batal": "BATAL",
-    "simpan": "SIMPAN"
+    "simpan": "SIMPAN",
+    "barcodeScanner": {
+      "notMember": "Santri dengan NIS $nis bukan anggota halaqoh Anda",
+      "cameraError": "Gagal memuat kamera:\n$error",
+      "clearPosition": "Pastikan barcode berada dalam posisi yang jelas",
+      "scannedSuccess": "$name hadir",
+      "totalSantri": "Total $count Santri",
+      "progress": "$scanned / $total",
+      "nisLabel": "NIS: $nis"
+    },
+    "mulaiAbsensi": {
+      "shubuh": "Shubuh",
+      "dhuha": "Dhuha",
+      "siang": "Siang",
+      "soreAshar": "Sore/Ashar",
+      "maghrib": "Maghrib",
+      "markAllPresent": "Tandai Semua Hadir"
+    }
   },
   "riwayatAbsensi": {
     "title": "Riwayat Absensi",
@@ -241,7 +339,18 @@
     "alphaLabel": "Alpha",
     "izinLabel": "Izin",
     "downloadLaporan": "DOWNLOAD LAPORAN ABSENSI",
-    "belumAdaData": "Belum ada data absensi bulan ini"
+    "belumAdaData": "Belum ada data absensi bulan ini",
+    "abbrTakhassus": ["P", "D", "S", "A", "M"],
+    "abbrReguler": ["P", "M"],
+    "error": "Error: $message",
+    "nisLabel": "NIS: $nis",
+    "belumTerdaftarHalaqoh": "Belum Terdaftar Halaqoh",
+    "sessionKeterangan": "Keterangan Sesi",
+    "sessionPagiShubuh": "Pagi (Shubuh)",
+    "sessionDhuha": "Dhuha",
+    "sessionSiang": "Siang",
+    "sessionSoreAshar": "Sore (Ashar)",
+    "sessionMalamMaghrib": "Malam (Maghrib)"
   },
   "kalenderAbsensi": {
     "title": "Kalender Absensi",
@@ -259,7 +368,12 @@
     "rab": "RAB",
     "kam": "KAM",
     "jum": "JUM",
-    "sab": "SAB"
+    "sab": "SAB",
+    "sessionsTakhassus": ["1. Shubuh", "2. Dhuha", "3. Siang", "4. Ashar", "5. Maghrib"],
+    "sessionsReguler": ["Pagi (Kiri)", "Malam (Kanan)"],
+    "nisLabel": "NIS: $nis",
+    "sakit": "Sakit",
+    "izin": "Izin"
   },
   "absensiHalaqoh": {
     "title": "Absensi Halaqoh",
@@ -274,7 +388,8 @@
     "sakit": "Sakit",
     "izin": "Izin",
     "alfa": "Alfa",
-    "downloadLaporan": "DOWNLOAD LAPORAN ABSENSI"
+    "downloadLaporan": "DOWNLOAD LAPORAN ABSENSI",
+    "swipeHint": "Geser baris tanggal ke kiri/kanan untuk melihat data per hari"
   },
   "detailAbsensiHariIni": {
     "title": "Detail Absensi Hari Ini",
@@ -284,14 +399,37 @@
     "alfa": "Alfa",
     "belumAbsen": "Belum Absen",
     "belumDiabsen": "Belum absen",
-    "daftarKehadiranSantri": "Daftar Kehadiran Santri"
+    "daftarKehadiranSantri": "Daftar Kehadiran Santri",
+    "saveSuccess": "Absensi berhasil disimpan!",
+    "saveFailed": "Gagal menyimpan absensi",
+    "warningBelumTitle": "Ada Santri Belum Diabsen",
+    "warningBelumBody": "Masih ada $count santri yang belum ditentukan statusnya.\n\nSantri tersebut tidak akan tercatat dalam data absensi jika Anda tetap menyimpan.",
+    "keepSaving": "Tetap Simpan",
+    "completeFirst": "Lengkapi Dulu",
+    "warningDuplicateTitle": "Data Sudah Ada",
+    "warningDuplicateBody": "Data absensi untuk sesi $session pada tanggal $date sudah ada. Apakah Anda ingin menimpa data tersebut?",
+    "cancel": "Batal",
+    "overwrite": "Timpa",
+    "sessionsTakhassus": ["Pagi", "Dhuha", "Siang", "Sore", "Malam"],
+    "sessionsReguler": ["Pagi", "Malam"],
+    "sessions": {
+      "pagi": "Pagi",
+      "dhuha": "Dhuha",
+      "siang": "Siang",
+      "ashar": "Ashar",
+      "malam": "Malam"
+    }
   },
   "hafalan": {
     "cariSantri": "Cari Santri",
     "daftarSantri": "Daftar Santri",
     "santriCount": "$count Santri",
     "riwayatHafalan": "Riwayat Hafalan",
-    "inputHafalan": "Input Hafalan"
+    "inputHafalan": "Input Hafalan",
+    "santriNotFound": "Santri tidak ditemukan.",
+    "targetLabel": "Target: $target",
+    "successSave": "Hafalan berhasil disimpan!",
+    "nisLabel": "NIS: $nis"
   },
   "inputHafalanForm": {
     "nama": "Nama: $name",
@@ -306,7 +444,25 @@
     "kelancaran": "Kelancaran 1 - 100",
     "tajwid": "Tajwid 1 - 100",
     "simpan": "SIMPAN",
-    "batal": "BATAL"
+    "batal": "BATAL",
+    "pilihDaftarSurat": "Pilih Daftar Surat",
+    "pilihSatuAtauLebihSurat": "Pilih satu atau lebih surat",
+    "semua": "Semua",
+    "juzLabel": "Juz $juz",
+    "cariNamaSurat": "Cari nama surat...",
+    "konfirmasiPilihanCount": "KONFIRMASI PILIHAN ($count)",
+    "konfirmasiPilihan": "KONFIRMASI PILIHAN",
+    "title": "Input Hafalan",
+    "nisLabel": "NIS: $nis",
+    "tanggalSetoran": "Tanggal Setoran",
+    "tambahSurat": "Tambah Surat",
+    "kelancaran": "Kelancaran",
+    "skalaPenilaian": "Skala 1-100",
+    "tajwid": "Tajwid",
+    "errPilihMinimalSatuSurah": "Pilih minimal satu surah",
+    "errWajibDiisi1Sampai100": "Wajib diisi antara 1 sampai 100",
+    "juzNumbers": "Juz $juz",
+    "semuaAyat": "Semua Ayat"
   },
   "riwayatHafalanSantri": {
     "title": "Riwayat Hafalan",
@@ -318,13 +474,40 @@
     "hafalanBaru": "Hafalan Baru",
     "murajaah": "Muraja'ah",
     "lihatProgress": "LIHAT PROGRESS HAFALAN PER SURAT",
-    "downloadLaporan": "DOWNLOAD LAPORAN HAFALAN"
+    "downloadLaporan": "DOWNLOAD LAPORAN HAFALAN",
+    "ayatRange": "Ayat $start - $end",
+    "suratCount": "$count surat",
+    "filterSemuaTipe": "Semua Tipe",
+    "filterHafalanBaru": "Hafalan Baru",
+    "filterMurajaah": "Muraja'ah",
+    "belumAdaDataBulanIni": "Belum ada data hafalan bulan ini",
+    "tidakAdaHafalanFilter": "Tidak ada hafalan untuk filter ini",
+    "nisLabel": "NIS: $nis",
+    "deleteSuccess": "Data hafalan berhasil dihapus!",
+    "deleteFailed": "Gagal menghapus data hafalan."
   },
   "progressHafalanPerJuz": {
     "title": "Progress Hafalan",
     "targetHafalan": "Target Hafalan",
     "pilihJuz": "Pilih Juz untuk melihat detail progress per surat",
-    "ayatSelesai": "$completed dari $total Ayat Selesai"
+    "ayatSelesai": "$completed dari $total Ayat Selesai",
+    "juzLabel": "Juz $juz",
+    "kelasLabel": "Kelas $kelas",
+    "tambahTargetHafalan": "Tambah Target Hafalan",
+    "warningBanner": "Perhatian: $juzLabels belum diselesaikan. Pastikan santri tetap menyelesaikan target hafalan semester ini. Anda tetap dapat menambah target baru, namun target yang sudah ditetapkan wajib diselesaikan terlebih dahulu.",
+    "cariJuz": "Cari Juz (contoh: Juz 1)",
+    "surahCount": "$count Surat",
+    "targetBelumSelesai": "Target Belum Selesai",
+    "confirmAddExtraJuzMessage": "$juzLabels belum diselesaikan semester ini.\n\nIngatkan santri untuk tetap menyelesaikan target yang sudah ditetapkan. Apakah Anda yakin ingin menambahkan Juz $nextJuz sebagai target tambahan?",
+    "batal": "Batal",
+    "yaTambahkan": "Ya, Tambahkan",
+    "successAddTarget": "Juz $juz ditambahkan sebagai target",
+    "failedSaveTarget": "Gagal menyimpan target, coba lagi",
+    "tutup": "Tutup",
+    "teacherCanAddHint": "Ketuk + untuk menambah target juz secara manual",
+    "nisLabel": "NIS: $nis",
+    "ayatCompletedInfo": "$completed dari $total Ayat Selesai",
+    "percent": "$percent %"
   },
   "progressHafalanPerSurat": {
     "title": "Progress Per Surat",
@@ -332,7 +515,12 @@
     "ayatDari": "Ayat $memorized dari $total",
     "selesai": "Selesai",
     "dalamProses": "Dalam Proses",
-    "belumDimulai": "Belum Dimulai"
+    "belumDimulai": "Belum Dimulai",
+    "unknownSurah": "Tidak Diketahui",
+    "juzTitle": "Juz $juz",
+    "nisLabel": "NIS: $nis",
+    "ayatCount": "$count Ayat",
+    "percent": "$percent%"
   },
   "mutabaahSantri": {
     "title": "Mutaba'ah Santri",
@@ -342,7 +530,11 @@
     "tgl": "TGL",
     "surat": "SURAT",
     "ayat": "AYAT",
-    "nilai": "NILAI"
+    "nilai": "NILAI",
+    "dayNames": ["AHA", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB"],
+    "belumAdaHafalanBaru": "Belum ada hafalan baru",
+    "belumAdaMurajaah": "Belum ada muraja'ah",
+    "suratCount": "$count surat"
   },
   "guruProfile": {
     "editProfile": "Edit Profile",
@@ -351,7 +543,10 @@
     "tentangAplikasi": "Tentang Aplikasi",
     "keluar": "Keluar",
     "guruHalaqoh": "Guru Halaqoh",
-    "appVersion": "MyHalaqoh App v$version"
+    "appVersion": "MyHalaqoh App v$version",
+    "loading": "Memuat...",
+    "pengampu": "Pengampu $halaqoh",
+    "nipLabel": "NIP: $nip"
   },
   "editProfile": {
     "title": "Edit Profile",
@@ -363,7 +558,20 @@
     "kontak": "KONTAK",
     "nomorHp": "Nomor HP",
     "email": "Email",
-    "simpanPerubahan": "Simpan Perubahan"
+    "simpanPerubahan": "Simpan Perubahan",
+    "pengampu": "Pengampu $halaqoh",
+    "successMessage": "Profil berhasil diperbarui",
+    "failedMessage": "Gagal memperbarui profil",
+    "tryAgain": "Coba Lagi",
+    "saving": "Menyimpan...",
+    "nis": "NIS",
+    "kelas": "Kelas",
+    "program": "Program",
+    "kontakWali": "Kontak Wali",
+    "namaWali": "Nama Wali",
+    "hubungan": "Hubungan",
+    "pilihHubungan": "Pilih hubungan",
+    "hubunganOptions": ["Ayah", "Ibu", "Saudara"]
   },
   "ubahPassword": {
     "title": "Ubah Password",
@@ -374,7 +582,16 @@
     "syaratKeamanan": "SYARAT KEAMANAN",
     "minimal8Karakter": "Minimal 8 karakter",
     "kombinasiHurufDanAngka": "Kombinasi huruf dan angka",
-    "ubahKataSandi": "Ubah Kata Sandi"
+    "ubahKataSandi": "Ubah Kata Sandi",
+    "successMessage": "Password berhasil diubah",
+    "failedMessage": "Gagal mengubah password",
+    "errOldPasswordRequired": "Password lama wajib diisi",
+    "errNewPasswordRequired": "Password baru wajib diisi",
+    "errMin8Chars": "Minimal 8 karakter",
+    "errLetterNumberCombo": "Harus kombinasi huruf dan angka",
+    "errConfirmRequired": "Konfirmasi password wajib diisi",
+    "errMismatch": "Password tidak cocok",
+    "processing": "Memproses..."
   },
   "pengaturanScreen": {
     "title": "Pengaturan",
@@ -396,7 +613,15 @@
     "hadir": "Hadir",
     "sakit": "Sakit",
     "izin": "Izin",
-    "alpha": "Alpha"
+    "alpha": "Alpha",
+    "loading": "Memuat...",
+    "notRegisteredHalaqoh": "Belum terdaftar di Halaqoh mana pun",
+    "nis": "NIS: $nis",
+    "guru": "Guru: $name",
+    "extraMemorization": "Hafalan Tambahan (Ekstra)",
+    "juzList": "Juz: $juz",
+    "extraJuzTarget": "Tambahan : $count Juz",
+    "halaqohInfo": "Kelas $kelas | $halaqoh"
   },
   "waliSantriNav": {
     "home": "Home",
@@ -413,7 +638,13 @@
     "tema": "Tema",
     "terangLight": "Terang / Light",
     "gelapDark": "Gelap / Dark",
-    "pilihTema": "Pilih Tema"
+    "pilihTema": "Pilih Tema",
+    "notifikasi": "Notifikasi",
+    "notifikasiAktif": "Aktif",
+    "notifikasiNonAktif": "Nonaktif",
+    "notifikasiDialogTitle": "Aktifkan Notifikasi",
+    "notifikasiDialogMessage": "Izin notifikasi belum diberikan. Buka Pengaturan HP Anda, aktifkan izin notifikasi untuk aplikasi ini, lalu kembali dan coba lagi.",
+    "bukaSettingHp": "Buka Pengaturan"
   },
   "dialogs": {
     "deleteTitle": "Hapus Data?",
@@ -463,5 +694,134 @@
     "kontakButton": "Hubungi Admin via WhatsApp",
     "footer": "Dibuat dengan ❤️ untuk kemajuan pendidikan pesantren",
     "copyright": "© 2026 MyHalaqoh. All rights reserved."
+  },
+  "general": {
+    "warning": "Peringatan",
+    "close": "Tutup",
+    "saving": "Menyimpan...",
+    "done": "Selesai",
+    "active": "AKTIF",
+    "confirmation": "Konfirmasi",
+    "yesProcess": "Ya, Proses"
+  },
+  "calendar": {
+    "months": ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"],
+    "daysAbbr": ["SEN", "SEL", "RAB", "KAM", "JUM", "SAB", "AHA"],
+    "daysAbbrSundayFirst": ["AHA", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB"]
+  },
+  "laporanConfig": {
+    "titleAbsensi": "Unduh Laporan Absensi",
+    "titleHafalan": "Unduh Laporan Hafalan",
+    "titleHalaqoh": "Rekap Absensi Halaqoh",
+    "subtitleAbsensi": "Pilih periode & konfigurasi laporan PDF santri.",
+    "subtitleHafalan": "Pilih periode & konfigurasi laporan PDF santri.",
+    "subtitleHalaqoh": "Pilih periode untuk mengunduh rekapitulasi satu halaqoh penuh.",
+    "timeRange": "Rentang Waktu",
+    "weekly": "Mingguan",
+    "monthly": "Bulanan",
+    "custom": "Kustom",
+    "semester": "Semester",
+    "selectDateRange": "Pilih Rentang Tanggal",
+    "startDate": "Tanggal Awal",
+    "endDate": "Tanggal Akhir",
+    "selectDateHint": "Pilih tanggal",
+    "chooseStartDate": "Pilih Tanggal Awal",
+    "chooseEndDate": "Pilih Tanggal Akhir",
+    "btnSelect": "Pilih",
+    "btnCancel": "Batal",
+    "totalDaysSelected": "Total $days hari dipilih",
+    "reportPeriod": "Periode Laporan",
+    "daysShort": "$days hr",
+    "btnGeneratePdf": "Buat Laporan PDF",
+    "btnGenerateRecapPdf": "Buat Rekapan PDF",
+    "generatingReport": "Membuat laporan...",
+    "readyTitle": "Laporan Siap!",
+    "readyRecapTitle": "Rekapan Siap!",
+    "readySubtitle": "PDF berhasil dibuat. Pratinjau atau bagikan sekarang.",
+    "attendanceReport": "Laporan Absensi",
+    "recapAttendance": "Rekap Absensi",
+    "memorizationReport": "Laporan Hafalan",
+    "btnPreview": "Pratinjau",
+    "btnShare": "Bagikan",
+    "btnCreateNewReport": "Buat laporan baru",
+    "btnCreateNewRecap": "Buat rekapan baru",
+    "errGenerate": "Gagal membuat laporan: $error",
+    "errPreview": "Gagal membuka pratinjau: $error",
+    "errShare": "Gagal berbagi laporan: $error",
+    "pdf": {
+      "shubuh": "Shubuh",
+      "dhuha": "Dhuha",
+      "siang": "Siang",
+      "ashar": "Ashar",
+      "maghrib": "Maghrib",
+      "presentCode": "H",
+      "sickCode": "S",
+      "permitCode": "I",
+      "absentCode": "A",
+      "systemName": "MyHalaqoh — Sistem Manajemen Halaqoh",
+      "pageLabel": "Halaman $page dari $total",
+      "titleAttendance": "Laporan Kehadiran Santri",
+      "titleHalaqohRecap": "Laporan Rekapitulasi Absensi Halaqoh",
+      "titleMemorization": "Laporan Capaian Hafalan Santri",
+      "printedAt": "Dicetak: $date",
+      "studentInfo": "Informasi Santri",
+      "halaqohInfo": "Informasi Halaqoh",
+      "studentName": "Nama Santri",
+      "nameHeader": "Nama",
+      "kehadiranHeader": "Kehadiran",
+      "maxHeader": "Max",
+      "hdrHeader": "Hdr",
+      "nis": "NIS",
+      "halaqoh": "Halaqoh",
+      "pembimbing": "Pembimbing",
+      "musyrif": "Musyrif",
+      "program": "Program",
+      "reportType": "Jenis Laporan",
+      "summaryAttendance": "Ringkasan Kehadiran",
+      "summaryMemorization": "Ringkasan Capaian",
+      "present": "Hadir",
+      "sick": "Sakit",
+      "permit": "Izin",
+      "absent": "Alfa",
+      "ziyadah": "Ziyadah",
+      "murajaah": "Muraja'ah",
+      "attendanceRate": "Tingkat Kehadiran",
+      "avgScore": "Nilai Rata-rata",
+      "totalScheduled": "$hadir dari $total sesi terjadwal",
+      "dailyDetailTitle": "Detail Kehadiran Harian",
+      "setoranDetailTitle": "Detail Setoran Hafalan",
+      "predikat": {
+        "mumtaz": "Mumtaz",
+        "jayyid": "Jayyid",
+        "maqbul": "Maqbul"
+      },
+      "weeksLabel": "Pekan ke-$index  ($start – $end)",
+      "no": "No.",
+      "dateHeader": "Hari, Tanggal",
+      "dayHeader": "Hari",
+      "typeHeader": "Tipe",
+      "dateShort": "Tanggal",
+      "surahAyatHeader": "Surah / Ayat",
+      "baruCode": "Baru",
+      "ulangCode": "Ulang",
+      "ziyadahLabel": "Ziyadah (Hafalan Baru)",
+      "murajaahLabel": "Muraja'ah (Ulang)",
+      "juzHeader": "Juz",
+      "surahDetailHeader": "Detail Surat",
+      "kelancaranHeader": "Kelancaran",
+      "tajwidHeader": "Tajwid",
+      "avgHeader": "Rata-rata",
+      "predikatHeader": "Predikat",
+      "hadirLabel": "Hadir",
+      "sakitLabel": "Sakit",
+      "izinLabel": "Izin",
+      "alfaLabel": "Alfa",
+      "keteranganLabel": "Keterangan",
+      "legenda": "Legenda",
+      "noSession": "Tidak ada sesi",
+      "statusLegenda": "H = Hadir  |  S = Sakit  |  I = Izin  |  A = Alfa",
+      "predikatLegenda": "Mumtaz: 85 - 100  |  Jayyid: 70 - 84  |  Maqbul: < 70",
+      "pekanShort": "Pekan ke-$index"
+    }
   }
 }

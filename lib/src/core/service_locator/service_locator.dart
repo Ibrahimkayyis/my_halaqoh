@@ -320,7 +320,7 @@ Future<void> initDependencies() async {
   // Registered as Singleton (not Factory) so the onTokenRefresh stream
   // subscription persists for the entire app session without being torn down
   // on screen disposal.
-  sl.registerSingleton<NotificationCubit>(NotificationCubit(sl()));
+  sl.registerSingleton<NotificationCubit>(NotificationCubit(sl(), sl()));
 
   // ── Guru Laporan — Cubit ──────────────────────────────────────────────────
   // Factory — scoped to the LaporanKonfigurasiSheet bottom sheet lifetime.

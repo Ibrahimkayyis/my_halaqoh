@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -52,53 +53,48 @@ class AbsensiPdfBuilder {
 
   static List<String> _sessionLabels(String programType) =>
       programType == 'takhassus'
-      ? ['Shubuh', 'Dhuha', 'Siang', 'Ashar', 'Maghrib']
-      : ['Shubuh', 'Maghrib'];
+      ? [
+          t.laporanConfig.pdf.shubuh,
+          t.laporanConfig.pdf.dhuha,
+          t.laporanConfig.pdf.siang,
+          t.laporanConfig.pdf.ashar,
+          t.laporanConfig.pdf.maghrib
+        ]
+      : [
+          t.laporanConfig.pdf.shubuh,
+          t.laporanConfig.pdf.maghrib
+        ];
 
   // ─── Status helpers ────────────────────────────────────────────────────────
   static String _statusCode(String status) {
     switch (status.trim().toLowerCase()) {
       case 'hadir':
-        return 'H';
+        return t.laporanConfig.pdf.presentCode;
       case 'sakit':
-        return 'S';
+        return t.laporanConfig.pdf.sickCode;
       case 'izin':
-        return 'I';
+        return t.laporanConfig.pdf.permitCode;
       case 'alfa':
-        return 'A';
+        return t.laporanConfig.pdf.absentCode;
       default:
         return '-';
     }
   }
 
   static PdfColor _codeColor(String code) {
-    switch (code) {
-      case 'H':
-        return _green;
-      case 'S':
-        return _yellow;
-      case 'I':
-        return _blue;
-      case 'A':
-        return _red;
-      default:
-        return _textSecondary;
-    }
+    if (code == t.laporanConfig.pdf.presentCode) return _green;
+    if (code == t.laporanConfig.pdf.sickCode) return _yellow;
+    if (code == t.laporanConfig.pdf.permitCode) return _blue;
+    if (code == t.laporanConfig.pdf.absentCode) return _red;
+    return _textSecondary;
   }
 
   static PdfColor _codeBg(String code) {
-    switch (code) {
-      case 'H':
-        return _greenBg;
-      case 'S':
-        return _yellowBg;
-      case 'I':
-        return _blueBg;
-      case 'A':
-        return _redBg;
-      default:
-        return _borderLight;
-    }
+    if (code == t.laporanConfig.pdf.presentCode) return _greenBg;
+    if (code == t.laporanConfig.pdf.sickCode) return _yellowBg;
+    if (code == t.laporanConfig.pdf.permitCode) return _blueBg;
+    if (code == t.laporanConfig.pdf.absentCode) return _redBg;
+    return _borderLight;
   }
 
   // ─── Main entry ───────────────────────────────────────────────────────────
@@ -148,13 +144,13 @@ class AbsensiPdfBuilder {
     int hadir = 0, sakit = 0, izin = 0, alfa = 0;
     for (final day in byDay.values) {
       for (final code in day.values) {
-        if (code == 'H') {
+        if (code == t.laporanConfig.pdf.presentCode) {
           hadir++;
-        } else if (code == 'S') {
+        } else if (code == t.laporanConfig.pdf.sickCode) {
           sakit++;
-        } else if (code == 'I') {
+        } else if (code == t.laporanConfig.pdf.permitCode) {
           izin++;
-        } else if (code == 'A') {
+        } else if (code == t.laporanConfig.pdf.absentCode) {
           alfa++;
         }
       }
@@ -177,8 +173,9 @@ class AbsensiPdfBuilder {
     final rate = totalScheduled > 0 ? hadir / totalScheduled : 0.0;
 
     // 6. Period label
-    final fmtFull = DateFormat('dd MMMM yyyy', 'id');
-    final fmtMonth = DateFormat('MMMM yyyy', 'id');
+    // 6. Period label
+    final fmtFull = DateFormat('dd MMMM yyyy', t.$meta.locale.languageCode);
+    final fmtMonth = DateFormat('MMMM yyyy', t.$meta.locale.languageCode);
     final period = config.range == ReportRange.monthly
         ? fmtMonth.format(config.startDate)
         : '${fmtFull.format(config.startDate)} – ${fmtFull.format(config.endDate)}';
@@ -189,7 +186,7 @@ class AbsensiPdfBuilder {
 
     // ── Build document ────────────────────────────────────────────────────
     final doc = pw.Document(
-      title: 'Laporan Absensi – ${config.santriName}',
+      title: '${t.laporanConfig.attendanceReport} – ${config.santriName}',
       author: 'MyHalaqoh',
     );
 
@@ -215,7 +212,7 @@ class AbsensiPdfBuilder {
             regular,
           ),
           pw.SizedBox(height: 16),
-          _buildSectionTitle('Detail Kehadiran Harian', bold),
+          _buildSectionTitle(t.laporanConfig.pdf.dailyDetailTitle, bold),
           pw.SizedBox(height: 6),
           _buildDetailTable(days, byDay, keys, sLabels, semiBold, regular),
           pw.SizedBox(height: 10),
@@ -227,7 +224,7 @@ class AbsensiPdfBuilder {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                'MyHalaqoh — Sistem Manajemen Halaqoh',
+                t.laporanConfig.pdf.systemName,
                 style: pw.TextStyle(
                   font: regular,
                   fontSize: 7,
@@ -235,7 +232,7 @@ class AbsensiPdfBuilder {
                 ),
               ),
               pw.Text(
-                'Halaman ${ctx.pageNumber} dari ${ctx.pagesCount}',
+                t.laporanConfig.pdf.pageLabel(page: '${ctx.pageNumber}', total: '${ctx.pagesCount}'),
                 style: pw.TextStyle(
                   font: semiBold,
                   fontSize: 7,
@@ -297,7 +294,7 @@ class AbsensiPdfBuilder {
                 ),
                 pw.SizedBox(height: 2),
                 pw.Text(
-                  'Laporan Kehadiran Santri',
+                  t.laporanConfig.pdf.titleAttendance,
                   style: pw.TextStyle(
                     font: regular,
                     fontSize: 8.5,
@@ -333,7 +330,7 @@ class AbsensiPdfBuilder {
               ),
               pw.SizedBox(height: 4),
               pw.Text(
-                'Dicetak: $printedOn',
+                t.laporanConfig.pdf.printedAt(date: printedOn),
                 style: pw.TextStyle(
                   font: regular,
                   fontSize: 7,
@@ -368,7 +365,7 @@ class AbsensiPdfBuilder {
               border: pw.Border.all(color: _border, width: 0.5),
             ),
             child: pw.Text(
-              'Informasi Santri',
+              t.laporanConfig.pdf.studentInfo,
               style: pw.TextStyle(font: bold, fontSize: 9, color: _textPrimary),
             ),
           ),
@@ -383,12 +380,12 @@ class AbsensiPdfBuilder {
                 pw.TableRow(
                   children: [
                     _infoCell(
-                      'Nama Santri',
+                      t.laporanConfig.pdf.studentName,
                       config.santriName,
                       semiBold,
                       regular,
                     ),
-                    _infoCell('NIS', config.santriNis, semiBold, regular),
+                    _infoCell(t.laporanConfig.pdf.nis, config.santriNis, semiBold, regular),
                   ],
                 ),
                 pw.TableRow(
@@ -396,8 +393,8 @@ class AbsensiPdfBuilder {
                 ),
                 pw.TableRow(
                   children: [
-                    _infoCell('Halaqoh', config.halaqohName, semiBold, regular),
-                    _infoCell('Pembimbing', config.guruNama, semiBold, regular),
+                    _infoCell(t.laporanConfig.pdf.halaqoh, config.halaqohName, semiBold, regular),
+                    _infoCell(t.laporanConfig.pdf.pembimbing, config.guruNama, semiBold, regular),
                   ],
                 ),
               ],
@@ -438,7 +435,7 @@ class AbsensiPdfBuilder {
               ),
             ),
             child: pw.Text(
-              'Ringkasan Kehadiran',
+              t.laporanConfig.pdf.summaryAttendance,
               style: pw.TextStyle(font: bold, fontSize: 9, color: _textPrimary),
             ),
           ),
@@ -459,8 +456,8 @@ class AbsensiPdfBuilder {
                       children: [
                         _statCard(
                           '$hadir',
-                          'Hadir',
-                          'H',
+                          t.laporanConfig.pdf.present,
+                          t.laporanConfig.pdf.presentCode,
                           _green,
                           _greenBg,
                           bold,
@@ -469,8 +466,8 @@ class AbsensiPdfBuilder {
                         ),
                         _statCard(
                           '$sakit',
-                          'Sakit',
-                          'S',
+                          t.laporanConfig.pdf.sick,
+                          t.laporanConfig.pdf.sickCode,
                           _yellow,
                           _yellowBg,
                           bold,
@@ -479,8 +476,8 @@ class AbsensiPdfBuilder {
                         ),
                         _statCard(
                           '$izin',
-                          'Izin',
-                          'I',
+                          t.laporanConfig.pdf.permit,
+                          t.laporanConfig.pdf.permitCode,
                           _blue,
                           _blueBg,
                           bold,
@@ -489,8 +486,8 @@ class AbsensiPdfBuilder {
                         ),
                         _statCard(
                           '$alfa',
-                          'Alfa',
-                          'A',
+                          t.laporanConfig.pdf.absent,
+                          t.laporanConfig.pdf.absentCode,
                           _red,
                           _redBg,
                           bold,
@@ -519,7 +516,7 @@ class AbsensiPdfBuilder {
                               pw.Row(
                                 children: [
                                   pw.Text(
-                                    'Tingkat Kehadiran  ',
+                                    '${t.laporanConfig.pdf.attendanceRate}  ',
                                     style: pw.TextStyle(
                                       font: regular,
                                       fontSize: 8.5,
@@ -538,7 +535,7 @@ class AbsensiPdfBuilder {
                               ),
                               pw.SizedBox(height: 2),
                               pw.Text(
-                                '$hadir dari $totalScheduled sesi terjadwal',
+                                t.laporanConfig.pdf.totalScheduled(hadir: '$hadir', total: '$totalScheduled'),
                                 style: pw.TextStyle(
                                   font: regular,
                                   fontSize: 7.5,
@@ -604,8 +601,8 @@ class AbsensiPdfBuilder {
     final headerRow = pw.TableRow(
       decoration: pw.BoxDecoration(color: _textPrimary),
       children: [
-        _thCell('Tanggal', semiBold, color: _white),
-        _thCell('Hari', semiBold, color: _white),
+        _thCell(t.laporanConfig.pdf.dateHeader, semiBold, color: _white),
+        _thCell(t.laporanConfig.pdf.dayHeader, semiBold, color: _white),
         for (final label in sLabels)
           _thCell(
             label,
@@ -614,7 +611,7 @@ class AbsensiPdfBuilder {
             fontSize: sessionCount > 2 ? 6.5 : 7.5,
           ),
         _thCell(
-          'Keterangan',
+          t.laporanConfig.pdf.keteranganLabel,
           semiBold,
           color: _white,
           align: pw.TextAlign.left,
@@ -638,7 +635,7 @@ class AbsensiPdfBuilder {
         ),
         children: [
           _tdCell(
-            DateFormat('dd/MM/yy').format(date),
+            DateFormat('dd/MM/yy', t.$meta.locale.languageCode).format(date),
             regular,
             align: pw.TextAlign.center,
           ),
@@ -663,11 +660,11 @@ class AbsensiPdfBuilder {
 
   static pw.Widget _buildLegend(pw.Font regular, pw.Font semiBold) {
     final items = [
-      ('H', 'Hadir'),
-      ('S', 'Sakit'),
-      ('I', 'Izin'),
-      ('A', 'Alfa'),
-      ('-', 'Tidak ada sesi'),
+      (t.laporanConfig.pdf.presentCode, t.laporanConfig.pdf.present),
+      (t.laporanConfig.pdf.sickCode, t.laporanConfig.pdf.sick),
+      (t.laporanConfig.pdf.permitCode, t.laporanConfig.pdf.permit),
+      (t.laporanConfig.pdf.absentCode, t.laporanConfig.pdf.absent),
+      ('-', t.laporanConfig.pdf.noSession),
     ];
 
     return pw.Container(
@@ -681,7 +678,7 @@ class AbsensiPdfBuilder {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            'Keterangan Status',
+            t.laporanConfig.pdf.legenda,
             style: pw.TextStyle(
               font: semiBold,
               fontSize: 7.5,
@@ -948,8 +945,7 @@ class AbsensiPdfBuilder {
   static DateTime _midnight(DateTime d) => DateTime(d.year, d.month, d.day);
 
   static String _shortDay(int weekday) {
-    const n = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-    return n[(weekday - 1) % 7];
+    return t.calendar.daysAbbr[(weekday - 1) % 7];
   }
 
   static String _buildNote(Map<String, String> dayData, List<String> keys) {
@@ -957,13 +953,13 @@ class AbsensiPdfBuilder {
     for (final key in keys) {
       if (dayData[key] == 'A') absent.add(_sesiLabel(key));
     }
-    if (absent.isNotEmpty) return 'Alfa: ${absent.join(', ')}';
+    if (absent.isNotEmpty) return '${t.laporanConfig.pdf.absent}: ${absent.join(', ')}';
 
     final sakit = <String>[];
     for (final key in keys) {
       if (dayData[key] == 'S') sakit.add(_sesiLabel(key));
     }
-    if (sakit.isNotEmpty) return 'Sakit: ${sakit.join(', ')}';
+    if (sakit.isNotEmpty) return '${t.laporanConfig.pdf.sick}: ${sakit.join(', ')}';
 
     return '';
   }
@@ -971,15 +967,15 @@ class AbsensiPdfBuilder {
   static String _sesiLabel(String key) {
     switch (key) {
       case 'shubuh':
-        return 'Shubuh';
+        return t.laporanConfig.pdf.shubuh;
       case 'dhuha':
-        return 'Dhuha';
+        return t.laporanConfig.pdf.dhuha;
       case 'siang':
-        return 'Siang';
+        return t.laporanConfig.pdf.siang;
       case 'ashar':
-        return 'Ashar';
+        return t.laporanConfig.pdf.ashar;
       case 'maghrib':
-        return 'Maghrib';
+        return t.laporanConfig.pdf.maghrib;
       default:
         return key;
     }

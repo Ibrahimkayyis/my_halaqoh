@@ -31,8 +31,8 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
   String? _filterKelas;
   String? _filterProgram;
 
-  final List<String> _kelasOptions = ['Semua', '7', '8', '9', '10', '11', '12'];
-  final List<String> _programOptions = ['Semua', 'Reguler', 'Takhassus'];
+  List<String> get _kelasOptions => [t.halaqoh.all, '7', '8', '9', '10', '11', '12'];
+  List<String> get _programOptions => [t.halaqoh.all, t.targetHafalan.reguler, t.targetHafalan.takhassus];
 
   @override
   void dispose() {
@@ -50,17 +50,17 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
           h.nama.toLowerCase().contains(_searchQuery) ||
           h.guruNama.toLowerCase().contains(_searchQuery);
 
-      final matchesKelas = _filterKelas == null || _filterKelas == 'Semua' || h.kelas == _filterKelas;
-      final matchesProgram = _filterProgram == null || _filterProgram == 'Semua' ||
-          (_filterProgram == 'Reguler' && h.program == 'R') ||
-          (_filterProgram == 'Takhassus' && h.program == 'T');
+      final matchesKelas = _filterKelas == null || _filterKelas == t.halaqoh.all || h.kelas == _filterKelas;
+      final matchesProgram = _filterProgram == null || _filterProgram == t.halaqoh.all ||
+          (_filterProgram == t.targetHafalan.reguler && h.program == 'R') ||
+          (_filterProgram == t.targetHafalan.takhassus && h.program == 'T');
 
       return matchesSearch && matchesKelas && matchesProgram;
     }).toList();
   }
 
   String _getKelasLabel(HalaqohModel halaqoh) {
-    return 'Kelas ${halaqoh.kelas}${halaqoh.program}';
+    return t.halaqoh.kelasProgramLabel(kelas: halaqoh.kelas, program: halaqoh.program);
   }
 
   Future<void> _onEdit(HalaqohModel halaqoh) async {
@@ -129,7 +129,7 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
                     child: filtered.isEmpty
                         ? Center(
                             child: Text(
-                              'Belum ada data halaqoh',
+                              t.halaqoh.emptyList,
                               style: TextStyle(
                                 color: colors.textSecondary,
                                 fontFamily: 'Poppins',
@@ -190,7 +190,7 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
         children: [
           Expanded(
             child: CustomDropdown<String>(
-              hintText: 'Kelas',
+              hintText: t.addData.kelas,
               items: _kelasOptions,
               initialItem: _filterKelas,
               onChanged: (value) {
@@ -228,7 +228,7 @@ class _HalaqohListScreenState extends State<HalaqohListScreen> {
           SizedBox(width: 10.w),
           Expanded(
             child: CustomDropdown<String>(
-              hintText: 'Program',
+              hintText: t.addHalaqoh.program,
               items: _programOptions,
               initialItem: _filterProgram,
               onChanged: (value) {

@@ -63,6 +63,11 @@ class AbsensiRemoteDataSourceImpl implements AbsensiRemoteDataSource {
   }
 
   @override
+  Future<void> put(AbsensiModel model) async {
+    await _collection.doc(model.id).set(AbsensiMapper.toFirestore(model));
+  }
+
+  @override
   Future<void> update(AbsensiModel model) async {
     await _collection.doc(model.id).update(AbsensiMapper.toFirestore(model));
   }

@@ -182,7 +182,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Pilih Daftar Surat',
+                                t.inputHafalanForm.pilihDaftarSurat,
                                 style: TextStyle(
                                   fontSize: 18.sp,
                                   fontWeight: FontWeight.w700,
@@ -192,7 +192,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                'Pilih satu atau lebih surat',
+                                t.inputHafalanForm.pilihSatuAtauLebihSurat,
                                 style: TextStyle(
                                   fontSize: 13.sp,
                                   color: colors.textSecondary,
@@ -229,7 +229,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                           padding: EdgeInsets.only(right: 8.w),
                           child: ChoiceChip(
                             label: Text(
-                              isSemua ? 'Semua' : 'Juz $juzNum',
+                              isSemua ? t.inputHafalanForm.semua : t.inputHafalanForm.juzLabel(juz: juzNum),
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 fontFamily: 'Poppins',
@@ -273,7 +273,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                           color: colors.textPrimary,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Cari nama surat...',
+                          hintText: t.inputHafalanForm.cariNamaSurat,
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
                             fontFamily: 'Poppins',
@@ -398,8 +398,8 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                             }
                           : null,
                       label: totalCount > 0
-                          ? 'KONFIRMASI PILIHAN  ($totalCount)'
-                          : 'KONFIRMASI PILIHAN',
+                          ? t.inputHafalanForm.konfirmasiPilihanCount(count: totalCount)
+                          : t.inputHafalanForm.konfirmasiPilihan,
                       borderRadius: 14.r,
                     ),
                   ),
@@ -470,7 +470,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 title: Text(
-                  'Input Hafalan',
+                  t.inputHafalanForm.title,
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
@@ -542,7 +542,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                                   borderRadius: BorderRadius.circular(6.r),
                                 ),
                                 child: Text(
-                                  'NIS: ${widget.nis}',
+                                  t.inputHafalanForm.nisLabel(nis: widget.nis),
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w500,
@@ -608,7 +608,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Tanggal Setoran',
+                                  t.inputHafalanForm.tanggalSetoran,
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w500,
@@ -664,7 +664,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Tambah Surat',
+                                  t.inputHafalanForm.tambahSurat,
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w500,
@@ -674,7 +674,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                                 ),
                                 SizedBox(height: 2.h),
                                 Text(
-                                  'Pilih Daftar Surat',
+                                  t.inputHafalanForm.pilihDaftarSurat,
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w600,
@@ -739,8 +739,8 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
 
                   // ── Kelancaran ──
                   _buildScoringField(
-                    'Kelancaran',
-                    'Skala 1-100',
+                    t.inputHafalanForm.kelancaran,
+                    t.inputHafalanForm.skalaPenilaian,
                     Icons.speed,
                     _kelancaranController,
                     colors,
@@ -750,8 +750,8 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
 
                   // ── Tajwid ──
                   _buildScoringField(
-                    'Tajwid',
-                    'Skala 1-100',
+                    t.inputHafalanForm.tajwid,
+                    t.inputHafalanForm.skalaPenilaian,
                     Icons.record_voice_over_outlined,
                     _tajwidController,
                     colors,
@@ -787,9 +787,9 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     if (_selectedSurahs.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: const Text(
-                            'Pilih minimal satu surah',
-                            style: TextStyle(fontFamily: 'Poppins'),
+                          content: Text(
+                            t.inputHafalanForm.errPilihMinimalSatuSurah,
+                            style: const TextStyle(fontFamily: 'Poppins'),
                           ),
                           backgroundColor: colors.red,
                         ),
@@ -806,10 +806,10 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
 
                     // Compute both errors at once so all red borders show together
                     final kelancaranErr = (kelancaranRaw.isEmpty || kelancaranVal == null || kelancaranVal < 1 || kelancaranVal > 100)
-                        ? 'Wajib diisi antara 1 sampai 100'
+                        ? t.inputHafalanForm.errWajibDiisi1Sampai100
                         : null;
                     final tajwidErr = (tajwidRaw.isEmpty || tajwidVal == null || tajwidVal < 1 || tajwidVal > 100)
-                        ? 'Wajib diisi antara 1 sampai 100'
+                        ? t.inputHafalanForm.errWajibDiisi1Sampai100
                         : null;
 
                     if (kelancaranErr != null || tajwidErr != null) {
@@ -925,7 +925,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       ),
                     ),
                     Text(
-                      'Juz ${sel.surah.juzNumbers.join(", ")}',
+                      t.inputHafalanForm.juzNumbers(juz: sel.surah.juzNumbers.join(", ")),
                       style: TextStyle(
                         fontSize: 11.sp,
                         color: colors.textSecondary,
@@ -972,7 +972,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                 ),
                 SizedBox(width: 6.w),
                 Text(
-                  'Semua Ayat',
+                  t.inputHafalanForm.semuaAyat,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,

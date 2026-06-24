@@ -146,7 +146,7 @@ class DashboardScreen extends StatelessWidget {
           BlocBuilder<SantriCubit, SantriState>(
             builder: (context, state) {
               final subtitle = state.maybeWhen(
-                loaded: (list) => '${list.length} santri',
+                loaded: (list) => t.dashboard.santriCountDynamic(count: list.length),
                 orElse: () => t.dashboard.santriCount,
               );
               return MenuCard(
@@ -161,7 +161,7 @@ class DashboardScreen extends StatelessWidget {
           BlocBuilder<GuruCubit, GuruState>(
             builder: (context, state) {
               final subtitle = state.maybeWhen(
-                loaded: (list) => '${list.length} guru',
+                loaded: (list) => t.dashboard.guruCountDynamic(count: list.length),
                 orElse: () => t.dashboard.guruCount,
               );
               return MenuCard(
@@ -176,7 +176,7 @@ class DashboardScreen extends StatelessWidget {
           BlocBuilder<HalaqohCubit, HalaqohState>(
             builder: (context, state) {
               final subtitle = state.maybeWhen(
-                loaded: (list) => '${list.length} halaqoh',
+                loaded: (list) => t.dashboard.halaqohCountDynamic(count: list.length),
                 orElse: () => t.dashboard.halaqohCount,
               );
               return MenuCard(

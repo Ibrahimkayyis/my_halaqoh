@@ -43,9 +43,9 @@ class _SubmissionGroup {
   String get ayatDisplay {
     if (records.length == 1) {
       final r = records.first;
-      return '${r.ayatMulai}-${r.ayatSelesai}';
+      return t.riwayatHafalanSantri.ayatRange(start: '${r.ayatMulai}', end: '${r.ayatSelesai}');
     }
-    return '${records.length} surat';
+    return t.mutabaahSantri.suratCount(count: records.length);
   }
 }
 
@@ -109,15 +109,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
   // Expand/collapse state (key = sectionKey_index)
   final Set<String> _expandedKeys = {};
 
-  final List<String> _dayNames = [
-    'AHA',
-    'SEN',
-    'SEL',
-    'RAB',
-    'KAM',
-    'JUM',
-    'SAB',
-  ];
+  List<String> get _dayNames => t.mutabaahSantri.dayNames;
 
   String _getDayName(DateTime date) => _dayNames[date.weekday % 7];
 
@@ -289,7 +281,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                               SizedBox(height: 10.h),
                               if (hafalanBaruGroups.isEmpty)
                                 _buildEmptyState(
-                                  'Belum ada hafalan baru',
+                                  t.mutabaahSantri.belumAdaHafalanBaru,
                                   colors,
                                 )
                               else
@@ -311,7 +303,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                               ),
                               SizedBox(height: 10.h),
                               if (murajaahGroups.isEmpty)
-                                _buildEmptyState("Belum ada muraja'ah", colors)
+                                _buildEmptyState(t.mutabaahSantri.belumAdaMurajaah, colors)
                               else
                                 _buildPaginatedTable(
                                   allGroups: murajaahGroups,
@@ -798,7 +790,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
             SizedBox(
               width: 55.w,
               child: Text(
-                '${record.ayatMulai}-${record.ayatSelesai}',
+                t.riwayatHafalanSantri.ayatRange(start: '${record.ayatMulai}', end: '${record.ayatSelesai}'),
                 style: TextStyle(
                   fontSize: 11.sp,
                   color: colors.textSecondary.withValues(alpha: 0.8),

@@ -35,30 +35,9 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
   late int _currentMonth;
   late int _currentYear;
 
-  final List<String> _monthNames = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
+  List<String> get _monthNames => t.calendar.months;
 
-  final List<String> _dayAbbr = [
-    'SEN',
-    'SEL',
-    'RAB',
-    'KAM',
-    'JUM',
-    'SAB',
-    'AHA',
-  ];
+  List<String> get _dayAbbr => t.calendar.daysAbbr;
 
   // Session keys and abbreviations are computed from the resolved programType
   // (see _effectiveProgramType() in build). These static helpers accept the
@@ -478,7 +457,7 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
-                            'Geser baris tanggal ke kiri/kanan untuk melihat data per hari',
+                            t.absensiHalaqoh.swipeHint,
                             style: TextStyle(
                               fontSize: 11.sp,
                               color: colors.primary,
@@ -595,16 +574,16 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     final labels = <Map<String, String>>[];
     if (effectiveProgramType == 'takhassus') {
       labels.addAll([
-        {'code': 'P', 'label': 'Pagi'},
-        {'code': 'D', 'label': 'Dhuha'},
-        {'code': 'S', 'label': 'Siang'},
-        {'code': 'A', 'label': 'Ashar'},
-        {'code': 'M', 'label': 'Malam'},
+        {'code': t.riwayatAbsensi.abbrTakhassus[0], 'label': t.detailAbsensiHariIni.sessions.pagi},
+        {'code': t.riwayatAbsensi.abbrTakhassus[1], 'label': t.detailAbsensiHariIni.sessions.dhuha},
+        {'code': t.riwayatAbsensi.abbrTakhassus[2], 'label': t.detailAbsensiHariIni.sessions.siang},
+        {'code': t.riwayatAbsensi.abbrTakhassus[3], 'label': t.detailAbsensiHariIni.sessions.ashar},
+        {'code': t.riwayatAbsensi.abbrTakhassus[4], 'label': t.detailAbsensiHariIni.sessions.malam},
       ]);
     } else {
       labels.addAll([
-        {'code': 'P', 'label': 'Pagi'},
-        {'code': 'M', 'label': 'Malam'},
+        {'code': t.riwayatAbsensi.abbrReguler[0], 'label': t.detailAbsensiHariIni.sessions.pagi},
+        {'code': t.riwayatAbsensi.abbrReguler[1], 'label': t.detailAbsensiHariIni.sessions.malam},
       ]);
     }
 
@@ -794,7 +773,7 @@ class _SyncedTableState extends State<_SyncedTable> {
                 ),
               ),
               child: Text(
-                'Santri',
+                t.absensiHalaqoh.santri,
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,

@@ -88,7 +88,7 @@ class _WaliSantriProgressPerSuratScreenState
       }
 
       return {
-        'name': surah?.name ?? 'Unknown',
+        'name': surah?.name ?? t.progressHafalanPerSurat.unknownSurah,
         'totalAyat': totalAyat,
         'memorized': memorized,
       };
@@ -156,7 +156,7 @@ class _WaliSantriProgressPerSuratScreenState
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          'Juz ${widget.juzNumber}',
+                          t.progressHafalanPerSurat.juzTitle(juz: widget.juzNumber),
                           style: TextStyle(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w700,
@@ -241,7 +241,7 @@ class _WaliSantriProgressPerSuratScreenState
     final halaqohInfo = myHalaqoh != null
         ? t.riwayatHafalanSantri.halaqohKelas(
             halaqoh: myHalaqoh!.nama, kelas: myHalaqoh!.kelas)
-        : (santri != null ? 'Kelas ${santri.kelas}' : '');
+        : (santri != null ? t.progressHafalanPerJuz.kelasLabel(kelas: santri.kelas) : '');
 
     return Container(
       width: double.infinity,
@@ -289,7 +289,7 @@ class _WaliSantriProgressPerSuratScreenState
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'NIS: $displayNis',
+                  t.progressHafalanPerSurat.nisLabel(nis: displayNis),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
@@ -319,15 +319,29 @@ class _WaliSantriProgressPerSuratScreenState
     final surahName = surah['name'] as String;
     final totalAyat = surah['totalAyat'] as int;
     final memorized = surah['memorized'] as int;
-    final percent = totalAyat > 0 ? (memorized / totalAyat * 100).round() : 0;
+
+    String formatPercent(double v) {
+      if (v == 0) return '0';
+      if (v >= 1) {
+        final rounded = double.parse(v.toStringAsFixed(1));
+        return rounded == rounded.roundToDouble()
+            ? rounded.toInt().toString()
+            : rounded.toStringAsFixed(1);
+      }
+      final s = v.toStringAsFixed(2);
+      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+
+    final progressVal = totalAyat > 0 ? (memorized / totalAyat * 100) : 0.0;
+    final percentStr = formatPercent(progressVal);
     final progress = totalAyat > 0 ? memorized / totalAyat : 0.0;
 
     String statusLabel;
     Color statusColor;
-    if (percent == 100) {
+    if (progressVal == 100) {
       statusLabel = t.progressHafalanPerSurat.selesai;
       statusColor = colors.primary;
-    } else if (percent > 0) {
+    } else if (progressVal > 0) {
       statusLabel = t.progressHafalanPerSurat.dalamProses;
       statusColor = colors.primary;
     } else {
@@ -369,7 +383,7 @@ class _WaliSantriProgressPerSuratScreenState
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    '$totalAyat Ayat',
+                    t.progressHafalanPerSurat.ayatCount(count: totalAyat),
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w400,
@@ -380,7 +394,7 @@ class _WaliSantriProgressPerSuratScreenState
                 ],
               ),
               Text(
-                '$percent%',
+                t.progressHafalanPerSurat.percent(percent: percentStr),
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w800,

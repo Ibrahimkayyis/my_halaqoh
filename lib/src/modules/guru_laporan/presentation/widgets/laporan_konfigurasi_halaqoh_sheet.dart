@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
@@ -166,13 +167,6 @@ class _LaporanKonfigurasiHalaqohSheetState
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-  static const _monthNames = [
-    'Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des',
-  ];
-  static const _monthNamesFull = [
-    'Januari','Februari','Maret','April','Mei','Juni',
-    'Juli','Agustus','September','Oktober','November','Desember',
-  ];
 
   void _switchRange(ReportRange r) {
     setState(() => _range = r);
@@ -199,10 +193,10 @@ class _LaporanKonfigurasiHalaqohSheetState
           : (_customEnd ?? DateTime(_year, _month + 1, 0)),
       firstDate: DateTime(2020),
       lastDate: DateTime(2030, 12, 31),
-      locale: const Locale('id', 'ID'),
-      helpText: isStart ? 'Pilih Tanggal Awal' : 'Pilih Tanggal Akhir',
-      confirmText: 'Pilih',
-      cancelText: 'Batal',
+      locale: Locale(t.$meta.locale.languageCode),
+      helpText: isStart ? t.laporanConfig.chooseStartDate : t.laporanConfig.chooseEndDate,
+      confirmText: t.laporanConfig.btnSelect,
+      cancelText: t.laporanConfig.btnCancel,
     );
     if (picked == null) return;
     setState(() {
@@ -295,7 +289,7 @@ class _LaporanKonfigurasiHalaqohSheetState
       children: [
         // Title
         Text(
-          'Rekap Absensi Halaqoh',
+          t.laporanConfig.titleHalaqoh,
           style: TextStyle(
             fontSize: 17.sp,
             fontWeight: FontWeight.w700,
@@ -305,7 +299,7 @@ class _LaporanKonfigurasiHalaqohSheetState
         ),
         SizedBox(height: 4.h),
         Text(
-          'Pilih periode untuk mengunduh rekapitulasi satu halaqoh penuh.',
+          t.laporanConfig.subtitleHalaqoh,
           style: TextStyle(
             fontSize: 12.sp,
             color: colors.textSecondary,
@@ -323,14 +317,14 @@ class _LaporanKonfigurasiHalaqohSheetState
         SizedBox(height: 20.h),
 
         // ── Range type cards ─────────────────────────────────────────
-        _SectionLabel(label: 'Rentang Waktu', colors: colors),
+        _SectionLabel(label: t.laporanConfig.timeRange, colors: colors),
         SizedBox(height: 8.h),
 
         Row(
           children: [
             _RangeCard(
               icon: Icons.view_week_rounded,
-              label: 'Mingguan',
+              label: t.laporanConfig.weekly,
               selected: _range == ReportRange.weekly,
               colors: colors,
               onTap: () => _switchRange(ReportRange.weekly),
@@ -338,7 +332,7 @@ class _LaporanKonfigurasiHalaqohSheetState
             SizedBox(width: 8.w),
             _RangeCard(
               icon: Icons.calendar_month_rounded,
-              label: 'Bulanan',
+              label: t.laporanConfig.monthly,
               selected: _range == ReportRange.monthly,
               colors: colors,
               onTap: () => _switchRange(ReportRange.monthly),
@@ -346,7 +340,7 @@ class _LaporanKonfigurasiHalaqohSheetState
             SizedBox(width: 8.w),
             _RangeCard(
               icon: Icons.tune_rounded,
-              label: 'Kustom',
+              label: t.laporanConfig.custom,
               selected: _range == ReportRange.semester,
               colors: colors,
               onTap: () => _switchRange(ReportRange.semester),
@@ -400,7 +394,7 @@ class _LaporanKonfigurasiHalaqohSheetState
                       ),
                       SizedBox(width: 10.w),
                       Text(
-                        'Membuat laporan...',
+                        t.laporanConfig.generatingReport,
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 14.sp,
@@ -415,7 +409,7 @@ class _LaporanKonfigurasiHalaqohSheetState
                       Icon(Icons.picture_as_pdf_rounded, size: 20.sp),
                       SizedBox(width: 8.w),
                       Text(
-                        'Buat Rekapan PDF',
+                        t.laporanConfig.btnGenerateRecapPdf,
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 14.sp,
@@ -458,7 +452,7 @@ class _LaporanKonfigurasiHalaqohSheetState
             ),
             Expanded(
               child: Text(
-                '${_monthNamesFull[_weekMonth - 1]} $_weekYear',
+                '${t.calendar.months[_weekMonth - 1]} $_weekYear',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: colors.textPrimary, fontFamily: 'Poppins'),
               ),
@@ -509,7 +503,7 @@ class _LaporanKonfigurasiHalaqohSheetState
           ),
           itemCount: 12,
           itemBuilder: (_, i) => _MonthChip(
-            label: _monthNames[i],
+            label: t.calendar.months[i].substring(0, 3),
             selected: (i + 1) == _month,
             colors: colors,
             onTap: () => setState(() => _month = i + 1),
@@ -523,13 +517,13 @@ class _LaporanKonfigurasiHalaqohSheetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionLabel(label: 'Pilih Rentang Tanggal', colors: colors),
+        _SectionLabel(label: t.laporanConfig.selectDateRange, colors: colors),
         SizedBox(height: 10.h),
         Row(
           children: [
-            Expanded(child: _DatePickerField(label: 'Tanggal Awal', date: _customStart, icon: Icons.event_available_rounded, colors: colors, onTap: () => _pickDate(true))),
+            Expanded(child: _DatePickerField(label: t.laporanConfig.startDate, date: _customStart, icon: Icons.event_available_rounded, colors: colors, onTap: () => _pickDate(true))),
             Padding(padding: EdgeInsets.symmetric(horizontal: 8.w), child: Icon(Icons.arrow_forward_rounded, size: 18.sp, color: colors.textSecondary)),
-            Expanded(child: _DatePickerField(label: 'Tanggal Akhir', date: _customEnd, icon: Icons.event_rounded, colors: colors, onTap: () => _pickDate(false))),
+            Expanded(child: _DatePickerField(label: t.laporanConfig.endDate, date: _customEnd, icon: Icons.event_rounded, colors: colors, onTap: () => _pickDate(false))),
           ],
         ),
         if (_customStart != null && _customEnd != null) ...[
@@ -551,7 +545,7 @@ class _LaporanKonfigurasiHalaqohSheetState
       children: [
         // Header
         Text(
-          'Rekapan Siap!',
+          t.laporanConfig.readyRecapTitle,
           style: TextStyle(
             fontSize: 17.sp,
             fontWeight: FontWeight.w700,
@@ -561,7 +555,7 @@ class _LaporanKonfigurasiHalaqohSheetState
         ),
         SizedBox(height: 4.h),
         Text(
-          'PDF berhasil dibuat. Pratinjau atau bagikan sekarang.',
+          t.laporanConfig.readySubtitle,
           style: TextStyle(
             fontSize: 12.sp,
             color: colors.textSecondary,
@@ -603,7 +597,7 @@ class _LaporanKonfigurasiHalaqohSheetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Rekap Absensi',
+                      t.laporanConfig.recapAttendance,
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -650,7 +644,7 @@ class _LaporanKonfigurasiHalaqohSheetState
             Expanded(
               child: _ActionButton(
                 icon: Icons.visibility_outlined,
-                label: 'Pratinjau',
+                label: t.laporanConfig.btnPreview,
                 isPrimary: false,
                 colors: colors,
                 onTap: () => context.read<LaporanAbsensiHalaqohCubit>().previewPdf(
@@ -662,7 +656,7 @@ class _LaporanKonfigurasiHalaqohSheetState
             Expanded(
               child: _ActionButton(
                 icon: Icons.share_rounded,
-                label: 'Bagikan',
+                label: t.laporanConfig.btnShare,
                 isPrimary: true,
                 colors: colors,
                 onTap: () => context.read<LaporanAbsensiHalaqohCubit>().sharePdf(
@@ -683,7 +677,7 @@ class _LaporanKonfigurasiHalaqohSheetState
               color: colors.textSecondary,
             ),
             label: Text(
-              'Buat rekapan baru',
+              t.laporanConfig.btnCreateNewRecap,
               style: TextStyle(
                 fontSize: 12.sp,
                 color: colors.textSecondary,
@@ -821,7 +815,7 @@ class _WeekChip extends StatelessWidget {
       required this.isSelected, required this.colors, required this.onTap});
   @override
   Widget build(BuildContext context) {
-    final fmt = DateFormat('dd MMM', 'id');
+    final fmt = DateFormat('dd MMM', t.$meta.locale.languageCode);
     final label = '${fmt.format(weekStart)} – ${fmt.format(weekEnd)}';
     final weekNum = ((weekStart.difference(DateTime(weekStart.year, 1, 1)).inDays) / 7).floor() + 1;
     return GestureDetector(
@@ -883,7 +877,7 @@ class _DatePickerField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasDate = date != null;
-    final text = hasDate ? DateFormat('dd MMM yyyy', 'id').format(date!) : 'Pilih tanggal';
+    final text = hasDate ? DateFormat('dd MMM yyyy', t.$meta.locale.languageCode).format(date!) : t.laporanConfig.selectDateHint;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -923,7 +917,7 @@ class _DurationBadge extends StatelessWidget {
     child: Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(Icons.info_outline_rounded, size: 13.sp, color: colors.primary),
       SizedBox(width: 5.w),
-      Text('Total $days hari dipilih', style: TextStyle(fontSize: 11.sp, color: colors.primary, fontWeight: FontWeight.w500, fontFamily: 'Poppins')),
+      Text(t.laporanConfig.totalDaysSelected(days: days), style: TextStyle(fontSize: 11.sp, color: colors.primary, fontWeight: FontWeight.w500, fontFamily: 'Poppins')),
     ]),
   );
 }
@@ -933,7 +927,7 @@ class _PreviewBar extends StatelessWidget {
   const _PreviewBar({required this.startDate, required this.endDate, required this.colors});
   @override
   Widget build(BuildContext context) {
-    final fmt = DateFormat('dd MMM yyyy', 'id');
+    final fmt = DateFormat('dd MMM yyyy', t.$meta.locale.languageCode);
     final days = endDate.difference(startDate).inDays + 1;
     return Container(
       width: double.infinity,
@@ -943,7 +937,7 @@ class _PreviewBar extends StatelessWidget {
         Icon(Icons.date_range_rounded, size: 18.sp, color: colors.primary),
         SizedBox(width: 10.w),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Periode Laporan', style: TextStyle(fontSize: 9.sp, color: colors.textSecondary, fontFamily: 'Poppins')),
+          Text(t.laporanConfig.reportPeriod, style: TextStyle(fontSize: 9.sp, color: colors.textSecondary, fontFamily: 'Poppins')),
           SizedBox(height: 2.h),
           Text('${fmt.format(startDate)} – ${fmt.format(endDate)}',
               style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: colors.textPrimary, fontFamily: 'Poppins')),
@@ -951,7 +945,7 @@ class _PreviewBar extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
           decoration: BoxDecoration(color: colors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6.r)),
-          child: Text('$days hr', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: colors.primary, fontFamily: 'Poppins')),
+          child: Text(t.laporanConfig.daysShort(days: days), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: colors.primary, fontFamily: 'Poppins')),
         ),
       ]),
     );

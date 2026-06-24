@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:printing/printing.dart';
 
 import '../../domain/models/laporan_absensi_config.dart';
@@ -37,7 +38,7 @@ class LaporanAbsensiCubit extends Cubit<LaporanAbsensiState> {
       emit(LaporanAbsensiState.generated(bytes));
     } catch (e, st) {
       _log.e('PDF generation failed', error: e, stackTrace: st);
-      emit(LaporanAbsensiState.error('Gagal membuat laporan: ${e.toString()}'));
+      emit(LaporanAbsensiState.error(t.laporanConfig.errGenerate(error: e.toString())));
     }
   }
 
@@ -53,7 +54,7 @@ class LaporanAbsensiCubit extends Cubit<LaporanAbsensiState> {
       );
     } catch (e, st) {
       _log.e('PDF preview failed', error: e, stackTrace: st);
-      emit(LaporanAbsensiState.error('Gagal membuka pratinjau: ${e.toString()}'));
+      emit(LaporanAbsensiState.error(t.laporanConfig.errPreview(error: e.toString())));
     }
   }
 
@@ -66,7 +67,7 @@ class LaporanAbsensiCubit extends Cubit<LaporanAbsensiState> {
       await Printing.sharePdf(bytes: bytes, filename: filename);
     } catch (e, st) {
       _log.e('PDF share failed', error: e, stackTrace: st);
-      emit(LaporanAbsensiState.error('Gagal berbagi laporan: ${e.toString()}'));
+      emit(LaporanAbsensiState.error(t.laporanConfig.errShare(error: e.toString())));
     }
   }
 

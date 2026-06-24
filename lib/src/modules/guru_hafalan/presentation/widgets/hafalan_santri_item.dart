@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 
 /// Santri list item for hafalan screen — avatar, name, NIS, Riwayat Hafalan and Input Hafalan buttons
@@ -79,7 +80,7 @@ class HafalanSantriItem extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      'NIS: $nis',
+                      t.hafalan.nisLabel(nis: nis),
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w400,

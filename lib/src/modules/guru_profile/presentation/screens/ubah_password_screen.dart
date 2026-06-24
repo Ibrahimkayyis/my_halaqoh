@@ -66,7 +66,7 @@ class _UbahPasswordScreenState extends State<UbahPasswordScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Password berhasil diubah',
+            t.ubahPassword.successMessage,
             style: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp),
           ),
           backgroundColor: Colors.green,
@@ -82,7 +82,7 @@ class _UbahPasswordScreenState extends State<UbahPasswordScreen> {
       // Extract error message from cubit state
       final errorMessage = _profileCubit.state.maybeWhen(
         error: (msg) => msg,
-        orElse: () => 'Gagal mengubah password',
+        orElse: () => t.ubahPassword.failedMessage,
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -171,7 +171,7 @@ class _UbahPasswordScreenState extends State<UbahPasswordScreen> {
                             setState(() => _obscureOld = !_obscureOld),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Password lama wajib diisi';
+                            return t.ubahPassword.errOldPasswordRequired;
                           }
                           return null;
                         },
@@ -189,16 +189,16 @@ class _UbahPasswordScreenState extends State<UbahPasswordScreen> {
                             setState(() => _obscureNew = !_obscureNew),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Password baru wajib diisi';
+                            return t.ubahPassword.errNewPasswordRequired;
                           }
                           if (value.length < 8) {
-                            return 'Minimal 8 karakter';
+                            return t.ubahPassword.errMin8Chars;
                           }
                           // Check for combination of letters and numbers
                           final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(value);
                           final hasDigit = RegExp(r'[0-9]').hasMatch(value);
                           if (!hasLetter || !hasDigit) {
-                            return 'Harus kombinasi huruf dan angka';
+                            return t.ubahPassword.errLetterNumberCombo;
                           }
                           return null;
                         },
@@ -216,10 +216,10 @@ class _UbahPasswordScreenState extends State<UbahPasswordScreen> {
                             setState(() => _obscureConfirm = !_obscureConfirm),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Konfirmasi password wajib diisi';
+                            return t.ubahPassword.errConfirmRequired;
                           }
                           if (value != _newPasswordController.text) {
-                            return 'Password tidak cocok';
+                            return t.ubahPassword.errMismatch;
                           }
                           return null;
                         },
@@ -276,7 +276,7 @@ class _UbahPasswordScreenState extends State<UbahPasswordScreen> {
                     height: 52.h,
                     onPressed: _isSubmitting ? null : _onSubmit,
                     label: _isSubmitting
-                        ? 'Memproses...'
+                        ? t.ubahPassword.processing
                         : t.ubahPassword.ubahKataSandi,
                     borderRadius: 26.r,
                   ),
