@@ -94,6 +94,69 @@ class AccessDeniedRouteArgs {
 }
 
 /// generated route for
+/// [ActivityLogDetailScreen]
+class ActivityLogDetailRoute extends PageRouteInfo<ActivityLogDetailRouteArgs> {
+  ActivityLogDetailRoute({
+    Key? key,
+    required ActivityLogModel log,
+    List<PageRouteInfo>? children,
+  }) : super(
+         ActivityLogDetailRoute.name,
+         args: ActivityLogDetailRouteArgs(key: key, log: log),
+         initialChildren: children,
+       );
+
+  static const String name = 'ActivityLogDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<ActivityLogDetailRouteArgs>();
+      return ActivityLogDetailScreen(key: args.key, log: args.log);
+    },
+  );
+}
+
+class ActivityLogDetailRouteArgs {
+  const ActivityLogDetailRouteArgs({this.key, required this.log});
+
+  final Key? key;
+
+  final ActivityLogModel log;
+
+  @override
+  String toString() {
+    return 'ActivityLogDetailRouteArgs{key: $key, log: $log}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ActivityLogDetailRouteArgs) return false;
+    return key == other.key && log == other.log;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ log.hashCode;
+}
+
+/// generated route for
+/// [ActivityLogScreen]
+class ActivityLogRoute extends PageRouteInfo<void> {
+  const ActivityLogRoute({List<PageRouteInfo>? children})
+    : super(ActivityLogRoute.name, initialChildren: children);
+
+  static const String name = 'ActivityLogRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ActivityLogScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [AddHalaqohScreen]
 class AddHalaqohRoute extends PageRouteInfo<AddHalaqohRouteArgs> {
   AddHalaqohRoute({
@@ -452,6 +515,22 @@ class GuruDashboardWrapperRouteArgs {
 
   @override
   int get hashCode => key.hashCode ^ programType.hashCode;
+}
+
+/// generated route for
+/// [GuruPickerScreen]
+class GuruPickerRoute extends PageRouteInfo<void> {
+  const GuruPickerRoute({List<PageRouteInfo>? children})
+    : super(GuruPickerRoute.name, initialChildren: children);
+
+  static const String name = 'GuruPickerRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const GuruPickerScreen();
+    },
+  );
 }
 
 /// generated route for
@@ -1100,6 +1179,22 @@ class RiwayatHafalanSantriRouteArgs {
 }
 
 /// generated route for
+/// [SantriPickerScreen]
+class SantriPickerRoute extends PageRouteInfo<void> {
+  const SantriPickerRoute({List<PageRouteInfo>? children})
+    : super(SantriPickerRoute.name, initialChildren: children);
+
+  static const String name = 'SantriPickerRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const SantriPickerScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [SelectSantriScreen]
 class SelectSantriRoute extends PageRouteInfo<SelectSantriRouteArgs> {
   SelectSantriRoute({
@@ -1177,6 +1272,22 @@ class SelectSantriRouteArgs {
       const SetEquality().hash(assignedSantriIds) ^
       currentSantriCount.hashCode ^
       const SetEquality().hash(preSelectedIds);
+}
+
+/// generated route for
+/// [SuperAdminPickerScreen]
+class SuperAdminPickerRoute extends PageRouteInfo<void> {
+  const SuperAdminPickerRoute({List<PageRouteInfo>? children})
+    : super(SuperAdminPickerRoute.name, initialChildren: children);
+
+  static const String name = 'SuperAdminPickerRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const SuperAdminPickerScreen();
+    },
+  );
 }
 
 /// generated route for

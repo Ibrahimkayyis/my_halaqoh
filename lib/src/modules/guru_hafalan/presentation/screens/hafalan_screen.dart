@@ -5,8 +5,7 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
@@ -37,7 +36,6 @@ class _HafalanScreenState extends State<HafalanScreen> {
     final colors = AppColors.of(context);
 
     // Retrieve Auth Context
-    final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
     final santriState = context.watch<SantriCubit>().state;
     final targetHafalanState = context.watch<TargetHafalanCubit>().state;
@@ -49,13 +47,9 @@ class _HafalanScreenState extends State<HafalanScreen> {
       orElse: () {},
     );
 
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) {
-        linkedDocId = userMeta.linkedDocId;
-      },
-      orElse: () {},
-    );
+    // Gunakan ActiveSessionHelper agar super_admin yang sedang impersonasi
+    // guru mendapatkan linkedDocId guru yang dipilih, bukan 'SYSTEM'.
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
 
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(

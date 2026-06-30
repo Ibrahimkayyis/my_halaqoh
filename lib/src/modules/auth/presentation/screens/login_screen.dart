@@ -123,6 +123,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 context.router.replace(
                   WaliSantriDashboardWrapperRoute(programType: programStr),
                 );
+              } else if (user.role == 'super_admin') {
+                context.router.replace(const SuperAdminPickerRoute());
               }
             },
             orElse: () {},

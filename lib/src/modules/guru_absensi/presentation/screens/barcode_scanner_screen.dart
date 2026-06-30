@@ -8,8 +8,7 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
@@ -102,15 +101,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   }
 
   void _loadSantriList() {
-    final authState = context.read<AuthCubit>().state;
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
     final halaqohState = context.read<HalaqohCubit>().state;
     final santriState = context.read<SantriCubit>().state;
-
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) => linkedDocId = userMeta.linkedDocId,
-      orElse: () {},
-    );
 
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(

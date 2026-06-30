@@ -44,6 +44,9 @@ import 'src/modules/guru_hafalan/domain/services/hafalan_sync_service.dart';
 import 'src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'src/modules/auth/presentation/cubits/auth_state.dart';
 
+// Super Admin
+import 'src/modules/super_admin/presentation/cubits/impersonation/impersonation_cubit.dart';
+
 // ── FCM Background Message Handler ────────────────────────────────────────────
 // MUST be a top-level function (not inside a class).
 // CONSTRAINT: This runs in a SEPARATE BACKGROUND ISOLATE.
@@ -251,6 +254,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<TargetHafalanCubit>()..watchAll()),
         BlocProvider(create: (_) => sl<KelasCubit>()..watchAll()),
         BlocProvider(create: (_) => sl<ProgramCubit>()..watchAll()),
+        // Super Admin — Singleton cubit, persists across all navigations
+        BlocProvider.value(value: sl<ImpersonationCubit>()),
       ],
       child: BlocListener<AuthCubit, AuthState>(
         // Only trigger routing when the state genuinely changes type.
@@ -298,6 +303,8 @@ class MyApp extends StatelessWidget {
                 _appRouter.replace(
                   WaliSantriDashboardWrapperRoute(programType: programStr),
                 );
+              } else if (user.role == 'super_admin') {
+                _appRouter.replace(const SuperAdminPickerRoute());
               } else {
                 // Unknown role — fall through to login
                 _appRouter.replace(const LoginRoute());

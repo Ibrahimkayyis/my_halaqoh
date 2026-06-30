@@ -13,8 +13,7 @@ import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/riwayat_
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/widgets/laporan_konfigurasi_hafalan_sheet.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -467,11 +466,7 @@ class _RiwayatHafalanSantriScreenState
                               height: 48.h,
                               onPressed: () {
                                 HalaqohModel? myHalaqoh;
-                                String linkedDocId = '';
-                                context.read<AuthCubit>().state.maybeWhen(
-                                  authenticated: (u) => linkedDocId = u.linkedDocId,
-                                  orElse: () {},
-                                );
+                                final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
                                 context.read<HalaqohCubit>().state.maybeWhen(
                                   loaded: (list) {
                                     try { myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId); } catch (_) {}

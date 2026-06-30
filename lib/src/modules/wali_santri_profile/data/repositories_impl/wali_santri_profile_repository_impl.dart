@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/data/datasources/remote/source/abstract/wali_santri_profile_remote_datasource.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/domain/repositories/wali_santri_profile_repository.dart';
@@ -9,8 +11,9 @@ import 'package:my_halaqoh/src/modules/wali_santri_profile/domain/repositories/w
 /// Wraps remote datasource calls with Either error handling.
 class WaliSantriProfileRepositoryImpl implements WaliSantriProfileRepository {
   final WaliSantriProfileRemoteDataSource _remote;
+  final ActivityLogService _activityLog;
 
-  WaliSantriProfileRepositoryImpl(this._remote);
+  WaliSantriProfileRepositoryImpl(this._remote, this._activityLog);
 
   @override
   Future<Either<String, SantriModel>> getProfile(String santriDocId) async {
@@ -26,6 +29,13 @@ class WaliSantriProfileRepositoryImpl implements WaliSantriProfileRepository {
   Future<Either<String, void>> updateProfile(SantriModel model) async {
     try {
       await _remote.update(model);
+      unawaited(_activityLog.log(
+        action: 'update',
+        module: 'santri',
+        entityId: model.id,
+        entityName: model.nama,
+        description: 'Memperbarui informasi profil wali santri untuk siswa: ${model.nama}',
+      ));
       return const Right(null);
     } catch (e) {
       return Left('Gagal memperbarui profil: $e');
@@ -42,6 +52,12 @@ class WaliSantriProfileRepositoryImpl implements WaliSantriProfileRepository {
         santriDocId: santriDocId,
         file: imageFile,
       );
+      unawaited(_activityLog.log(
+        action: 'update',
+        module: 'santri',
+        entityId: santriDocId,
+        description: 'Mengunggah foto profil baru untuk Wali Santri dari siswa ID: $santriDocId',
+      ));
       return Right(url);
     } catch (e) {
       return Left('Gagal mengunggah foto: $e');
@@ -58,6 +74,11 @@ class WaliSantriProfileRepositoryImpl implements WaliSantriProfileRepository {
         currentPassword: currentPassword,
         newPassword: newPassword,
       );
+      unawaited(_activityLog.log(
+        action: 'update',
+        module: 'auth',
+        description: 'Wali Santri berhasil memperbarui kata sandi akun',
+      ));
       return const Right(null);
     } catch (e) {
       return Left(e.toString().replaceFirst('Exception: ', ''));

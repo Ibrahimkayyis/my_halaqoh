@@ -9,8 +9,7 @@ import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/screens/wali_santri_progress_per_juz_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
@@ -188,14 +187,7 @@ class _WaliSantriRiwayatHafalanScreenState
   }
 
   void _fetchData() {
-    final authState = context.read<AuthCubit>().state;
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) {
-        linkedDocId = userMeta.linkedDocId;
-      },
-      orElse: () {},
-    );
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
     if (linkedDocId.isNotEmpty) {
       _riwayatCubit.watchRiwayat(linkedDocId, _currentMonth, _currentYear);
     }
@@ -209,20 +201,13 @@ class _WaliSantriRiwayatHafalanScreenState
         builder: (context) {
           final colors = AppColors.of(context);
 
-          final authState = context.watch<AuthCubit>().state;
           final halaqohState = context.watch<HalaqohCubit>().state;
           final santriState = context.watch<SantriCubit>().state;
           final riwayatState = context
               .watch<WaliSantriRiwayatHafalanCubit>()
               .state;
 
-          String linkedDocId = '';
-          authState.maybeWhen(
-            authenticated: (userMeta) {
-              linkedDocId = userMeta.linkedDocId;
-            },
-            orElse: () {},
-          );
+          final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
 
           SantriModel? mySantri;
           santriState.maybeWhen(

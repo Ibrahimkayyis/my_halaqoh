@@ -864,5 +864,36 @@
     "hapusProgramConfirm": "Apakah Anda yakin ingin menghapus program \"$nama\" ($id)? Tindakan ini tidak dapat dibatalkan.",
     "gagalMenghapusProgram": "Gagal menghapus program",
     "aturKelasProgram": "Atur kelas & program"
+  },
+  "superAdmin": {
+    "pickerTitle": "Pilih Mode Akses",
+    "pickerSubtitle": "Masuk sebagai",
+    "accessAsAdmin": "Akses sebagai Admin",
+    "accessAsAdminDesc": "Kelola guru, santri, halaqoh, dan target hafalan",
+    "accessAsGuru": "Akses sebagai Guru",
+    "accessAsGuruDesc": "Pilih guru dan masuk ke fitur absensi & hafalan",
+    "accessAsWali": "Akses sebagai Wali Santri",
+    "accessAsWaliDesc": "Pilih santri dan lihat progress & absensi mereka",
+    "viewActivityLog": "Lihat Log Aktivitas",
+    "modeLabel": "Mode $role: $name",
+    "exitMode": "Keluar",
+    "exitModeTooltip": "Keluar dari mode impersonasi",
+    "guruPickerTitle": "Pilih Guru",
+    "santriPickerTitle": "Pilih Santri",
+    "searchGuru": "Cari guru...",
+    "searchSantri": "Cari santri..."
+  },
+  "activityLog": {
+    "title": "Log Aktivitas",
+    "filterRole": "Filter Role",
+    "filterModule": "Filter Modul",
+    "filterAction": "Filter Aksi",
+    "filterDateFrom": "Dari Tanggal",
+    "filterDateTo": "Sampai Tanggal",
+    "allRoles": "Semua Role",
+    "allModules": "Semua Modul",
+    "allActions": "Semua Aksi",
+    "empty": "Belum ada log aktivitas",
+    "resetFilter": "Reset Filter"
   }
 }

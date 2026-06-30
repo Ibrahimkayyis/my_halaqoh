@@ -862,5 +862,36 @@
     "hapusProgramConfirm": "Are you sure you want to delete program \"$nama\" ($id)? This action cannot be undone.",
     "gagalMenghapusProgram": "Failed to delete program",
     "aturKelasProgram": "Manage classes & programs"
+  },
+  "superAdmin": {
+    "pickerTitle": "Select Access Mode",
+    "pickerSubtitle": "Sign in as",
+    "accessAsAdmin": "Access as Admin",
+    "accessAsAdminDesc": "Manage teachers, students, halaqoh, and memorization targets",
+    "accessAsGuru": "Access as Teacher",
+    "accessAsGuruDesc": "Select a teacher and access attendance & memorization features",
+    "accessAsWali": "Access as Parent",
+    "accessAsWaliDesc": "Select a student and view their progress & attendance",
+    "viewActivityLog": "View Activity Log",
+    "modeLabel": "Mode $role: $name",
+    "exitMode": "Exit",
+    "exitModeTooltip": "Exit impersonation mode",
+    "guruPickerTitle": "Select Teacher",
+    "santriPickerTitle": "Select Student",
+    "searchGuru": "Search teacher...",
+    "searchSantri": "Search student..."
+  },
+  "activityLog": {
+    "title": "Activity Log",
+    "filterRole": "Filter Role",
+    "filterModule": "Filter Module",
+    "filterAction": "Filter Action",
+    "filterDateFrom": "From Date",
+    "filterDateTo": "To Date",
+    "allRoles": "All Roles",
+    "allModules": "All Modules",
+    "allActions": "All Actions",
+    "empty": "No activity logs yet",
+    "resetFilter": "Reset Filter"
   }
 }

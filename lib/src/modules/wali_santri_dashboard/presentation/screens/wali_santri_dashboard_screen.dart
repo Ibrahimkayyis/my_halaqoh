@@ -5,6 +5,7 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
@@ -121,15 +122,15 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
     final santriState = context.watch<SantriCubit>().state;
     final targetHafalanState = context.watch<TargetHafalanCubit>().state;
 
-    String santriName = '';
-    String linkedDocId = '';
-    String nis = '';
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
 
+    // Fallback values from AuthCubit
+    String authSantriName = '';
+    String authNis = '';
     authState.maybeWhen(
       authenticated: (userMeta) {
-        santriName = userMeta.displayName;
-        linkedDocId = userMeta.linkedDocId;
-        nis = userMeta.identifier;
+        authSantriName = userMeta.displayName;
+        authNis = userMeta.identifier;
       },
       orElse: () {},
     );
@@ -159,6 +160,9 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
       },
       orElse: () {},
     );
+
+    final santriName = mySantri?.nama ?? authSantriName;
+    final nis = mySantri?.nis ?? authNis;
 
     // Look up the admin-defined target for this santri's kelas + program
     TargetHafalanModel? myTarget;

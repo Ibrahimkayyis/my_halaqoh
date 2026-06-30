@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:logger/logger.dart';
+import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 import '../../domain/models/absensi_model.dart';
 import '../../domain/repositories/absensi_repository.dart';
 import '../datasources/local/absensi_local_datasource.dart';
@@ -18,9 +21,10 @@ import '../datasources/remote/source/abstract/absensi_remote_datasource.dart';
 class AbsensiRepositoryImpl implements AbsensiRepository {
   final AbsensiRemoteDataSource _remote;
   final AbsensiLocalDataSource _local;
+  final ActivityLogService _activityLog;
   final _log = Logger();
 
-  AbsensiRepositoryImpl(this._remote, this._local);
+  AbsensiRepositoryImpl(this._remote, this._local, this._activityLog);
 
   // ── READ ────────────────────────────────────────────────────────────────────
 
@@ -87,6 +91,13 @@ class AbsensiRepositoryImpl implements AbsensiRepository {
       // Jika offline/gagal, AbsensiSyncService akan retry saat koneksi kembali.
       _trySyncNow(localModel);
 
+      unawaited(_activityLog.log(
+        action: 'save_absensi',
+        module: 'absensi',
+        entityId: model.id,
+        description: 'Menyimpan absensi halaqoh ${model.halaqohId} sesi ${model.sesi}',
+      ));
+
       return Right(model.id);
     } catch (e, st) {
       _log.e('Failed to save absensi locally', error: e, stackTrace: st);
@@ -146,6 +157,14 @@ class AbsensiRepositoryImpl implements AbsensiRepository {
       } catch (e) {
         _log.w('Failed to delete remote record immediately: $e');
       }
+
+      unawaited(_activityLog.log(
+        action: 'delete',
+        module: 'absensi',
+        entityId: id,
+        description: 'Menghapus data absensi dengan ID $id',
+      ));
+
       return const Right(null);
     } catch (e, st) {
       _log.e('Failed to delete absensi locally', error: e, stackTrace: st);

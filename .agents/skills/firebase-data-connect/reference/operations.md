@@ -1,40 +1,58 @@
 # Operations Reference
 
 ## Contents
+
 - [Generated Fields](#generated-fields)
 - [Queries](#queries)
 - [Mutations](#mutations)
 - [Key Scalars](#key-scalars)
 - [Multi-Step Operations](#multi-step-operations)
 
----
+______________________________________________________________________
 
 ## Generated Fields
 
-Data Connect auto-generates fields for each `@table` type:
+SQL Connect auto-generates fields for each `@table` type:
 
-| Generated Field | Purpose | Example |
-|-----------------|---------|---------|
-| `movie(id: UUID, key: Key, first: Row)` | Get single record | `movie(id: $id)` or `movie(first: {where: ...})` |
-| `movies(where: ..., orderBy: ..., limit: ..., offset: ..., distinct: ..., having: ...)` | List/filter records | `movies(where: {...})` |
-| `movie_insert(data: ...)` | Create record | Returns key |
-| `movie_insertMany(data: [...])` | Bulk create | Returns keys |
-| `movie_update(id: ..., data: ...)` | Update by ID | Returns key or null |
-| `movie_updateMany(where: ..., data: ...)` | Bulk update | Returns count |
-| `movie_upsert(data: ...)` | Insert or update | Returns key |
-| `movie_delete(id: ...)` | Delete by ID | Returns key or null |
-| `movie_deleteMany(where: ...)` | Bulk delete | Returns count |
+| Generated Field                                                                         | Purpose             | Example                                          |
+| --------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------ |
+| `movie(id: UUID, key: Key, first: Row)`                                                 | Get single record   | `movie(id: $id)` or `movie(first: {where: ...})` |
+| `movies(where: ..., orderBy: ..., limit: ..., offset: ..., distinct: ..., having: ...)` | List/filter records | `movies(where: {...})`                           |
+| `movie_insert(data: ...)`                                                               | Create record       | Returns key                                      |
+| `movie_insertMany(data: [...])`                                                         | Bulk create         | Returns keys                                     |
+| `movie_update(id: ..., data: ...)`                                                      | Update by ID        | Returns key or null                              |
+| `movie_updateMany(where: ..., data: ...)`                                               | Bulk update         | Returns count                                    |
+| `movie_upsert(data: ...)`                                                               | Insert or update    | Returns key                                      |
+| `movie_delete(id: ...)`                                                                 | Delete by ID        | Returns key or null                              |
+| `movie_deleteMany(where: ...)`                                                          | Bulk delete         | Returns count                                    |
 
 ### Relation Fields
+
 For a `Post` with `author: User!`:
+
 - `post.author` - Navigate to related User
 - `user.posts_on_author` - Reverse: all Posts by User
 
 For many-to-many via `MovieActor`:
+
 - `movie.actors_via_MovieActor` - Get all actors
 - `actor.movies_via_MovieActor` - Get all movies
 
----
+______________________________________________________________________
+
+## Referencing Generated GraphQL Schema
+
+**Do not guess** available queries or mutations. Review the generated schema
+files instead of trying to deduce them from the data model.
+
+1. **Location**: `.dataconnect/schema/main/` (relative to project root).
+1. **Action**: Scan this directory for generated files (`query.gql`,
+   `mutation.gql`, `relation.gql`, `input.gql`) to understand the exact shape of
+   the API and auto-generated types.
+1. **Validation**: Always run `firebase dataconnect:compile` to verify
+   operations against the full schema.
+
+______________________________________________________________________
 
 ## Queries
 
@@ -68,19 +86,19 @@ query ListMovies($genre: String, $minRating: Int) @auth(level: PUBLIC) {
 
 ### Filter Operators
 
-| Operator | Description | Example |
-|----------|-------------|---------|
-| `eq` | Equals | `{ title: { eq: "Matrix" }}` |
-| `ne` | Not equals | `{ status: { ne: "deleted" }}` |
-| `gt`, `ge` | Greater than (or equal) | `{ rating: { ge: 4 }}` |
-| `lt`, `le` | Less than (or equal) | `{ releaseYear: { lt: 2000 }}` |
-| `in` | In list | `{ genre: { in: ["Action", "Drama"] }}` |
-| `nin` | Not in list | `{ status: { nin: ["deleted", "hidden"] }}` |
-| `isNull` | Is null check | `{ description: { isNull: true }}` |
-| `contains` | String contains | `{ title: { contains: "war" }}` |
-| `startsWith` | String starts with | `{ title: { startsWith: "The" }}` |
-| `endsWith` | String ends with | `{ email: { endsWith: "@gmail.com" }}` |
-| `includes` | Array includes | `{ tags: { includes: "sci-fi" }}` |
+| Operator     | Description             | Example                                     |
+| ------------ | ----------------------- | ------------------------------------------- |
+| `eq`         | Equals                  | `{ title: { eq: "Matrix" }}`                |
+| `ne`         | Not equals              | `{ status: { ne: "deleted" }}`              |
+| `gt`, `ge`   | Greater than (or equal) | `{ rating: { ge: 4 }}`                      |
+| `lt`, `le`   | Less than (or equal)    | `{ releaseYear: { lt: 2000 }}`              |
+| `in`         | In list                 | `{ genre: { in: ["Action", "Drama"] }}`     |
+| `nin`        | Not in list             | `{ status: { nin: ["deleted", "hidden"] }}` |
+| `isNull`     | Is null check           | `{ description: { isNull: true }}`          |
+| `contains`   | String contains         | `{ title: { contains: "war" }}`             |
+| `startsWith` | String starts with      | `{ title: { startsWith: "The" }}`           |
+| `endsWith`   | String ends with        | `{ email: { endsWith: "@gmail.com" }}`      |
+| `includes`   | Array includes          | `{ tags: { includes: "sci-fi" }}`           |
 
 ### Expression Operators (Compare with Server Values)
 
@@ -140,6 +158,15 @@ query MoviesByDirector($director: String!) @auth(level: PUBLIC) {
     movieMetadata_on_movie: { director: { eq: $director }}
   }) { id title }
 }
+
+# Filter by null relationship (e.g., top-level categories with no parent)
+# Use the generated foreign key field (e.g., parentId)
+query TopLevelCategories @auth(level: PUBLIC) {
+  categories(where: { parentId: { eq: null } }) {
+    id
+    name
+  }
+}
 ```
 
 ### Aliases
@@ -155,7 +182,7 @@ query CompareRatings($genre: String!) @auth(level: PUBLIC) {
 }
 ```
 
----
+______________________________________________________________________
 
 ## Mutations
 
@@ -215,14 +242,14 @@ mutation AddTag($id: UUID!, $tag: String!) @auth(level: USER) {
 }
 ```
 
-| Operator | Types | Description |
-|----------|-------|-------------|
-| `inc` | Int, Float, Date, Timestamp | Increment value |
-| `dec` | Int, Float, Date, Timestamp | Decrement value |
-| `add` | Lists | Add items if not present |
-| `remove` | Lists | Remove all matching items |
-| `append` | Lists | Append to end |
-| `prepend` | Lists | Prepend to start |
+| Operator  | Types                       | Description               |
+| --------- | --------------------------- | ------------------------- |
+| `inc`     | Int, Float, Date, Timestamp | Increment value           |
+| `dec`     | Int, Float, Date, Timestamp | Decrement value           |
+| `add`     | Lists                       | Add items if not present  |
+| `remove`  | Lists                       | Remove all matching items |
+| `append`  | Lists                       | Append to end             |
+| `prepend` | Lists                       | Prepend to start          |
 
 ### Upsert
 
@@ -265,11 +292,12 @@ mutation UpdateMyPost($id: UUID!, $content: String!) @auth(level: USER) {
 }
 ```
 
----
+______________________________________________________________________
 
 ## Key Scalars
 
-Key scalars (`Movie_Key`, `User_Key`) are auto-generated types representing primary keys:
+Key scalars (`Movie_Key`, `User_Key`) are auto-generated types representing
+primary keys:
 
 ```graphql
 # Using key scalar
@@ -293,7 +321,7 @@ mutation CreateAndFetch($title: String!) @auth(level: USER) {
 }
 ```
 
----
+______________________________________________________________________
 
 ## Multi-Step Operations
 

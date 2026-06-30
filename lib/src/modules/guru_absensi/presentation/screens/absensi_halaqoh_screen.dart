@@ -6,8 +6,7 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
@@ -75,14 +74,8 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
   }
 
   void _loadData() {
-    final authState = context.read<AuthCubit>().state;
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
     final halaqohState = context.read<HalaqohCubit>().state;
-
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) => linkedDocId = userMeta.linkedDocId,
-      orElse: () {},
-    );
 
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(
@@ -255,15 +248,9 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     final colors = AppColors.of(context);
     final daysInMonth = _daysInMonth(_currentYear, _currentMonth);
 
-    final authState = context.watch<AuthCubit>().state;
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
     final halaqohState = context.watch<HalaqohCubit>().state;
     final santriState = context.watch<SantriCubit>().state;
-
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) => linkedDocId = userMeta.linkedDocId,
-      orElse: () {},
-    );
 
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(

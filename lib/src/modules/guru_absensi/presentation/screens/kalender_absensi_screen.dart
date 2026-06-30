@@ -6,8 +6,7 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_state.dart';
@@ -62,14 +61,8 @@ class _KalenderAbsensiScreenState extends State<KalenderAbsensiScreen> {
   }
 
   void _loadData() {
-    final authState = context.read<AuthCubit>().state;
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
     final halaqohState = context.read<HalaqohCubit>().state;
-
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) => linkedDocId = userMeta.linkedDocId,
-      orElse: () {},
-    );
 
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(

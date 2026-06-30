@@ -7,7 +7,7 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
@@ -24,18 +24,11 @@ class GuruProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    final authState = context.watch<AuthCubit>().state;
     final guruState = context.watch<GuruCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
 
     // Extract linkedDocId from AuthCubit
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) {
-        linkedDocId = userMeta.linkedDocId;
-      },
-      orElse: () {},
-    );
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
 
     // Find the full GuruModel from GuruCubit's streamed list
     GuruModel? currentGuru;

@@ -8,8 +8,7 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_record_entry.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_cubit.dart';
@@ -74,13 +73,8 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
     _absensiCubit = sl<AbsensiCubit>();
     _currentSesi = widget.selectedSesi;
 
-    final authState = context.read<AuthCubit>().state;
+    _guruId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
     final halaqohState = context.read<HalaqohCubit>().state;
-
-    authState.maybeWhen(
-      authenticated: (userMeta) => _guruId = userMeta.linkedDocId,
-      orElse: () {},
-    );
 
     halaqohState.maybeWhen(
       loaded: (list) {

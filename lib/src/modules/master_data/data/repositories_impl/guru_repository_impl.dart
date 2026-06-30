@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
+import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/local/master_data_local_datasource.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/remote/source/abstract/guru_remote_datasource.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/guru_model.dart';
@@ -7,8 +10,9 @@ import 'package:my_halaqoh/src/modules/master_data/domain/repositories/guru_repo
 class GuruRepositoryImpl implements GuruRepository {
   final GuruRemoteDataSource _remote;
   final MasterDataLocalDataSource _local;
+  final ActivityLogService _activityLog;
 
-  GuruRepositoryImpl(this._remote, this._local);
+  GuruRepositoryImpl(this._remote, this._local, this._activityLog);
 
   @override
   Stream<List<GuruModel>> watchAll() {
@@ -50,6 +54,13 @@ class GuruRepositoryImpl implements GuruRepository {
       final id = await _remote.add(model);
       final created = model.copyWith(id: id);
       await _local.putGuru(created);
+      unawaited(_activityLog.log(
+        action: 'create',
+        module: 'guru',
+        entityId: id,
+        entityName: model.nama,
+        description: 'Menambahkan guru baru: ${model.nama}',
+      ));
       return Right(id);
     } catch (e) {
       return Left('Gagal menambahkan guru: $e');
@@ -60,6 +71,13 @@ class GuruRepositoryImpl implements GuruRepository {
   Future<Either<String, int>> addBulk(List<GuruModel> models) async {
     try {
       final count = await _remote.addBulk(models);
+      unawaited(_activityLog.log(
+        action: 'create',
+        module: 'guru',
+        entityId: 'BULK_UPLOAD',
+        entityName: 'Bulk Upload Guru',
+        description: 'Menambahkan $count guru via bulk upload',
+      ));
       return Right(count);
     } catch (e) {
       return Left('Gagal menambahkan guru bulk: $e');
@@ -71,6 +89,13 @@ class GuruRepositoryImpl implements GuruRepository {
     try {
       await _remote.update(model);
       await _local.putGuru(model);
+      unawaited(_activityLog.log(
+        action: 'update',
+        module: 'guru',
+        entityId: model.id,
+        entityName: model.nama,
+        description: 'Memperbarui data guru: ${model.nama}',
+      ));
       return const Right(null);
     } catch (e) {
       return Left('Gagal mengupdate guru: $e');
@@ -80,8 +105,22 @@ class GuruRepositoryImpl implements GuruRepository {
   @override
   Future<Either<String, void>> delete(String id) async {
     try {
+      String? guruName;
+      try {
+        final localGuru = _local.guruBox.get(id);
+        guruName = localGuru?.nama;
+      } catch (_) {}
+
       await _remote.delete(id);
       await _local.deleteGuru(id);
+
+      unawaited(_activityLog.log(
+        action: 'delete',
+        module: 'guru',
+        entityId: id,
+        entityName: guruName ?? 'ID: $id',
+        description: 'Menghapus guru: ${guruName ?? id}',
+      ));
       return const Right(null);
     } catch (e) {
       return Left('Gagal menghapus guru: $e');

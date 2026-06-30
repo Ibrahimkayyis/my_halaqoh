@@ -5,8 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/quran/quran_service.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
@@ -100,16 +99,8 @@ class _WaliSantriProgressPerSuratScreenState
     final colors = AppColors.of(context);
 
     // Look up the linked santri for real profile data
-    final authState = context.watch<AuthCubit>().state;
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
     final santriState = context.watch<SantriCubit>().state;
-
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) {
-        linkedDocId = userMeta.linkedDocId;
-      },
-      orElse: () {},
-    );
 
     // Fetch data if needed
     _checkAndLoadData(linkedDocId);

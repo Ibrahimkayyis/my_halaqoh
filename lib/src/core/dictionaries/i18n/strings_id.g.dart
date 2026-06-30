@@ -77,6 +77,9 @@ class TranslationsId implements Translations {
 	@override late final _TranslationsGeneralId general = _TranslationsGeneralId._(_root);
 	@override late final _TranslationsCalendarId calendar = _TranslationsCalendarId._(_root);
 	@override late final _TranslationsLaporanConfigId laporanConfig = _TranslationsLaporanConfigId._(_root);
+	@override late final _TranslationsKelasProgramId kelasProgram = _TranslationsKelasProgramId._(_root);
+	@override late final _TranslationsSuperAdminId superAdmin = _TranslationsSuperAdminId._(_root);
+	@override late final _TranslationsActivityLogId activityLog = _TranslationsActivityLogId._(_root);
 }
 
 // Path: app
@@ -1162,6 +1165,99 @@ class _TranslationsLaporanConfigId implements TranslationsLaporanConfigEn {
 	@override late final _TranslationsLaporanConfigPdfId pdf = _TranslationsLaporanConfigPdfId._(_root);
 }
 
+// Path: kelasProgram
+class _TranslationsKelasProgramId implements TranslationsKelasProgramEn {
+	_TranslationsKelasProgramId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Kelola Kelas & Program';
+	@override String get kelasTab => 'Kelas';
+	@override String get programTab => 'Program';
+	@override String get belumAdaKelas => 'Belum ada data kelas';
+	@override String kelasNama({required Object nama}) => 'Kelas ${nama}';
+	@override String urutanPromosi({required Object urutan, required Object nextKelas}) => 'Urutan: ${urutan} | Promosi ke: ${nextKelas}';
+	@override String get lulusAlumni => 'Lulus (Alumni)';
+	@override String get belumAdaProgram => 'Belum ada data program';
+	@override String programId({required Object id}) => 'ID: ${id}';
+	@override String get tambahKelas => 'Tambah Kelas';
+	@override String get editKelas => 'Edit Kelas';
+	@override String get namaKelas => 'Nama Kelas';
+	@override String get namaKelasHint => 'e.g. 7, 8, atau A, B';
+	@override String get namaKelasRequired => 'Nama kelas harus diisi';
+	@override String get urutanKelas => 'Urutan Kelas';
+	@override String get urutanKelasHint => 'e.g. Angka urutan kelas untuk promosi';
+	@override String get urutanRequired => 'Urutan harus diisi';
+	@override String get urutanNumeric => 'Urutan harus berupa angka';
+	@override String get kelasSelanjutnya => 'Kelas Selanjutnya';
+	@override String get pilihKelasSelanjutnya => 'Pilih Kelas Selanjutnya';
+	@override String get batal => 'Batal';
+	@override String get simpan => 'Simpan';
+	@override String gagalMenyimpan({required Object error}) => 'Gagal menyimpan: ${error}';
+	@override String get hapusKelas => 'Hapus Kelas';
+	@override String hapusKelasConfirm({required Object nama}) => 'Apakah Anda yakin ingin menghapus Kelas ${nama}? Tindakan ini tidak dapat dibatalkan.';
+	@override String get hapus => 'Hapus';
+	@override String get gagalMenghapusKelas => 'Gagal menghapus kelas';
+	@override String get tambahProgram => 'Tambah Program';
+	@override String get editProgram => 'Edit Program';
+	@override String get kodeProgram => 'Kode Program';
+	@override String get kodeProgramHint => 'e.g. R, T, atau TH';
+	@override String get kodeProgramRequired => 'Kode program harus diisi';
+	@override String get namaProgram => 'Nama Program';
+	@override String get namaProgramHint => 'e.g. Reguler, Takhassus, atau Tahfidz';
+	@override String get namaProgramRequired => 'Nama program harus diisi';
+	@override String get hapusProgram => 'Hapus Program';
+	@override String hapusProgramConfirm({required Object nama, required Object id}) => 'Apakah Anda yakin ingin menghapus program "${nama}" (${id})? Tindakan ini tidak dapat dibatalkan.';
+	@override String get gagalMenghapusProgram => 'Gagal menghapus program';
+	@override String get aturKelasProgram => 'Atur kelas & program';
+}
+
+// Path: superAdmin
+class _TranslationsSuperAdminId implements TranslationsSuperAdminEn {
+	_TranslationsSuperAdminId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get pickerTitle => 'Pilih Mode Akses';
+	@override String get pickerSubtitle => 'Masuk sebagai';
+	@override String get accessAsAdmin => 'Akses sebagai Admin';
+	@override String get accessAsAdminDesc => 'Kelola guru, santri, halaqoh, dan target hafalan';
+	@override String get accessAsGuru => 'Akses sebagai Guru';
+	@override String get accessAsGuruDesc => 'Pilih guru dan masuk ke fitur absensi & hafalan';
+	@override String get accessAsWali => 'Akses sebagai Wali Santri';
+	@override String get accessAsWaliDesc => 'Pilih santri dan lihat progress & absensi mereka';
+	@override String get viewActivityLog => 'Lihat Log Aktivitas';
+	@override String modeLabel({required Object role, required Object name}) => 'Mode ${role}: ${name}';
+	@override String get exitMode => 'Keluar';
+	@override String get exitModeTooltip => 'Keluar dari mode impersonasi';
+	@override String get guruPickerTitle => 'Pilih Guru';
+	@override String get santriPickerTitle => 'Pilih Santri';
+	@override String get searchGuru => 'Cari guru...';
+	@override String get searchSantri => 'Cari santri...';
+}
+
+// Path: activityLog
+class _TranslationsActivityLogId implements TranslationsActivityLogEn {
+	_TranslationsActivityLogId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Log Aktivitas';
+	@override String get filterRole => 'Filter Role';
+	@override String get filterModule => 'Filter Modul';
+	@override String get filterAction => 'Filter Aksi';
+	@override String get filterDateFrom => 'Dari Tanggal';
+	@override String get filterDateTo => 'Sampai Tanggal';
+	@override String get allRoles => 'Semua Role';
+	@override String get allModules => 'Semua Modul';
+	@override String get allActions => 'Semua Aksi';
+	@override String get empty => 'Belum ada log aktivitas';
+	@override String get resetFilter => 'Reset Filter';
+}
+
 // Path: absensi.barcodeScanner
 class _TranslationsAbsensiBarcodeScannerId implements TranslationsAbsensiBarcodeScannerEn {
 	_TranslationsAbsensiBarcodeScannerId._(this._root);
@@ -2079,6 +2175,72 @@ extension on TranslationsId {
 			case 'laporanConfig.pdf.statusLegenda': return 'H = Hadir  |  S = Sakit  |  I = Izin  |  A = Alfa';
 			case 'laporanConfig.pdf.predikatLegenda': return 'Mumtaz: 85 - 100  |  Jayyid: 70 - 84  |  Maqbul: < 70';
 			case 'laporanConfig.pdf.pekanShort': return ({required Object index}) => 'Pekan ke-${index}';
+			case 'kelasProgram.title': return 'Kelola Kelas & Program';
+			case 'kelasProgram.kelasTab': return 'Kelas';
+			case 'kelasProgram.programTab': return 'Program';
+			case 'kelasProgram.belumAdaKelas': return 'Belum ada data kelas';
+			case 'kelasProgram.kelasNama': return ({required Object nama}) => 'Kelas ${nama}';
+			case 'kelasProgram.urutanPromosi': return ({required Object urutan, required Object nextKelas}) => 'Urutan: ${urutan} | Promosi ke: ${nextKelas}';
+			case 'kelasProgram.lulusAlumni': return 'Lulus (Alumni)';
+			case 'kelasProgram.belumAdaProgram': return 'Belum ada data program';
+			case 'kelasProgram.programId': return ({required Object id}) => 'ID: ${id}';
+			case 'kelasProgram.tambahKelas': return 'Tambah Kelas';
+			case 'kelasProgram.editKelas': return 'Edit Kelas';
+			case 'kelasProgram.namaKelas': return 'Nama Kelas';
+			case 'kelasProgram.namaKelasHint': return 'e.g. 7, 8, atau A, B';
+			case 'kelasProgram.namaKelasRequired': return 'Nama kelas harus diisi';
+			case 'kelasProgram.urutanKelas': return 'Urutan Kelas';
+			case 'kelasProgram.urutanKelasHint': return 'e.g. Angka urutan kelas untuk promosi';
+			case 'kelasProgram.urutanRequired': return 'Urutan harus diisi';
+			case 'kelasProgram.urutanNumeric': return 'Urutan harus berupa angka';
+			case 'kelasProgram.kelasSelanjutnya': return 'Kelas Selanjutnya';
+			case 'kelasProgram.pilihKelasSelanjutnya': return 'Pilih Kelas Selanjutnya';
+			case 'kelasProgram.batal': return 'Batal';
+			case 'kelasProgram.simpan': return 'Simpan';
+			case 'kelasProgram.gagalMenyimpan': return ({required Object error}) => 'Gagal menyimpan: ${error}';
+			case 'kelasProgram.hapusKelas': return 'Hapus Kelas';
+			case 'kelasProgram.hapusKelasConfirm': return ({required Object nama}) => 'Apakah Anda yakin ingin menghapus Kelas ${nama}? Tindakan ini tidak dapat dibatalkan.';
+			case 'kelasProgram.hapus': return 'Hapus';
+			case 'kelasProgram.gagalMenghapusKelas': return 'Gagal menghapus kelas';
+			case 'kelasProgram.tambahProgram': return 'Tambah Program';
+			case 'kelasProgram.editProgram': return 'Edit Program';
+			case 'kelasProgram.kodeProgram': return 'Kode Program';
+			case 'kelasProgram.kodeProgramHint': return 'e.g. R, T, atau TH';
+			case 'kelasProgram.kodeProgramRequired': return 'Kode program harus diisi';
+			case 'kelasProgram.namaProgram': return 'Nama Program';
+			case 'kelasProgram.namaProgramHint': return 'e.g. Reguler, Takhassus, atau Tahfidz';
+			case 'kelasProgram.namaProgramRequired': return 'Nama program harus diisi';
+			case 'kelasProgram.hapusProgram': return 'Hapus Program';
+			case 'kelasProgram.hapusProgramConfirm': return ({required Object nama, required Object id}) => 'Apakah Anda yakin ingin menghapus program "${nama}" (${id})? Tindakan ini tidak dapat dibatalkan.';
+			case 'kelasProgram.gagalMenghapusProgram': return 'Gagal menghapus program';
+			case 'kelasProgram.aturKelasProgram': return 'Atur kelas & program';
+			case 'superAdmin.pickerTitle': return 'Pilih Mode Akses';
+			case 'superAdmin.pickerSubtitle': return 'Masuk sebagai';
+			case 'superAdmin.accessAsAdmin': return 'Akses sebagai Admin';
+			case 'superAdmin.accessAsAdminDesc': return 'Kelola guru, santri, halaqoh, dan target hafalan';
+			case 'superAdmin.accessAsGuru': return 'Akses sebagai Guru';
+			case 'superAdmin.accessAsGuruDesc': return 'Pilih guru dan masuk ke fitur absensi & hafalan';
+			case 'superAdmin.accessAsWali': return 'Akses sebagai Wali Santri';
+			case 'superAdmin.accessAsWaliDesc': return 'Pilih santri dan lihat progress & absensi mereka';
+			case 'superAdmin.viewActivityLog': return 'Lihat Log Aktivitas';
+			case 'superAdmin.modeLabel': return ({required Object role, required Object name}) => 'Mode ${role}: ${name}';
+			case 'superAdmin.exitMode': return 'Keluar';
+			case 'superAdmin.exitModeTooltip': return 'Keluar dari mode impersonasi';
+			case 'superAdmin.guruPickerTitle': return 'Pilih Guru';
+			case 'superAdmin.santriPickerTitle': return 'Pilih Santri';
+			case 'superAdmin.searchGuru': return 'Cari guru...';
+			case 'superAdmin.searchSantri': return 'Cari santri...';
+			case 'activityLog.title': return 'Log Aktivitas';
+			case 'activityLog.filterRole': return 'Filter Role';
+			case 'activityLog.filterModule': return 'Filter Modul';
+			case 'activityLog.filterAction': return 'Filter Aksi';
+			case 'activityLog.filterDateFrom': return 'Dari Tanggal';
+			case 'activityLog.filterDateTo': return 'Sampai Tanggal';
+			case 'activityLog.allRoles': return 'Semua Role';
+			case 'activityLog.allModules': return 'Semua Modul';
+			case 'activityLog.allActions': return 'Semua Aksi';
+			case 'activityLog.empty': return 'Belum ada log aktivitas';
+			case 'activityLog.resetFilter': return 'Reset Filter';
 			default: return null;
 		}
 	}

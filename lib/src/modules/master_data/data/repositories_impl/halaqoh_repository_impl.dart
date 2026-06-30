@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
+import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/local/master_data_local_datasource.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/remote/source/abstract/halaqoh_remote_datasource.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
@@ -7,8 +10,9 @@ import 'package:my_halaqoh/src/modules/master_data/domain/repositories/halaqoh_r
 class HalaqohRepositoryImpl implements HalaqohRepository {
   final HalaqohRemoteDataSource _remote;
   final MasterDataLocalDataSource _local;
+  final ActivityLogService _activityLog;
 
-  HalaqohRepositoryImpl(this._remote, this._local);
+  HalaqohRepositoryImpl(this._remote, this._local, this._activityLog);
 
   @override
   Stream<List<HalaqohModel>> watchAll() {
@@ -48,6 +52,13 @@ class HalaqohRepositoryImpl implements HalaqohRepository {
       final id = await _remote.add(model);
       final created = model.copyWith(id: id);
       await _local.putHalaqoh(created);
+      unawaited(_activityLog.log(
+        action: 'create',
+        module: 'halaqoh',
+        entityId: id,
+        entityName: model.nama,
+        description: 'Menambahkan halaqoh baru: ${model.nama}',
+      ));
       return Right(id);
     } catch (e) {
       return Left('Gagal menambahkan halaqoh: $e');
@@ -59,6 +70,13 @@ class HalaqohRepositoryImpl implements HalaqohRepository {
     try {
       await _remote.update(model);
       await _local.putHalaqoh(model);
+      unawaited(_activityLog.log(
+        action: 'update',
+        module: 'halaqoh',
+        entityId: model.id,
+        entityName: model.nama,
+        description: 'Memperbarui halaqoh: ${model.nama}',
+      ));
       return const Right(null);
     } catch (e) {
       return Left('Gagal mengupdate halaqoh: $e');
@@ -70,6 +88,12 @@ class HalaqohRepositoryImpl implements HalaqohRepository {
     try {
       await _remote.delete(id);
       await _local.deleteHalaqoh(id);
+      unawaited(_activityLog.log(
+        action: 'delete',
+        module: 'halaqoh',
+        entityId: id,
+        description: 'Menghapus halaqoh dengan ID: $id',
+      ));
       return const Right(null);
     } catch (e) {
       return Left('Gagal menghapus halaqoh: $e');

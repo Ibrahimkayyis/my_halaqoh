@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/widgets/guru_dashboard_header.dart';
@@ -88,10 +89,14 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
     authState.maybeWhen(
       authenticated: (userMeta) {
         guruName = userMeta.displayName;
-        linkedDocId = userMeta.linkedDocId;
       },
       orElse: () {},
     );
+
+    // Untuk super_admin yang sedang impersonasi guru,
+    // ActiveSessionHelper mengembalikan linkedDocId dari ImpersonationContext.
+    // Untuk guru asli, mengembalikan userMeta.linkedDocId seperti biasa.
+    linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
 
     // Look up real guru data for name and profile picture
     GuruModel? myGuru;

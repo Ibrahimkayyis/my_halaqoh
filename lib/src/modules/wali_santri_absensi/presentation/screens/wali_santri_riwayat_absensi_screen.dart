@@ -9,6 +9,7 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_state.dart';
@@ -85,14 +86,8 @@ class _WaliSantriRiwayatAbsensiScreenState
 
   void _loadData() {
     if (!mounted) return;
-    final authState = context.read<AuthCubit>().state;
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
     final halaqohState = context.read<HalaqohCubit>().state;
-
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) => linkedDocId = userMeta.linkedDocId,
-      orElse: () {},
-    );
 
     HalaqohModel? myHalaqoh;
     halaqohState.maybeWhen(
@@ -209,17 +204,9 @@ class _WaliSantriRiwayatAbsensiScreenState
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    final authState = context.watch<AuthCubit>().state;
-    final halaqohState = context.watch<HalaqohCubit>().state;
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
     final santriState = context.watch<SantriCubit>().state;
-
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) {
-        linkedDocId = userMeta.linkedDocId;
-      },
-      orElse: () {},
-    );
+    final halaqohState = context.watch<HalaqohCubit>().state;
 
     SantriModel? mySantri;
     santriState.maybeWhen(

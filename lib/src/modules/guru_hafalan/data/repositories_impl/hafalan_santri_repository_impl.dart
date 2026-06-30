@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:logger/logger.dart';
+import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 import '../../domain/models/hafalan_santri_model.dart';
 import '../../domain/repositories/hafalan_santri_repository.dart';
 import '../datasources/local/hafalan_santri_local_data_source.dart';
@@ -8,9 +11,10 @@ import '../datasources/remote/source/abstract/hafalan_santri_remote_datasource.d
 class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
   final HafalanSantriLocalDataSource _local;
   final HafalanSantriRemoteDataSource _remote;
+  final ActivityLogService _activityLog;
   final _log = Logger();
 
-  HafalanSantriRepositoryImpl(this._local, this._remote);
+  HafalanSantriRepositoryImpl(this._local, this._remote, this._activityLog);
 
   @override
   Future<Either<String, HafalanSantriModel>> addHafalan(HafalanSantriModel hafalan) async {
@@ -22,6 +26,14 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
 
       // 2. Try to sync to remote immediately
       _trySyncNow(localModel);
+
+      unawaited(_activityLog.log(
+        action: 'add_hafalan',
+        module: 'hafalan',
+        entityId: localModel.id,
+        entityName: localModel.surahName,
+        description: 'Menyimpan setoran hafalan ${localModel.jenis} ${localModel.surahName} untuk santri ${localModel.santriId}',
+      ));
 
       return Right(localModel);
     } catch (e, st) {
@@ -146,6 +158,14 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
         _log.w('Failed to delete remote record immediately: $e');
         // Fails silently for now, as is typical for offline-first actions
       }
+
+      unawaited(_activityLog.log(
+        action: 'delete',
+        module: 'hafalan',
+        entityId: id,
+        description: 'Menghapus data hafalan dengan ID $id',
+      ));
+
       return const Right(null);
     } catch (e, st) {
       _log.e('Failed to delete hafalan locally', error: e, stackTrace: st);

@@ -14,11 +14,36 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // By default, authenticated users can read all data.
-    // Only Admin can write/modify the data.
+    // Function to check if user is a super admin.
+    // Super Admin memiliki akses penuh (read + write + delete) ke SEMUA data.
+    function isSuperAdmin() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin';
+    }
+
+    // Function to check if user is admin OR super_admin
+    function isAdminOrSuperAdmin() {
+      return isAdmin() || isSuperAdmin();
+    }
+
+    // ── Super Admin: akses penuh ke semua dokumen ─────────────────────────
+    // Aturan ini match sebelum aturan spesifik di bawah — super_admin
+    // diizinkan read+write di seluruh database tanpa pengecualian.
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    // ── Default: authenticated users bisa read semua data ────────────────
+    // Only Admin can write/modify the data (selain super_admin di atas).
     match /{document=**} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
+    }
+
+    // ── Activity Log ─────────────────────────────────────────────────────
+    match /activity_log/{logId} {
+      allow create: if isAuthenticated();
+      allow read, update, delete: if isSuperAdmin();
     }
 
     // Guru Profile: allow guru to update their own document
@@ -30,32 +55,23 @@ service cloud.firestore {
     }
 
     // Santri Profile: allow santri (wali santri) to update their own document
-    // Only profile-editable fields are changed from the app; admin-managed fields
-    // (nis, kelas, program, halaqohId, authUid) are never sent as writes from the client.
     match /santri/{santriId} {
       allow read: if isAuthenticated();
       allow update: if isAuthenticated() &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.linkedDocId == santriId;
       allow create, delete: if isAdmin();
     }
-    
+
     // Exception: Users can read their own metadata.
-    // Wali Santri can also update their own fcmToken for push notifications.
-    // The affectedKeys guard ensures ONLY fcmToken and fcmTokenUpdatedAt can be
-    // changed — no other fields (e.g. role, identifier) are writable by the client.
     match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId || isAdmin();
-      allow write: if isAdmin();
+      allow read: if request.auth != null && request.auth.uid == userId || isAdminOrSuperAdmin();
+      allow write: if isAdminOrSuperAdmin();
       // Allow authenticated user to update their own FCM token fields only
       allow update: if request.auth != null
         && request.auth.uid == userId
         && request.resource.data.diff(resource.data).affectedKeys()
              .hasOnly(['fcmToken', 'fcmTokenUpdatedAt']);
       // Allow unauthenticated list with limit 1 — used by the login pre-check
-      // to distinguish "NIP/NIS tidak ditemukan" vs "password salah".
-      // Note: request.query.filters is NOT valid Firestore Rules syntax;
-      // only request.query.limit / offset / orderBy are available.
-      // Limiting to 1 document is sufficient to prevent bulk enumeration.
       allow list: if request.auth == null && request.query.limit == 1;
     }
 
@@ -70,7 +86,6 @@ service cloud.firestore {
     }
 
     // Santri Extra Target: allow authenticated Gurus to add/update extra juz targets.
-    // This collection stores teacher-assigned extra juz beyond the admin curriculum.
     match /santriExtraTarget/{santriId} {
       allow read, write: if isAuthenticated();
     }

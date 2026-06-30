@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:logger/logger.dart';
+import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/local/master_data_local_datasource.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/remote/mapper/santri_mapper.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/remote/mapper/target_hafalan_mapper.dart';
@@ -13,9 +16,11 @@ class SantriRepositoryImpl implements SantriRepository {
   final SantriRemoteDataSource _remote;
   final MasterDataLocalDataSource _local;
   final FirebaseFirestore _firestore;
+  final ActivityLogService _activityLog;
   final _log = Logger();
 
-  SantriRepositoryImpl(this._remote, this._local, this._firestore);
+  SantriRepositoryImpl(
+      this._remote, this._local, this._firestore, this._activityLog);
 
   // ──────────────────────────────────────────────────────────────────────────
   // Existing methods
@@ -79,6 +84,13 @@ class SantriRepositoryImpl implements SantriRepository {
       final id = await _remote.add(model);
       final created = model.copyWith(id: id);
       await _local.putSantri(created);
+      unawaited(_activityLog.log(
+        action: 'create',
+        module: 'santri',
+        entityId: id,
+        entityName: model.nama,
+        description: 'Menambahkan santri baru: ${model.nama} (NIS: ${model.nis})',
+      ));
       return Right(id);
     } catch (e) {
       return Left('Gagal menambahkan santri: $e');
@@ -89,8 +101,13 @@ class SantriRepositoryImpl implements SantriRepository {
   Future<Either<String, int>> addBulk(List<SantriModel> models) async {
     try {
       final count = await _remote.addBulk(models);
-      // We don't cache bulk here because the stream will automatically update
-      // the cache when the Firestore collection changes.
+      unawaited(_activityLog.log(
+        action: 'create',
+        module: 'santri',
+        entityId: 'BULK_UPLOAD',
+        entityName: 'Bulk Upload Santri',
+        description: 'Menambahkan $count santri via bulk upload',
+      ));
       return Right(count);
     } catch (e) {
       return Left('Gagal menambahkan santri bulk: $e');
@@ -102,6 +119,13 @@ class SantriRepositoryImpl implements SantriRepository {
     try {
       await _remote.update(model);
       await _local.putSantri(model);
+      unawaited(_activityLog.log(
+        action: 'update',
+        module: 'santri',
+        entityId: model.id,
+        entityName: model.nama,
+        description: 'Mengubah data santri: ${model.nama} (NIS: ${model.nis})',
+      ));
       return const Right(null);
     } catch (e) {
       return Left('Gagal mengupdate santri: $e');
@@ -111,8 +135,22 @@ class SantriRepositoryImpl implements SantriRepository {
   @override
   Future<Either<String, void>> delete(String id) async {
     try {
+      String? santriName;
+      try {
+        final localSantri = _local.santriBox.get(id);
+        santriName = localSantri?.nama;
+      } catch (_) {}
+
       await _remote.delete(id);
       await _local.deleteSantri(id);
+
+      unawaited(_activityLog.log(
+        action: 'delete',
+        module: 'santri',
+        entityId: id,
+        entityName: santriName ?? 'ID: $id',
+        description: 'Menghapus santri: ${santriName ?? id}',
+      ));
       return const Right(null);
     } catch (e) {
       return Left('Gagal menghapus santri: $e');

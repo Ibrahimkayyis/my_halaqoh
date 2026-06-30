@@ -19,9 +19,10 @@ export const bulkCreateUserAccounts = onCall(async (request) => {
         throw new HttpsError('unauthenticated', 'Endpoint ini mensyaratkan autentikasi.');
     }
     
-    // Check if the caller is an Admin
+    // Check if the caller is an Admin or Super Admin
     const callerMeta = await admin.firestore().collection('users').doc(request.auth.uid).get();
-    if (!callerMeta.exists || callerMeta.data()?.role !== 'admin') {
+    const callerRole = callerMeta.exists ? callerMeta.data()?.role : null;
+    if (!callerMeta.exists || (callerRole !== 'admin' && callerRole !== 'super_admin')) {
         throw new HttpsError('permission-denied', 'Hanya administrator yang bisa membuat akun bulk.');
     }
 

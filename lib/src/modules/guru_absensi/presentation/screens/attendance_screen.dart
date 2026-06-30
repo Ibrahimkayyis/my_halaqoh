@@ -7,8 +7,7 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
@@ -81,17 +80,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final colors = AppColors.of(context);
 
     // Retrieve Auth Context
-    final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
     final santriState = context.watch<SantriCubit>().state;
 
-    String linkedDocId = '';
-    authState.maybeWhen(
-      authenticated: (userMeta) {
-        linkedDocId = userMeta.linkedDocId;
-      },
-      orElse: () {},
-    );
+    // Gunakan ActiveSessionHelper agar super_admin yang sedang impersonasi
+    // guru mendapatkan linkedDocId guru yang dipilih, bukan 'SYSTEM'.
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
 
     bool isHalaqohLoading = false;
     HalaqohModel? myHalaqoh;

@@ -8,6 +8,7 @@ import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
@@ -135,19 +136,9 @@ class _WaliSantriDashboardWrapperScreenState
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    final authState = context.watch<AuthCubit>().state;
-    String santriName = '';
-    String nis = '';
-    String linkedDocId = '';
-
-    authState.maybeWhen(
-      authenticated: (userMeta) {
-        santriName = userMeta.displayName;
-        nis = userMeta.identifier;
-        linkedDocId = userMeta.linkedDocId;
-      },
-      orElse: () {},
-    );
+    // Gunakan ActiveSessionHelper agar super_admin yang sedang impersonasi
+    // santri bisa mendapatkan linkedDocId dari ImpersonationContext.
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
 
     // Look up real santri data for more accurate name if available locally
     final santriState = context.watch<SantriCubit>().state;
@@ -157,6 +148,19 @@ class _WaliSantriDashboardWrapperScreenState
         try {
           mySantri = list.firstWhere((s) => s.id == linkedDocId);
         } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    // Fallback name/nis dari AuthCubit (untuk santri asli),
+    // atau dari ImpersonationContext (untuk super_admin impersonasi santri).
+    final authState = context.watch<AuthCubit>().state;
+    String santriName = '';
+    String nis = '';
+    authState.maybeWhen(
+      authenticated: (userMeta) {
+        santriName = userMeta.displayName;
+        nis = userMeta.identifier;
       },
       orElse: () {},
     );

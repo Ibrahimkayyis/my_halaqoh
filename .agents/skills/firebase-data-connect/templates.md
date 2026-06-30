@@ -1,8 +1,8 @@
 # Templates
 
-Ready-to-use templates for common Firebase Data Connect patterns.
+Ready-to-use templates for common Firebase SQL Connect patterns.
 
----
+______________________________________________________________________
 
 ## Basic CRUD Schema
 
@@ -49,7 +49,7 @@ mutation DeleteItem($id: UUID!) @auth(level: USER) {
 }
 ```
 
----
+______________________________________________________________________
 
 ## User-Owned Resources
 
@@ -113,7 +113,7 @@ mutation DeleteNote($id: UUID!) @auth(level: USER) {
 }
 ```
 
----
+______________________________________________________________________
 
 ## Many-to-Many Relationship
 
@@ -169,7 +169,7 @@ mutation RemoveTagFromArticle($articleId: UUID!, $tagId: UUID!) @auth(level: USE
 }
 ```
 
----
+______________________________________________________________________
 
 ## dataconnect.yaml Template
 
@@ -187,7 +187,7 @@ schema:
 connectorDirs: ["./connector"]
 ```
 
----
+______________________________________________________________________
 
 ## connector.yaml Template
 
@@ -207,12 +207,12 @@ generate:
     package: myapp_dataconnect
 ```
 
----
+______________________________________________________________________
 
 ## Firebase Init Commands
 
 ```bash
-# Initialize Data Connect in project
+# Initialize SQL Connect in project
 npx -y firebase-tools@latest init dataconnect
 
 # Initialize with specific project
@@ -229,7 +229,7 @@ npx -y firebase-tools@latest dataconnect:sdk:generate
 npx -y firebase-tools@latest deploy --only dataconnect
 ```
 
----
+______________________________________________________________________
 
 ## SDK Initialization (Web)
 
@@ -266,4 +266,53 @@ console.log(data.items);
 
 // Create item (requires auth)
 await createItem({ name: 'New Item', description: 'Description' });
+```
+
+______________________________________________________________________
+
+## Realtime Query Templates
+
+### Time-Based Polling
+
+```graphql
+query LiveDashboard
+  @auth(level: PUBLIC)
+  @refresh(every: { seconds: 30 }) {
+  items(orderBy: [{ updatedAt: DESC }], limit: 20) {
+    id name updatedAt
+  }
+}
+```
+
+### Event-Driven Refresh
+
+```graphql
+query ItemList($categoryId: UUID!)
+  @auth(level: PUBLIC)
+  @refresh(onMutationExecuted: {
+    operation: "CreateItem",
+    condition: "request.variables.categoryId == mutation.variables.categoryId"
+  }) {
+  items(where: { category: { id: { eq: $categoryId }}}) {
+    id name createdAt
+  }
+}
+```
+
+### Client Subscribe (Web)
+
+```typescript
+import { liveDashboardRef } from '@myapp/dataconnect';
+import { subscribe } from 'firebase/data-connect';
+
+const unsubscribe = subscribe(liveDashboardRef(), {
+  onNext: (result) => {
+    // Called immediately with current data, then on each refresh
+    renderDashboard(result.data.items);
+  },
+  onError: (error) => console.error('Subscription error:', error)
+});
+
+// Cleanup when done
+// unsubscribe();
 ```

@@ -47,6 +47,13 @@ import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_ubah_password_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/screens/wali_santri_pengaturan_screen.dart';
 import 'package:my_halaqoh/src/modules/about/presentation/screens/tentang_aplikasi_screen.dart';
+// Super Admin
+import 'package:my_halaqoh/src/modules/super_admin/presentation/screens/super_admin_picker_screen.dart';
+import 'package:my_halaqoh/src/modules/super_admin/presentation/screens/guru_picker_screen.dart';
+import 'package:my_halaqoh/src/modules/super_admin/presentation/screens/santri_picker_screen.dart';
+import 'package:my_halaqoh/src/modules/super_admin/presentation/screens/activity_log_screen.dart';
+import 'package:my_halaqoh/src/modules/super_admin/presentation/screens/activity_log_detail_screen.dart';
+import 'package:my_halaqoh/src/modules/super_admin/domain/models/activity_log_model.dart';
 
 part 'app_router.gr.dart';
 
@@ -73,42 +80,42 @@ class AppRouter extends RootStackRouter {
       page: DashboardWrapperRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['admin']),
+        RoleGuard(_authCubit, allowedRoles: ['admin', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: AddHalaqohRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['admin']),
+        RoleGuard(_authCubit, allowedRoles: ['admin', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: SelectSantriRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['admin']),
+        RoleGuard(_authCubit, allowedRoles: ['admin', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: PengaturanMasterDataRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['admin']),
+        RoleGuard(_authCubit, allowedRoles: ['admin', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: KelolaKelasProgramRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['admin']),
+        RoleGuard(_authCubit, allowedRoles: ['admin', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: PengaturanMasterDataSettingsRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['admin']),
+        RoleGuard(_authCubit, allowedRoles: ['admin', 'super_admin']),
       ],
     ),
 
@@ -117,126 +124,126 @@ class AppRouter extends RootStackRouter {
       page: GuruDashboardWrapperRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: AttendanceRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: HafalanRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: MyHalaqohRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: DetailSantriRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: BarcodeScannerRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: RiwayatAbsensiRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: KalenderAbsensiRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: AbsensiHalaqohRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: DetailAbsensiHariIniRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: InputHafalanRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: RiwayatHafalanSantriRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: ProgressHafalanPerJuzRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: ProgressHafalanPerSuratRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: MutabaahSantriRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: EditProfileRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: UbahPasswordRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: PengaturanRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['guru']),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'super_admin']),
       ],
     ),
 
@@ -245,77 +252,114 @@ class AppRouter extends RootStackRouter {
       page: WaliSantriDashboardWrapperRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: WaliSantriRiwayatHafalanRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: WaliSantriProgressPerJuzRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: WaliSantriProgressPerSuratRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: WaliSantriMutabaahRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: WaliSantriRiwayatAbsensiRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: WaliSantriKalenderAbsensiRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: WaliSantriProfileRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: WaliSantriEditProfileRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: WaliSantriUbahPasswordRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
       ],
     ),
     AutoRoute(
       page: WaliSantriPengaturanRoute.page,
       guards: [
         AuthGuard(_authCubit),
-        RoleGuard(_authCubit, allowedRoles: ['santri']),
+        RoleGuard(_authCubit, allowedRoles: ['santri', 'super_admin']),
+      ],
+    ),
+
+    // ── Super Admin-only routes ────────────────────────────────────────
+    AutoRoute(
+      page: SuperAdminPickerRoute.page,
+      guards: [
+        AuthGuard(_authCubit),
+        RoleGuard(_authCubit, allowedRoles: ['super_admin']),
+      ],
+    ),
+    AutoRoute(
+      page: GuruPickerRoute.page,
+      guards: [
+        AuthGuard(_authCubit),
+        RoleGuard(_authCubit, allowedRoles: ['super_admin']),
+      ],
+    ),
+    AutoRoute(
+      page: SantriPickerRoute.page,
+      guards: [
+        AuthGuard(_authCubit),
+        RoleGuard(_authCubit, allowedRoles: ['super_admin']),
+      ],
+    ),
+    AutoRoute(
+      page: ActivityLogRoute.page,
+      guards: [
+        AuthGuard(_authCubit),
+        RoleGuard(_authCubit, allowedRoles: ['super_admin']),
+      ],
+    ),
+    AutoRoute(
+      page: ActivityLogDetailRoute.page,
+      guards: [
+        AuthGuard(_authCubit),
+        RoleGuard(_authCubit, allowedRoles: ['super_admin']),
       ],
     ),
 

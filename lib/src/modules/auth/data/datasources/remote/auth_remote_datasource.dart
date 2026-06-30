@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 import 'package:my_halaqoh/src/modules/auth/domain/models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
@@ -20,8 +23,13 @@ abstract class AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
+  final ActivityLogService _activityLog;
 
-  AuthRemoteDataSourceImpl(this._firebaseAuth, this._firestore);
+  AuthRemoteDataSourceImpl(
+    this._firebaseAuth,
+    this._firestore,
+    this._activityLog,
+  );
 
   @override
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
@@ -81,11 +89,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     final data = docSnap.data()!;
     data['uid'] = uid;
-    return UserModel.fromJson(data);
+    final userModel = UserModel.fromJson(data);
+
+    unawaited(_activityLog.log(
+      action: 'login',
+      module: 'auth',
+      description: 'Pengguna $normalizedIdentifier berhasil login sebagai ${userModel.role}',
+    ));
+
+    return userModel;
   }
 
   @override
   Future<void> signOut() async {
+    unawaited(_activityLog.log(
+      action: 'logout',
+      module: 'auth',
+      description: 'Pengguna logout dari aplikasi',
+    ));
     await _firebaseAuth.signOut();
   }
 

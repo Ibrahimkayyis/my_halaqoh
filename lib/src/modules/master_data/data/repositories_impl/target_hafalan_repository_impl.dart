@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
+import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/local/master_data_local_datasource.dart';
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/remote/source/abstract/target_hafalan_remote_datasource.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
@@ -7,8 +10,9 @@ import 'package:my_halaqoh/src/modules/master_data/domain/repositories/target_ha
 class TargetHafalanRepositoryImpl implements TargetHafalanRepository {
   final TargetHafalanRemoteDataSource _remote;
   final MasterDataLocalDataSource _local;
+  final ActivityLogService _activityLog;
 
-  TargetHafalanRepositoryImpl(this._remote, this._local);
+  TargetHafalanRepositoryImpl(this._remote, this._local, this._activityLog);
 
   @override
   Stream<List<TargetHafalanModel>> watchAll() {
@@ -48,6 +52,12 @@ class TargetHafalanRepositoryImpl implements TargetHafalanRepository {
     try {
       await _remote.save(model);
       await _local.putTargetHafalan(model);
+      unawaited(_activityLog.log(
+        action: 'update',
+        module: 'target_hafalan',
+        entityId: model.id,
+        description: 'Menyimpan target hafalan kelas ${model.kelas} ${model.program}',
+      ));
       return const Right(null);
     } catch (e) {
       return Left('Gagal menyimpan target hafalan: $e');
@@ -59,6 +69,12 @@ class TargetHafalanRepositoryImpl implements TargetHafalanRepository {
     try {
       await _remote.delete(id);
       await _local.deleteTargetHafalan(id);
+      unawaited(_activityLog.log(
+        action: 'delete',
+        module: 'target_hafalan',
+        entityId: id,
+        description: 'Menghapus target hafalan dengan ID: $id',
+      ));
       return const Right(null);
     } catch (e) {
       return Left('Gagal menghapus target hafalan: $e');

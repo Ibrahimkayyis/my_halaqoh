@@ -80,6 +80,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsGeneralEn general = TranslationsGeneralEn._(_root);
 	late final TranslationsCalendarEn calendar = TranslationsCalendarEn._(_root);
 	late final TranslationsLaporanConfigEn laporanConfig = TranslationsLaporanConfigEn._(_root);
+	late final TranslationsKelasProgramEn kelasProgram = TranslationsKelasProgramEn._(_root);
+	late final TranslationsSuperAdminEn superAdmin = TranslationsSuperAdminEn._(_root);
+	late final TranslationsActivityLogEn activityLog = TranslationsActivityLogEn._(_root);
 }
 
 // Path: app
@@ -2434,6 +2437,231 @@ class TranslationsLaporanConfigEn {
 	late final TranslationsLaporanConfigPdfEn pdf = TranslationsLaporanConfigPdfEn._(_root);
 }
 
+// Path: kelasProgram
+class TranslationsKelasProgramEn {
+	TranslationsKelasProgramEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Manage Class & Program'
+	String get title => 'Manage Class & Program';
+
+	/// en: 'Class'
+	String get kelasTab => 'Class';
+
+	/// en: 'Program'
+	String get programTab => 'Program';
+
+	/// en: 'No class data yet'
+	String get belumAdaKelas => 'No class data yet';
+
+	/// en: 'Class $nama'
+	String kelasNama({required Object nama}) => 'Class ${nama}';
+
+	/// en: 'Order: $urutan | Promote to: $nextKelas'
+	String urutanPromosi({required Object urutan, required Object nextKelas}) => 'Order: ${urutan} | Promote to: ${nextKelas}';
+
+	/// en: 'Graduated (Alumni)'
+	String get lulusAlumni => 'Graduated (Alumni)';
+
+	/// en: 'No program data yet'
+	String get belumAdaProgram => 'No program data yet';
+
+	/// en: 'ID: $id'
+	String programId({required Object id}) => 'ID: ${id}';
+
+	/// en: 'Add Class'
+	String get tambahKelas => 'Add Class';
+
+	/// en: 'Edit Class'
+	String get editKelas => 'Edit Class';
+
+	/// en: 'Class Name'
+	String get namaKelas => 'Class Name';
+
+	/// en: 'e.g. 7, 8, or A, B'
+	String get namaKelasHint => 'e.g. 7, 8, or A, B';
+
+	/// en: 'Class name must be filled'
+	String get namaKelasRequired => 'Class name must be filled';
+
+	/// en: 'Class Order'
+	String get urutanKelas => 'Class Order';
+
+	/// en: 'e.g. Class order number for promotion'
+	String get urutanKelasHint => 'e.g. Class order number for promotion';
+
+	/// en: 'Order must be filled'
+	String get urutanRequired => 'Order must be filled';
+
+	/// en: 'Order must be a number'
+	String get urutanNumeric => 'Order must be a number';
+
+	/// en: 'Next Class'
+	String get kelasSelanjutnya => 'Next Class';
+
+	/// en: 'Choose Next Class'
+	String get pilihKelasSelanjutnya => 'Choose Next Class';
+
+	/// en: 'Cancel'
+	String get batal => 'Cancel';
+
+	/// en: 'Save'
+	String get simpan => 'Save';
+
+	/// en: 'Failed to save: $error'
+	String gagalMenyimpan({required Object error}) => 'Failed to save: ${error}';
+
+	/// en: 'Delete Class'
+	String get hapusKelas => 'Delete Class';
+
+	/// en: 'Are you sure you want to delete Class $nama? This action cannot be undone.'
+	String hapusKelasConfirm({required Object nama}) => 'Are you sure you want to delete Class ${nama}? This action cannot be undone.';
+
+	/// en: 'Delete'
+	String get hapus => 'Delete';
+
+	/// en: 'Failed to delete class'
+	String get gagalMenghapusKelas => 'Failed to delete class';
+
+	/// en: 'Add Program'
+	String get tambahProgram => 'Add Program';
+
+	/// en: 'Edit Program'
+	String get editProgram => 'Edit Program';
+
+	/// en: 'Program Code'
+	String get kodeProgram => 'Program Code';
+
+	/// en: 'e.g. R, T, or TH'
+	String get kodeProgramHint => 'e.g. R, T, or TH';
+
+	/// en: 'Program code must be filled'
+	String get kodeProgramRequired => 'Program code must be filled';
+
+	/// en: 'Program Name'
+	String get namaProgram => 'Program Name';
+
+	/// en: 'e.g. Regular, Special, or Memorization'
+	String get namaProgramHint => 'e.g. Regular, Special, or Memorization';
+
+	/// en: 'Program name must be filled'
+	String get namaProgramRequired => 'Program name must be filled';
+
+	/// en: 'Delete Program'
+	String get hapusProgram => 'Delete Program';
+
+	/// en: 'Are you sure you want to delete program "$nama" ($id)? This action cannot be undone.'
+	String hapusProgramConfirm({required Object nama, required Object id}) => 'Are you sure you want to delete program "${nama}" (${id})? This action cannot be undone.';
+
+	/// en: 'Failed to delete program'
+	String get gagalMenghapusProgram => 'Failed to delete program';
+
+	/// en: 'Manage classes & programs'
+	String get aturKelasProgram => 'Manage classes & programs';
+}
+
+// Path: superAdmin
+class TranslationsSuperAdminEn {
+	TranslationsSuperAdminEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Select Access Mode'
+	String get pickerTitle => 'Select Access Mode';
+
+	/// en: 'Sign in as'
+	String get pickerSubtitle => 'Sign in as';
+
+	/// en: 'Access as Admin'
+	String get accessAsAdmin => 'Access as Admin';
+
+	/// en: 'Manage teachers, students, halaqoh, and memorization targets'
+	String get accessAsAdminDesc => 'Manage teachers, students, halaqoh, and memorization targets';
+
+	/// en: 'Access as Teacher'
+	String get accessAsGuru => 'Access as Teacher';
+
+	/// en: 'Select a teacher and access attendance & memorization features'
+	String get accessAsGuruDesc => 'Select a teacher and access attendance & memorization features';
+
+	/// en: 'Access as Parent'
+	String get accessAsWali => 'Access as Parent';
+
+	/// en: 'Select a student and view their progress & attendance'
+	String get accessAsWaliDesc => 'Select a student and view their progress & attendance';
+
+	/// en: 'View Activity Log'
+	String get viewActivityLog => 'View Activity Log';
+
+	/// en: 'Mode $role: $name'
+	String modeLabel({required Object role, required Object name}) => 'Mode ${role}: ${name}';
+
+	/// en: 'Exit'
+	String get exitMode => 'Exit';
+
+	/// en: 'Exit impersonation mode'
+	String get exitModeTooltip => 'Exit impersonation mode';
+
+	/// en: 'Select Teacher'
+	String get guruPickerTitle => 'Select Teacher';
+
+	/// en: 'Select Student'
+	String get santriPickerTitle => 'Select Student';
+
+	/// en: 'Search teacher...'
+	String get searchGuru => 'Search teacher...';
+
+	/// en: 'Search student...'
+	String get searchSantri => 'Search student...';
+}
+
+// Path: activityLog
+class TranslationsActivityLogEn {
+	TranslationsActivityLogEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Activity Log'
+	String get title => 'Activity Log';
+
+	/// en: 'Filter Role'
+	String get filterRole => 'Filter Role';
+
+	/// en: 'Filter Module'
+	String get filterModule => 'Filter Module';
+
+	/// en: 'Filter Action'
+	String get filterAction => 'Filter Action';
+
+	/// en: 'From Date'
+	String get filterDateFrom => 'From Date';
+
+	/// en: 'To Date'
+	String get filterDateTo => 'To Date';
+
+	/// en: 'All Roles'
+	String get allRoles => 'All Roles';
+
+	/// en: 'All Modules'
+	String get allModules => 'All Modules';
+
+	/// en: 'All Actions'
+	String get allActions => 'All Actions';
+
+	/// en: 'No activity logs yet'
+	String get empty => 'No activity logs yet';
+
+	/// en: 'Reset Filter'
+	String get resetFilter => 'Reset Filter';
+}
+
 // Path: absensi.barcodeScanner
 class TranslationsAbsensiBarcodeScannerEn {
 	TranslationsAbsensiBarcodeScannerEn._(this._root);
@@ -3530,6 +3758,72 @@ extension on Translations {
 			case 'laporanConfig.pdf.statusLegenda': return 'H = Present  |  S = Sick  |  I = Permit  |  A = Absent';
 			case 'laporanConfig.pdf.predikatLegenda': return 'Mumtaz: 85 - 100  |  Jayyid: 70 - 84  |  Maqbul: < 70';
 			case 'laporanConfig.pdf.pekanShort': return ({required Object index}) => 'Week ${index}';
+			case 'kelasProgram.title': return 'Manage Class & Program';
+			case 'kelasProgram.kelasTab': return 'Class';
+			case 'kelasProgram.programTab': return 'Program';
+			case 'kelasProgram.belumAdaKelas': return 'No class data yet';
+			case 'kelasProgram.kelasNama': return ({required Object nama}) => 'Class ${nama}';
+			case 'kelasProgram.urutanPromosi': return ({required Object urutan, required Object nextKelas}) => 'Order: ${urutan} | Promote to: ${nextKelas}';
+			case 'kelasProgram.lulusAlumni': return 'Graduated (Alumni)';
+			case 'kelasProgram.belumAdaProgram': return 'No program data yet';
+			case 'kelasProgram.programId': return ({required Object id}) => 'ID: ${id}';
+			case 'kelasProgram.tambahKelas': return 'Add Class';
+			case 'kelasProgram.editKelas': return 'Edit Class';
+			case 'kelasProgram.namaKelas': return 'Class Name';
+			case 'kelasProgram.namaKelasHint': return 'e.g. 7, 8, or A, B';
+			case 'kelasProgram.namaKelasRequired': return 'Class name must be filled';
+			case 'kelasProgram.urutanKelas': return 'Class Order';
+			case 'kelasProgram.urutanKelasHint': return 'e.g. Class order number for promotion';
+			case 'kelasProgram.urutanRequired': return 'Order must be filled';
+			case 'kelasProgram.urutanNumeric': return 'Order must be a number';
+			case 'kelasProgram.kelasSelanjutnya': return 'Next Class';
+			case 'kelasProgram.pilihKelasSelanjutnya': return 'Choose Next Class';
+			case 'kelasProgram.batal': return 'Cancel';
+			case 'kelasProgram.simpan': return 'Save';
+			case 'kelasProgram.gagalMenyimpan': return ({required Object error}) => 'Failed to save: ${error}';
+			case 'kelasProgram.hapusKelas': return 'Delete Class';
+			case 'kelasProgram.hapusKelasConfirm': return ({required Object nama}) => 'Are you sure you want to delete Class ${nama}? This action cannot be undone.';
+			case 'kelasProgram.hapus': return 'Delete';
+			case 'kelasProgram.gagalMenghapusKelas': return 'Failed to delete class';
+			case 'kelasProgram.tambahProgram': return 'Add Program';
+			case 'kelasProgram.editProgram': return 'Edit Program';
+			case 'kelasProgram.kodeProgram': return 'Program Code';
+			case 'kelasProgram.kodeProgramHint': return 'e.g. R, T, or TH';
+			case 'kelasProgram.kodeProgramRequired': return 'Program code must be filled';
+			case 'kelasProgram.namaProgram': return 'Program Name';
+			case 'kelasProgram.namaProgramHint': return 'e.g. Regular, Special, or Memorization';
+			case 'kelasProgram.namaProgramRequired': return 'Program name must be filled';
+			case 'kelasProgram.hapusProgram': return 'Delete Program';
+			case 'kelasProgram.hapusProgramConfirm': return ({required Object nama, required Object id}) => 'Are you sure you want to delete program "${nama}" (${id})? This action cannot be undone.';
+			case 'kelasProgram.gagalMenghapusProgram': return 'Failed to delete program';
+			case 'kelasProgram.aturKelasProgram': return 'Manage classes & programs';
+			case 'superAdmin.pickerTitle': return 'Select Access Mode';
+			case 'superAdmin.pickerSubtitle': return 'Sign in as';
+			case 'superAdmin.accessAsAdmin': return 'Access as Admin';
+			case 'superAdmin.accessAsAdminDesc': return 'Manage teachers, students, halaqoh, and memorization targets';
+			case 'superAdmin.accessAsGuru': return 'Access as Teacher';
+			case 'superAdmin.accessAsGuruDesc': return 'Select a teacher and access attendance & memorization features';
+			case 'superAdmin.accessAsWali': return 'Access as Parent';
+			case 'superAdmin.accessAsWaliDesc': return 'Select a student and view their progress & attendance';
+			case 'superAdmin.viewActivityLog': return 'View Activity Log';
+			case 'superAdmin.modeLabel': return ({required Object role, required Object name}) => 'Mode ${role}: ${name}';
+			case 'superAdmin.exitMode': return 'Exit';
+			case 'superAdmin.exitModeTooltip': return 'Exit impersonation mode';
+			case 'superAdmin.guruPickerTitle': return 'Select Teacher';
+			case 'superAdmin.santriPickerTitle': return 'Select Student';
+			case 'superAdmin.searchGuru': return 'Search teacher...';
+			case 'superAdmin.searchSantri': return 'Search student...';
+			case 'activityLog.title': return 'Activity Log';
+			case 'activityLog.filterRole': return 'Filter Role';
+			case 'activityLog.filterModule': return 'Filter Module';
+			case 'activityLog.filterAction': return 'Filter Action';
+			case 'activityLog.filterDateFrom': return 'From Date';
+			case 'activityLog.filterDateTo': return 'To Date';
+			case 'activityLog.allRoles': return 'All Roles';
+			case 'activityLog.allModules': return 'All Modules';
+			case 'activityLog.allActions': return 'All Actions';
+			case 'activityLog.empty': return 'No activity logs yet';
+			case 'activityLog.resetFilter': return 'Reset Filter';
 			default: return null;
 		}
 	}

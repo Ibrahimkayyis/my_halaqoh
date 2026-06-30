@@ -10,8 +10,7 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/wali_santri_model.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/cubits/wali_santri_profile_cubit.dart';
@@ -71,14 +70,7 @@ class _WaliSantriEditProfileScreenState
     super.initState();
     _profileCubit = sl<WaliSantriProfileCubit>();
 
-    // Get linkedDocId from AuthCubit and load profile
-    final authState = context.read<AuthCubit>().state;
-    authState.maybeWhen(
-      authenticated: (userMeta) {
-        _linkedDocId = userMeta.linkedDocId;
-      },
-      orElse: () {},
-    );
+    _linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
 
     if (_linkedDocId.isNotEmpty) {
       _profileCubit.loadProfile(_linkedDocId);

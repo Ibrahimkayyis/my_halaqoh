@@ -25,6 +25,7 @@ import 'package:my_halaqoh/src/modules/auth/domain/repositories/auth_repository.
 import 'package:my_halaqoh/src/modules/auth/data/repositories_impl/auth_repository_impl.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/core/services/storage_service.dart';
+import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 
 // Master Data — Data Layer
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/local/master_data_local_datasource.dart';
@@ -134,6 +135,18 @@ import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_absensi_halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_hafalan_cubit.dart';
 
+// Super Admin — Data Layer
+import 'package:my_halaqoh/src/modules/super_admin/data/datasources/remote/source/abstract/activity_log_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/super_admin/data/datasources/remote/source/implementation/activity_log_remote_datasource_impl.dart';
+import 'package:my_halaqoh/src/modules/super_admin/data/repositories_impl/activity_log_repository_impl.dart';
+
+// Super Admin — Domain Layer
+import 'package:my_halaqoh/src/modules/super_admin/domain/repositories/activity_log_repository.dart';
+
+// Super Admin — Presentation Layer
+import 'package:my_halaqoh/src/modules/super_admin/presentation/cubits/impersonation/impersonation_cubit.dart';
+import 'package:my_halaqoh/src/modules/super_admin/presentation/cubits/activity_log/activity_log_cubit.dart';
+
 final sl = GetIt.instance;
 
 /// Call this in main.dart before runApp()
@@ -152,6 +165,11 @@ Future<void> initDependencies() async {
 
   // Core Services
   sl.registerLazySingleton<StorageService>(() => StorageService());
+
+  // ActivityLogService — must be registered BEFORE any repository that uses it
+  sl.registerLazySingleton<ActivityLogService>(
+    () => ActivityLogService(sl<FirebaseFirestore>(), sl<FirebaseAuth>()),
+  );
 
   // ── Firebase ──────────────────────────────────────────────────────────────
   sl.registerLazySingleton<FirebaseFirestore>(
@@ -172,7 +190,7 @@ Future<void> initDependencies() async {
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(sl(), sl()),
+    () => AuthRemoteDataSourceImpl(sl(), sl(), sl<ActivityLogService>()),
   );
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(sl()),
@@ -206,16 +224,17 @@ Future<void> initDependencies() async {
 
   // ── Master Data — Repositories ────────────────────────────────────────────
   sl.registerLazySingleton<GuruRepository>(
-    () => GuruRepositoryImpl(sl(), sl()),
+    () => GuruRepositoryImpl(sl(), sl(), sl<ActivityLogService>()),
   );
   sl.registerLazySingleton<SantriRepository>(
-    () => SantriRepositoryImpl(sl(), sl(), sl<FirebaseFirestore>()),
+    () => SantriRepositoryImpl(
+        sl(), sl(), sl<FirebaseFirestore>(), sl<ActivityLogService>()),
   );
   sl.registerLazySingleton<HalaqohRepository>(
-    () => HalaqohRepositoryImpl(sl(), sl()),
+    () => HalaqohRepositoryImpl(sl(), sl(), sl<ActivityLogService>()),
   );
   sl.registerLazySingleton<TargetHafalanRepository>(
-    () => TargetHafalanRepositoryImpl(sl(), sl()),
+    () => TargetHafalanRepositoryImpl(sl(), sl(), sl<ActivityLogService>()),
   );
   sl.registerLazySingleton<KelasRepository>(
     () => KelasRepositoryImpl(sl()),
@@ -253,7 +272,7 @@ Future<void> initDependencies() async {
 
   // ── Guru Absensi — Repository ──────────────────────────────────────────────
   sl.registerLazySingleton<AbsensiRepository>(
-    () => AbsensiRepositoryImpl(sl(), sl()),
+    () => AbsensiRepositoryImpl(sl(), sl(), sl<ActivityLogService>()),
   );
 
   // ── Guru Absensi — Sync Service ────────────────────────────────────────────
@@ -274,7 +293,7 @@ Future<void> initDependencies() async {
 
   // ── Guru Hafalan — Repository ──────────────────────────────────────────────
   sl.registerLazySingleton<HafalanSantriRepository>(
-    () => HafalanSantriRepositoryImpl(sl(), sl()),
+    () => HafalanSantriRepositoryImpl(sl(), sl(), sl<ActivityLogService>()),
   );
 
   // ── Guru Hafalan — Sync Service ────────────────────────────────────────────
@@ -299,7 +318,7 @@ Future<void> initDependencies() async {
 
   // ── Guru Profile — Repository ──────────────────────────────────────────────
   sl.registerLazySingleton<GuruProfileRepository>(
-    () => GuruProfileRepositoryImpl(sl()),
+    () => GuruProfileRepositoryImpl(sl(), sl()),
   );
 
   // ── Guru Profile — Cubit (Factory — scoped per screen) ─────────────────────
@@ -326,7 +345,7 @@ Future<void> initDependencies() async {
 
   // ── Wali Santri Profile — Repository ───────────────────────────────────────
   sl.registerLazySingleton<WaliSantriProfileRepository>(
-    () => WaliSantriProfileRepositoryImpl(sl()),
+    () => WaliSantriProfileRepositoryImpl(sl(), sl()),
   );
 
   // ── Wali Santri Profile — Cubit (Factory — scoped per screen) ─────────────
@@ -355,4 +374,24 @@ Future<void> initDependencies() async {
   sl.registerFactory<LaporanAbsensiCubit>(() => LaporanAbsensiCubit());
   sl.registerFactory<LaporanAbsensiHalaqohCubit>(() => LaporanAbsensiHalaqohCubit());
   sl.registerFactory<LaporanHafalanCubit>(() => LaporanHafalanCubit(sl()));
+
+  // ── Super Admin — DataSources ─────────────────────────────────────────────
+  sl.registerLazySingleton<ActivityLogRemoteDataSource>(
+    () => ActivityLogRemoteDataSourceImpl(sl<FirebaseFirestore>()),
+  );
+
+  // ── Super Admin — Repository ──────────────────────────────────────────────
+  sl.registerLazySingleton<ActivityLogRepository>(
+    () => ActivityLogRepositoryImpl(sl()),
+  );
+
+  // ── Super Admin — ImpersonationCubit (Singleton — persists across nav) ─────
+  // MUST be Singleton (not Factory) so impersonation state is preserved
+  // when navigating between screens during an active impersonation session.
+  sl.registerSingleton<ImpersonationCubit>(ImpersonationCubit());
+
+  // ── Super Admin — ActivityLogCubit (Factory — scoped to screen) ───────────
+  sl.registerFactory<ActivityLogCubit>(
+    () => ActivityLogCubit(sl()),
+  );
 }

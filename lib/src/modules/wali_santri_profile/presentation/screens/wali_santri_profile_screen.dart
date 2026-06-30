@@ -9,6 +9,7 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
@@ -28,27 +29,12 @@ class WaliSantriProfileScreen extends StatefulWidget {
 
 class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
   late final WaliSantriProfileCubit _profileCubit;
-  String _linkedDocId = '';
+  String? _lastLoadedId;
 
   @override
   void initState() {
     super.initState();
     _profileCubit = sl<WaliSantriProfileCubit>();
-
-    // Read linkedDocId synchronously from AuthCubit — available in initState
-    // because AuthCubit is a global singleton already in the widget tree.
-    final authState = context.read<AuthCubit>().state;
-    authState.maybeWhen(
-      authenticated: (userMeta) {
-        _linkedDocId = userMeta.linkedDocId;
-      },
-      orElse: () {},
-    );
-
-    // Load full profile data for avatar (photo) display
-    if (_linkedDocId.isNotEmpty) {
-      _profileCubit.loadProfile(_linkedDocId);
-    }
   }
 
   @override
@@ -61,16 +47,35 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
+
+    // Dynamically load profile when linked student switches
+    if (linkedDocId.isNotEmpty && linkedDocId != _lastLoadedId) {
+      _lastLoadedId = linkedDocId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _profileCubit.loadProfile(linkedDocId);
+      });
+    }
+
     final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
 
     String santriName = '';
     String nis = '';
 
+    final realRole = authState.maybeWhen(
+      authenticated: (user) => user.role,
+      orElse: () => null,
+    );
+    final activeRole = ActiveSessionHelper.getActiveRole(context);
+    final isImpersonation = realRole == 'super_admin' && activeRole != 'super_admin';
+
     authState.maybeWhen(
       authenticated: (userMeta) {
-        santriName = userMeta.displayName;
-        nis = userMeta.identifier;
+        if (!isImpersonation) {
+          santriName = userMeta.displayName;
+          nis = userMeta.identifier;
+        }
       },
       orElse: () {},
     );
@@ -80,7 +85,7 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
       loaded: (list) {
         try {
           myHalaqoh = list.firstWhere(
-            (h) => h.santriIds.contains(_linkedDocId),
+            (h) => h.santriIds.contains(linkedDocId),
           );
         } catch (_) {}
       },
@@ -105,8 +110,8 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
               children: [
                 _buildHeader(
                   colors: colors,
-                  name: santriName.isNotEmpty ? santriName : t.guruProfile.loading,
-                  nis: nis,
+                  name: santri?.nama ?? (santriName.isNotEmpty ? santriName : t.guruProfile.loading),
+                  nis: santri?.nis ?? nis,
                   badge: myHalaqoh != null
                       ? '${t.progressHafalanPerJuz.kelasLabel(kelas: myHalaqoh!.kelas)} | ${myHalaqoh!.program == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler}'
                       : '${t.progressHafalanPerJuz.kelasLabel(kelas: '?')} | ?',
