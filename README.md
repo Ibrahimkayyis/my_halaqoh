@@ -72,11 +72,11 @@ MyHalaqoh employs an offline-first architecture — teachers can record attendan
 ---
 
 ## Screenshots
-
-| Screenshot 1 | Screenshot 2 |
-|:---:|:---:|
-| ![](docs/screenshot_1.png) | ![](docs/screenshot_2.png) |
-
+ 
+![Screenshot 1](docs/screenshot_1.png)
+ 
+![Screenshot 2](docs/screenshot_2.png)
+ 
 ---
 
 ## Architecture
