@@ -681,11 +681,20 @@ class TranslationsAddDataEn {
 	/// en: 'Saving $current / $total to server...'
 	String bulkStatusSaving({required Object current, required Object total}) => 'Saving ${current} / ${total} to server...';
 
-	/// en: 'Done! Success: $success, Failed: $fail (Failed data is usually due to NIP already registered)'
-	String bulkGuruFinished({required Object success, required Object fail}) => 'Done! Success: ${success}, Failed: ${fail}\n(Failed data is usually due to NIP already registered)';
+	/// en: 'Done!'
+	String get bulkFinishedTitle => 'Done!';
 
-	/// en: 'Done! Success: $success, Failed: $fail (Failed data is usually due to NIS already registered)'
-	String bulkSantriFinished({required Object success, required Object fail}) => 'Done! Success: ${success}, Failed: ${fail}\n(Failed data is usually due to NIS already registered)';
+	/// en: 'Success'
+	String get bulkSuccess => 'Success';
+
+	/// en: 'Failed'
+	String get bulkFailed => 'Failed';
+
+	/// en: 'Note: Unsaved records may be due to the Employee Identification Number (NIP) already registered in the system.'
+	String get bulkGuruFailNote => 'Note: Unsaved records may be due to the Employee Identification Number (NIP) already registered in the system.';
+
+	/// en: 'Note: Unsaved records may be due to the Student Identification Number (NIS) already registered in the system.'
+	String get bulkSantriFailNote => 'Note: Unsaved records may be due to the Student Identification Number (NIS) already registered in the system.';
 }
 
 // Path: addHalaqoh
@@ -3147,8 +3156,11 @@ extension on Translations {
 			case 'addData.bulkErrorNoValidRows': return 'No valid data rows to upload!';
 			case 'addData.bulkStatusProcessing': return ({required Object count}) => 'Processing ${count} rows...';
 			case 'addData.bulkStatusSaving': return ({required Object current, required Object total}) => 'Saving ${current} / ${total} to server...';
-			case 'addData.bulkGuruFinished': return ({required Object success, required Object fail}) => 'Done! Success: ${success}, Failed: ${fail}\n(Failed data is usually due to NIP already registered)';
-			case 'addData.bulkSantriFinished': return ({required Object success, required Object fail}) => 'Done! Success: ${success}, Failed: ${fail}\n(Failed data is usually due to NIS already registered)';
+			case 'addData.bulkFinishedTitle': return 'Done!';
+			case 'addData.bulkSuccess': return 'Success';
+			case 'addData.bulkFailed': return 'Failed';
+			case 'addData.bulkGuruFailNote': return 'Note: Unsaved records may be due to the Employee Identification Number (NIP) already registered in the system.';
+			case 'addData.bulkSantriFailNote': return 'Note: Unsaved records may be due to the Student Identification Number (NIS) already registered in the system.';
 			case 'addHalaqoh.title': return 'Add New Halaqoh';
 			case 'addHalaqoh.namaHalaqoh': return 'Halaqoh Name';
 			case 'addHalaqoh.namaHalaqohHint': return 'Example: Halaqoh 7A';

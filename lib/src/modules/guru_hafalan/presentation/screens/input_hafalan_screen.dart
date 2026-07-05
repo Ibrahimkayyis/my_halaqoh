@@ -72,7 +72,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
   // ── Tab controller (replaces _selectedTab string) ─────────────────────────
   late TabController _tabController;
 
-  DateTime _tanggalSetoran = DateTime.now();
+  final DateTime _tanggalSetoran = DateTime.now();
 
   final _juzController = TextEditingController();
   final _kelancaranController = TextEditingController();
@@ -92,12 +92,16 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
     _surahList = QuranService.instance.getAllSurahs();
     _tabController = TabController(length: 2, vsync: this);
 
-    // Clear inline errors as the teacher types
+    // Clear inline errors and update rubric indicators as the teacher types
     _kelancaranController.addListener(() {
-      if (_kelancaranError != null) setState(() => _kelancaranError = null);
+      setState(() {
+        if (_kelancaranError != null) _kelancaranError = null;
+      });
     });
     _tajwidController.addListener(() {
-      if (_tajwidError != null) setState(() => _tajwidError = null);
+      setState(() {
+        if (_tajwidError != null) _tajwidError = null;
+      });
     });
   }
 
@@ -412,29 +416,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
     );
   }
 
-  Future<void> _selectTanggalSetoran(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _tanggalSetoran,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppColors.of(context).primary,
-              onPrimary: Colors.white,
-              onSurface: AppColors.of(context).textPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _tanggalSetoran) {
-      setState(() => _tanggalSetoran = picked);
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -589,7 +571,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
 
                   // ── Tanggal Setoran Picker ──
                   GestureDetector(
-                    onTap: () => _selectTanggalSetoran(context),
+                    onTap: null, // Disabled: locked to current date
                     child: Container(
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(
@@ -599,7 +581,10 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       decoration: BoxDecoration(
                         color: colors.surface,
                         borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: colors.border, width: 1),
+                        border: Border.all(
+                          color: colors.border.withValues(alpha: 0.5),
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -625,7 +610,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: colors.textPrimary,
+                                    color: colors.textSecondary,
                                     fontFamily: 'Poppins',
                                   ),
                                 ),
@@ -635,7 +620,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                           Icon(
                             Icons.calendar_month,
                             size: 22.sp,
-                            color: colors.primary,
+                            color: colors.textSecondary.withValues(alpha: 0.5),
                           ),
                         ],
                       ),
@@ -1078,6 +1063,56 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
     );
   }
 
+  Widget? _buildRubricIndicator(String text, AppColorSet colors) {
+    final cleanText = text.trim();
+    if (cleanText.isEmpty) return null;
+    final score = int.tryParse(cleanText);
+    if (score == null || score < 1 || score > 100) return null;
+
+    String label;
+    Color textColor;
+    Color bgColor;
+
+    if (score >= 85) {
+      label = t.laporanConfig.pdf.predikat.mumtaz;
+      textColor = colors.primary;
+      bgColor = colors.primary.withValues(alpha: 0.1);
+    } else if (score >= 70) {
+      label = t.laporanConfig.pdf.predikat.jayyid;
+      textColor = const Color(0xFFF3722C);
+      bgColor = const Color(0xFFF3722C).withValues(alpha: 0.1);
+    } else {
+      label = t.laporanConfig.pdf.predikat.maqbul;
+      textColor = colors.red;
+      bgColor = colors.red.withValues(alpha: 0.1);
+    }
+
+    return Container(
+      margin: EdgeInsets.only(right: 8.w),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── Scoring field ──────────────────────────────────────────────────────────
   Widget _buildScoringField(
     String label,
@@ -1137,6 +1172,8 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                 size: 20.sp,
                 color: hasError ? colors.red : colors.textSecondary,
               ),
+              suffixIcon: _buildRubricIndicator(controller.text, colors),
+              suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 16.w,

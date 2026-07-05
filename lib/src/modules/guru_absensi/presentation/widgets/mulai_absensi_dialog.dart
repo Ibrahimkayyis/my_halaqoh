@@ -24,20 +24,10 @@ class MulaiAbsensiDialog extends StatefulWidget {
 }
 
 class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
-  DateTime _selectedDate = DateTime.now();
+  final DateTime _selectedDate = DateTime.now();
   String _selectedSesi = 'shubuh';
 
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-    );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
-  }
+
 
   /// Session definitions per program type
   List<_SessionDef> get _sessionDefs {
@@ -108,7 +98,7 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
               ),
               SizedBox(height: 8.h),
               GestureDetector(
-                onTap: _pickDate,
+                onTap: null, // Disabled: locked to current date
                 child: Container(
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(
@@ -119,7 +109,7 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
                     color: colors.background,
                     borderRadius: BorderRadius.circular(10.r),
                     border: Border.all(
-                      color: colors.border.withValues(alpha: 0.5),
+                      color: colors.border.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -131,14 +121,14 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
-                          color: colors.textPrimary,
+                          color: colors.textSecondary,
                           fontFamily: 'Poppins',
                         ),
                       ),
                       Icon(
                         Icons.calendar_today_outlined,
                         size: 18.sp,
-                        color: colors.textSecondary,
+                        color: colors.textSecondary.withValues(alpha: 0.5),
                       ),
                     ],
                   ),

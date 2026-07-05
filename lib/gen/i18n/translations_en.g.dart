@@ -81,6 +81,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsCalendarEn calendar = TranslationsCalendarEn.internal(_root);
 	late final TranslationsLaporanConfigEn laporanConfig = TranslationsLaporanConfigEn.internal(_root);
 	late final TranslationsKelasProgramEn kelasProgram = TranslationsKelasProgramEn.internal(_root);
+	late final TranslationsSuperAdminEn superAdmin = TranslationsSuperAdminEn.internal(_root);
+	late final TranslationsActivityLogEn activityLog = TranslationsActivityLogEn.internal(_root);
 }
 
 // Path: app
@@ -679,11 +681,20 @@ class TranslationsAddDataEn {
 	/// en: 'Saving $current / $total to server...'
 	String bulkStatusSaving({required Object current, required Object total}) => 'Saving ${current} / ${total} to server...';
 
-	/// en: 'Done! Success: $success, Failed: $fail (Failed data is usually due to NIP already registered)'
-	String bulkGuruFinished({required Object success, required Object fail}) => 'Done! Success: ${success}, Failed: ${fail}\n(Failed data is usually due to NIP already registered)';
+	/// en: 'Done!'
+	String get bulkFinishedTitle => 'Done!';
 
-	/// en: 'Done! Success: $success, Failed: $fail (Failed data is usually due to NIS already registered)'
-	String bulkSantriFinished({required Object success, required Object fail}) => 'Done! Success: ${success}, Failed: ${fail}\n(Failed data is usually due to NIS already registered)';
+	/// en: 'Success'
+	String get bulkSuccess => 'Success';
+
+	/// en: 'Failed'
+	String get bulkFailed => 'Failed';
+
+	/// en: 'Note: Data failed to save because the Employee Identification Number (NIP) is already registered in the system.'
+	String get bulkGuruFailNote => 'Note: Data failed to save because the Employee Identification Number (NIP) is already registered in the system.';
+
+	/// en: 'Note: Data failed to save because the Student Identification Number (NIS) is already registered in the system.'
+	String get bulkSantriFailNote => 'Note: Data failed to save because the Student Identification Number (NIS) is already registered in the system.';
 }
 
 // Path: addHalaqoh
@@ -1069,6 +1080,9 @@ class TranslationsRiwayatAbsensiEn {
 	/// en: 'Attendance History'
 	String get title => 'Attendance History';
 
+	/// en: 'Attendance Summary'
+	String get ringkasanKehadiran => 'Attendance Summary';
+
 	/// en: 'Halaqoh $halaqoh - Class $kelas'
 	String halaqohKelas({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
 
@@ -1300,6 +1314,15 @@ class TranslationsDetailAbsensiHariIniEn {
 	/// en: 'Present'
 	String get hadir => 'Present';
 
+	/// en: 'Present (Barcode Scan)'
+	String get hadirBarcode => 'Present (Barcode Scan)';
+
+	/// en: 'Present (No Card)'
+	String get hadirManual => 'Present (No Card)';
+
+	/// en: 'Present (Late)'
+	String get terlambat => 'Present (Late)';
+
 	/// en: 'Sick'
 	String get sakit => 'Sick';
 
@@ -1513,6 +1536,9 @@ class TranslationsRiwayatHafalanSantriEn {
 
 	/// en: 'Total Review'
 	String get totalMurajaah => 'Total Review';
+
+	/// en: 'TOTAL SESSIONS'
+	String get totalTatapMuka => 'TOTAL SESSIONS';
 
 	/// en: 'All Types'
 	String get semuaTipe => 'All Types';
@@ -2561,6 +2587,105 @@ class TranslationsKelasProgramEn {
 	String get aturKelasProgram => 'Manage classes & programs';
 }
 
+// Path: superAdmin
+class TranslationsSuperAdminEn {
+	TranslationsSuperAdminEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Select Access Mode'
+	String get pickerTitle => 'Select Access Mode';
+
+	/// en: 'Sign in as'
+	String get pickerSubtitle => 'Sign in as';
+
+	/// en: 'Access as Admin'
+	String get accessAsAdmin => 'Access as Admin';
+
+	/// en: 'Manage teachers, students, halaqoh, and memorization targets'
+	String get accessAsAdminDesc => 'Manage teachers, students, halaqoh, and memorization targets';
+
+	/// en: 'Access as Teacher'
+	String get accessAsGuru => 'Access as Teacher';
+
+	/// en: 'Select a teacher and access attendance & memorization features'
+	String get accessAsGuruDesc => 'Select a teacher and access attendance & memorization features';
+
+	/// en: 'Access as Parent'
+	String get accessAsWali => 'Access as Parent';
+
+	/// en: 'Select a student and view their progress & attendance'
+	String get accessAsWaliDesc => 'Select a student and view their progress & attendance';
+
+	/// en: 'View Activity Log'
+	String get viewActivityLog => 'View Activity Log';
+
+	/// en: 'Mode $role: $name'
+	String modeLabel({required Object role, required Object name}) => 'Mode ${role}: ${name}';
+
+	/// en: 'Exit'
+	String get exitMode => 'Exit';
+
+	/// en: 'Exit impersonation mode'
+	String get exitModeTooltip => 'Exit impersonation mode';
+
+	/// en: 'Select Teacher'
+	String get guruPickerTitle => 'Select Teacher';
+
+	/// en: 'Select Student'
+	String get santriPickerTitle => 'Select Student';
+
+	/// en: 'Search teacher...'
+	String get searchGuru => 'Search teacher...';
+
+	/// en: 'Search student...'
+	String get searchSantri => 'Search student...';
+}
+
+// Path: activityLog
+class TranslationsActivityLogEn {
+	TranslationsActivityLogEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Activity Log'
+	String get title => 'Activity Log';
+
+	/// en: 'Filter Role'
+	String get filterRole => 'Filter Role';
+
+	/// en: 'Filter Module'
+	String get filterModule => 'Filter Module';
+
+	/// en: 'Filter Action'
+	String get filterAction => 'Filter Action';
+
+	/// en: 'From Date'
+	String get filterDateFrom => 'From Date';
+
+	/// en: 'To Date'
+	String get filterDateTo => 'To Date';
+
+	/// en: 'All Roles'
+	String get allRoles => 'All Roles';
+
+	/// en: 'All Modules'
+	String get allModules => 'All Modules';
+
+	/// en: 'All Actions'
+	String get allActions => 'All Actions';
+
+	/// en: 'No activity logs yet'
+	String get empty => 'No activity logs yet';
+
+	/// en: 'Reset Filter'
+	String get resetFilter => 'Reset Filter';
+}
+
 // Path: absensi.barcodeScanner
 class TranslationsAbsensiBarcodeScannerEn {
 	TranslationsAbsensiBarcodeScannerEn.internal(this._root);
@@ -3046,8 +3171,11 @@ extension on Translations {
 			case 'addData.bulkErrorNoValidRows': return 'No valid data rows to upload!';
 			case 'addData.bulkStatusProcessing': return ({required Object count}) => 'Processing ${count} rows...';
 			case 'addData.bulkStatusSaving': return ({required Object current, required Object total}) => 'Saving ${current} / ${total} to server...';
-			case 'addData.bulkGuruFinished': return ({required Object success, required Object fail}) => 'Done! Success: ${success}, Failed: ${fail}\n(Failed data is usually due to NIP already registered)';
-			case 'addData.bulkSantriFinished': return ({required Object success, required Object fail}) => 'Done! Success: ${success}, Failed: ${fail}\n(Failed data is usually due to NIS already registered)';
+			case 'addData.bulkFinishedTitle': return 'Done!';
+			case 'addData.bulkSuccess': return 'Success';
+			case 'addData.bulkFailed': return 'Failed';
+			case 'addData.bulkGuruFailNote': return 'Note: Data failed to save because the Employee Identification Number (NIP) is already registered in the system.';
+			case 'addData.bulkSantriFailNote': return 'Note: Data failed to save because the Student Identification Number (NIS) is already registered in the system.';
 			case 'addHalaqoh.title': return 'Add New Halaqoh';
 			case 'addHalaqoh.namaHalaqoh': return 'Halaqoh Name';
 			case 'addHalaqoh.namaHalaqohHint': return 'Example: Halaqoh 7A';
@@ -3164,6 +3292,7 @@ extension on Translations {
 			case 'absensi.mulaiAbsensi.maghrib': return 'Maghrib';
 			case 'absensi.mulaiAbsensi.markAllPresent': return 'Mark All Present';
 			case 'riwayatAbsensi.title': return 'Attendance History';
+			case 'riwayatAbsensi.ringkasanKehadiran': return 'Attendance Summary';
 			case 'riwayatAbsensi.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
 			case 'riwayatAbsensi.hadir': return 'PRESENT';
 			case 'riwayatAbsensi.sakit': return 'SICK';
@@ -3238,6 +3367,9 @@ extension on Translations {
 			case 'absensiHalaqoh.swipeHint': return 'Swipe date row left/right to view daily data';
 			case 'detailAbsensiHariIni.title': return 'Today\'s Attendance Detail';
 			case 'detailAbsensiHariIni.hadir': return 'Present';
+			case 'detailAbsensiHariIni.hadirBarcode': return 'Present (Barcode Scan)';
+			case 'detailAbsensiHariIni.hadirManual': return 'Present (No Card)';
+			case 'detailAbsensiHariIni.terlambat': return 'Present (Late)';
 			case 'detailAbsensiHariIni.sakit': return 'Sick';
 			case 'detailAbsensiHariIni.izin': return 'Excused';
 			case 'detailAbsensiHariIni.alfa': return 'Absent';
@@ -3308,6 +3440,7 @@ extension on Translations {
 			case 'riwayatHafalanSantri.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
 			case 'riwayatHafalanSantri.totalHafalanBaru': return 'Total New Memorization';
 			case 'riwayatHafalanSantri.totalMurajaah': return 'Total Review';
+			case 'riwayatHafalanSantri.totalTatapMuka': return 'TOTAL SESSIONS';
 			case 'riwayatHafalanSantri.semuaTipe': return 'All Types';
 			case 'riwayatHafalanSantri.bukaMutabaah': return 'OPEN MUTABA\'AH';
 			case 'riwayatHafalanSantri.hafalanBaru': return 'New Memorization';
@@ -3696,6 +3829,33 @@ extension on Translations {
 			case 'kelasProgram.hapusProgramConfirm': return ({required Object nama, required Object id}) => 'Are you sure you want to delete program "${nama}" (${id})? This action cannot be undone.';
 			case 'kelasProgram.gagalMenghapusProgram': return 'Failed to delete program';
 			case 'kelasProgram.aturKelasProgram': return 'Manage classes & programs';
+			case 'superAdmin.pickerTitle': return 'Select Access Mode';
+			case 'superAdmin.pickerSubtitle': return 'Sign in as';
+			case 'superAdmin.accessAsAdmin': return 'Access as Admin';
+			case 'superAdmin.accessAsAdminDesc': return 'Manage teachers, students, halaqoh, and memorization targets';
+			case 'superAdmin.accessAsGuru': return 'Access as Teacher';
+			case 'superAdmin.accessAsGuruDesc': return 'Select a teacher and access attendance & memorization features';
+			case 'superAdmin.accessAsWali': return 'Access as Parent';
+			case 'superAdmin.accessAsWaliDesc': return 'Select a student and view their progress & attendance';
+			case 'superAdmin.viewActivityLog': return 'View Activity Log';
+			case 'superAdmin.modeLabel': return ({required Object role, required Object name}) => 'Mode ${role}: ${name}';
+			case 'superAdmin.exitMode': return 'Exit';
+			case 'superAdmin.exitModeTooltip': return 'Exit impersonation mode';
+			case 'superAdmin.guruPickerTitle': return 'Select Teacher';
+			case 'superAdmin.santriPickerTitle': return 'Select Student';
+			case 'superAdmin.searchGuru': return 'Search teacher...';
+			case 'superAdmin.searchSantri': return 'Search student...';
+			case 'activityLog.title': return 'Activity Log';
+			case 'activityLog.filterRole': return 'Filter Role';
+			case 'activityLog.filterModule': return 'Filter Module';
+			case 'activityLog.filterAction': return 'Filter Action';
+			case 'activityLog.filterDateFrom': return 'From Date';
+			case 'activityLog.filterDateTo': return 'To Date';
+			case 'activityLog.allRoles': return 'All Roles';
+			case 'activityLog.allModules': return 'All Modules';
+			case 'activityLog.allActions': return 'All Actions';
+			case 'activityLog.empty': return 'No activity logs yet';
+			case 'activityLog.resetFilter': return 'Reset Filter';
 			default: return null;
 		}
 	}

@@ -373,6 +373,7 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
         children: [
           Expanded(
             child: CustomDropdown<String>(
+              key: ValueKey(kelasOptions),
               hintText: t.addData.kelas,
               items: kelasOptions,
               initialItem: kelasOptions.contains(_filterKelas) ? _filterKelas : null,
@@ -413,6 +414,7 @@ class _SelectSantriScreenState extends State<SelectSantriScreen> {
           SizedBox(width: 10.w),
           Expanded(
             child: CustomDropdown<String>(
+              key: ValueKey(programOptions),
               hintText: t.addHalaqoh.program,
               items: programOptions,
               initialItem: programOptions.contains(_filterProgram) ? _filterProgram : null,

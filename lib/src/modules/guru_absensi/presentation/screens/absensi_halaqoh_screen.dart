@@ -102,7 +102,12 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
   String _statusToCode(String status) {
     switch (status) {
       case 'hadir':
+      case 'hadir_barcode':
         return 'H';
+      case 'hadir_manual':
+        return 'HT';
+      case 'terlambat':
+        return 'T';
       case 'sakit':
         return 'S';
       case 'izin':
@@ -477,9 +482,9 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                     ),
                   ),
 
-                  // ── Footer: legend + download ──
+                  // ── Footer: actions ──
                   Container(
-                    padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
+                    padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 16.h),
                     decoration: BoxDecoration(
                       color: colors.surface,
                       border: Border(
@@ -489,42 +494,16 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _legendDot(
-                              colors.primary,
-                              t.absensiHalaqoh.hadir,
-                              colors,
-                            ),
-                            SizedBox(width: 16.w),
-                            _legendDot(
-                              colors.yellow,
-                              t.absensiHalaqoh.sakit,
-                              colors,
-                            ),
-                            SizedBox(width: 16.w),
-                            _legendDot(
-                              colors.blue,
-                              t.absensiHalaqoh.izin,
-                              colors,
-                            ),
-                            SizedBox(width: 16.w),
-                            _legendDot(
-                              colors.red,
-                              t.absensiHalaqoh.alfa,
-                              colors,
-                            ),
-                          ],
+                        CustomOutlinedButton(
+                          width: double.infinity,
+                          onPressed: () {
+                            _showKeteranganDialog(context, colors, effectiveProgramType);
+                          },
+                          icon: Icons.info_outline,
+                          label: 'Lihat Keterangan',
+                          borderRadius: 24.r,
                         ),
-                        SizedBox(height: 10.h),
-                        Wrap(
-                          spacing: 12.w,
-                          runSpacing: 6.h,
-                          alignment: WrapAlignment.center,
-                          children: _buildSessionLegend(colors, effectiveProgramType),
-                        ),
-                        SizedBox(height: 14.h),
+                        SizedBox(height: 12.h),
                         PrimaryButton(
                           width: double.infinity,
                           onPressed: () {
@@ -617,6 +596,12 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
       case 'H':
         dotColor = colors.primary;
         break;
+      case 'HT':
+        dotColor = colors.green;
+        break;
+      case 'T':
+        dotColor = const Color(0xFFF3722C);
+        break;
       case 'S':
         dotColor = colors.yellow;
         break;
@@ -641,20 +626,152 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 10.w,
-          height: 10.w,
+          width: 12.w,
+          height: 12.w,
           decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
-        SizedBox(width: 4.w),
+        SizedBox(width: 10.w),
         Text(
           label,
           style: TextStyle(
-            fontSize: 11.sp,
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w500,
             color: colors.textPrimary,
             fontFamily: 'Poppins',
           ),
         ),
       ],
+    );
+  }
+
+  void _showKeteranganDialog(BuildContext context, AppColorSet colors, String effectiveProgramType) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: colors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
+          child: Padding(
+            padding: EdgeInsets.all(20.w),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      t.riwayatAbsensi.keterangan,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: colors.textPrimary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                      color: colors.textSecondary,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16.h),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Card 1: STATUS ABSENSI
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            color: colors.background,
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(
+                              color: colors.border.withValues(alpha: 0.8),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'STATUS ABSENSI',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.textSecondary,
+                                  fontFamily: 'Poppins',
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              SizedBox(height: 14.h),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _legendDot(colors.primary, t.detailAbsensiHariIni.hadirBarcode, colors),
+                                  SizedBox(height: 12.h),
+                                  _legendDot(colors.green, t.detailAbsensiHariIni.hadirManual, colors),
+                                  SizedBox(height: 12.h),
+                                  _legendDot(const Color(0xFFF3722C), t.detailAbsensiHariIni.terlambat, colors),
+                                  SizedBox(height: 12.h),
+                                  _legendDot(colors.yellow, t.absensiHalaqoh.sakit, colors),
+                                  SizedBox(height: 12.h),
+                                  _legendDot(colors.blue, t.absensiHalaqoh.izin, colors),
+                                  SizedBox(height: 12.h),
+                                  _legendDot(colors.red, t.absensiHalaqoh.alfa, colors),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                        // Card 2: SESI
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            color: colors.background,
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(
+                              color: colors.border.withValues(alpha: 0.8),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                'SESI',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.textSecondary,
+                                  fontFamily: 'Poppins',
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              SizedBox(height: 14.h),
+                              Wrap(
+                                spacing: 16.w,
+                                runSpacing: 8.h,
+                                alignment: WrapAlignment.center,
+                                children: _buildSessionLegend(colors, effectiveProgramType),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

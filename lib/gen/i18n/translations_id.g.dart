@@ -80,6 +80,8 @@ class TranslationsId extends Translations {
 	@override late final _TranslationsCalendarId calendar = _TranslationsCalendarId._(_root);
 	@override late final _TranslationsLaporanConfigId laporanConfig = _TranslationsLaporanConfigId._(_root);
 	@override late final _TranslationsKelasProgramId kelasProgram = _TranslationsKelasProgramId._(_root);
+	@override late final _TranslationsSuperAdminId superAdmin = _TranslationsSuperAdminId._(_root);
+	@override late final _TranslationsActivityLogId activityLog = _TranslationsActivityLogId._(_root);
 }
 
 // Path: app
@@ -345,8 +347,11 @@ class _TranslationsAddDataId extends TranslationsAddDataEn {
 	@override String get bulkErrorNoValidRows => 'Tidak ada baris data yang valid untuk diunggah!';
 	@override String bulkStatusProcessing({required Object count}) => 'Memproses ${count} baris...';
 	@override String bulkStatusSaving({required Object current, required Object total}) => 'Menyimpan ${current} / ${total} ke server...';
-	@override String bulkGuruFinished({required Object success, required Object fail}) => 'Selesai! Sukses: ${success}, Gagal: ${fail}\n(Data Gagal biasanya karena NIP sudah terdaftar)';
-	@override String bulkSantriFinished({required Object success, required Object fail}) => 'Selesai! Sukses: ${success}, Gagal: ${fail}\n(Data Gagal biasanya karena NIS sudah terdaftar)';
+	@override String get bulkFinishedTitle => 'Selesai!';
+	@override String get bulkSuccess => 'Sukses';
+	@override String get bulkFailed => 'Gagal';
+	@override String get bulkGuruFailNote => 'Catatan: Data gagal disimpan karena Nomor Induk Pegawai (NIP) telah terdaftar di sistem.';
+	@override String get bulkSantriFailNote => 'Catatan: Data gagal disimpan karena Nomor Induk Siswa (NIS) telah terdaftar di sistem.';
 }
 
 // Path: addHalaqoh
@@ -524,6 +529,7 @@ class _TranslationsRiwayatAbsensiId extends TranslationsRiwayatAbsensiEn {
 
 	// Translations
 	@override String get title => 'Riwayat Absensi';
+	@override String get ringkasanKehadiran => 'Ringkasan Kehadiran';
 	@override String halaqohKelas({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
 	@override String get hadir => 'HADIR';
 	@override String get sakit => 'SAKIT';
@@ -633,6 +639,9 @@ class _TranslationsDetailAbsensiHariIniId extends TranslationsDetailAbsensiHariI
 	// Translations
 	@override String get title => 'Detail Absensi Hari Ini';
 	@override String get hadir => 'Hadir';
+	@override String get hadirBarcode => 'Hadir (Scan Barcode)';
+	@override String get hadirManual => 'Hadir (Tanpa Kartu)';
+	@override String get terlambat => 'Hadir (Terlambat)';
 	@override String get sakit => 'Sakit';
 	@override String get izin => 'Izin';
 	@override String get alfa => 'Alfa';
@@ -730,6 +739,7 @@ class _TranslationsRiwayatHafalanSantriId extends TranslationsRiwayatHafalanSant
 	@override String halaqohKelas({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
 	@override String get totalHafalanBaru => 'Total Hafalan Baru';
 	@override String get totalMurajaah => 'Total Muraja\'ah';
+	@override String get totalTatapMuka => 'TOTAL TATAP MUKA';
 	@override String get semuaTipe => 'Semua Tipe';
 	@override String get bukaMutabaah => 'BUKA MUTABA\'AH';
 	@override String get hafalanBaru => 'Hafalan Baru';
@@ -1213,6 +1223,51 @@ class _TranslationsKelasProgramId extends TranslationsKelasProgramEn {
 	@override String get aturKelasProgram => 'Atur kelas & program';
 }
 
+// Path: superAdmin
+class _TranslationsSuperAdminId extends TranslationsSuperAdminEn {
+	_TranslationsSuperAdminId._(TranslationsId root) : this._root = root, super.internal(root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get pickerTitle => 'Pilih Mode Akses';
+	@override String get pickerSubtitle => 'Masuk sebagai';
+	@override String get accessAsAdmin => 'Akses sebagai Admin';
+	@override String get accessAsAdminDesc => 'Kelola guru, santri, halaqoh, dan target hafalan';
+	@override String get accessAsGuru => 'Akses sebagai Guru';
+	@override String get accessAsGuruDesc => 'Pilih guru dan masuk ke fitur absensi & hafalan';
+	@override String get accessAsWali => 'Akses sebagai Wali Santri';
+	@override String get accessAsWaliDesc => 'Pilih santri dan lihat progress & absensi mereka';
+	@override String get viewActivityLog => 'Lihat Log Aktivitas';
+	@override String modeLabel({required Object role, required Object name}) => 'Mode ${role}: ${name}';
+	@override String get exitMode => 'Keluar';
+	@override String get exitModeTooltip => 'Keluar dari mode impersonasi';
+	@override String get guruPickerTitle => 'Pilih Guru';
+	@override String get santriPickerTitle => 'Pilih Santri';
+	@override String get searchGuru => 'Cari guru...';
+	@override String get searchSantri => 'Cari santri...';
+}
+
+// Path: activityLog
+class _TranslationsActivityLogId extends TranslationsActivityLogEn {
+	_TranslationsActivityLogId._(TranslationsId root) : this._root = root, super.internal(root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Log Aktivitas';
+	@override String get filterRole => 'Filter Role';
+	@override String get filterModule => 'Filter Modul';
+	@override String get filterAction => 'Filter Aksi';
+	@override String get filterDateFrom => 'Dari Tanggal';
+	@override String get filterDateTo => 'Sampai Tanggal';
+	@override String get allRoles => 'Semua Role';
+	@override String get allModules => 'Semua Modul';
+	@override String get allActions => 'Semua Aksi';
+	@override String get empty => 'Belum ada log aktivitas';
+	@override String get resetFilter => 'Reset Filter';
+}
+
 // Path: absensi.barcodeScanner
 class _TranslationsAbsensiBarcodeScannerId extends TranslationsAbsensiBarcodeScannerEn {
 	_TranslationsAbsensiBarcodeScannerId._(TranslationsId root) : this._root = root, super.internal(root);
@@ -1519,8 +1574,11 @@ extension on TranslationsId {
 			case 'addData.bulkErrorNoValidRows': return 'Tidak ada baris data yang valid untuk diunggah!';
 			case 'addData.bulkStatusProcessing': return ({required Object count}) => 'Memproses ${count} baris...';
 			case 'addData.bulkStatusSaving': return ({required Object current, required Object total}) => 'Menyimpan ${current} / ${total} ke server...';
-			case 'addData.bulkGuruFinished': return ({required Object success, required Object fail}) => 'Selesai! Sukses: ${success}, Gagal: ${fail}\n(Data Gagal biasanya karena NIP sudah terdaftar)';
-			case 'addData.bulkSantriFinished': return ({required Object success, required Object fail}) => 'Selesai! Sukses: ${success}, Gagal: ${fail}\n(Data Gagal biasanya karena NIS sudah terdaftar)';
+			case 'addData.bulkFinishedTitle': return 'Selesai!';
+			case 'addData.bulkSuccess': return 'Sukses';
+			case 'addData.bulkFailed': return 'Gagal';
+			case 'addData.bulkGuruFailNote': return 'Catatan: Data gagal disimpan karena Nomor Induk Pegawai (NIP) telah terdaftar di sistem.';
+			case 'addData.bulkSantriFailNote': return 'Catatan: Data gagal disimpan karena Nomor Induk Siswa (NIS) telah terdaftar di sistem.';
 			case 'addHalaqoh.title': return 'Tambah Halaqoh Baru';
 			case 'addHalaqoh.namaHalaqoh': return 'Nama Halaqoh';
 			case 'addHalaqoh.namaHalaqohHint': return 'Contoh: Halaqoh 7A';
@@ -1637,6 +1695,7 @@ extension on TranslationsId {
 			case 'absensi.mulaiAbsensi.maghrib': return 'Maghrib';
 			case 'absensi.mulaiAbsensi.markAllPresent': return 'Tandai Semua Hadir';
 			case 'riwayatAbsensi.title': return 'Riwayat Absensi';
+			case 'riwayatAbsensi.ringkasanKehadiran': return 'Ringkasan Kehadiran';
 			case 'riwayatAbsensi.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
 			case 'riwayatAbsensi.hadir': return 'HADIR';
 			case 'riwayatAbsensi.sakit': return 'SAKIT';
@@ -1711,6 +1770,9 @@ extension on TranslationsId {
 			case 'absensiHalaqoh.swipeHint': return 'Geser baris tanggal ke kiri/kanan untuk melihat data per hari';
 			case 'detailAbsensiHariIni.title': return 'Detail Absensi Hari Ini';
 			case 'detailAbsensiHariIni.hadir': return 'Hadir';
+			case 'detailAbsensiHariIni.hadirBarcode': return 'Hadir (Scan Barcode)';
+			case 'detailAbsensiHariIni.hadirManual': return 'Hadir (Tanpa Kartu)';
+			case 'detailAbsensiHariIni.terlambat': return 'Hadir (Terlambat)';
 			case 'detailAbsensiHariIni.sakit': return 'Sakit';
 			case 'detailAbsensiHariIni.izin': return 'Izin';
 			case 'detailAbsensiHariIni.alfa': return 'Alfa';
@@ -1781,6 +1843,7 @@ extension on TranslationsId {
 			case 'riwayatHafalanSantri.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
 			case 'riwayatHafalanSantri.totalHafalanBaru': return 'Total Hafalan Baru';
 			case 'riwayatHafalanSantri.totalMurajaah': return 'Total Muraja\'ah';
+			case 'riwayatHafalanSantri.totalTatapMuka': return 'TOTAL TATAP MUKA';
 			case 'riwayatHafalanSantri.semuaTipe': return 'Semua Tipe';
 			case 'riwayatHafalanSantri.bukaMutabaah': return 'BUKA MUTABA\'AH';
 			case 'riwayatHafalanSantri.hafalanBaru': return 'Hafalan Baru';
@@ -2169,6 +2232,33 @@ extension on TranslationsId {
 			case 'kelasProgram.hapusProgramConfirm': return ({required Object nama, required Object id}) => 'Apakah Anda yakin ingin menghapus program "${nama}" (${id})? Tindakan ini tidak dapat dibatalkan.';
 			case 'kelasProgram.gagalMenghapusProgram': return 'Gagal menghapus program';
 			case 'kelasProgram.aturKelasProgram': return 'Atur kelas & program';
+			case 'superAdmin.pickerTitle': return 'Pilih Mode Akses';
+			case 'superAdmin.pickerSubtitle': return 'Masuk sebagai';
+			case 'superAdmin.accessAsAdmin': return 'Akses sebagai Admin';
+			case 'superAdmin.accessAsAdminDesc': return 'Kelola guru, santri, halaqoh, dan target hafalan';
+			case 'superAdmin.accessAsGuru': return 'Akses sebagai Guru';
+			case 'superAdmin.accessAsGuruDesc': return 'Pilih guru dan masuk ke fitur absensi & hafalan';
+			case 'superAdmin.accessAsWali': return 'Akses sebagai Wali Santri';
+			case 'superAdmin.accessAsWaliDesc': return 'Pilih santri dan lihat progress & absensi mereka';
+			case 'superAdmin.viewActivityLog': return 'Lihat Log Aktivitas';
+			case 'superAdmin.modeLabel': return ({required Object role, required Object name}) => 'Mode ${role}: ${name}';
+			case 'superAdmin.exitMode': return 'Keluar';
+			case 'superAdmin.exitModeTooltip': return 'Keluar dari mode impersonasi';
+			case 'superAdmin.guruPickerTitle': return 'Pilih Guru';
+			case 'superAdmin.santriPickerTitle': return 'Pilih Santri';
+			case 'superAdmin.searchGuru': return 'Cari guru...';
+			case 'superAdmin.searchSantri': return 'Cari santri...';
+			case 'activityLog.title': return 'Log Aktivitas';
+			case 'activityLog.filterRole': return 'Filter Role';
+			case 'activityLog.filterModule': return 'Filter Modul';
+			case 'activityLog.filterAction': return 'Filter Aksi';
+			case 'activityLog.filterDateFrom': return 'Dari Tanggal';
+			case 'activityLog.filterDateTo': return 'Sampai Tanggal';
+			case 'activityLog.allRoles': return 'Semua Role';
+			case 'activityLog.allModules': return 'Semua Modul';
+			case 'activityLog.allActions': return 'Semua Aksi';
+			case 'activityLog.empty': return 'Belum ada log aktivitas';
+			case 'activityLog.resetFilter': return 'Reset Filter';
 			default: return null;
 		}
 	}

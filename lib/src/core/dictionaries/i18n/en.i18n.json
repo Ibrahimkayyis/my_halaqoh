@@ -186,8 +186,11 @@
     "bulkErrorNoValidRows": "No valid data rows to upload!",
     "bulkStatusProcessing": "Processing $count rows...",
     "bulkStatusSaving": "Saving $current / $total to server...",
-    "bulkGuruFinished": "Done! Success: $success, Failed: $fail\n(Failed data is usually due to NIP already registered)",
-    "bulkSantriFinished": "Done! Success: $success, Failed: $fail\n(Failed data is usually due to NIS already registered)"
+    "bulkFinishedTitle": "Done!",
+    "bulkSuccess": "Success",
+    "bulkFailed": "Failed",
+    "bulkGuruFailNote": "Note: Data failed to save because the Employee Identification Number (NIP) is already registered in the system.",
+    "bulkSantriFailNote": "Note: Data failed to save because the Student Identification Number (NIS) is already registered in the system."
   },
   "addHalaqoh": {
     "title": "Add New Halaqoh",
@@ -324,6 +327,7 @@
   },
   "riwayatAbsensi": {
     "title": "Attendance History",
+    "ringkasanKehadiran": "Attendance Summary",
     "halaqohKelas": "Halaqoh $halaqoh - Class $kelas",
     "hadir": "PRESENT",
     "sakit": "SICK",
@@ -394,6 +398,9 @@
   "detailAbsensiHariIni": {
     "title": "Today's Attendance Detail",
     "hadir": "Present",
+    "hadirBarcode": "Present (Barcode Scan)",
+    "hadirManual": "Present (No Card)",
+    "terlambat": "Present (Late)",
     "sakit": "Sick",
     "izin": "Excused",
     "alfa": "Absent",
@@ -467,6 +474,7 @@
     "halaqohKelas": "Halaqoh $halaqoh - Class $kelas",
     "totalHafalanBaru": "Total New Memorization",
     "totalMurajaah": "Total Review",
+    "totalTatapMuka": "TOTAL SESSIONS",
     "semuaTipe": "All Types",
     "bukaMutabaah": "OPEN MUTABA'AH",
     "hafalanBaru": "New Memorization",

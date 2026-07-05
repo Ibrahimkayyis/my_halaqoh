@@ -227,8 +227,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
       setState(() {
         _isProcessing = false;
         _currentRow = _totalRows;
-        _statusMessage =
-            t.addData.bulkGuruFinished(success: _successCount, fail: _failCount);
+        _statusMessage = '';
       });
     }
   }
@@ -304,8 +303,7 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
       setState(() {
         _isProcessing = false;
         _currentRow = _totalRows;
-        _statusMessage =
-            t.addData.bulkSantriFinished(success: _successCount, fail: _failCount);
+        _statusMessage = '';
       });
     }
   }
@@ -427,22 +425,119 @@ class _BulkUploadDialogState extends State<BulkUploadDialog> {
                   SizedBox(height: 4.h),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: Text(
-                      _statusMessage.isEmpty
-                          ? t.addData.bulkFormat
-                          : _statusMessage,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: _statusMessage.isNotEmpty ? 13.sp : 12.sp,
-                        fontWeight: _statusMessage.isNotEmpty
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                        color: _statusMessage.isNotEmpty
-                            ? colors.primary
-                            : colors.textSecondary,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
+                    child: isDone
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                t.addData.bulkFinishedTitle,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.textPrimary,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              SizedBox(height: 12.h),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                      vertical: 6.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colors.success.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(20.r),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.check_circle_outline,
+                                          color: colors.success,
+                                          size: 16.sp,
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          '${t.addData.bulkSuccess}: $_successCount',
+                                          style: TextStyle(
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: colors.success,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                      vertical: 6.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colors.error.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(20.r),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline,
+                                          color: colors.error,
+                                          size: 16.sp,
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          '${t.addData.bulkFailed}: $_failCount',
+                                          style: TextStyle(
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: colors.error,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (_failCount > 0) ...[
+                                SizedBox(height: 14.h),
+                                Text(
+                                  widget.importType == BulkImportType.guru
+                                      ? t.addData.bulkGuruFailNote
+                                      : t.addData.bulkSantriFailNote,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: colors.textSecondary,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                              ],
+                            ],
+                          )
+                        : Text(
+                            _statusMessage.isEmpty
+                                ? t.addData.bulkFormat
+                                : _statusMessage,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: _statusMessage.isNotEmpty ? 13.sp : 12.sp,
+                              fontWeight: _statusMessage.isNotEmpty
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              color: _statusMessage.isNotEmpty
+                                  ? colors.primary
+                                  : colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
                   ),
                   if (_isProcessing) ...[
                     SizedBox(height: 16.h),

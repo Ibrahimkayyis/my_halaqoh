@@ -279,6 +279,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                             _buildLabel(colors, t.addHalaqoh.kelas),
                             SizedBox(height: 8.h),
                             CustomDropdown<String>(
+                              key: ValueKey(kelasList),
                               hintText: t.addHalaqoh.kelasHint,
                               items: kelasList,
                               initialItem: kelasList.contains(_selectedKelas) ? _selectedKelas : null,
@@ -301,6 +302,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                             _buildLabel(colors, t.addHalaqoh.program),
                             SizedBox(height: 8.h),
                             CustomDropdown<String>(
+                              key: ValueKey(programList),
                               hintText: t.addHalaqoh.programHint,
                               items: programList,
                               initialItem: programList.contains(_selectedProgram) ? _selectedProgram : null,
@@ -350,6 +352,7 @@ class _AddHalaqohScreenState extends State<AddHalaqohScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CustomDropdown<String>.search(
+                            key: ValueKey(guruNames),
                             hintText: t.addHalaqoh.pengampuHint,
                             items: guruNames,
                             initialItem: _selectedGuru?.nama,

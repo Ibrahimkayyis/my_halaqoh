@@ -345,8 +345,11 @@ class _TranslationsAddDataId implements TranslationsAddDataEn {
 	@override String get bulkErrorNoValidRows => 'Tidak ada baris data yang valid untuk diunggah!';
 	@override String bulkStatusProcessing({required Object count}) => 'Memproses ${count} baris...';
 	@override String bulkStatusSaving({required Object current, required Object total}) => 'Menyimpan ${current} / ${total} ke server...';
-	@override String bulkGuruFinished({required Object success, required Object fail}) => 'Selesai! Sukses: ${success}, Gagal: ${fail}\n(Data Gagal biasanya karena NIP sudah terdaftar)';
-	@override String bulkSantriFinished({required Object success, required Object fail}) => 'Selesai! Sukses: ${success}, Gagal: ${fail}\n(Data Gagal biasanya karena NIS sudah terdaftar)';
+	@override String get bulkFinishedTitle => 'Selesai!';
+	@override String get bulkSuccess => 'Sukses';
+	@override String get bulkFailed => 'Gagal';
+	@override String get bulkGuruFailNote => 'Catatan: Data yang gagal disimpan kemungkinan disebabkan oleh Nomor Induk Pegawai (NIP) yang sudah terdaftar di sistem.';
+	@override String get bulkSantriFailNote => 'Catatan: Data yang gagal disimpan kemungkinan disebabkan oleh Nomor Induk Siswa (NIS) yang sudah terdaftar di sistem.';
 }
 
 // Path: addHalaqoh
@@ -1564,8 +1567,11 @@ extension on TranslationsId {
 			case 'addData.bulkErrorNoValidRows': return 'Tidak ada baris data yang valid untuk diunggah!';
 			case 'addData.bulkStatusProcessing': return ({required Object count}) => 'Memproses ${count} baris...';
 			case 'addData.bulkStatusSaving': return ({required Object current, required Object total}) => 'Menyimpan ${current} / ${total} ke server...';
-			case 'addData.bulkGuruFinished': return ({required Object success, required Object fail}) => 'Selesai! Sukses: ${success}, Gagal: ${fail}\n(Data Gagal biasanya karena NIP sudah terdaftar)';
-			case 'addData.bulkSantriFinished': return ({required Object success, required Object fail}) => 'Selesai! Sukses: ${success}, Gagal: ${fail}\n(Data Gagal biasanya karena NIS sudah terdaftar)';
+			case 'addData.bulkFinishedTitle': return 'Selesai!';
+			case 'addData.bulkSuccess': return 'Sukses';
+			case 'addData.bulkFailed': return 'Gagal';
+			case 'addData.bulkGuruFailNote': return 'Catatan: Data yang gagal disimpan kemungkinan disebabkan oleh Nomor Induk Pegawai (NIP) yang sudah terdaftar di sistem.';
+			case 'addData.bulkSantriFailNote': return 'Catatan: Data yang gagal disimpan kemungkinan disebabkan oleh Nomor Induk Siswa (NIS) yang sudah terdaftar di sistem.';
 			case 'addHalaqoh.title': return 'Tambah Halaqoh Baru';
 			case 'addHalaqoh.namaHalaqoh': return 'Nama Halaqoh';
 			case 'addHalaqoh.namaHalaqohHint': return 'Contoh: Halaqoh 7A';

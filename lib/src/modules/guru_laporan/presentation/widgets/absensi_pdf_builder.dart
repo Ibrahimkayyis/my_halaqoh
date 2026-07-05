@@ -43,6 +43,8 @@ class AbsensiPdfBuilder {
   static final _yellowBg = PdfColor.fromHex('#FFFBEB');
   static final _blueBg = PdfColor.fromHex('#EFF6FF');
   static final _redBg = PdfColor.fromHex('#FEF2F2');
+  static final _orange = PdfColor.fromHex('#F3722C');
+  static final _orangeBg = PdfColor.fromHex('#FFF5F0');
   static final _white = PdfColors.white;
 
   // ─── Session definitions ───────────────────────────────────────────────────
@@ -69,7 +71,11 @@ class AbsensiPdfBuilder {
   static String _statusCode(String status) {
     switch (status.trim().toLowerCase()) {
       case 'hadir':
+      case 'hadir_barcode':
+      case 'hadir_manual':
         return t.laporanConfig.pdf.presentCode;
+      case 'terlambat':
+        return 'T';
       case 'sakit':
         return t.laporanConfig.pdf.sickCode;
       case 'izin':
@@ -83,6 +89,7 @@ class AbsensiPdfBuilder {
 
   static PdfColor _codeColor(String code) {
     if (code == t.laporanConfig.pdf.presentCode) return _green;
+    if (code == 'T') return _orange;
     if (code == t.laporanConfig.pdf.sickCode) return _yellow;
     if (code == t.laporanConfig.pdf.permitCode) return _blue;
     if (code == t.laporanConfig.pdf.absentCode) return _red;
@@ -91,6 +98,7 @@ class AbsensiPdfBuilder {
 
   static PdfColor _codeBg(String code) {
     if (code == t.laporanConfig.pdf.presentCode) return _greenBg;
+    if (code == 'T') return _orangeBg;
     if (code == t.laporanConfig.pdf.sickCode) return _yellowBg;
     if (code == t.laporanConfig.pdf.permitCode) return _blueBg;
     if (code == t.laporanConfig.pdf.absentCode) return _redBg;
@@ -144,7 +152,7 @@ class AbsensiPdfBuilder {
     int hadir = 0, sakit = 0, izin = 0, alfa = 0;
     for (final day in byDay.values) {
       for (final code in day.values) {
-        if (code == t.laporanConfig.pdf.presentCode) {
+        if (code == t.laporanConfig.pdf.presentCode || code == 'T') {
           hadir++;
         } else if (code == t.laporanConfig.pdf.sickCode) {
           sakit++;
