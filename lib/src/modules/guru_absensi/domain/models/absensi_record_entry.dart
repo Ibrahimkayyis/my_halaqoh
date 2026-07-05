@@ -16,7 +16,7 @@ abstract class AbsensiRecordEntry with _$AbsensiRecordEntry {
     /// Student full name (denormalized for offline display)
     required String nama,
 
-    /// Attendance status: 'hadir', 'sakit', 'izin', 'alfa'
+    /// Attendance status: 'hadir_barcode', 'hadir_manual', 'terlambat', 'sakit', 'izin', 'alfa', 'hadir'
     required String status,
   }) = _AbsensiRecordEntry;
 

@@ -143,6 +143,9 @@ class AbsensiHalaqohPdfBuilder {
         final stats = result[santriId]!;
         switch (entry.status.trim().toLowerCase()) {
           case 'hadir':
+          case 'hadir_barcode':
+          case 'hadir_manual':
+          case 'terlambat':
             stats.hadir++;
             break;
           case 'sakit':

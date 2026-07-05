@@ -404,27 +404,10 @@ class _WaliSantriRiwayatHafalanScreenState
 
                           // Stats cards — IntrinsicHeight memastikan kedua card
                           // sama tingginya meski label berbeda panjang.
-                          IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Expanded(
-                                  child: _buildStatCard(
-                                    '$totalBaru',
-                                    t.riwayatHafalanSantri.totalHafalanBaru,
-                                    colors,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Expanded(
-                                  child: _buildStatCard(
-                                    '$totalMurajaah',
-                                    t.riwayatHafalanSantri.totalMurajaah,
-                                    colors,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          _buildCombinedStatCard(
+                            totalBaru,
+                            totalMurajaah,
+                            colors,
                           ),
                           SizedBox(height: 16.h),
 
@@ -590,38 +573,120 @@ class _WaliSantriRiwayatHafalanScreenState
     );
   }
 
-  Widget _buildStatCard(String value, String label, AppColorSet colors) {
+  Widget _buildCombinedStatCard(
+    int totalBaru,
+    int totalMurajaah,
+    AppColorSet colors,
+  ) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 12.w),
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: colors.border, width: 1),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: colors.border.withValues(alpha: 0.5),
+          width: 1,
+        ),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            value,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 28.sp,
-              fontWeight: FontWeight.w800,
-              color: colors.primary,
-              fontFamily: 'Poppins',
+          // Header Chip
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 6.h,
+            ),
+            decoration: BoxDecoration(
+              color: colors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.analytics_outlined,
+                  size: 16.sp,
+                  color: colors.primary,
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  t.riwayatHafalanSantri.totalTatapMuka,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: colors.primary,
+                    fontFamily: 'Poppins',
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: 2.h),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w500,
-              color: colors.textSecondary,
-              fontFamily: 'Poppins',
-            ),
+          SizedBox(height: 20.h),
+          // Stats Row
+          Row(
+            children: [
+              // Hafalan Baru
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      '$totalBaru',
+                      style: TextStyle(
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.w800,
+                        color: colors.primary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      t.riwayatHafalanSantri.hafalanBaru,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: colors.textSecondary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Divider
+              Container(
+                height: 36.h,
+                width: 1,
+                color: colors.border.withValues(alpha: 0.5),
+              ),
+              // Muraja'ah
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      '$totalMurajaah',
+                      style: TextStyle(
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFFF3722C), // Orange
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      t.riwayatHafalanSantri.murajaah,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: colors.textSecondary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

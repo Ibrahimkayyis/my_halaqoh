@@ -186,8 +186,11 @@
     "bulkErrorNoValidRows": "Tidak ada baris data yang valid untuk diunggah!",
     "bulkStatusProcessing": "Memproses $count baris...",
     "bulkStatusSaving": "Menyimpan $current / $total ke server...",
-    "bulkGuruFinished": "Selesai! Sukses: $success, Gagal: $fail\n(Data Gagal biasanya karena NIP sudah terdaftar)",
-    "bulkSantriFinished": "Selesai! Sukses: $success, Gagal: $fail\n(Data Gagal biasanya karena NIS sudah terdaftar)"
+    "bulkFinishedTitle": "Selesai!",
+    "bulkSuccess": "Sukses",
+    "bulkFailed": "Gagal",
+    "bulkGuruFailNote": "Catatan: Data gagal disimpan karena Nomor Induk Pegawai (NIP) telah terdaftar di sistem.",
+    "bulkSantriFailNote": "Catatan: Data gagal disimpan karena Nomor Induk Siswa (NIS) telah terdaftar di sistem."
   },
   "addHalaqoh": {
     "title": "Tambah Halaqoh Baru",
@@ -324,6 +327,7 @@
   },
   "riwayatAbsensi": {
     "title": "Riwayat Absensi",
+    "ringkasanKehadiran": "Ringkasan Kehadiran",
     "halaqohKelas": "Halaqoh $halaqoh - Kelas $kelas",
     "hadir": "HADIR",
     "sakit": "SAKIT",
@@ -394,6 +398,9 @@
   "detailAbsensiHariIni": {
     "title": "Detail Absensi Hari Ini",
     "hadir": "Hadir",
+    "hadirBarcode": "Hadir (Scan Barcode)",
+    "hadirManual": "Hadir (Tanpa Kartu)",
+    "terlambat": "Hadir (Terlambat)",
     "sakit": "Sakit",
     "izin": "Izin",
     "alfa": "Alfa",
@@ -469,6 +476,7 @@
     "halaqohKelas": "Halaqoh $halaqoh - Kelas $kelas",
     "totalHafalanBaru": "Total Hafalan Baru",
     "totalMurajaah": "Total Muraja'ah",
+    "totalTatapMuka": "TOTAL TATAP MUKA",
     "semuaTipe": "Semua Tipe",
     "bukaMutabaah": "BUKA MUTABA'AH",
     "hafalanBaru": "Hafalan Baru",

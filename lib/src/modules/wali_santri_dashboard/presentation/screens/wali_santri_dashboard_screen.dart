@@ -83,7 +83,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
     int month,
     int year,
   ) {
-    int hadir = 0, sakit = 0, izin = 0, alfa = 0;
+    int hadirBarcode = 0, hadirManual = 0, terlambat = 0, sakit = 0, izin = 0, alfa = 0;
 
     for (final record in allRecords) {
       if (record.tanggal.month != month || record.tanggal.year != year) {
@@ -95,7 +95,14 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
 
       switch (entry.first.status) {
         case 'hadir':
-          hadir++;
+        case 'hadir_barcode':
+          hadirBarcode++;
+          break;
+        case 'hadir_manual':
+          hadirManual++;
+          break;
+        case 'terlambat':
+          terlambat++;
           break;
         case 'sakit':
           sakit++;
@@ -109,7 +116,14 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
       }
     }
 
-    return {'hadir': hadir, 'sakit': sakit, 'izin': izin, 'alfa': alfa};
+    return {
+      'hadir_barcode': hadirBarcode,
+      'hadir_manual': hadirManual,
+      'terlambat': terlambat,
+      'sakit': sakit,
+      'izin': izin,
+      'alfa': alfa,
+    };
   }
 
   @override
@@ -725,14 +739,36 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
           ),
           SizedBox(height: 18.h),
 
-          // Attendance stats grid (2x2)
+          // Attendance stats grid (2x3)
           Row(
             children: [
               Expanded(
                 child: _buildAttendanceStat(
-                  t.waliSantriDashboard.hadir,
-                  '${stats['hadir']}',
+                  t.detailAbsensiHariIni.hadirBarcode,
+                  '${stats['hadir_barcode']}',
                   colors.primary,
+                  colors,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _buildAttendanceStat(
+                  t.detailAbsensiHariIni.hadirManual,
+                  '${stats['hadir_manual']}',
+                  colors.green,
+                  colors,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildAttendanceStat(
+                  t.detailAbsensiHariIni.terlambat,
+                  '${stats['terlambat']}',
+                  const Color(0xFFF3722C),
                   colors,
                 ),
               ),
@@ -781,7 +817,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
     AppColorSet colors,
   ) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: colors.background,
         borderRadius: BorderRadius.circular(12.r),
@@ -794,16 +830,19 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
             decoration: BoxDecoration(shape: BoxShape.circle, color: dotColor),
           ),
           SizedBox(width: 8.w),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w500,
-              color: colors.textSecondary,
-              fontFamily: 'Poppins',
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 11.5.sp,
+                fontWeight: FontWeight.w500,
+                color: colors.textSecondary,
+                fontFamily: 'Poppins',
+                height: 1.2,
+              ),
             ),
           ),
-          const Spacer(),
+          SizedBox(width: 8.w),
           Text(
             value,
             style: TextStyle(

@@ -53,13 +53,6 @@ class _WaliSantriKalenderAbsensiScreenState
     return ['shubuh', 'maghrib'];
   }
 
-  List<String> get _sessionLabels {
-    if (widget.programType == 'takhassus') {
-      return t.kalenderAbsensi.sessionsTakhassus;
-    }
-    return t.kalenderAbsensi.sessionsReguler;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -129,7 +122,12 @@ class _WaliSantriKalenderAbsensiScreenState
   String _statusToCode(String status) {
     switch (status) {
       case 'hadir':
+      case 'hadir_barcode':
         return 'H';
+      case 'hadir_manual':
+        return 'HT';
+      case 'terlambat':
+        return 'T';
       case 'sakit':
         return 'S';
       case 'izin':
@@ -418,13 +416,13 @@ class _WaliSantriKalenderAbsensiScreenState
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
                     child: Container(
                       width: double.infinity,
-                      padding: EdgeInsets.all(18.w),
+                      padding: EdgeInsets.all(20.w),
                       decoration: BoxDecoration(
                         color: colors.surface,
-                        borderRadius: BorderRadius.circular(14.r),
+                        borderRadius: BorderRadius.circular(16.r),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -436,86 +434,141 @@ class _WaliSantriKalenderAbsensiScreenState
                           Text(
                             t.kalenderAbsensi.keterangan,
                             style: TextStyle(
-                              fontSize: 15.sp,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
                               color: colors.textPrimary,
                               fontFamily: 'Poppins',
                             ),
                           ),
-                          SizedBox(height: 14.h),
+                          SizedBox(height: 16.h),
+                          // Symmetrical status legend rows
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              _buildLegendDot(
-                                colors.primary,
-                                t.kalenderAbsensi.hadirLabel,
-                                colors,
-                              ),
-                              SizedBox(width: 30.w),
-                              _buildLegendDot(
-                                colors.yellow,
-                                t.kalenderAbsensi.sakit,
-                                colors,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.h),
-                          Row(
-                            children: [
-                              _buildLegendDot(colors.blue, t.kalenderAbsensi.izin, colors),
-                              SizedBox(width: 30.w),
-                              _buildLegendDot(
-                                colors.red,
-                                t.kalenderAbsensi.alfaLabel,
-                                colors,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.h),
-                          Row(
-                            children: [
-                              _buildLegendDot(
-                                colors.border,
-                                t.kalenderAbsensi.belumAbsen,
-                                colors,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 14.h),
-                          Divider(
-                            color: colors.border.withValues(alpha: 0.5),
-                            height: 1,
-                          ),
-                          SizedBox(height: 14.h),
-                          if (widget.programType == 'takhassus')
-                            Wrap(
-                              spacing: 12.w,
-                              runSpacing: 6.h,
-                              children: _sessionLabels.map((label) {
-                                return Text(
-                                  label,
-                                  style: TextStyle(
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: colors.textSecondary,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                );
-                              }).toList(),
-                            )
-                          else
-                            Row(
-                              children: [
-                                _buildSessionLegend(
-                                  t.kalenderAbsensi.pagiKiri,
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.primary,
+                                  t.detailAbsensiHariIni.hadirBarcode,
                                   colors,
+                                  customCode: 'H',
                                 ),
-                                SizedBox(width: 24.w),
-                                _buildSessionLegend(
-                                  t.kalenderAbsensi.malamKanan,
+                              ),
+                              SizedBox(width: 16.w),
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.green,
+                                  t.detailAbsensiHariIni.hadirManual,
                                   colors,
+                                  customCode: 'HT',
                                 ),
-                              ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: _buildLegendItem(
+                                  const Color(0xFFF3722C),
+                                  t.detailAbsensiHariIni.terlambat,
+                                  colors,
+                                  customCode: 'T',
+                                ),
+                              ),
+                              SizedBox(width: 16.w),
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.yellow,
+                                  t.kalenderAbsensi.sakit,
+                                  colors,
+                                  customCode: 'S',
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.blue,
+                                  t.kalenderAbsensi.izin,
+                                  colors,
+                                  customCode: 'I',
+                                ),
+                              ),
+                              SizedBox(width: 16.w),
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.red,
+                                  t.kalenderAbsensi.alfaLabel,
+                                  colors,
+                                  customCode: 'A',
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.border,
+                                  t.kalenderAbsensi.belumAbsen,
+                                  colors,
+                                  customCode: '-',
+                                  isDashedBorder: true,
+                                ),
+                              ),
+                              SizedBox(width: 16.w),
+                              const Expanded(
+                                child: SizedBox(),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 24.h),
+                          Text(
+                            t.riwayatAbsensi.sessionKeterangan,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                              fontFamily: 'Poppins',
                             ),
+                          ),
+                          SizedBox(height: 16.h),
+                          // Session legend forced to 1 single horizontal row with horizontal scrolling to prevent overflow
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: widget.programType == 'takhassus'
+                                  ? t.kalenderAbsensi.sessionsTakhassus.map((label) {
+                                      final parts = label.split('. ');
+                                      final code = parts[0];
+                                      final name = parts.length > 1 ? parts[1] : '';
+                                      return Padding(
+                                        padding: EdgeInsets.only(right: 20.w),
+                                        child: _buildSessionLabel(code, name, colors),
+                                      );
+                                    }).toList()
+                                  : [
+                                      _buildSessionLabel(
+                                        'P',
+                                        t.kalenderAbsensi.pagiKiri,
+                                        colors,
+                                      ),
+                                      SizedBox(width: 24.w),
+                                      _buildSessionLabel(
+                                        'M',
+                                        t.kalenderAbsensi.malamKanan,
+                                        colors,
+                                      ),
+                                    ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -646,6 +699,10 @@ class _WaliSantriKalenderAbsensiScreenState
     switch (status) {
       case 'H':
         return colors.primary;
+      case 'HT':
+        return colors.green;
+      case 'T':
+        return const Color(0xFFF3722C);
       case 'S':
         return colors.yellow;
       case 'I':
@@ -665,47 +722,82 @@ class _WaliSantriKalenderAbsensiScreenState
     );
   }
 
-  Widget _buildLegendDot(Color color, String label, AppColorSet colors) {
+  Widget _buildLegendItem(
+    Color color,
+    String label,
+    AppColorSet colors, {
+    String? customCode,
+    bool isDashedBorder = false,
+  }) {
+    final displayCode = customCode ?? label[0];
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 12.w,
-          height: 12.w,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+          width: 28.w,
+          height: 28.w,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isDashedBorder ? Colors.transparent : color,
+            border: isDashedBorder
+                ? Border.all(color: color, width: 1.5, style: BorderStyle.solid)
+                : null,
+          ),
+          child: Center(
+            child: Text(
+              displayCode,
+              style: TextStyle(
+                fontSize: displayCode.length > 1 ? 10.sp : 12.sp,
+                fontWeight: FontWeight.w700,
+                color: isDashedBorder ? colors.textSecondary : Colors.white,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ),
         ),
-        SizedBox(width: 8.w),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w500,
-            color: colors.textPrimary,
-            fontFamily: 'Poppins',
+        SizedBox(width: 10.w),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.5.sp,
+              fontWeight: FontWeight.w500,
+              color: colors.textPrimary,
+              fontFamily: 'Poppins',
+              height: 1.2,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSessionLegend(String label, AppColorSet colors) {
+  Widget _buildSessionLabel(String code, String name, AppColorSet colors) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          label.contains('Pagi') || label.contains('Morning')
-              ? Icons.wb_sunny_outlined
-              : Icons.nights_stay_outlined,
-          size: 14.sp,
-          color: colors.textSecondary,
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            color: colors.border.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(6.r),
+          ),
+          child: Text(
+            code,
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w700,
+              color: colors.primary,
+              fontFamily: 'Poppins',
+            ),
+          ),
         ),
-        SizedBox(width: 4.w),
+        SizedBox(width: 6.w),
         Text(
-          label,
+          name,
           style: TextStyle(
             fontSize: 12.sp,
-            fontWeight: FontWeight.w400,
-            color: colors.textSecondary,
+            fontWeight: FontWeight.w500,
+            color: colors.textPrimary,
             fontFamily: 'Poppins',
           ),
         ),

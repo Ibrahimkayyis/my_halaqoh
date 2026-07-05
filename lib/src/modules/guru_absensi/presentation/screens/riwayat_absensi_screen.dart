@@ -128,7 +128,12 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
   String _statusToCode(String status) {
     switch (status) {
       case 'hadir':
+      case 'hadir_barcode':
         return 'H';
+      case 'hadir_manual':
+        return 'HT';
+      case 'terlambat':
+        return 'T';
       case 'sakit':
         return 'S';
       case 'izin':
@@ -141,12 +146,23 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
   }
 
   Map<String, int> _computeStats(Map<int, Map<String, String>> attendanceData) {
-    int hadir = 0, sakit = 0, izin = 0, alfa = 0;
+    int hadirBarcode = 0,
+        hadirManual = 0,
+        terlambat = 0,
+        sakit = 0,
+        izin = 0,
+        alfa = 0;
     for (final data in attendanceData.values) {
       for (final status in data.values) {
         switch (status) {
           case 'H':
-            hadir++;
+            hadirBarcode++;
+            break;
+          case 'HT':
+            hadirManual++;
+            break;
+          case 'T':
+            terlambat++;
             break;
           case 'S':
             sakit++;
@@ -160,7 +176,14 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
         }
       }
     }
-    return {'hadir': hadir, 'sakit': sakit, 'izin': izin, 'alfa': alfa};
+    return {
+      'hadir_barcode': hadirBarcode,
+      'hadir_manual': hadirManual,
+      'terlambat': terlambat,
+      'sakit': sakit,
+      'izin': izin,
+      'alfa': alfa,
+    };
   }
 
   void _prevMonth() {
@@ -341,47 +364,117 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                   // ── Summary stats ──
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Row(
-                      children: [
-                        _buildStat(
-                          '${stats['hadir']}',
-                          t.riwayatAbsensi.hadir,
-                          colors.primary,
-                          colors,
-                        ),
-                        SizedBox(width: 10.w),
-                        _buildStat(
-                          '${stats['sakit']}',
-                          t.riwayatAbsensi.sakit,
-                          colors.yellow,
-                          colors,
-                        ),
-                        SizedBox(width: 10.w),
-                        _buildStat(
-                          '${stats['izin']}',
-                          t.riwayatAbsensi.izin,
-                          colors.blue,
-                          colors,
-                        ),
-                        SizedBox(width: 10.w),
-                        _buildStat(
-                          '${stats['alfa']}',
-                          t.riwayatAbsensi.alfa,
-                          colors.red,
-                          colors,
-                        ),
-                      ],
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(16.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              20.w,
+                              16.h,
+                              20.w,
+                              12.h,
+                            ),
+                            child: Text(
+                              t.riwayatAbsensi.ringkasanKehadiran,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colors.textPrimary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ),
+                          // Row 1
+                          SizedBox(
+                            height: 92.h,
+                            child: Row(
+                              children: [
+                                _buildStat(
+                                  '${stats['hadir_barcode']}',
+                                  t.detailAbsensiHariIni.hadirBarcode,
+                                  colors.primary,
+                                  colors,
+                                ),
+                                _buildShortDivider(colors),
+                                _buildStat(
+                                  '${stats['hadir_manual']}',
+                                  t.detailAbsensiHariIni.hadirManual,
+                                  colors.green,
+                                  colors,
+                                ),
+                                _buildShortDivider(colors),
+                                _buildStat(
+                                  '${stats['terlambat']}',
+                                  t.detailAbsensiHariIni.terlambat,
+                                  const Color(0xFFF3722C),
+                                  colors,
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Row 2
+                          SizedBox(
+                            height: 84.h,
+                            child: Row(
+                              children: [
+                                _buildStat(
+                                  '${stats['sakit']}',
+                                  t.riwayatAbsensi.sakit,
+                                  colors.yellow,
+                                  colors,
+                                ),
+                                _buildShortDivider(colors),
+                                _buildStat(
+                                  '${stats['izin']}',
+                                  t.riwayatAbsensi.izin,
+                                  colors.blue,
+                                  colors,
+                                ),
+                                _buildShortDivider(colors),
+                                _buildStat(
+                                  '${stats['alfa']}',
+                                  t.riwayatAbsensi.alfa,
+                                  colors.red,
+                                  colors,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                        ],
+                      ),
                     ),
                   ),
                   SizedBox(height: 20.h),
 
                   // ── Day cards ──
                   SizedBox(
-                    height: _effectiveProgramType == 'takhassus' ? 350.h : 200.h,
+                    height: _effectiveProgramType == 'takhassus'
+                        ? 350.h
+                        : 200.h,
                     child: Builder(
                       builder: (context) {
-                        final totalDays = DateUtils.getDaysInMonth(_currentYear, _currentMonth);
-                        final daysList = List.generate(totalDays, (index) => index + 1);
+                        final totalDays = DateUtils.getDaysInMonth(
+                          _currentYear,
+                          _currentMonth,
+                        );
+                        final daysList = List.generate(
+                          totalDays,
+                          (index) => index + 1,
+                        );
 
                         return ListView.builder(
                           scrollDirection: Axis.horizontal,
@@ -389,7 +482,8 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                           itemCount: daysList.length,
                           itemBuilder: (context, index) {
                             final day = daysList[index];
-                            final data = attendanceData[day] ?? <String, String>{};
+                            final data =
+                                attendanceData[day] ?? <String, String>{};
                             return _buildDayCard(
                               day,
                               _getDayName(day),
@@ -402,25 +496,31 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                     ),
                   ),
                   SizedBox(height: 8.h),
-                  
+
                   // ── Swipe hint ──
                   Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.chevron_left,
-                          size: 16.sp,
-                          color: colors.textSecondary.withValues(alpha: 0.5),
-                        ),
-                          Text(
-                            t.riwayatAbsensi.geserHint,
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: colors.textSecondary.withValues(
-                                alpha: 0.5,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.chevron_left,
+                            size: 16.sp,
+                            color: colors.textSecondary.withValues(alpha: 0.5),
+                          ),
+                          Flexible(
+                            child: Text(
+                              t.riwayatAbsensi.geserHint,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: colors.textSecondary.withValues(
+                                  alpha: 0.5,
+                                ),
+                                fontFamily: 'Poppins',
                               ),
-                              fontFamily: 'Poppins',
                             ),
                           ),
                           Icon(
@@ -431,6 +531,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                         ],
                       ),
                     ),
+                  ),
                   SizedBox(height: 16.h),
 
                   // ── Lihat Kalender button ──
@@ -484,13 +585,13 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
                     child: Container(
                       width: double.infinity,
-                      padding: EdgeInsets.all(18.w),
+                      padding: EdgeInsets.all(20.w),
                       decoration: BoxDecoration(
                         color: colors.surface,
-                        borderRadius: BorderRadius.circular(14.r),
+                        borderRadius: BorderRadius.circular(16.r),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -502,103 +603,143 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                           Text(
                             t.riwayatAbsensi.keterangan,
                             style: TextStyle(
-                              fontSize: 15.sp,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
                               color: colors.textPrimary,
                               fontFamily: 'Poppins',
                             ),
                           ),
-                          SizedBox(height: 12.h),
+                          SizedBox(height: 16.h),
+                          // Symmetrical status legend rows
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              _buildLegendItem(
-                                colors.primary,
-                                t.riwayatAbsensi.hadirLabel,
-                                colors,
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.primary,
+                                  t.detailAbsensiHariIni.hadirBarcode,
+                                  colors,
+                                  customCode: 'H',
+                                ),
                               ),
-                              SizedBox(width: 40.w),
-                              _buildLegendItem(
-                                colors.yellow,
-                                t.riwayatAbsensi.sakitLabel,
-                                colors,
+                              SizedBox(width: 16.w),
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.green,
+                                  t.detailAbsensiHariIni.hadirManual,
+                                  colors,
+                                  customCode: 'HT',
+                                ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 8.h),
+                          SizedBox(height: 16.h),
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              _buildLegendItem(
-                                colors.red,
-                                t.riwayatAbsensi.alphaLabel,
-                                colors,
+                              Expanded(
+                                child: _buildLegendItem(
+                                  const Color(0xFFF3722C),
+                                  t.detailAbsensiHariIni.terlambat,
+                                  colors,
+                                  customCode: 'T',
+                                ),
                               ),
-                              SizedBox(width: 40.w),
-                              _buildLegendItem(
-                                colors.blue,
-                                t.riwayatAbsensi.izinLabel,
-                                colors,
+                              SizedBox(width: 16.w),
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.yellow,
+                                  t.riwayatAbsensi.sakitLabel,
+                                  colors,
+                                  customCode: 'S',
+                                ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 14.h),
-                          Divider(
-                            color: colors.border.withValues(alpha: 0.5),
-                            height: 1,
+                          SizedBox(height: 16.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.blue,
+                                  t.riwayatAbsensi.izinLabel,
+                                  colors,
+                                  customCode: 'I',
+                                ),
+                              ),
+                              SizedBox(width: 16.w),
+                              Expanded(
+                                child: _buildLegendItem(
+                                  colors.red,
+                                  t.riwayatAbsensi.alphaLabel,
+                                  colors,
+                                  customCode: 'A',
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 14.h),
+                          SizedBox(height: 24.h),
                           Text(
                             t.riwayatAbsensi.sessionKeterangan,
                             style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w700,
                               color: colors.textPrimary,
                               fontFamily: 'Poppins',
                             ),
                           ),
-                          SizedBox(height: 8.h),
-                          Wrap(
-                            spacing: 16.w,
-                            runSpacing: 6.h,
-                            children: _effectiveProgramType == 'takhassus'
-                                ? [
-                                    _buildSessionLabel(
-                                      t.riwayatAbsensi.abbrTakhassus[0],
-                                      t.riwayatAbsensi.sessionPagiShubuh,
-                                      colors,
-                                    ),
-                                    _buildSessionLabel(
-                                      t.riwayatAbsensi.abbrTakhassus[1],
-                                      t.riwayatAbsensi.sessionDhuha,
-                                      colors,
-                                    ),
-                                    _buildSessionLabel(
-                                      t.riwayatAbsensi.abbrTakhassus[2],
-                                      t.riwayatAbsensi.sessionSiang,
-                                      colors,
-                                    ),
-                                    _buildSessionLabel(
-                                      t.riwayatAbsensi.abbrTakhassus[3],
-                                      t.riwayatAbsensi.sessionSoreAshar,
-                                      colors,
-                                    ),
-                                    _buildSessionLabel(
-                                      t.riwayatAbsensi.abbrTakhassus[4],
-                                      t.riwayatAbsensi.sessionMalamMaghrib,
-                                      colors,
-                                    ),
-                                  ]
-                                : [
-                                    _buildSessionLabel(
-                                      t.riwayatAbsensi.abbrReguler[0],
-                                      t.riwayatAbsensi.sessionPagiShubuh,
-                                      colors,
-                                    ),
-                                    _buildSessionLabel(
-                                      t.riwayatAbsensi.abbrReguler[1],
-                                      t.riwayatAbsensi.sessionMalamMaghrib,
-                                      colors,
-                                    ),
-                                  ],
+                          SizedBox(height: 16.h),
+                          // Session legend forced to 1 single horizontal row with horizontal scrolling to prevent overflow
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: _effectiveProgramType == 'takhassus'
+                                  ? [
+                                      _buildSessionLabel(
+                                        t.riwayatAbsensi.abbrTakhassus[0],
+                                        t.riwayatAbsensi.sessionPagiShubuh,
+                                        colors,
+                                      ),
+                                      SizedBox(width: 20.w),
+                                      _buildSessionLabel(
+                                        t.riwayatAbsensi.abbrTakhassus[1],
+                                        t.riwayatAbsensi.sessionDhuha,
+                                        colors,
+                                      ),
+                                      SizedBox(width: 20.w),
+                                      _buildSessionLabel(
+                                        t.riwayatAbsensi.abbrTakhassus[2],
+                                        t.riwayatAbsensi.sessionSiang,
+                                        colors,
+                                      ),
+                                      SizedBox(width: 20.w),
+                                      _buildSessionLabel(
+                                        t.riwayatAbsensi.abbrTakhassus[3],
+                                        t.riwayatAbsensi.sessionSoreAshar,
+                                        colors,
+                                      ),
+                                      SizedBox(width: 20.w),
+                                      _buildSessionLabel(
+                                        t.riwayatAbsensi.abbrTakhassus[4],
+                                        t.riwayatAbsensi.sessionMalamMaghrib,
+                                        colors,
+                                      ),
+                                    ]
+                                  : [
+                                      _buildSessionLabel(
+                                        t.riwayatAbsensi.abbrReguler[0],
+                                        t.riwayatAbsensi.sessionPagiShubuh,
+                                        colors,
+                                      ),
+                                      SizedBox(width: 24.w),
+                                      _buildSessionLabel(
+                                        t.riwayatAbsensi.abbrReguler[1],
+                                        t.riwayatAbsensi.sessionMalamMaghrib,
+                                        colors,
+                                      ),
+                                    ],
+                            ),
                           ),
                         ],
                       ),
@@ -615,7 +756,9 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                       onPressed: () {
                         // Resolve the teacher's halaqoh from the global cubit
                         HalaqohModel? myHalaqoh;
-                        final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
+                        final linkedDocId =
+                            ActiveSessionHelper.getActiveLinkedDocId(context) ??
+                            '';
                         context.read<HalaqohCubit>().state.maybeWhen(
                           loaded: (list) {
                             try {
@@ -629,13 +772,13 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
 
                         LaporanKonfigurasiSheet.show(
                           context,
-                          records:     allRecords,
-                          santriName:  widget.name,
-                          santriNis:   widget.nis,
-                           programType: _effectiveProgramType,
-                          halaqoh:     myHalaqoh,
+                          records: allRecords,
+                          santriName: widget.name,
+                          santriNis: widget.nis,
+                          programType: _effectiveProgramType,
+                          halaqoh: myHalaqoh,
                           initialMonth: _currentMonth,
-                          initialYear:  _currentYear,
+                          initialYear: _currentYear,
                         );
                       },
                       icon: Icons.download,
@@ -659,43 +802,52 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
     AppColorSet colors,
   ) {
     return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12.h),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               value,
               style: TextStyle(
-                fontSize: 22.sp,
+                fontSize: 26.sp,
                 fontWeight: FontWeight.w700,
                 color: color,
                 fontFamily: 'Poppins',
               ),
             ),
-            SizedBox(height: 2.h),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w600,
-                color: colors.textSecondary,
-                fontFamily: 'Poppins',
-                letterSpacing: 0.5,
+            SizedBox(height: 4.h),
+            Flexible(
+              child: Text(
+                label.toUpperCase(),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 9.sp,
+                  fontWeight: FontWeight.w600,
+                  color: colors.textSecondary,
+                  fontFamily: 'Poppins',
+                  letterSpacing: 0.3,
+                  height: 1.2,
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// A short centered vertical line that does NOT span the full cell height —
+  /// gives a lighter, more elegant look than a full VerticalDivider.
+  Widget _buildShortDivider(AppColorSet colors) {
+    return Center(
+      child: Container(
+        width: 1,
+        height: 40.h,
+        color: colors.border.withValues(alpha: 0.5),
       ),
     );
   }
@@ -778,6 +930,10 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
         bgColor = colors.primary;
         label = 'H';
         break;
+      case 'T':
+        bgColor = const Color(0xFFF3722C);
+        label = 'T';
+        break;
       case 'S':
         bgColor = colors.yellow;
         label = 'S';
@@ -812,19 +968,27 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
     );
   }
 
-  Widget _buildLegendItem(Color color, String label, AppColorSet colors) {
+  Widget _buildLegendItem(
+    Color color,
+    String label,
+    AppColorSet colors, {
+    String? customCode,
+  }) {
+    final displayCode = customCode ?? label[0];
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 24.w,
-          height: 24.w,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+          width: 28.w,
+          height: 28.w,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+          ),
           child: Center(
             child: Text(
-              label[0],
+              displayCode,
               style: TextStyle(
-                fontSize: 11.sp,
+                fontSize: displayCode.length > 1 ? 10.sp : 12.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
                 fontFamily: 'Poppins',
@@ -832,14 +996,17 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
             ),
           ),
         ),
-        SizedBox(width: 8.w),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w500,
-            color: colors.textPrimary,
-            fontFamily: 'Poppins',
+        SizedBox(width: 10.w),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.5.sp,
+              fontWeight: FontWeight.w500,
+              color: colors.textPrimary,
+              fontFamily: 'Poppins',
+              height: 1.2,
+            ),
           ),
         ),
       ],
@@ -851,28 +1018,28 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
           decoration: BoxDecoration(
-            color: colors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(4.r),
+            color: colors.border.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(6.r),
           ),
           child: Text(
             code,
             style: TextStyle(
-              fontSize: 11.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w700,
               color: colors.primary,
               fontFamily: 'Poppins',
             ),
           ),
         ),
-        SizedBox(width: 4.w),
+        SizedBox(width: 6.w),
         Text(
           name,
           style: TextStyle(
-            fontSize: 11.sp,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
-            color: colors.textSecondary,
+            color: colors.textPrimary,
             fontFamily: 'Poppins',
           ),
         ),
