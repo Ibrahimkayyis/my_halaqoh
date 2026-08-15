@@ -740,6 +740,9 @@ class _TranslationsRiwayatHafalanSantriId extends TranslationsRiwayatHafalanSant
 	@override String get totalHafalanBaru => 'Total Hafalan Baru';
 	@override String get totalMurajaah => 'Total Muraja\'ah';
 	@override String get totalTatapMuka => 'TOTAL TATAP MUKA';
+	@override String get tapForDetails => 'Ketuk untuk melihat detail';
+	@override String get tapToClose => 'Ketuk untuk menutup detail';
+	@override String get tatapMukaLabel => 'Tatap Muka';
 	@override String get semuaTipe => 'Semua Tipe';
 	@override String get bukaMutabaah => 'BUKA MUTABA\'AH';
 	@override String get hafalanBaru => 'Hafalan Baru';
@@ -1844,6 +1847,9 @@ extension on TranslationsId {
 			case 'riwayatHafalanSantri.totalHafalanBaru': return 'Total Hafalan Baru';
 			case 'riwayatHafalanSantri.totalMurajaah': return 'Total Muraja\'ah';
 			case 'riwayatHafalanSantri.totalTatapMuka': return 'TOTAL TATAP MUKA';
+			case 'riwayatHafalanSantri.tapForDetails': return 'Ketuk untuk melihat detail';
+			case 'riwayatHafalanSantri.tapToClose': return 'Ketuk untuk menutup detail';
+			case 'riwayatHafalanSantri.tatapMukaLabel': return 'Tatap Muka';
 			case 'riwayatHafalanSantri.semuaTipe': return 'Semua Tipe';
 			case 'riwayatHafalanSantri.bukaMutabaah': return 'BUKA MUTABA\'AH';
 			case 'riwayatHafalanSantri.hafalanBaru': return 'Hafalan Baru';

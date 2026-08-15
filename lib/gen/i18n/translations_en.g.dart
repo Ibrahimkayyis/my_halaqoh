@@ -1540,6 +1540,15 @@ class TranslationsRiwayatHafalanSantriEn {
 	/// en: 'TOTAL SESSIONS'
 	String get totalTatapMuka => 'TOTAL SESSIONS';
 
+	/// en: 'Tap to view details'
+	String get tapForDetails => 'Tap to view details';
+
+	/// en: 'Tap to close details'
+	String get tapToClose => 'Tap to close details';
+
+	/// en: 'Sessions'
+	String get tatapMukaLabel => 'Sessions';
+
 	/// en: 'All Types'
 	String get semuaTipe => 'All Types';
 
@@ -3441,6 +3450,9 @@ extension on Translations {
 			case 'riwayatHafalanSantri.totalHafalanBaru': return 'Total New Memorization';
 			case 'riwayatHafalanSantri.totalMurajaah': return 'Total Review';
 			case 'riwayatHafalanSantri.totalTatapMuka': return 'TOTAL SESSIONS';
+			case 'riwayatHafalanSantri.tapForDetails': return 'Tap to view details';
+			case 'riwayatHafalanSantri.tapToClose': return 'Tap to close details';
+			case 'riwayatHafalanSantri.tatapMukaLabel': return 'Sessions';
 			case 'riwayatHafalanSantri.semuaTipe': return 'All Types';
 			case 'riwayatHafalanSantri.bukaMutabaah': return 'OPEN MUTABA\'AH';
 			case 'riwayatHafalanSantri.hafalanBaru': return 'New Memorization';

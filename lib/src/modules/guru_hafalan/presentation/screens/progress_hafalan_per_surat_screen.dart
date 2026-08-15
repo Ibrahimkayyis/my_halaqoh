@@ -7,6 +7,15 @@ import 'package:my_halaqoh/src/core/quran/quran_service.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
 
 /// Progress Hafalan Per Surat — shows surah-level progress for a specific juz
 @RoutePage()
@@ -26,20 +35,45 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
 
   @override
   Widget wrappedRoute(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<ProgressHafalanCubit>()..watchProgress(santriId),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => sl<ProgressHafalanCubit>()..watchProgress(santriId),
+        ),
+        BlocProvider(
+          create: (context) => sl<SantriExtraTargetCubit>()..watchExtraJuz(santriId),
+        ),
+      ],
       child: this,
     );
   }
 
   /// Build surah data for this juz from QuranService with real progress.
-  List<Map<String, dynamic>> _buildSurahData(ProgressHafalanState progressState) {
+  List<Map<String, dynamic>> _buildSurahData(
+    ProgressHafalanState progressState,
+    TargetHafalanModel? target,
+    SantriModel? santri,
+    List<int> extraJuz,
+  ) {
     final juz = QuranService.instance.getJuzByNumber(juzNumber);
     if (juz == null) return [];
 
-    return juz.surahs.map((seg) {
+    final targetRanges = TargetHafalanHelper.getTargetRangesForJuz(
+      juzNumber: juzNumber,
+      target: target,
+      kelas: santri?.kelas,
+      programCode: santri?.program,
+      extraJuz: extraJuz,
+    );
+
+    final result = <Map<String, dynamic>>[];
+
+    for (final seg in juz.surahs) {
+      final match = targetRanges.where((r) => r.surahId == seg.surahId).firstOrNull;
+      if (match == null) continue;
+
       final surah = QuranService.instance.getSurahById(seg.surahId);
-      final totalAyat = seg.ayatEnd - seg.ayatStart + 1;
+      final totalAyat = match.ayatEnd - match.ayatStart + 1;
 
       // Look up real memorized count from ProgressHafalanCubit
       int memorized = 0;
@@ -53,29 +87,73 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
                 .where((sp) => sp.surahId == seg.surahId)
                 .firstOrNull;
             if (surahProgress != null) {
-              memorized = surahProgress.memorizedAyat;
+              final memorizedLimit = seg.ayatStart + surahProgress.memorizedAyat - 1;
+              if (surahProgress.memorizedAyat > 0) {
+                final start = match.ayatStart > seg.ayatStart ? match.ayatStart : seg.ayatStart;
+                final end = match.ayatEnd < memorizedLimit ? match.ayatEnd : memorizedLimit;
+                if (start <= end) {
+                  memorized = end - start + 1;
+                }
+              }
             }
           }
         },
         orElse: () {},
       );
 
-      return {
+      result.add({
         'name': surah?.name ?? t.progressHafalanPerSurat.unknownSurah,
         'totalAyat': totalAyat,
         'memorized': memorized,
-      };
-    }).toList();
+      });
+    }
+
+    return result;
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
+    // Look up santri, target, and extraJuz to filter targeted surahs
+    final santriState = context.watch<SantriCubit>().state;
+    final targetHafalanState = context.watch<TargetHafalanCubit>().state;
+    final extraTargetState = context.watch<SantriExtraTargetCubit>().state;
+
+    SantriModel? santri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          santri = list.firstWhere((s) => s.id == santriId || s.nis == nis);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    TargetHafalanModel? target;
+    targetHafalanState.maybeWhen(
+      loaded: (targets) {
+        if (santri != null) {
+          target = TargetHafalanHelper.findTarget(
+            targets,
+            santri!.kelas,
+            santri!.program,
+          );
+        }
+      },
+      orElse: () {},
+    );
+
+    final extraJuz = <int>[];
+    extraTargetState.maybeWhen(
+      loaded: (juzList) => extraJuz.addAll(juzList),
+      orElse: () {},
+    );
+
     return BlocBuilder<ProgressHafalanCubit, ProgressHafalanState>(
       builder: (context, progressState) {
         // Build surah data with real progress
-        final surahs = _buildSurahData(progressState);
+        final surahs = _buildSurahData(progressState, target, santri, extraJuz);
 
     return Scaffold(
       backgroundColor: colors.background,

@@ -16,6 +16,7 @@ import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
+import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/halaqoh_info_card.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/santri_list_item.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
@@ -40,6 +41,13 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  String _formatJuz(double v) {
+    if (v == 0) return '0';
+    if (v == v.roundToDouble()) return v.toInt().toString();
+    final s = v.toStringAsFixed(2);
+    return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
   }
 
   @override
@@ -174,7 +182,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                             : t.myHalaqohScreen.pengampu,
                         target: t.myHalaqohScreen.target(
                           count: myTarget != null
-                              ? '${TargetHafalanHelper.getTargetJuzCount(myTarget!, effectiveKelas, effectiveProgram)}'
+                              ? _formatJuz(TargetHafalanHelper.getTargetJuzCountDouble(myTarget!, effectiveKelas, effectiveProgram))
                               : '0',
                           range: myTarget != null
                               ? TargetHafalanHelper.getActiveSemesterSummary(myTarget!, effectiveKelas, effectiveProgram) ?? '-'
@@ -352,35 +360,45 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                             ProgressHafalanState
                           >(
                             builder: (context, state) {
-                              double completed = 0.0;
+                              OverallHafalanProgress? progressData;
                               state.maybeWhen(
-                                loaded: (progressData) {
-                                  for (final jp
-                                      in progressData.juzProgressList) {
-                                    if (jp.totalAyat > 0) {
-                                      completed +=
-                                          jp.memorizedAyat / jp.totalAyat;
-                                    }
-                                  }
-                                },
+                                loaded: (p) => progressData = p,
                                 orElse: () {},
                               );
 
                               // ── Per-santri target lookup ──────────────────
                               // Use santri.kelas & santri.program (updated on
                               // promotion) NOT myHalaqoh.kelas which is stale.
-                              final santriTarget = TargetHafalanHelper
-                                  .findTarget(
+                              final santriTarget = TargetHafalanHelper.findTarget(
                                 allTargets,
                                 santri.kelas,
                                 santri.program,
                               );
+
+                              double completed = 0.0;
+                              if (santriTarget != null && progressData != null) {
+                                completed = TargetHafalanHelper.getCompletedJuzCountDouble(
+                                  targetModel: santriTarget,
+                                  kelas: santri.kelas,
+                                  programCode: santri.program,
+                                  progressData: progressData,
+                                );
+                              } else {
+                                final pData = progressData;
+                                if (pData != null) {
+                                  for (final jp in pData.juzProgressList) {
+                                    if (jp.totalAyat > 0) {
+                                      completed += jp.memorizedAyat / jp.totalAyat;
+                                    }
+                                  }
+                                }
+                              }
                               final targetJuz = santriTarget != null
-                                  ? TargetHafalanHelper.getTargetJuzCount(
+                                  ? TargetHafalanHelper.getTargetJuzCountDouble(
                                       santriTarget,
                                       santri.kelas,
                                       santri.program,
-                                    ).toDouble()
+                                    )
                                   : 0.0;
                               String formatPercent(double v) {
                                 if (v == 0) return '0';
@@ -399,20 +417,13 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                                   : 0.0;
                               final pct = formatPercent(progress * 100);
 
-                              String formatJuz(double v) {
-                                if (v == 0) return '0';
-                                return v == v.roundToDouble()
-                                    ? v.toInt().toString()
-                                    : v.toStringAsFixed(2);
-                              }
-
                               return Padding(
                                 padding: EdgeInsets.only(bottom: 12.h),
                                 child: SantriListItem(
                                   name: santri.nama,
                                   progressText: t.myHalaqohScreen.progressText(
-                                    completed: formatJuz(completed),
-                                    target: formatJuz(targetJuz),
+                                    completed: _formatJuz(completed),
+                                    target: _formatJuz(targetJuz),
                                   ),
                                   percentage: '$pct%',
                                   progress: progress,

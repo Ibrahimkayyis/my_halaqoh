@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,7 +12,6 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/kelas_sta
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/program_state.dart';
 import 'package:my_halaqoh/src/core/widget/tab/app_tab_selector.dart';
-import 'package:animated_custom_dropdown/custom_dropdown.dart';
 
 @RoutePage()
 class KelolaKelasProgramScreen extends StatefulWidget {
@@ -264,16 +264,23 @@ class _KelolaKelasProgramScreenState extends State<KelolaKelasProgramScreen>
     final formKey = GlobalKey<FormState>();
     final nameCtrl = TextEditingController(text: existing?.nama);
     final urutanCtrl = TextEditingController(text: existing?.urutan.toString() ?? '');
-    String? nextKelasId = existing?.nextKelasId;
 
-    // Filter list to exclude itself from nextKelas options to prevent circular dependency
-    final nextKelasOptions = list.where((item) => existing == null || item.id != existing.id).toList();
+    VoidCallback? onNameChanged;
+    nameCtrl.addListener(() {
+      onNameChanged?.call();
+    });
 
     showDialog(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            onNameChanged = () {
+              if (ctx.mounted) {
+                setDialogState(() {});
+              }
+            };
+
             return AlertDialog(
               backgroundColor: colors.surface,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
@@ -334,41 +341,17 @@ class _KelolaKelasProgramScreenState extends State<KelolaKelasProgramScreen>
                         ),
                       ),
                       SizedBox(height: 4.h),
-                      (() {
-                        final String labelAlumni = t.kelasProgram.lulusAlumni;
-                        final List<String> dropdownItems = [
-                          labelAlumni,
-                          ...nextKelasOptions.map((item) => t.kelasProgram.kelasNama(nama: item.nama)),
-                        ];
-
-                        final Map<String, String?> labelToIdMap = {
-                          labelAlumni: null,
-                        };
-                        for (final item in nextKelasOptions) {
-                          labelToIdMap[t.kelasProgram.kelasNama(nama: item.nama)] = item.id;
-                        }
-
-                        final Map<String?, String> idToLabelMap = {
-                          null: labelAlumni,
-                        };
-                        for (final item in nextKelasOptions) {
-                          idToLabelMap[item.id] = t.kelasProgram.kelasNama(nama: item.nama);
-                        }
-
-                        final String initialSelectedLabel = idToLabelMap[nextKelasId] ?? labelAlumni;
-
-                        return CustomDropdown<String>(
-                          hintText: t.kelasProgram.pilihKelasSelanjutnya,
-                          items: dropdownItems,
-                          initialItem: initialSelectedLabel,
-                          decoration: _dropdownDecoration(colors),
-                          onChanged: (val) {
-                            setDialogState(() {
-                              nextKelasId = labelToIdMap[val];
-                            });
-                          },
-                        );
-                      }()),
+                      TextFormField(
+                        key: ValueKey(nameCtrl.text),
+                        initialValue: _getNextKelasLabel(nameCtrl.text, list),
+                        enabled: false,
+                        decoration: InputDecoration(
+                          hintText: t.kelasProgram.kelasSelanjutnya,
+                          hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 12.sp),
+                          fillColor: colors.surface.withValues(alpha: 0.5),
+                        ),
+                        style: TextStyle(fontFamily: 'Poppins', fontSize: 14.sp, color: colors.textSecondary),
+                      ),
                     ],
                   ),
                 ),
@@ -382,22 +365,70 @@ class _KelolaKelasProgramScreenState extends State<KelolaKelasProgramScreen>
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
                       final now = DateTime.now();
-                      final model = KelasModel(
-                        id: existing?.id ?? '', // empty will generate auto in firestore
-                        nama: nameCtrl.text.trim(),
-                        urutan: int.parse(urutanCtrl.text.trim()),
-                        nextKelasId: nextKelasId,
-                        createdAt: existing?.createdAt ?? now,
-                        updatedAt: now,
-                      );
+                      final targetId = existing?.id ?? FirebaseFirestore.instance.collection('kelas').doc().id;
+                      final targetNama = nameCtrl.text.trim();
+                      final targetUrutan = int.parse(urutanCtrl.text.trim());
+
+                      // 1. Build updated list of all classes representing the state after save
+                      final updatedList = list.map((k) {
+                        if (k.id == targetId) {
+                          return k.copyWith(
+                            nama: targetNama,
+                            urutan: targetUrutan,
+                          );
+                        }
+                        return k;
+                      }).toList();
+
+                      if (existing == null) {
+                        updatedList.add(KelasModel(
+                          id: targetId,
+                          nama: targetNama,
+                          urutan: targetUrutan,
+                          nextKelasId: null,
+                          createdAt: now,
+                          updatedAt: now,
+                        ));
+                      }
+
+                      // 2. Recalculate nextKelasId for all classes in updatedList
+                      final finalizedList = updatedList.map((k) {
+                        final val = int.tryParse(k.nama);
+                        String? computedNextId;
+                        if (val != null && val < 12) {
+                          final nextName = (val + 1).toString();
+                          try {
+                            final nextKelas = updatedList.firstWhere((item) => item.nama == nextName);
+                            computedNextId = nextKelas.id;
+                          } catch (_) {
+                            computedNextId = null;
+                          }
+                        } else {
+                          computedNextId = null;
+                        }
+                        return k.copyWith(nextKelasId: computedNextId, updatedAt: now);
+                      }).toList();
+
                       final kelasCubit = context.read<KelasCubit>();
                       final messenger = ScaffoldMessenger.of(context);
                       try {
+                        // 3. Save the main target class
+                        final targetModel = finalizedList.firstWhere((k) => k.id == targetId);
                         if (existing == null) {
-                          await kelasCubit.addKelas(model);
+                          await kelasCubit.addKelas(targetModel);
                         } else {
-                          await kelasCubit.updateKelas(model);
+                          await kelasCubit.updateKelas(targetModel);
                         }
+
+                        // 4. Update other classes whose nextKelasId has changed
+                        for (final k in finalizedList) {
+                          if (k.id == targetId) continue;
+                          final original = list.firstWhere((item) => item.id == k.id);
+                          if (original.nextKelasId != k.nextKelasId) {
+                            await kelasCubit.updateKelas(k);
+                          }
+                        }
+
                         if (context.mounted && ctx.mounted) Navigator.of(ctx).pop();
                       } catch (e) {
                         if (context.mounted) {
@@ -444,6 +475,13 @@ class _KelolaKelasProgramScreenState extends State<KelolaKelasProgramScreen>
               onPressed: () async {
                 final kelasCubit = context.read<KelasCubit>();
                 final messenger = ScaffoldMessenger.of(context);
+
+                // Get current list of classes before deletion
+                final list = kelasCubit.state.maybeWhen(
+                  loaded: (l) => l,
+                  orElse: () => <KelasModel>[],
+                );
+
                 final success = await kelasCubit.deleteKelas(model.id);
                 if (context.mounted && ctx.mounted) {
                   Navigator.of(ctx).pop();
@@ -451,6 +489,13 @@ class _KelolaKelasProgramScreenState extends State<KelolaKelasProgramScreen>
                     messenger.showSnackBar(
                       SnackBar(content: Text(t.kelasProgram.gagalMenghapusKelas, style: const TextStyle(fontFamily: 'Poppins')), backgroundColor: colors.error),
                     );
+                  } else {
+                    // Update any class that pointed to the deleted class
+                    for (final k in list) {
+                      if (k.id != model.id && k.nextKelasId == model.id) {
+                        await kelasCubit.updateKelas(k.copyWith(nextKelasId: null, updatedAt: DateTime.now()));
+                      }
+                    }
                   }
                 }
               },
@@ -608,29 +653,23 @@ class _KelolaKelasProgramScreenState extends State<KelolaKelasProgramScreen>
     );
   }
 
-  CustomDropdownDecoration _dropdownDecoration(AppColorSet colors) {
-    return CustomDropdownDecoration(
-      closedBorderRadius: BorderRadius.circular(10.r),
-      closedBorder: Border.all(color: colors.border),
-      closedFillColor: colors.surface,
-      expandedBorderRadius: BorderRadius.circular(10.r),
-      expandedBorder: Border.all(color: colors.primary),
-      expandedFillColor: colors.surface,
-      headerStyle: TextStyle(
-        fontSize: 13.sp,
-        color: colors.textPrimary,
-        fontFamily: 'Poppins',
-      ),
-      hintStyle: TextStyle(
-        fontSize: 13.sp,
-        color: colors.textSecondary.withValues(alpha: 0.5),
-        fontFamily: 'Poppins',
-      ),
-      listItemStyle: TextStyle(
-        fontSize: 13.sp,
-        color: colors.textPrimary,
-        fontFamily: 'Poppins',
-      ),
-    );
+  String _getNextKelasLabel(String name, List<KelasModel> list) {
+    final cleanName = name.trim();
+    if (cleanName.isEmpty) return '-';
+    final val = int.tryParse(cleanName);
+    if (val != null) {
+      if (val >= 12) {
+        return t.kelasProgram.lulusAlumni;
+      }
+      final nextName = (val + 1).toString();
+      final exists = list.any((item) => item.nama == nextName);
+      if (exists) {
+        return t.kelasProgram.kelasNama(nama: nextName);
+      } else {
+        return '${t.kelasProgram.kelasNama(nama: nextName)} (${t.kelasProgram.belumAdaKelas.toLowerCase()})';
+      }
+    }
+    return t.kelasProgram.lulusAlumni;
   }
+
 }

@@ -399,9 +399,18 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
         : <int>[];
 
     // ── Admin progress calculation ────────────────────────────────────────────
-    final int juzTargetAdmin = adminJuzList.length;
+    final double juzTargetAdmin = target != null && santri != null
+        ? TargetHafalanHelper.getTargetJuzCountDouble(target, santri.kelas, santri.program)
+        : 0.0;
     double juzCompletedAdmin = 0.0;
-    if (progressData != null) {
+    if (target != null && santri != null && progressData != null) {
+      juzCompletedAdmin = TargetHafalanHelper.getCompletedJuzCountDouble(
+        targetModel: target,
+        kelas: santri.kelas,
+        programCode: santri.program,
+        progressData: progressData,
+      );
+    } else if (progressData != null) {
       for (final juzNum in adminJuzList) {
         final jp = progressData.juzProgressList
             .where((j) => j.juzNumber == juzNum)
@@ -447,22 +456,21 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
     String formatPercent(double v) {
       if (v == 0) return '0';
       if (v >= 1) {
-        // For values >= 1%, show integer if whole, otherwise 1 decimal
         final rounded = double.parse(v.toStringAsFixed(1));
         return rounded == rounded.roundToDouble()
             ? rounded.toInt().toString()
             : rounded.toStringAsFixed(1);
       }
-      // For small values < 1%, show up to 2 decimal places, trim trailing zeros
       final s = v.toStringAsFixed(2);
-      // Remove trailing zeros after decimal point
       return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
     }
 
     // Format juzCompleted to remove .0 if it's a whole number, otherwise show 2 decimals
     String formatJuz(double v) {
       if (v == 0) return '0';
-      return v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+      if (v == v.roundToDouble()) return v.toInt().toString();
+      final s = v.toStringAsFixed(2);
+      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
     }
 
     return Container(
@@ -565,7 +573,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              t.waliSantriDashboard.target(target: '$juzTargetAdmin'),
+              t.waliSantriDashboard.target(target: formatJuz(juzTargetAdmin)),
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,

@@ -74,15 +74,16 @@ class _ActivityLogViewState extends State<_ActivityLogView> {
 
   Future<void> _selectCustomDateRange(BuildContext context) async {
     final now = DateTime.now();
+    final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
     final initialRange = DateTimeRange(
       start: _filterFromDate ?? now.subtract(const Duration(days: 7)),
-      end: _filterToDate ?? now,
+      end: _filterToDate ?? todayEnd,
     );
     final pickedRange = await showDateRangePicker(
       context: context,
       initialDateRange: initialRange,
       firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
+      lastDate: todayEnd,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(

@@ -154,19 +154,19 @@ class _WaliSantriProgressPerJuzScreenState
 
           // Build juz display data from combined juz set + QuranService
           final juzDisplayData = allJuzNums.map((juzNum) {
-            final juzModel = QuranService.instance.getJuzByNumber(juzNum);
-            int totalAyat = juzModel?.totalAyat ?? 0;
-            int memorizedAyat = 0;
-
-            if (progressData != null) {
-              final juzProgress = progressData!.juzProgressList
-                  .where((jp) => jp.juzNumber == juzNum)
-                  .firstOrNull;
-              if (juzProgress != null) {
-                totalAyat = juzProgress.totalAyat;
-                memorizedAyat = juzProgress.memorizedAyat;
-              }
-            }
+            final juzProgress = progressData?.juzProgressList
+                .where((jp) => jp.juzNumber == juzNum)
+                .firstOrNull;
+            final stats = TargetHafalanHelper.getJuzProgressStats(
+              juzNumber: juzNum,
+              target: target,
+              kelas: santri?.kelas,
+              programCode: santri?.program,
+              extraJuz: extraJuz,
+              juzProgress: juzProgress,
+            );
+            final totalAyat = stats['total'] ?? 0;
+            final memorizedAyat = stats['completed'] ?? 0;
 
             return {
               'juz': juzNum,

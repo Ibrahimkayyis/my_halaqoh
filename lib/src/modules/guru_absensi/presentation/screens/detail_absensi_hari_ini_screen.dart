@@ -622,8 +622,8 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                                   _buildGridStatCard(
                                     label: t.detailAbsensiHariIni.hadirBarcode,
                                     value: '${stats['hadir_barcode']}',
-                                    bgColor: colors.primary.withValues(alpha: 0.08),
-                                    textColor: colors.primary,
+                                    bgColor: const Color(0xFF16A34A).withValues(alpha: 0.08),
+                                    textColor: const Color(0xFF16A34A),
                                     isLarge: true,
                                   ),
                                   SizedBox(height: 12.h),
@@ -1083,13 +1083,14 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
 
   // ── Locked Status Badge ───────────────────────────────────────────────────
   Widget _buildLockedStatusBadge(AppColorSet colors) {
+    final barcodeColor = const Color(0xFF16A34A);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: colors.primary.withValues(alpha: 0.1),
+        color: barcodeColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(
-          color: colors.primary.withValues(alpha: 0.3),
+          color: barcodeColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -1101,7 +1102,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
               Icon(
                 Icons.check_circle_rounded,
                 size: 16.sp,
-                color: colors.primary,
+                color: barcodeColor,
               ),
               SizedBox(width: 8.w),
               Text(
@@ -1110,7 +1111,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Poppins',
-                  color: colors.primary,
+                  color: barcodeColor,
                 ),
               ),
             ],
@@ -1118,7 +1119,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
           Icon(
             Icons.lock_outline,
             size: 16.sp,
-            color: colors.primary.withValues(alpha: 0.6),
+            color: barcodeColor.withValues(alpha: 0.6),
           ),
         ],
       ),
@@ -1198,9 +1199,10 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
   Color _getStatusBgColor(String status, AppColorSet colors) {
     switch (status) {
       case 'hadir':
-      case 'hadir_barcode':
       case 'hadir_manual':
         return colors.primary.withValues(alpha: 0.1);
+      case 'hadir_barcode':
+        return const Color(0xFF16A34A).withValues(alpha: 0.1);
       case 'terlambat':
         return const Color(0xFFF3722C).withValues(alpha: 0.1);
       case 'sakit':
@@ -1217,9 +1219,10 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
   Color _getStatusBorderColor(String status, AppColorSet colors) {
     switch (status) {
       case 'hadir':
-      case 'hadir_barcode':
       case 'hadir_manual':
         return colors.primary.withValues(alpha: 0.3);
+      case 'hadir_barcode':
+        return const Color(0xFF16A34A).withValues(alpha: 0.3);
       case 'terlambat':
         return const Color(0xFFF3722C).withValues(alpha: 0.3);
       case 'sakit':
@@ -1236,9 +1239,10 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
   Color _getStatusTextColor(String status, AppColorSet colors) {
     switch (status) {
       case 'hadir':
-      case 'hadir_barcode':
       case 'hadir_manual':
         return colors.primary;
+      case 'hadir_barcode':
+        return const Color(0xFF16A34A);
       case 'terlambat':
         return const Color(0xFFF3722C);
       case 'sakit':

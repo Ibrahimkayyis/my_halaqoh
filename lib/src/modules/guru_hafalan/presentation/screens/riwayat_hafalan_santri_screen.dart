@@ -142,6 +142,7 @@ class _RiwayatHafalanSantriScreenState
     t.riwayatHafalanSantri.filterMurajaah,
   ];
   int _selectedFilterIndex = 0;
+  bool _isStatsExpanded = false;
 
   String get _filterKey {
     if (_selectedFilterIndex == 1) return 'Ziyadah';
@@ -545,117 +546,193 @@ class _RiwayatHafalanSantriScreenState
     int totalMurajaah,
     AppColorSet colors,
   ) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: colors.border.withValues(alpha: 0.5),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header Chip
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 6.h,
-            ),
-            decoration: BoxDecoration(
-              color: colors.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.analytics_outlined,
-                  size: 16.sp,
-                  color: colors.primary,
-                ),
-                SizedBox(width: 6.w),
-                Text(
-                  t.riwayatHafalanSantri.totalTatapMuka,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w700,
-                    color: colors.primary,
-                    fontFamily: 'Poppins',
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isStatsExpanded = !_isStatsExpanded;
+        });
+      },
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color: colors.border.withValues(alpha: 0.5),
+              width: 1,
             ),
           ),
-          SizedBox(height: 20.h),
-          // Stats Row
-          Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Hafalan Baru
-              Expanded(
-                child: Column(
+              // Header Chip
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 6.h,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    Icon(
+                      Icons.analytics_outlined,
+                      size: 16.sp,
+                      color: colors.primary,
+                    ),
+                    SizedBox(width: 6.w),
                     Text(
-                      '$totalBaru',
+                      t.riwayatHafalanSantri.totalTatapMuka,
                       style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w700,
                         color: colors.primary,
                         fontFamily: 'Poppins',
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      t.riwayatHafalanSantri.hafalanBaru,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: colors.textSecondary,
-                        fontFamily: 'Poppins',
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              // Divider
-              Container(
-                height: 36.h,
-                width: 1,
-                color: colors.border.withValues(alpha: 0.5),
-              ),
-              // Muraja'ah
-              Expanded(
-                child: Column(
+              SizedBox(height: 20.h),
+              if (!_isStatsExpanded) ...[
+                // Collapsed View (Single Total)
+                Text(
+                  '${totalBaru + totalMurajaah}',
+                  style: TextStyle(
+                    fontSize: 28.sp,
+                    fontWeight: FontWeight.w800,
+                    color: colors.primary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  t.riwayatHafalanSantri.tatapMukaLabel,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: colors.textSecondary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '$totalMurajaah',
+                      t.riwayatHafalanSantri.tapForDetails,
                       style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFFF3722C), // Orange
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w500,
+                        color: colors.textSecondary.withValues(alpha: 0.7),
                         fontFamily: 'Poppins',
                       ),
                     ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      t.riwayatHafalanSantri.murajaah,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: colors.textSecondary,
-                        fontFamily: 'Poppins',
+                    SizedBox(width: 2.w),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 14.sp,
+                      color: colors.textSecondary.withValues(alpha: 0.7),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                // Expanded View (Breakdown)
+                Row(
+                  children: [
+                    // Hafalan Baru
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            '$totalBaru',
+                            style: TextStyle(
+                              fontSize: 28.sp,
+                              fontWeight: FontWeight.w800,
+                              color: colors.primary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            t.riwayatHafalanSantri.hafalanBaru,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Divider
+                    Container(
+                      height: 36.h,
+                      width: 1,
+                      color: colors.border.withValues(alpha: 0.5),
+                    ),
+                    // Muraja'ah
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            '$totalMurajaah',
+                            style: TextStyle(
+                              fontSize: 28.sp,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFFF3722C), // Orange
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            t.riwayatHafalanSantri.murajaah,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
+                SizedBox(height: 16.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      t.riwayatHafalanSantri.tapToClose,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w500,
+                        color: colors.textSecondary.withValues(alpha: 0.7),
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    SizedBox(width: 2.w),
+                    Icon(
+                      Icons.keyboard_arrow_up_rounded,
+                      size: 14.sp,
+                      color: colors.textSecondary.withValues(alpha: 0.7),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
-        ],
+        ),
       ),
     );
   }

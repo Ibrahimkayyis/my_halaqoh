@@ -354,10 +354,17 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
   /// Progress Hafalan card driven by admin-set memorization targets.
   /// Shows target juz, completion count (0 for now), progress bar.
   Widget _buildProgressCard(AppColorSet colors, SantriModel? santri, TargetHafalanModel? target, OverallHafalanProgress? progressData) {
-    final int juzTarget = target != null && santri != null ? TargetHafalanHelper.getTargetJuzCount(target, santri.kelas, santri.program) : 0;
+    final double juzTarget = target != null && santri != null ? TargetHafalanHelper.getTargetJuzCountDouble(target, santri.kelas, santri.program) : 0.0;
     
     double juzCompleted = 0.0;
-    if (progressData != null) {
+    if (target != null && santri != null && progressData != null) {
+      juzCompleted = TargetHafalanHelper.getCompletedJuzCountDouble(
+        targetModel: target,
+        kelas: santri.kelas,
+        programCode: santri.program,
+        progressData: progressData,
+      );
+    } else if (progressData != null) {
       for (final jp in progressData.juzProgressList) {
         if (jp.totalAyat > 0) {
           juzCompleted += jp.memorizedAyat / jp.totalAyat;
@@ -380,21 +387,22 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
     final double progress = juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
     final String percent = formatPercent(progress * 100);
     
-    // Format juzCompleted to remove .0 if it's a whole number, otherwise show 2 decimals
     String formatJuz(double v) {
       if (v == 0) return '0';
-      return v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+      if (v == v.roundToDouble()) return v.toInt().toString();
+      final s = v.toStringAsFixed(2);
+      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
     }
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 24.w),
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -480,7 +488,7 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              t.waliSantriDashboard.target(target: '$juzTarget'),
+              t.waliSantriDashboard.target(target: formatJuz(juzTarget)),
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
