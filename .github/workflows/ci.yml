@@ -1,0 +1,67 @@
+name: Flutter CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  flutter-ci:
+    name: Flutter CI (analyze, test, build)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Android Gradle toolchain requires Java
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Setup Flutter with pub cache for faster subsequent runs
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.4'
+          channel: stable
+          cache: true
+          cache-key: flutter-${{ runner.os }}-3.35.4
+
+      # firebase_options.dart is gitignored. Stored as base64 in secret to safely handle
+      # special characters in Dart code ($apiKey, $appId, etc.) that echo would misinterpret.
+      # Secret name: FIREBASE_OPTIONS_DART_B64
+      - name: Restore firebase_options.dart
+        run: echo "${{ secrets.FIREBASE_OPTIONS_DART_B64 }}" | base64 --decode > lib/firebase_options.dart
+
+      # google-services.json is gitignored. Stored as base64 in secret.
+      # Secret name: GOOGLE_SERVICES_JSON_B64
+      - name: Restore google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" | base64 --decode > android/app/google-services.json
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # NOTE: build_runner is intentionally omitted here.
+      # All generated files (.freezed.dart, .g.dart, .gr.dart, lib/gen/) are committed
+      # to the repo. Re-running build_runner in CI causes exit code 1 due to conflicts
+      # with the already-present output files, even with --delete-conflicting-outputs.
+      # flutter analyze (next step) will catch any stale generated files at compile time.
+
+      # Only fails on errors, not warnings or info.
+      # Flags --no-fatal-warnings and --no-fatal-infos ensure that non-error lints don't break CI.
+      - name: Analyze code
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
+
+      - name: Run tests
+        run: flutter test
+
+      # Build check only — APK is not uploaded anywhere.
+      # Release build is intentionally skipped: release signing is not yet configured.
+      - name: Build APK (debug — build check)
+        run: flutter build apk --debug

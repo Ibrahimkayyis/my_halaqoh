@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_halaqoh/src/modules/auth/presentation/screens/login_screen.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/screens/login_screen.dart';
+
+class MockAuthCubit extends Mock implements AuthCubit {}
 
 void main() {
+  late MockAuthCubit mockAuthCubit;
+
   setUp(() {
     LocaleSettings.setLocaleRawSync('en');
+    mockAuthCubit = MockAuthCubit();
+    when(() => mockAuthCubit.state).thenReturn(const AuthState.initial());
+    when(() => mockAuthCubit.stream).thenAnswer((_) => const Stream.empty());
   });
 
   Widget createTestWidget() {
@@ -14,8 +26,11 @@ void main() {
       designSize: const Size(360, 690),
       minTextAdapt: true,
       builder: (context, child) {
-        return const MaterialApp(
-          home: LoginScreen(),
+        return MaterialApp(
+          home: BlocProvider<AuthCubit>.value(
+            value: mockAuthCubit,
+            child: const LoginScreen(),
+          ),
         );
       },
     );
@@ -25,27 +40,27 @@ void main() {
     testWidgets('renders login title', (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
-      expect(find.text('Login'), findsWidgets);
+      expect(find.text(t.auth.loginTitle), findsWidgets);
     });
 
     testWidgets('renders login subtitle', (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
-      expect(find.text('Sign in to your account'), findsOneWidget);
+      expect(find.text(t.auth.loginSubtitle), findsOneWidget);
     });
 
     testWidgets('renders username label and field', (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
-      expect(find.text('USERNAME / EMAIL'), findsOneWidget);
-      expect(find.widgetWithText(TextField, 'Enter your username'), findsOneWidget);
+      expect(find.text(t.auth.usernameLabel), findsOneWidget);
+      expect(find.widgetWithText(TextField, t.auth.usernameHint), findsOneWidget);
     });
 
     testWidgets('renders password label and field', (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
-      expect(find.text('PASSWORD'), findsOneWidget);
-      expect(find.widgetWithText(TextField, 'Enter your password'), findsOneWidget);
+      expect(find.text(t.auth.passwordLabel), findsOneWidget);
+      expect(find.widgetWithText(TextField, t.auth.passwordHint), findsOneWidget);
     });
 
     testWidgets('password field is obscured by default', (tester) async {
@@ -78,13 +93,13 @@ void main() {
     testWidgets('renders forgot password link', (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
-      expect(find.text('Lupa Password?'), findsOneWidget);
+      expect(find.text(t.auth.forgotPassword), findsOneWidget);
     });
 
     testWidgets('renders LOGIN button', (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
-      expect(find.widgetWithText(ElevatedButton, 'LOGIN'), findsOneWidget);
+      expect(find.widgetWithText(PrimaryButton, t.auth.loginButton), findsOneWidget);
     });
 
     testWidgets('renders header with logo', (tester) async {
@@ -96,13 +111,13 @@ void main() {
     testWidgets('renders app title in header', (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
-      expect(find.text('MyHalaqoh'), findsOneWidget);
+      expect(find.text(t.app.title), findsOneWidget);
     });
 
     testWidgets('renders subtitle in header', (tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
-      expect(find.text('Halaqoh Management System'), findsAtLeast(1));
+      expect(find.text(t.splash.subtitle), findsAtLeast(1));
     });
   });
 }

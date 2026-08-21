@@ -542,10 +542,13 @@ class TargetHafalanHelper {
 
     if (periode.fraksi != null) {
       final clean = periode.fraksi!.replaceAll(' Juz', '').trim();
-      if (clean == '½') weight = 0.5;
-      else if (clean == '¾') weight = 0.75;
-      else if (clean == '¼') weight = 0.25;
-      else {
+      if (clean == '½') {
+        weight = 0.5;
+      } else if (clean == '¾') {
+        weight = 0.75;
+      } else if (clean == '¼') {
+        weight = 0.25;
+      } else {
         final parts = clean.split('/');
         if (parts.length == 2) {
           final num = double.tryParse(parts[0]);
