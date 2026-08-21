@@ -1,0 +1,66 @@
+﻿name: Flutter CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  flutter-ci:
+    name: Flutter CI (analyze, test, build)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Android Gradle toolchain requires Java
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Setup Flutter with pub cache for faster subsequent runs
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.4'
+          channel: stable
+          cache: true
+          cache-key: flutter-${{ runner.os }}-3.35.4
+
+      # firebase_options.dart is gitignored (contains Firebase config).
+      # The secret FIREBASE_OPTIONS_DART must contain the full file content.
+      - name: Restore firebase_options.dart
+        run: echo "${{ secrets.FIREBASE_OPTIONS_DART }}" > lib/firebase_options.dart
+
+      # google-services.json is gitignored (contains Firebase API keys).
+      # The secret GOOGLE_SERVICES_JSON must contain the full file content.
+      - name: Restore google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Safety net: if a PR modifies a @freezed model / @RoutePage() / slang translation
+      # but forgets to commit the generated files, this step will regenerate them.
+      # If generated files already match the committed ones, this is a no-op.
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # Only fails on errors, not warnings or info.
+      # Current codebase has ~2 warnings and ~14 info items that are non-blocking.
+      - name: Analyze code
+        run: flutter analyze --no-fatal-warnings
+
+      - name: Run tests
+        run: flutter test
+
+      # Build check only — APK is not uploaded anywhere.
+      # Release build is intentionally skipped: release signing is not yet configured.
+      - name: Build APK (debug — build check)
+        run: flutter build apk --debug
