@@ -33,15 +33,16 @@ jobs:
           cache: true
           cache-key: flutter-${{ runner.os }}-3.35.4
 
-      # firebase_options.dart is gitignored (contains Firebase config).
-      # The secret FIREBASE_OPTIONS_DART must contain the full file content.
+      # firebase_options.dart is gitignored. Stored as base64 in secret to safely handle
+      # special characters in Dart code ($apiKey, $appId, etc.) that echo would misinterpret.
+      # Secret name: FIREBASE_OPTIONS_DART_B64
       - name: Restore firebase_options.dart
-        run: echo "${{ secrets.FIREBASE_OPTIONS_DART }}" > lib/firebase_options.dart
+        run: echo "${{ secrets.FIREBASE_OPTIONS_DART_B64 }}" | base64 --decode > lib/firebase_options.dart
 
-      # google-services.json is gitignored (contains Firebase API keys).
-      # The secret GOOGLE_SERVICES_JSON must contain the full file content.
+      # google-services.json is gitignored. Stored as base64 in secret.
+      # Secret name: GOOGLE_SERVICES_JSON_B64
       - name: Restore google-services.json
-        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" | base64 --decode > android/app/google-services.json
 
       - name: Install dependencies
         run: flutter pub get
