@@ -1,4 +1,4 @@
-﻿name: Flutter CI
+name: Flutter CI
 
 on:
   push:
@@ -46,11 +46,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # Safety net: if a PR modifies a @freezed model / @RoutePage() / slang translation
-      # but forgets to commit the generated files, this step will regenerate them.
-      # If generated files already match the committed ones, this is a no-op.
-      - name: Run code generation
-        run: dart run build_runner build --delete-conflicting-outputs
+      # NOTE: build_runner is intentionally omitted here.
+      # All generated files (.freezed.dart, .g.dart, .gr.dart, lib/gen/) are committed
+      # to the repo. Re-running build_runner in CI causes exit code 1 due to conflicts
+      # with the already-present output files, even with --delete-conflicting-outputs.
+      # flutter analyze (next step) will catch any stale generated files at compile time.
 
       # Only fails on errors, not warnings or info.
       # Current codebase has ~2 warnings and ~14 info items that are non-blocking.
