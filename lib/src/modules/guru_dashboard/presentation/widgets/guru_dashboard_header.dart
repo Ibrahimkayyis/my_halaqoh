@@ -107,47 +107,111 @@ class GuruDashboardHeader extends StatelessWidget {
                 ],
               ),
 
-              // Logout Button in rounded square container
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () async {
-                    final confirmed = await ConfirmLogoutDialog.show(context);
-                    if (confirmed && context.mounted) {
-                      final authCubit = context.read<AuthCubit>();
-                      context.router.replaceAll([const LoginRoute()]);
-                      await authCubit.logout();
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(12.r),
-                  child: Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: colors.surface,
+              // Top Right Actions: Notification Bell & Logout Button
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 1. Notification Button with unread indicator
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        context.router.push(const NotificationListRoute());
+                      },
                       borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: isDark
-                            ? colors.border
-                            : colors.border.withValues(alpha: 0.8),
-                        width: 0.8,
-                      ),
-                      boxShadow: isDark
-                          ? []
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
+                      child: Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: isDark
+                                ? colors.border
+                                : colors.border.withValues(alpha: 0.8),
+                            width: 0.8,
+                          ),
+                          boxShadow: isDark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              Icons.notifications_outlined,
+                              size: 19.sp,
+                              color: colors.textPrimary,
+                            ),
+                            // Red unread badge dot
+                            Positioned(
+                              top: -1,
+                              right: -1,
+                              child: Container(
+                                width: 7.w,
+                                height: 7.w,
+                                decoration: BoxDecoration(
+                                  color: colors.error,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                            ],
-                    ),
-                    child: Icon(
-                      Icons.logout_rounded,
-                      size: 18.sp,
-                      color: Colors.redAccent,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
+
+                  SizedBox(width: 8.w),
+
+                  // 2. Logout Button in rounded square container
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () async {
+                        final confirmed = await ConfirmLogoutDialog.show(context);
+                        if (confirmed && context.mounted) {
+                          final authCubit = context.read<AuthCubit>();
+                          context.router.replaceAll([const LoginRoute()]);
+                          await authCubit.logout();
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(12.r),
+                      child: Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: isDark
+                                ? colors.border
+                                : colors.border.withValues(alpha: 0.8),
+                            width: 0.8,
+                          ),
+                          boxShadow: isDark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                        ),
+                        child: Icon(
+                          Icons.logout_rounded,
+                          size: 18.sp,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

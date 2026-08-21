@@ -18,7 +18,7 @@ mixin _$AbsensiRecordEntry {
 /// Firestore document ID of the santri
  String get santriId;/// NIS — unique student identifier
  String get nis;/// Student full name (denormalized for offline display)
- String get nama;/// Attendance status: 'hadir', 'sakit', 'izin', 'alfa'
+ String get nama;/// Attendance status: 'hadir_barcode', 'hadir_manual', 'terlambat', 'sakit', 'izin', 'alfa', 'hadir'
  String get status;
 /// Create a copy of AbsensiRecordEntry
 /// with the given fields replaced by the non-null parameter values.
@@ -225,7 +225,7 @@ class _AbsensiRecordEntry implements AbsensiRecordEntry {
 @override final  String nis;
 /// Student full name (denormalized for offline display)
 @override final  String nama;
-/// Attendance status: 'hadir', 'sakit', 'izin', 'alfa'
+/// Attendance status: 'hadir_barcode', 'hadir_manual', 'terlambat', 'sakit', 'izin', 'alfa', 'hadir'
 @override final  String status;
 
 /// Create a copy of AbsensiRecordEntry

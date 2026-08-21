@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
@@ -281,6 +282,108 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
                           extraJuz: extraJuz,
                         );
                       },
+                    ),
+                    SizedBox(height: 22.h),
+
+                    // 4. UJIAN SERTIFIKASI Section Title
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: _buildSectionTitle(
+                        context: context,
+                        title: 'Ujian Sertifikasi Tahfidz',
+                        colors: colors,
+                        textTheme: textTheme,
+                      ),
+                    ),
+                    SizedBox(height: 12.h),
+
+                    // Sertifikasi Tahfidz Action Card
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Container(
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: isDark
+                                ? colors.border
+                                : colors.border.withValues(alpha: 0.8),
+                            width: 0.8,
+                          ),
+                          boxShadow: isDark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(10.w),
+                                  decoration: BoxDecoration(
+                                    color: colors.primary.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.workspace_premium_rounded,
+                                    size: 24.sp,
+                                    color: colors.primary,
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Ujian Sertifikasi 1 Juz',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w700,
+                                          color: colors.textPrimary,
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                      SizedBox(height: 2.h),
+                                      Text(
+                                        'Daftarkan santri ini ke Waka Tahfidz setelah menyelesaikan hafalan 1 juz penuh.',
+                                        style: TextStyle(
+                                          fontSize: 11.5.sp,
+                                          color: colors.textSecondary,
+                                          fontFamily: 'Poppins',
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 14.h),
+                            PrimaryButton(
+                              onPressed: () {
+                                context.router.push(
+                                  FormPendaftaranSertifikasiRoute(
+                                    preselectedSantri: santri,
+                                  ),
+                                );
+                              },
+                              label: 'Daftarkan Sertifikasi',
+                              icon: Icons.app_registration_rounded,
+                              width: double.infinity,
+                              height: 44.h,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     SizedBox(height: 40.h),
                   ],

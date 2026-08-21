@@ -1,7 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
@@ -185,11 +187,13 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
                 ),
               SizedBox(height: 16.h),
 
-              // ── 2. Action Bar (3 Columns: Absensi, Hafalan, Halaqoh) ─
+              // ── 2. Action Bar (4 Columns: Absensi, Setoran, Halaqoh, Sertifikasi) ─
               DashboardActionBar(
                 onAbsensiTap: () => widget.onNavigateToTab?.call(2),
                 onHafalanTap: () => widget.onNavigateToTab?.call(3),
                 onHalaqohTap: () => widget.onNavigateToTab?.call(1),
+                onSertifikasiTap: () =>
+                    context.router.push(const DaftarSertifikasiRoute()),
               ),
               SizedBox(height: 22.h),
 

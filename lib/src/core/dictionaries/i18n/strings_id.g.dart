@@ -348,8 +348,8 @@ class _TranslationsAddDataId implements TranslationsAddDataEn {
 	@override String get bulkFinishedTitle => 'Selesai!';
 	@override String get bulkSuccess => 'Sukses';
 	@override String get bulkFailed => 'Gagal';
-	@override String get bulkGuruFailNote => 'Catatan: Data yang gagal disimpan kemungkinan disebabkan oleh Nomor Induk Pegawai (NIP) yang sudah terdaftar di sistem.';
-	@override String get bulkSantriFailNote => 'Catatan: Data yang gagal disimpan kemungkinan disebabkan oleh Nomor Induk Siswa (NIS) yang sudah terdaftar di sistem.';
+	@override String get bulkGuruFailNote => 'Catatan: Data gagal disimpan karena Nomor Induk Pegawai (NIP) telah terdaftar di sistem.';
+	@override String get bulkSantriFailNote => 'Catatan: Data gagal disimpan karena Nomor Induk Siswa (NIS) telah terdaftar di sistem.';
 }
 
 // Path: addHalaqoh
@@ -527,6 +527,7 @@ class _TranslationsRiwayatAbsensiId implements TranslationsRiwayatAbsensiEn {
 
 	// Translations
 	@override String get title => 'Riwayat Absensi';
+	@override String get ringkasanKehadiran => 'Ringkasan Kehadiran';
 	@override String halaqohKelas({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
 	@override String get hadir => 'HADIR';
 	@override String get sakit => 'SAKIT';
@@ -636,6 +637,9 @@ class _TranslationsDetailAbsensiHariIniId implements TranslationsDetailAbsensiHa
 	// Translations
 	@override String get title => 'Detail Absensi Hari Ini';
 	@override String get hadir => 'Hadir';
+	@override String get hadirBarcode => 'Hadir (Scan Barcode)';
+	@override String get hadirManual => 'Hadir (Tanpa Kartu)';
+	@override String get terlambat => 'Hadir (Terlambat)';
 	@override String get sakit => 'Sakit';
 	@override String get izin => 'Izin';
 	@override String get alfa => 'Alfa';
@@ -733,6 +737,10 @@ class _TranslationsRiwayatHafalanSantriId implements TranslationsRiwayatHafalanS
 	@override String halaqohKelas({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
 	@override String get totalHafalanBaru => 'Total Hafalan Baru';
 	@override String get totalMurajaah => 'Total Muraja\'ah';
+	@override String get totalTatapMuka => 'TOTAL TATAP MUKA';
+	@override String get tapForDetails => 'Ketuk untuk melihat detail';
+	@override String get tapToClose => 'Ketuk untuk menutup detail';
+	@override String get tatapMukaLabel => 'Tatap Muka';
 	@override String get semuaTipe => 'Semua Tipe';
 	@override String get bukaMutabaah => 'BUKA MUTABA\'AH';
 	@override String get hafalanBaru => 'Hafalan Baru';
@@ -1570,8 +1578,8 @@ extension on TranslationsId {
 			case 'addData.bulkFinishedTitle': return 'Selesai!';
 			case 'addData.bulkSuccess': return 'Sukses';
 			case 'addData.bulkFailed': return 'Gagal';
-			case 'addData.bulkGuruFailNote': return 'Catatan: Data yang gagal disimpan kemungkinan disebabkan oleh Nomor Induk Pegawai (NIP) yang sudah terdaftar di sistem.';
-			case 'addData.bulkSantriFailNote': return 'Catatan: Data yang gagal disimpan kemungkinan disebabkan oleh Nomor Induk Siswa (NIS) yang sudah terdaftar di sistem.';
+			case 'addData.bulkGuruFailNote': return 'Catatan: Data gagal disimpan karena Nomor Induk Pegawai (NIP) telah terdaftar di sistem.';
+			case 'addData.bulkSantriFailNote': return 'Catatan: Data gagal disimpan karena Nomor Induk Siswa (NIS) telah terdaftar di sistem.';
 			case 'addHalaqoh.title': return 'Tambah Halaqoh Baru';
 			case 'addHalaqoh.namaHalaqoh': return 'Nama Halaqoh';
 			case 'addHalaqoh.namaHalaqohHint': return 'Contoh: Halaqoh 7A';
@@ -1688,6 +1696,7 @@ extension on TranslationsId {
 			case 'absensi.mulaiAbsensi.maghrib': return 'Maghrib';
 			case 'absensi.mulaiAbsensi.markAllPresent': return 'Tandai Semua Hadir';
 			case 'riwayatAbsensi.title': return 'Riwayat Absensi';
+			case 'riwayatAbsensi.ringkasanKehadiran': return 'Ringkasan Kehadiran';
 			case 'riwayatAbsensi.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
 			case 'riwayatAbsensi.hadir': return 'HADIR';
 			case 'riwayatAbsensi.sakit': return 'SAKIT';
@@ -1762,6 +1771,9 @@ extension on TranslationsId {
 			case 'absensiHalaqoh.swipeHint': return 'Geser baris tanggal ke kiri/kanan untuk melihat data per hari';
 			case 'detailAbsensiHariIni.title': return 'Detail Absensi Hari Ini';
 			case 'detailAbsensiHariIni.hadir': return 'Hadir';
+			case 'detailAbsensiHariIni.hadirBarcode': return 'Hadir (Scan Barcode)';
+			case 'detailAbsensiHariIni.hadirManual': return 'Hadir (Tanpa Kartu)';
+			case 'detailAbsensiHariIni.terlambat': return 'Hadir (Terlambat)';
 			case 'detailAbsensiHariIni.sakit': return 'Sakit';
 			case 'detailAbsensiHariIni.izin': return 'Izin';
 			case 'detailAbsensiHariIni.alfa': return 'Alfa';
@@ -1832,6 +1844,10 @@ extension on TranslationsId {
 			case 'riwayatHafalanSantri.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
 			case 'riwayatHafalanSantri.totalHafalanBaru': return 'Total Hafalan Baru';
 			case 'riwayatHafalanSantri.totalMurajaah': return 'Total Muraja\'ah';
+			case 'riwayatHafalanSantri.totalTatapMuka': return 'TOTAL TATAP MUKA';
+			case 'riwayatHafalanSantri.tapForDetails': return 'Ketuk untuk melihat detail';
+			case 'riwayatHafalanSantri.tapToClose': return 'Ketuk untuk menutup detail';
+			case 'riwayatHafalanSantri.tatapMukaLabel': return 'Tatap Muka';
 			case 'riwayatHafalanSantri.semuaTipe': return 'Semua Tipe';
 			case 'riwayatHafalanSantri.bukaMutabaah': return 'BUKA MUTABA\'AH';
 			case 'riwayatHafalanSantri.hafalanBaru': return 'Hafalan Baru';

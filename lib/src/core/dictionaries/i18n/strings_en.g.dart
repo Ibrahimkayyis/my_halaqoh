@@ -690,11 +690,11 @@ class TranslationsAddDataEn {
 	/// en: 'Failed'
 	String get bulkFailed => 'Failed';
 
-	/// en: 'Note: Unsaved records may be due to the Employee Identification Number (NIP) already registered in the system.'
-	String get bulkGuruFailNote => 'Note: Unsaved records may be due to the Employee Identification Number (NIP) already registered in the system.';
+	/// en: 'Note: Data failed to save because the Employee Identification Number (NIP) is already registered in the system.'
+	String get bulkGuruFailNote => 'Note: Data failed to save because the Employee Identification Number (NIP) is already registered in the system.';
 
-	/// en: 'Note: Unsaved records may be due to the Student Identification Number (NIS) already registered in the system.'
-	String get bulkSantriFailNote => 'Note: Unsaved records may be due to the Student Identification Number (NIS) already registered in the system.';
+	/// en: 'Note: Data failed to save because the Student Identification Number (NIS) is already registered in the system.'
+	String get bulkSantriFailNote => 'Note: Data failed to save because the Student Identification Number (NIS) is already registered in the system.';
 }
 
 // Path: addHalaqoh
@@ -1080,6 +1080,9 @@ class TranslationsRiwayatAbsensiEn {
 	/// en: 'Attendance History'
 	String get title => 'Attendance History';
 
+	/// en: 'Attendance Summary'
+	String get ringkasanKehadiran => 'Attendance Summary';
+
 	/// en: 'Halaqoh $halaqoh - Class $kelas'
 	String halaqohKelas({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
 
@@ -1311,6 +1314,15 @@ class TranslationsDetailAbsensiHariIniEn {
 	/// en: 'Present'
 	String get hadir => 'Present';
 
+	/// en: 'Present (Barcode Scan)'
+	String get hadirBarcode => 'Present (Barcode Scan)';
+
+	/// en: 'Present (No Card)'
+	String get hadirManual => 'Present (No Card)';
+
+	/// en: 'Present (Late)'
+	String get terlambat => 'Present (Late)';
+
 	/// en: 'Sick'
 	String get sakit => 'Sick';
 
@@ -1524,6 +1536,18 @@ class TranslationsRiwayatHafalanSantriEn {
 
 	/// en: 'Total Review'
 	String get totalMurajaah => 'Total Review';
+
+	/// en: 'TOTAL SESSIONS'
+	String get totalTatapMuka => 'TOTAL SESSIONS';
+
+	/// en: 'Tap to view details'
+	String get tapForDetails => 'Tap to view details';
+
+	/// en: 'Tap to close details'
+	String get tapToClose => 'Tap to close details';
+
+	/// en: 'Sessions'
+	String get tatapMukaLabel => 'Sessions';
 
 	/// en: 'All Types'
 	String get semuaTipe => 'All Types';
@@ -3159,8 +3183,8 @@ extension on Translations {
 			case 'addData.bulkFinishedTitle': return 'Done!';
 			case 'addData.bulkSuccess': return 'Success';
 			case 'addData.bulkFailed': return 'Failed';
-			case 'addData.bulkGuruFailNote': return 'Note: Unsaved records may be due to the Employee Identification Number (NIP) already registered in the system.';
-			case 'addData.bulkSantriFailNote': return 'Note: Unsaved records may be due to the Student Identification Number (NIS) already registered in the system.';
+			case 'addData.bulkGuruFailNote': return 'Note: Data failed to save because the Employee Identification Number (NIP) is already registered in the system.';
+			case 'addData.bulkSantriFailNote': return 'Note: Data failed to save because the Student Identification Number (NIS) is already registered in the system.';
 			case 'addHalaqoh.title': return 'Add New Halaqoh';
 			case 'addHalaqoh.namaHalaqoh': return 'Halaqoh Name';
 			case 'addHalaqoh.namaHalaqohHint': return 'Example: Halaqoh 7A';
@@ -3277,6 +3301,7 @@ extension on Translations {
 			case 'absensi.mulaiAbsensi.maghrib': return 'Maghrib';
 			case 'absensi.mulaiAbsensi.markAllPresent': return 'Mark All Present';
 			case 'riwayatAbsensi.title': return 'Attendance History';
+			case 'riwayatAbsensi.ringkasanKehadiran': return 'Attendance Summary';
 			case 'riwayatAbsensi.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
 			case 'riwayatAbsensi.hadir': return 'PRESENT';
 			case 'riwayatAbsensi.sakit': return 'SICK';
@@ -3351,6 +3376,9 @@ extension on Translations {
 			case 'absensiHalaqoh.swipeHint': return 'Swipe date row left/right to view daily data';
 			case 'detailAbsensiHariIni.title': return 'Today\'s Attendance Detail';
 			case 'detailAbsensiHariIni.hadir': return 'Present';
+			case 'detailAbsensiHariIni.hadirBarcode': return 'Present (Barcode Scan)';
+			case 'detailAbsensiHariIni.hadirManual': return 'Present (No Card)';
+			case 'detailAbsensiHariIni.terlambat': return 'Present (Late)';
 			case 'detailAbsensiHariIni.sakit': return 'Sick';
 			case 'detailAbsensiHariIni.izin': return 'Excused';
 			case 'detailAbsensiHariIni.alfa': return 'Absent';
@@ -3421,6 +3449,10 @@ extension on Translations {
 			case 'riwayatHafalanSantri.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
 			case 'riwayatHafalanSantri.totalHafalanBaru': return 'Total New Memorization';
 			case 'riwayatHafalanSantri.totalMurajaah': return 'Total Review';
+			case 'riwayatHafalanSantri.totalTatapMuka': return 'TOTAL SESSIONS';
+			case 'riwayatHafalanSantri.tapForDetails': return 'Tap to view details';
+			case 'riwayatHafalanSantri.tapToClose': return 'Tap to close details';
+			case 'riwayatHafalanSantri.tatapMukaLabel': return 'Sessions';
 			case 'riwayatHafalanSantri.semuaTipe': return 'All Types';
 			case 'riwayatHafalanSantri.bukaMutabaah': return 'OPEN MUTABA\'AH';
 			case 'riwayatHafalanSantri.hafalanBaru': return 'New Memorization';
