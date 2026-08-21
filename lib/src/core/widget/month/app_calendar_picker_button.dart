@@ -48,7 +48,7 @@ class AppCalendarPickerButton extends StatelessWidget {
           builder: (ctx, setDialogState) {
             return AlertDialog(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.r)),
+                  borderRadius: BorderRadius.circular(24.r)),
               contentPadding:
                   EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
               title: Row(
@@ -105,7 +105,7 @@ class AppCalendarPickerButton extends StatelessWidget {
                           color: isSelected
                               ? colors.primary
                               : colors.primary.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(10.r),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                         alignment: Alignment.center,
                         child: Text(

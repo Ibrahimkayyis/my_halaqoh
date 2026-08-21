@@ -240,7 +240,7 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
                       final murajaahGroups = _groupIntoSubmissions(murajaah);
 
                       return SingleChildScrollView(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

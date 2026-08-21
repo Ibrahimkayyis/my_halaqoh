@@ -39,14 +39,7 @@ class SuperAdminPickerScreen extends StatelessWidget {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  colors.primary,
-                  colors.primary.withValues(alpha: 0.85),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+              gradient: colors.primaryGradient,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(36.r),
                 bottomRight: Radius.circular(36.r),

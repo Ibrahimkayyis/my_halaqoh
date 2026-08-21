@@ -29,6 +29,7 @@ class AppColors {
   static const AppColorSet light = AppColorSet(
     // Primary Colors
     primary: ColorName.primary,
+    primaryDark: Color(0xFF09434B),
     secondary: ColorName.secondary,
 
     // Text Colors
@@ -55,6 +56,7 @@ class AppColors {
   static const AppColorSet dark = AppColorSet(
     // Primary Colors
     primary: ColorName.primaryDark,
+    primaryDark: Color(0xFF07353C),
     secondary: ColorName.secondaryDark,
 
     // Text Colors
@@ -82,6 +84,7 @@ class AppColors {
 class AppColorSet {
   const AppColorSet({
     required this.primary,
+    required this.primaryDark,
     required this.secondary,
     required this.textPrimary,
     required this.textSecondary,
@@ -98,7 +101,15 @@ class AppColorSet {
 
   // Primary Colors
   final Color primary;
+  final Color primaryDark;
   final Color secondary;
+
+  /// Unified standard primary gradient across cards, headers, and buttons
+  LinearGradient get primaryGradient => LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [primary, primaryDark],
+  );
 
   // Text Colors
   final Color textPrimary;

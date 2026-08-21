@@ -1,4 +1,3 @@
-import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -267,113 +266,65 @@ class _WaliSantriRiwayatHafalanScreenState
 
           return Scaffold(
             backgroundColor: colors.background,
+            floatingActionButtonLocation: ExpandableFabMenu.location,
+            floatingActionButton: ExpandableFabMenu(
+              margin: EdgeInsets.only(bottom: 92.h, right: 8.w),
+              items: [
+                ExpandableFabItem(
+                  icon: Icons.analytics_outlined,
+                  label: 'Lihat Progress',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => WaliSantriProgressPerJuzScreen(
+                          name: widget.name,
+                          nis: widget.nis,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                ExpandableFabItem(
+                  icon: Icons.menu_book_outlined,
+                  label: 'Buka Mutaba\'ah',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => WaliSantriMutabaahScreen(
+                          name: widget.name,
+                          nis: widget.nis,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
             body: SafeArea(
               child: Column(
                 children: [
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Green gradient profile card
-                          Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.all(18.w),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  colors.primary,
-                                  colors.primary.withValues(alpha: 0.8),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16.r),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 50.w,
-                                  height: 50.w,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    image: mySantri?.profilePicture != null
-                                        ? DecorationImage(
-                                            image: NetworkImage(
-                                              mySantri!.profilePicture!,
-                                            ),
-                                            fit: BoxFit.cover,
-                                          )
-                                        : null,
-                                  ),
-                                  child: mySantri?.profilePicture == null
-                                      ? Icon(
-                                          Icons.person,
-                                          size: 26.sp,
-                                          color: Colors.white,
-                                        )
-                                      : null,
-                                ),
-                                SizedBox(width: 14.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        displayName,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 18.sp,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                          fontFamily: 'Poppins',
-                                        ),
-                                      ),
-                                      SizedBox(height: 2.h),
-                                      Text(
-                                        t.riwayatHafalanSantri.nisLabel(nis: displayNis),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white.withValues(
-                                            alpha: 0.85,
-                                          ),
-                                          fontFamily: 'Poppins',
-                                        ),
-                                      ),
-                                      Text(
-                                        myHalaqoh != null
-                                            ? t.riwayatHafalanSantri
-                                                  .halaqohKelas(
-                                                    halaqoh: myHalaqoh!.nama,
-                                                    kelas: myHalaqoh!.kelas,
-                                                  )
-                                            : t.waliSantriDashboard.notRegisteredHalaqoh,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white.withValues(
-                                            alpha: 0.85,
-                                          ),
-                                          fontFamily: 'Poppins',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                           SizedBox(height: 16.h),
+
+                          // Santri Profile Context Header
+                          SantriContextHeader(
+                            name: displayName,
+                            nis: displayNis,
+                            subtitle: myHalaqoh != null
+                                ? t.riwayatHafalanSantri.halaqohKelas(
+                                    halaqoh: myHalaqoh!.nama,
+                                    kelas: myHalaqoh!.kelas,
+                                  )
+                                : t.waliSantriDashboard.notRegisteredHalaqoh,
+                            profilePictureUrl: mySantri?.profilePicture,
+                          ),
+                          SizedBox(height: 22.h),
 
                           // Month navigator
                           Row(
@@ -410,107 +361,56 @@ class _WaliSantriRiwayatHafalanScreenState
                             totalMurajaah,
                             colors,
                           ),
-                          SizedBox(height: 16.h),
+                          SizedBox(height: 20.h),
 
-                          // Filter + Buka Mutaba'ah
+                          // ── Section Header: Setoran Terbaru ──
                           Row(
                             children: [
-                              Flexible(
-                                child: CustomDropdown<String>(
-                                  items: _filterOptions,
-                                  initialItem: _filterOptions[_selectedFilterIndex],
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      final idx = _filterOptions.indexOf(value);
-                                      setState(() {
-                                        _selectedFilterIndex = idx;
-                                        _expandedIndex = null;
-                                      });
-                                    }
-                                  },
-                                  decoration: CustomDropdownDecoration(
-                                    closedFillColor: colors.surface,
-                                    closedBorder: Border.all(
-                                      color: colors.border,
-                                      width: 1,
-                                    ),
-                                    closedBorderRadius: BorderRadius.circular(
-                                      10.r,
-                                    ),
-                                    expandedFillColor: colors.surface,
-                                    expandedBorder: Border.all(
-                                      color: colors.border,
-                                      width: 1,
-                                    ),
-                                    expandedBorderRadius: BorderRadius.circular(
-                                      10.r,
-                                    ),
-                                    headerStyle: TextStyle(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: colors.textPrimary,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                    listItemStyle: TextStyle(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: colors.textPrimary,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                  ),
+                              Container(
+                                width: 3.5.w,
+                                height: 16.h,
+                                decoration: BoxDecoration(
+                                  color: colors.primary,
+                                  borderRadius: BorderRadius.circular(2.r),
                                 ),
                               ),
-                              SizedBox(width: 10.w),
-
-                              // Buka Mutaba'ah button
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            WaliSantriMutabaahScreen(
-                                              name: widget.name,
-                                              nis: widget.nis,
-                                            ),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 10.h,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colors.primary,
-                                      borderRadius: BorderRadius.circular(10.r),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.menu_book,
-                                          size: 16.sp,
-                                          color: colors.textOnButton,
-                                        ),
-                                        SizedBox(width: 6.w),
-                                        Text(
-                                          t.riwayatHafalanSantri.bukaMutabaah,
-                                          style: TextStyle(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.w700,
-                                            color: colors.textOnButton,
-                                            fontFamily: 'Poppins',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                'Setoran Terbaru',
+                                style: TextStyle(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.textPrimary,
+                                  fontFamily: 'Poppins',
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 16.h),
+                          SizedBox(height: 12.h),
+
+                          // ── Filter Segmented Chips ──
+                          Row(
+                            children: [
+                              _buildFilterChip(
+                                0,
+                                _filterOptions[0],
+                                colors,
+                              ),
+                              SizedBox(width: 8.w),
+                              _buildFilterChip(
+                                1,
+                                _filterOptions[1],
+                                colors,
+                              ),
+                              SizedBox(width: 8.w),
+                              _buildFilterChip(
+                                2,
+                                _filterOptions[2],
+                                colors,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 14.h),
 
                           // Records list
                           if (riwayatState.maybeWhen(
@@ -536,31 +436,7 @@ class _WaliSantriRiwayatHafalanScreenState
                             ...groups.asMap().entries.map(
                               (e) => _buildGroupCard(e.value, e.key, colors),
                             ),
-                          SizedBox(height: 16.h),
-
-                          // Lihat Progress button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 48.h,
-                            child: CustomOutlinedButton(
-                              width: double.infinity,
-                              height: 48.h,
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        WaliSantriProgressPerJuzScreen(
-                                          name: widget.name,
-                                          nis: widget.nis,
-                                        ),
-                                  ),
-                                );
-                              },
-                              icon: Icons.menu_book,
-                              label: t.riwayatHafalanSantri.lihatProgress,
-                            ),
-                          ),
-                          SizedBox(height: 10.h),
+                          SizedBox(height: 160.h),
                         ],
                       ),
                     ),
@@ -570,6 +446,52 @@ class _WaliSantriRiwayatHafalanScreenState
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(int index, String label, AppColorSet colors) {
+    final isSelected = _selectedFilterIndex == index;
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _selectedFilterIndex = index;
+              _expandedIndex = null;
+            });
+          },
+          borderRadius: BorderRadius.circular(8.r),
+          child: Container(
+            height: 34.h,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? colors.primary.withValues(alpha: 0.1)
+                  : colors.surface,
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(
+                color: isSelected
+                    ? colors.primary
+                    : colors.border.withValues(alpha: 0.7),
+                width: isSelected ? 1.2 : 0.8,
+              ),
+            ),
+            child: Center(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.5.sp,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? colors.primary : colors.textSecondary,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -12,8 +12,11 @@ import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/presentation/cubits/absensi_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/widgets/laporan_konfigurasi_sheet.dart';
 
 /// Riwayat Absensi screen — individual student attendance history
@@ -215,6 +218,18 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
+    // Look up real santri data by NIS
+    final santriState = context.watch<SantriCubit>().state;
+    SantriModel? santri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          santri = list.firstWhere((s) => s.nis == widget.nis);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
     return BlocProvider.value(
       value: _absensiCubit,
       child: BlocBuilder<AbsensiCubit, AbsensiState>(
@@ -263,74 +278,25 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
               centerTitle: false,
             ),
             body: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 16.h),
 
-                  // ── Profile card ──
+                  // ── Profile Context Header ──
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(18.w),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            colors.primary,
-                            colors.primary.withValues(alpha: 0.85),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48.w,
-                            height: 48.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.2),
-                            ),
-                            child: Icon(
-                              Icons.person,
-                              size: 26.sp,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(width: 14.w),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.name,
-                                  style: TextStyle(
-                                    fontSize: 17.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                                SizedBox(height: 2.h),
-                                Text(
-                                  t.riwayatAbsensi.nisLabel(nis: widget.nis),
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    color: Colors.white.withValues(alpha: 0.85),
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: SantriContextHeader(
+                      name: santri?.nama ?? widget.name,
+                      nis: santri?.nis ?? widget.nis,
+                      subtitle: santri != null && santri!.kelas.isNotEmpty
+                          ? 'Kelas ${santri!.kelas}${santri!.program}'
+                          : null,
+                      profilePictureUrl: santri?.profilePicture,
                     ),
                   ),
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 22.h),
 
                   // ── Month navigator ──
                   Padding(
@@ -362,101 +328,9 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                   SizedBox(height: 16.h),
 
                   // ── Summary stats ──
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(16.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              20.w,
-                              16.h,
-                              20.w,
-                              12.h,
-                            ),
-                            child: Text(
-                              t.riwayatAbsensi.ringkasanKehadiran,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w700,
-                                color: colors.textPrimary,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          ),
-                          // Row 1
-                          SizedBox(
-                            height: 92.h,
-                            child: Row(
-                              children: [
-                                _buildStat(
-                                  '${stats['hadir_barcode']}',
-                                  t.detailAbsensiHariIni.hadirBarcode,
-                                  colors.primary,
-                                  colors,
-                                ),
-                                _buildShortDivider(colors),
-                                _buildStat(
-                                  '${stats['hadir_manual']}',
-                                  t.detailAbsensiHariIni.hadirManual,
-                                  colors.green,
-                                  colors,
-                                ),
-                                _buildShortDivider(colors),
-                                _buildStat(
-                                  '${stats['terlambat']}',
-                                  t.detailAbsensiHariIni.terlambat,
-                                  const Color(0xFFF3722C),
-                                  colors,
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Row 2
-                          SizedBox(
-                            height: 84.h,
-                            child: Row(
-                              children: [
-                                _buildStat(
-                                  '${stats['sakit']}',
-                                  t.riwayatAbsensi.sakit,
-                                  colors.yellow,
-                                  colors,
-                                ),
-                                _buildShortDivider(colors),
-                                _buildStat(
-                                  '${stats['izin']}',
-                                  t.riwayatAbsensi.izin,
-                                  colors.blue,
-                                  colors,
-                                ),
-                                _buildShortDivider(colors),
-                                _buildStat(
-                                  '${stats['alfa']}',
-                                  t.riwayatAbsensi.alfa,
-                                  colors.red,
-                                  colors,
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                        ],
-                      ),
-                    ),
+                  AttendanceSummaryCard(
+                    stats: stats,
+                    margin: EdgeInsets.symmetric(horizontal: 20.w),
                   ),
                   SizedBox(height: 20.h),
 
@@ -534,256 +408,52 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                   ),
                   SizedBox(height: 16.h),
 
-                  // ── Lihat Kalender button ──
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: GestureDetector(
-                      onTap: () {
-                        context.router.push(
-                          KalenderAbsensiRoute(
-                            name: widget.name,
-                            nis: widget.nis,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        decoration: BoxDecoration(
-                          color: colors.surface,
-                          borderRadius: BorderRadius.circular(14.r),
-                          border: Border.all(color: colors.primary, width: 1.5),
+                  // ── Action buttons (Kalender & Download) ──
+                  AttendanceActionRow(
+                    margin: EdgeInsets.symmetric(horizontal: 20.w),
+                    onViewCalendar: () {
+                      context.router.push(
+                        KalenderAbsensiRoute(
+                          name: widget.name,
+                          nis: widget.nis,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              t.riwayatAbsensi.lihatKalender,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: colors.primary,
-                                fontFamily: 'Poppins',
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                            SizedBox(width: 8.w),
-                            Icon(
-                              Icons.calendar_month,
-                              size: 20.sp,
-                              color: colors.primary,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                      );
+                    },
+                    onDownloadReport: () {
+                      // Resolve the teacher's halaqoh from the global cubit
+                      HalaqohModel? myHalaqoh;
+                      final linkedDocId =
+                          ActiveSessionHelper.getActiveLinkedDocId(context) ??
+                          '';
+                      context.read<HalaqohCubit>().state.maybeWhen(
+                        loaded: (list) {
+                          try {
+                            myHalaqoh = list.firstWhere(
+                              (h) => h.guruId == linkedDocId,
+                            );
+                          } catch (_) {}
+                        },
+                        orElse: () {},
+                      );
+
+                      LaporanKonfigurasiSheet.show(
+                        context,
+                        records: allRecords,
+                        santriName: widget.name,
+                        santriNis: widget.nis,
+                        programType: _effectiveProgramType,
+                        halaqoh: myHalaqoh,
+                        initialMonth: _currentMonth,
+                        initialYear: _currentYear,
+                      );
+                    },
                   ),
                   SizedBox(height: 16.h),
 
-                  // ── Keterangan card ──
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(20.w),
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(16.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            t.riwayatAbsensi.keterangan,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color: colors.textPrimary,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          SizedBox(height: 16.h),
-                          // Symmetrical status legend rows
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: _buildLegendItem(
-                                  colors.primary,
-                                  t.detailAbsensiHariIni.hadirBarcode,
-                                  colors,
-                                  customCode: 'H',
-                                ),
-                              ),
-                              SizedBox(width: 16.w),
-                              Expanded(
-                                child: _buildLegendItem(
-                                  colors.green,
-                                  t.detailAbsensiHariIni.hadirManual,
-                                  colors,
-                                  customCode: 'HT',
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16.h),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: _buildLegendItem(
-                                  const Color(0xFFF3722C),
-                                  t.detailAbsensiHariIni.terlambat,
-                                  colors,
-                                  customCode: 'T',
-                                ),
-                              ),
-                              SizedBox(width: 16.w),
-                              Expanded(
-                                child: _buildLegendItem(
-                                  colors.yellow,
-                                  t.riwayatAbsensi.sakitLabel,
-                                  colors,
-                                  customCode: 'S',
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16.h),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: _buildLegendItem(
-                                  colors.blue,
-                                  t.riwayatAbsensi.izinLabel,
-                                  colors,
-                                  customCode: 'I',
-                                ),
-                              ),
-                              SizedBox(width: 16.w),
-                              Expanded(
-                                child: _buildLegendItem(
-                                  colors.red,
-                                  t.riwayatAbsensi.alphaLabel,
-                                  colors,
-                                  customCode: 'A',
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 24.h),
-                          Text(
-                            t.riwayatAbsensi.sessionKeterangan,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color: colors.textPrimary,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          SizedBox(height: 16.h),
-                          // Session legend forced to 1 single horizontal row with horizontal scrolling to prevent overflow
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: _effectiveProgramType == 'takhassus'
-                                  ? [
-                                      _buildSessionLabel(
-                                        t.riwayatAbsensi.abbrTakhassus[0],
-                                        t.riwayatAbsensi.sessionPagiShubuh,
-                                        colors,
-                                      ),
-                                      SizedBox(width: 20.w),
-                                      _buildSessionLabel(
-                                        t.riwayatAbsensi.abbrTakhassus[1],
-                                        t.riwayatAbsensi.sessionDhuha,
-                                        colors,
-                                      ),
-                                      SizedBox(width: 20.w),
-                                      _buildSessionLabel(
-                                        t.riwayatAbsensi.abbrTakhassus[2],
-                                        t.riwayatAbsensi.sessionSiang,
-                                        colors,
-                                      ),
-                                      SizedBox(width: 20.w),
-                                      _buildSessionLabel(
-                                        t.riwayatAbsensi.abbrTakhassus[3],
-                                        t.riwayatAbsensi.sessionSoreAshar,
-                                        colors,
-                                      ),
-                                      SizedBox(width: 20.w),
-                                      _buildSessionLabel(
-                                        t.riwayatAbsensi.abbrTakhassus[4],
-                                        t.riwayatAbsensi.sessionMalamMaghrib,
-                                        colors,
-                                      ),
-                                    ]
-                                  : [
-                                      _buildSessionLabel(
-                                        t.riwayatAbsensi.abbrReguler[0],
-                                        t.riwayatAbsensi.sessionPagiShubuh,
-                                        colors,
-                                      ),
-                                      SizedBox(width: 24.w),
-                                      _buildSessionLabel(
-                                        t.riwayatAbsensi.abbrReguler[1],
-                                        t.riwayatAbsensi.sessionMalamMaghrib,
-                                        colors,
-                                      ),
-                                    ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // ── Download button ──
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: PrimaryButton(
-                      width: double.infinity,
-                      height: 52.h,
-                      onPressed: () {
-                        // Resolve the teacher's halaqoh from the global cubit
-                        HalaqohModel? myHalaqoh;
-                        final linkedDocId =
-                            ActiveSessionHelper.getActiveLinkedDocId(context) ??
-                            '';
-                        context.read<HalaqohCubit>().state.maybeWhen(
-                          loaded: (list) {
-                            try {
-                              myHalaqoh = list.firstWhere(
-                                (h) => h.guruId == linkedDocId,
-                              );
-                            } catch (_) {}
-                          },
-                          orElse: () {},
-                        );
-
-                        LaporanKonfigurasiSheet.show(
-                          context,
-                          records: allRecords,
-                          santriName: widget.name,
-                          santriNis: widget.nis,
-                          programType: _effectiveProgramType,
-                          halaqoh: myHalaqoh,
-                          initialMonth: _currentMonth,
-                          initialYear: _currentYear,
-                        );
-                      },
-                      icon: Icons.download,
-                      label: t.riwayatAbsensi.downloadLaporan,
-                    ),
+                  // ── Keterangan Card ──
+                  AttendanceLegendCard(
+                    programType: _effectiveProgramType,
+                    margin: EdgeInsets.symmetric(horizontal: 20.w),
                   ),
                   SizedBox(height: 24.h),
                 ],
@@ -791,63 +461,6 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildStat(
-    String value,
-    String label,
-    Color color,
-    AppColorSet colors,
-  ) {
-    return Expanded(
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 26.sp,
-                fontWeight: FontWeight.w700,
-                color: color,
-                fontFamily: 'Poppins',
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Flexible(
-              child: Text(
-                label.toUpperCase(),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 9.sp,
-                  fontWeight: FontWeight.w600,
-                  color: colors.textSecondary,
-                  fontFamily: 'Poppins',
-                  letterSpacing: 0.3,
-                  height: 1.2,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// A short centered vertical line that does NOT span the full cell height —
-  /// gives a lighter, more elegant look than a full VerticalDivider.
-  Widget _buildShortDivider(AppColorSet colors) {
-    return Center(
-      child: Container(
-        width: 1,
-        height: 40.h,
-        color: colors.border.withValues(alpha: 0.5),
       ),
     );
   }
@@ -967,83 +580,5 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
       ),
     );
   }
-
-  Widget _buildLegendItem(
-    Color color,
-    String label,
-    AppColorSet colors, {
-    String? customCode,
-  }) {
-    final displayCode = customCode ?? label[0];
-    return Row(
-      children: [
-        Container(
-          width: 28.w,
-          height: 28.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color,
-          ),
-          child: Center(
-            child: Text(
-              displayCode,
-              style: TextStyle(
-                fontSize: displayCode.length > 1 ? 10.sp : 12.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: 10.w),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.5.sp,
-              fontWeight: FontWeight.w500,
-              color: colors.textPrimary,
-              fontFamily: 'Poppins',
-              height: 1.2,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSessionLabel(String code, String name, AppColorSet colors) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-          decoration: BoxDecoration(
-            color: colors.border.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(6.r),
-          ),
-          child: Text(
-            code,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w700,
-              color: colors.primary,
-              fontFamily: 'Poppins',
-            ),
-          ),
-        ),
-        SizedBox(width: 6.w),
-        Text(
-          name,
-          style: TextStyle(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w500,
-            color: colors.textPrimary,
-            fontFamily: 'Poppins',
-          ),
-        ),
-      ],
-    );
-  }
 }
+

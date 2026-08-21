@@ -13,15 +13,15 @@ class ShimmerAbsensiSantriItem extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
         color: isDark ? colors.surface.withValues(alpha: 0.5) : colors.surface,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -29,29 +29,22 @@ class ShimmerAbsensiSantriItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Avatar placeholder
-          ShimmerBox(width: 44.w, height: 44.w, radius: 22.r),
-          SizedBox(width: 12.w),
-
           // Main content column
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Name placeholder
-                ShimmerBox(width: 150.w, height: 16.h, radius: 4.r),
+                ShimmerBox(width: 140.w, height: 16.h, radius: 4.r),
                 SizedBox(height: 6.h),
-
-                // NIS placeholder
                 ShimmerBox(width: 80.w, height: 12.h, radius: 4.r),
-                SizedBox(height: 10.h),
-
-                // Button placeholder
-                ShimmerBox(width: 120.w, height: 26.h, radius: 8.r),
               ],
             ),
           ),
+          SizedBox(width: 8.w),
+
+          // Chevron placeholder
+          ShimmerBox(width: 20.w, height: 20.h, radius: 4.r),
         ],
       ),
     );

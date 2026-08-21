@@ -574,13 +574,21 @@ class _ProgressHafalanPerJuzScreenState
 
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Green gradient profile card
-                    _buildProfileCard(colors, santri),
-                    SizedBox(height: 20.h),
+                    SizedBox(height: 12.h),
+
+                    // Profile Context Header
+                    SantriContextHeader(
+                      name: widget.name,
+                      nis: widget.nis,
+                      subtitle: santri != null && santri!.kelas.isNotEmpty ? 'Kelas: ${santri!.kelas}' : null,
+                      profilePictureUrl: santri?.profilePicture,
+                    ),
+                    SizedBox(height: 22.h),
 
                     // Target Hafalan header
                     Text(
@@ -735,75 +743,6 @@ class _ProgressHafalanPerJuzScreenState
     );
   }
 
-  Widget _buildProfileCard(AppColorSet colors, SantriModel? santri) {
-    final kelasInfo = santri != null
-        ? t.riwayatHafalanSantri.halaqohKelas(
-            halaqoh: '', kelas: santri.kelas)
-        : '';
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(18.w),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colors.primary, colors.primary.withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50.w,
-            height: 50.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.2),
-            ),
-            child: Icon(Icons.person, size: 26.sp, color: Colors.white),
-          ),
-          SizedBox(width: 14.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.name,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  t.progressHafalanPerJuz.nisLabel(nis: widget.nis),
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                if (kelasInfo.isNotEmpty)
-                  Text(
-                    kelasInfo,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildJuzCard(
     BuildContext context,

@@ -11,6 +11,9 @@ import 'package:my_halaqoh/src/core/quran/surah_model.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/input_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/domain/models/hafalan_santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Selected surah state
@@ -171,13 +174,13 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
               height: MediaQuery.of(context).size.height * 0.75,
               decoration: BoxDecoration(
                 color: colors.surface,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
               ),
               child: Column(
                 children: [
                   SizedBox(height: 20.h),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -223,7 +226,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     height: 40.h,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
                       itemCount: 31, // "Semua" + 30 Juz
                       itemBuilder: (ctx, index) {
                         final isSemua = index == 0;
@@ -244,6 +247,9 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                             selected: isSelected,
                             selectedColor: colors.primary,
                             backgroundColor: colors.surface,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
                             side: BorderSide(
                               color: isSelected ? colors.primary : colors.border,
                             ),
@@ -261,11 +267,11 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                   SizedBox(height: 12.h),
                   // ── Search Field ──
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
                     child: Container(
                       decoration: BoxDecoration(
                         color: colors.background,
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(color: colors.border, width: 1),
                       ),
                       child: TextField(
@@ -300,7 +306,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                   SizedBox(height: 8.h),
                   Expanded(
                     child: ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
                       itemCount: filtered.length,
                       itemBuilder: (_, idx) {
                         final surah = filtered[idx];
@@ -368,10 +374,10 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
+                    padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
                     child: PrimaryButton(
                       width: double.infinity,
-                      height: 50.h,
+                      height: 48.h,
                       onPressed: totalCount > 0
                           ? () {
                               _selectedSurahs.removeWhere((sel) {
@@ -404,7 +410,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       label: totalCount > 0
                           ? t.inputHafalanForm.konfirmasiPilihanCount(count: totalCount)
                           : t.inputHafalanForm.konfirmasiPilihan,
-                      borderRadius: 14.r,
+                      borderRadius: 8.r,
                     ),
                   ),
                 ],
@@ -421,6 +427,18 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+
+    // Look up real santri data by NIS
+    final santriState = context.watch<SantriCubit>().state;
+    SantriModel? santri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          santri = list.firstWhere((s) => s.nis == widget.nis);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
 
     return BlocConsumer<InputHafalanCubit, InputHafalanState>(
       listener: (context, state) {
@@ -466,80 +484,23 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                 children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 16.h),
 
-                  // ── Profile card ──
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: colors.surface,
-                      borderRadius: BorderRadius.circular(14.r),
-                      border: Border.all(
-                        color: colors.border.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48.w,
-                          height: 48.w,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: colors.primary.withValues(alpha: 0.1),
-                          ),
-                          child: Icon(
-                            Icons.person,
-                            size: 26.sp,
-                            color: colors.primary,
-                          ),
-                        ),
-                        SizedBox(width: 14.w),
-                        // FIX: Expanded prevents overflow when name is long
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.name,
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: colors.textPrimary,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
-                              SizedBox(height: 2.h),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8.w,
-                                  vertical: 2.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colors.background,
-                                  borderRadius: BorderRadius.circular(6.r),
-                                ),
-                                child: Text(
-                                  t.inputHafalanForm.nisLabel(nis: widget.nis),
-                                  style: TextStyle(
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: colors.textSecondary,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  // ── Profile Context Header ──
+                  SantriContextHeader(
+                    name: santri?.nama ?? widget.name,
+                    nis: santri?.nis ?? widget.nis,
+                    subtitle: santri != null && santri!.kelas.isNotEmpty
+                        ? 'Kelas ${santri!.kelas}${santri!.program}'
+                        : null,
+                    profilePictureUrl: santri?.profilePicture,
                   ),
-                  SizedBox(height: 18.h),
+                  SizedBox(height: 22.h),
 
                   // ── Ziyadah / Murajaah tab selector ──
                   AppTabSelector(
@@ -554,12 +515,19 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
 
                   Row(
                     children: [
-                      Icon(Icons.menu_book, size: 20.sp, color: colors.primary),
+                      Container(
+                        width: 3.5.w,
+                        height: 16.h,
+                        decoration: BoxDecoration(
+                          color: colors.primary,
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
                       SizedBox(width: 8.w),
                       Text(
                         t.inputHafalanForm.formulirHafalan,
                         style: TextStyle(
-                          fontSize: 16.sp,
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
                           color: colors.textPrimary,
                           fontFamily: 'Poppins',
@@ -580,7 +548,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       ),
                       decoration: BoxDecoration(
                         color: colors.surface,
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(
                           color: colors.border.withValues(alpha: 0.5),
                           width: 1,
@@ -639,7 +607,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       ),
                       decoration: BoxDecoration(
                         color: colors.surface,
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(color: colors.border, width: 1),
                       ),
                       child: Row(
@@ -703,16 +671,19 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                   // ── Penilaian header ──
                   Row(
                     children: [
-                      Icon(
-                        Icons.star_outline,
-                        size: 20.sp,
-                        color: colors.primary,
+                      Container(
+                        width: 3.5.w,
+                        height: 16.h,
+                        decoration: BoxDecoration(
+                          color: colors.primary,
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
                       ),
                       SizedBox(width: 8.w),
                       Text(
                         t.inputHafalanForm.penilaian,
                         style: TextStyle(
-                          fontSize: 16.sp,
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
                           color: colors.textPrimary,
                           fontFamily: 'Poppins',
@@ -750,7 +721,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
 
           // ── Bottom buttons ──
           Container(
-            padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
+            padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 20.h),
             decoration: BoxDecoration(
               color: colors.surface,
               boxShadow: [
@@ -761,87 +732,88 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            child: Row(
               children: [
-                PrimaryButton(
-                  width: double.infinity,
-                  height: 50.h,
-                  onPressed: () async {
-                    // ── Validation ──────────────────────────────────────────
-                    if (_selectedSurahs.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            t.inputHafalanForm.errPilihMinimalSatuSurah,
-                            style: const TextStyle(fontFamily: 'Poppins'),
-                          ),
-                          backgroundColor: colors.red,
-                        ),
-                      );
-                      return;
-                    }
-
-                    // Kelancaran: wajib diisi, angka 1–100
-                    final kelancaranRaw = _kelancaranController.text.trim();
-                    final kelancaranVal = int.tryParse(kelancaranRaw);
-                    // Tajwid: wajib diisi, angka 1–100
-                    final tajwidRaw = _tajwidController.text.trim();
-                    final tajwidVal = int.tryParse(tajwidRaw);
-
-                    // Compute both errors at once so all red borders show together
-                    final kelancaranErr = (kelancaranRaw.isEmpty || kelancaranVal == null || kelancaranVal < 1 || kelancaranVal > 100)
-                        ? t.inputHafalanForm.errWajibDiisi1Sampai100
-                        : null;
-                    final tajwidErr = (tajwidRaw.isEmpty || tajwidVal == null || tajwidVal < 1 || tajwidVal > 100)
-                        ? t.inputHafalanForm.errWajibDiisi1Sampai100
-                        : null;
-
-                    if (kelancaranErr != null || tajwidErr != null) {
-                      setState(() {
-                        _kelancaranError = kelancaranErr;
-                        _tajwidError = tajwidErr;
-                      });
-                      return;
-                    }
-
-                    // ── Confirmation & Save ──────────────────────────────────
-                    final confirmed = await ConfirmSaveDialog.show(context);
-                    if (confirmed && context.mounted) {
-                      final models = _selectedSurahs.map((sel) {
-                        final typeStr = _tabController.index == 0 ? 'Ziyadah' : 'Murajaah';
-                        final ayatStart = int.tryParse(sel.ayatAwalController.text) ?? 1;
-                        return HafalanSantriModel(
-                          id: DateTime.now().microsecondsSinceEpoch.toString() + sel.surah.id.toString(),
-                          santriId: widget.santriId,
-                          halaqohId: widget.halaqohId,
-                          guruId: widget.guruId,
-                          tanggalSetoran: _tanggalSetoran,
-                          jenis: typeStr,
-                          surahId: sel.surah.id,
-                          surahName: sel.surah.name,
-                          ayatMulai: ayatStart,
-                          ayatSelesai: int.tryParse(sel.ayatAkhirController.text) ?? sel.surah.ayatCount,
-                          juz: int.tryParse(_juzController.text) ?? sel.surah.juzForAyat(ayatStart) ?? sel.surah.juzStart,
-                          nilaiKelancaran: kelancaranVal!,
-                          nilaiTajwid: tajwidVal!,
-                          createdAt: DateTime.now(),
-                          isSynced: false,
-                        );
-                      }).toList();
-                      context.read<InputHafalanCubit>().submitMultipleHafalan(models);
-                    }
-                  },
-                  label: t.inputHafalanForm.simpan,
-                  borderRadius: 14.r,
+                Expanded(
+                  child: CustomOutlinedButton(
+                    height: 42.h,
+                    onPressed: () => Navigator.of(context).pop(),
+                    label: t.inputHafalanForm.batal,
+                    borderRadius: 8.r,
+                  ),
                 ),
-                SizedBox(height: 10.h),
-                CustomOutlinedButton(
-                  width: double.infinity,
-                  height: 50.h,
-                  onPressed: () => Navigator.of(context).pop(),
-                  label: t.inputHafalanForm.batal,
-                  borderRadius: 14.r,
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: PrimaryButton(
+                    height: 42.h,
+                    onPressed: () async {
+                      // ── Validation ──────────────────────────────────────────
+                      if (_selectedSurahs.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              t.inputHafalanForm.errPilihMinimalSatuSurah,
+                              style: const TextStyle(fontFamily: 'Poppins'),
+                            ),
+                            backgroundColor: colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      // Kelancaran: wajib diisi, angka 1–100
+                      final kelancaranRaw = _kelancaranController.text.trim();
+                      final kelancaranVal = int.tryParse(kelancaranRaw);
+                      // Tajwid: wajib diisi, angka 1–100
+                      final tajwidRaw = _tajwidController.text.trim();
+                      final tajwidVal = int.tryParse(tajwidRaw);
+
+                      // Compute both errors at once so all red borders show together
+                      final kelancaranErr = (kelancaranRaw.isEmpty || kelancaranVal == null || kelancaranVal < 1 || kelancaranVal > 100)
+                          ? t.inputHafalanForm.errWajibDiisi1Sampai100
+                          : null;
+                      final tajwidErr = (tajwidRaw.isEmpty || tajwidVal == null || tajwidVal < 1 || tajwidVal > 100)
+                          ? t.inputHafalanForm.errWajibDiisi1Sampai100
+                          : null;
+
+                      if (kelancaranErr != null || tajwidErr != null) {
+                        setState(() {
+                          _kelancaranError = kelancaranErr;
+                          _tajwidError = tajwidErr;
+                        });
+                        return;
+                      }
+
+                      // ── Confirmation & Save ──────────────────────────────────
+                      final confirmed = await ConfirmSaveDialog.show(context);
+                      if (confirmed && context.mounted) {
+                        final models = _selectedSurahs.map((sel) {
+                          final typeStr = _tabController.index == 0 ? 'Ziyadah' : 'Murajaah';
+                          final ayatStart = int.tryParse(sel.ayatAwalController.text) ?? 1;
+                          return HafalanSantriModel(
+                            id: DateTime.now().microsecondsSinceEpoch.toString() + sel.surah.id.toString(),
+                            santriId: widget.santriId,
+                            halaqohId: widget.halaqohId,
+                            guruId: widget.guruId,
+                            tanggalSetoran: _tanggalSetoran,
+                            jenis: typeStr,
+                            surahId: sel.surah.id,
+                            surahName: sel.surah.name,
+                            ayatMulai: ayatStart,
+                            ayatSelesai: int.tryParse(sel.ayatAkhirController.text) ?? sel.surah.ayatCount,
+                            juz: int.tryParse(_juzController.text) ?? sel.surah.juzForAyat(ayatStart) ?? sel.surah.juzStart,
+                            nilaiKelancaran: kelancaranVal!,
+                            nilaiTajwid: tajwidVal!,
+                            createdAt: DateTime.now(),
+                            isSynced: false,
+                          );
+                        }).toList();
+                        context.read<InputHafalanCubit>().submitMultipleHafalan(models);
+                      }
+                    },
+                    label: t.inputHafalanForm.simpan,
+                    borderRadius: 8.r,
+                  ),
                 ),
               ],
             ),
@@ -866,7 +838,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
           color: colors.border.withValues(alpha: 0.5),
           width: 1,
@@ -921,16 +893,20 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                 ),
               ),
               GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () {
                   setState(() {
                     _selectedSurahs[index].dispose();
                     _selectedSurahs.removeAt(index);
                   });
                 },
-                child: Icon(
-                  Icons.delete_outline,
-                  size: 20.sp,
-                  color: colors.textSecondary,
+                child: Padding(
+                  padding: EdgeInsets.all(6.w),
+                  child: Icon(
+                    Icons.delete_outline,
+                    size: 20.sp,
+                    color: colors.textSecondary,
+                  ),
                 ),
               ),
             ],
@@ -976,12 +952,11 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      t.inputHafalanForm.ayatAwal.toUpperCase(),
+                      t.inputHafalanForm.ayatAwal,
                       style: TextStyle(
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
                         color: colors.textSecondary,
-                        letterSpacing: 0.5,
                         fontFamily: 'Poppins',
                       ),
                     ),
@@ -989,7 +964,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     Container(
                       decoration: BoxDecoration(
                         color: colors.background,
-                        borderRadius: BorderRadius.circular(10.r),
+                        borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(color: colors.border, width: 1),
                       ),
                       child: TextField(
@@ -1019,12 +994,11 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      t.inputHafalanForm.ayatAkhir.toUpperCase(),
+                      t.inputHafalanForm.ayatAkhir,
                       style: TextStyle(
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
                         color: colors.textSecondary,
-                        letterSpacing: 0.5,
                         fontFamily: 'Poppins',
                       ),
                     ),
@@ -1032,7 +1006,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     Container(
                       decoration: BoxDecoration(
                         color: colors.background,
-                        borderRadius: BorderRadius.circular(10.r),
+                        borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(color: colors.border, width: 1),
                       ),
                       child: TextField(
@@ -1152,7 +1126,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
         Container(
           decoration: BoxDecoration(
             color: hasError ? colors.red.withValues(alpha: 0.05) : colors.surface,
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
               color: hasError ? colors.red : colors.border,
               width: hasError ? 1.5 : 1,
@@ -1214,7 +1188,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
     return Container(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: colors.border, width: 1),
       ),
       child: TextField(

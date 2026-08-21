@@ -14,10 +14,10 @@ class ShimmerDetailAbsensiHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(18.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: isDark ? colors.surface.withValues(alpha: 0.5) : colors.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
           color: colors.border.withValues(alpha: 0.5),
         ),
@@ -85,7 +85,7 @@ class ShimmerDetailAbsensiSantriItem extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
         color: isDark ? colors.surface.withValues(alpha: 0.5) : colors.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: colors.border.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
@@ -98,28 +98,19 @@ class ShimmerDetailAbsensiSantriItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top section: Avatar, Name, NIS
-          Row(
+          // Top section: Name, NIS
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ShimmerBox(width: 40.w, height: 40.w, radius: 20.r),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ShimmerBox(width: 140.w, height: 16.h, radius: 4.r),
-                    SizedBox(height: 4.h),
-                    ShimmerBox(width: 80.w, height: 12.h, radius: 4.r),
-                  ],
-                ),
-              ),
+              ShimmerBox(width: 160.w, height: 16.h, radius: 4.r),
+              SizedBox(height: 6.h),
+              ShimmerBox(width: 90.w, height: 12.h, radius: 4.r),
             ],
           ),
           SizedBox(height: 14.h),
 
           // Bottom section: Dropdown
-          ShimmerBox(width: double.infinity, height: 44.h, radius: 12.r),
+          ShimmerBox(width: double.infinity, height: 44.h, radius: 8.r),
         ],
       ),
     );

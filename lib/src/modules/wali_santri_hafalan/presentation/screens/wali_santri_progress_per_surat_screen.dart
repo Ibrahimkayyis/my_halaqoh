@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/quran/quran_service.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
@@ -179,6 +180,26 @@ class _WaliSantriProgressPerSuratScreenState
       orElse: () {},
     );
 
+    // Look up halaqoh for kelas info
+    final halaqohState = context.watch<HalaqohCubit>().state;
+    HalaqohModel? myHalaqoh;
+    halaqohState.maybeWhen(
+      loaded: (list) {
+        try {
+          if (santri != null) {
+            myHalaqoh = list.firstWhere(
+                (h) => h.santriIds.contains(santri!.id));
+          }
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    final halaqohInfo = myHalaqoh != null
+        ? t.riwayatHafalanSantri.halaqohKelas(
+            halaqoh: myHalaqoh!.nama, kelas: myHalaqoh!.kelas)
+        : (santri != null && santri!.kelas.isNotEmpty ? t.progressHafalanPerJuz.kelasLabel(kelas: santri!.kelas) : null);
+
     final extraJuz = <int>[];
     extraTargetState.maybeWhen(
       loaded: (juzList) => extraJuz.addAll(juzList),
@@ -228,13 +249,21 @@ class _WaliSantriProgressPerSuratScreenState
 
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Green gradient profile card
-                          _buildProfileCard(context, colors, santri),
-                          SizedBox(height: 20.h),
+                          SizedBox(height: 12.h),
+
+                          // Santri Profile Context Header
+                          SantriContextHeader(
+                            name: santri?.nama ?? widget.name,
+                            nis: santri?.nis ?? widget.nis,
+                            subtitle: halaqohInfo,
+                            profilePictureUrl: santri?.profilePicture,
+                          ),
+                          SizedBox(height: 22.h),
 
                           // Progress Per Surat header
                           Text(
@@ -274,103 +303,6 @@ class _WaliSantriProgressPerSuratScreenState
     );
   }
 
-  Widget _buildProfileCard(
-      BuildContext context, AppColorSet colors, SantriModel? santri) {
-    // Use real santri data, fall back to route params
-    final displayName = santri?.nama ?? widget.name;
-    final displayNis = santri?.nis ?? widget.nis;
-
-    // Look up halaqoh for kelas info
-    final halaqohState = context.watch<HalaqohCubit>().state;
-    HalaqohModel? myHalaqoh;
-    halaqohState.maybeWhen(
-      loaded: (list) {
-        try {
-          if (santri != null) {
-            myHalaqoh = list.firstWhere(
-                (h) => h.santriIds.contains(santri.id));
-          }
-        } catch (_) {}
-      },
-      orElse: () {},
-    );
-
-    final halaqohInfo = myHalaqoh != null
-        ? t.riwayatHafalanSantri.halaqohKelas(
-            halaqoh: myHalaqoh!.nama, kelas: myHalaqoh!.kelas)
-        : (santri != null ? t.progressHafalanPerJuz.kelasLabel(kelas: santri.kelas) : '');
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(18.w),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colors.primary, colors.primary.withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50.w,
-            height: 50.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.2),
-              image: santri?.profilePicture != null
-                  ? DecorationImage(
-                      image: NetworkImage(santri!.profilePicture!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: santri?.profilePicture == null
-                ? Icon(Icons.person, size: 26.sp, color: Colors.white)
-                : null,
-          ),
-          SizedBox(width: 14.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  displayName,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  t.progressHafalanPerSurat.nisLabel(nis: displayNis),
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                if (halaqohInfo.isNotEmpty)
-                  Text(
-                    halaqohInfo,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSurahCard(Map<String, dynamic> surah, AppColorSet colors) {
     final surahName = surah['name'] as String;

@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/academic_info_row.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
@@ -15,13 +19,10 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cu
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
-import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_state.dart';
 
-import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
-import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
-import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
-
-/// Detail santri screen showing profile header, academic info, and progress hafalan
+/// Detail santri screen showing profile header card, academic info, and progress hafalan
 @RoutePage()
 class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
   final String name;
@@ -30,34 +31,10 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
   const DetailSantriScreen({super.key, required this.name, required this.nis});
 
   @override
-  Widget wrappedRoute(BuildContext context) {
-    // Determine santriId from nis using SantriCubit
-    final santriState = context.read<SantriCubit>().state;
-    String? santriId;
-    santriState.maybeWhen(
-      loaded: (sList) {
-        try {
-          santriId = sList.firstWhere((s) => s.nis == nis).id;
-        } catch (_) {}
-      },
-      orElse: () {},
-    );
-
-    return BlocProvider(
-      create: (context) {
-        final cubit = sl<ProgressHafalanCubit>();
-        if (santriId != null) {
-          cubit.watchProgress(santriId!);
-        }
-        return cubit;
-      },
-      child: this,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Look up real santri data by NIS
     final santriState = context.watch<SantriCubit>().state;
@@ -108,12 +85,24 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
       );
     }
 
+    // Look up extra target juz for this santri
+    final extraTargetState = context.watch<SantriExtraTargetCubit>().state;
+    final extraJuz = <int>[];
+    extraTargetState.maybeWhen(
+      loaded: (juzList) => extraJuz.addAll(juzList),
+      orElse: () {},
+    );
+
     // Use real data with fallbacks to route params
     final displayName = santri?.nama ?? name;
     final displayNis = santri?.nis ?? nis;
-    final displayKelas = santri != null ? t.myHalaqohScreen.kelas(kelas: santri!.kelas) : '-';
+    final displayKelas = santri != null
+        ? t.myHalaqohScreen.kelas(kelas: santri!.kelas)
+        : '-';
     final displayProgram = santri != null
-        ? (santri!.program == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler)
+        ? (santri!.program == 'T'
+            ? t.myHalaqohScreen.programTakhassus
+            : t.myHalaqohScreen.programReguler)
         : '-';
     final displayHalaqoh = halaqoh?.nama ?? '-';
     final displayPembimbing = halaqoh?.guruNama ?? '-';
@@ -124,109 +113,127 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
       body: SafeArea(
         child: Column(
           children: [
-            // Back arrow + title
+            // ── Top App Bar ───────────────────────────────────────────
             Padding(
-              padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 24.w),
+              padding: EdgeInsets.only(left: 8.w, top: 8.h, right: 20.w),
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+                    icon: Icon(
+                      Icons.arrow_back_rounded,
+                      color: colors.textPrimary,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   SizedBox(width: 4.w),
                   Text(
                     t.detailSantri.title,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                      fontFamily: 'Poppins',
-                    ),
+                    style: textTheme.titleLarge?.copyWith(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                          color: colors.textPrimary,
+                        ) ??
+                        TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                          color: colors.textPrimary,
+                          fontFamily: 'Poppins',
+                        ),
                   ),
                 ],
               ),
             ),
 
-            // Scrollable content
+            // ── Scrollable Body Content ───────────────────────────────
             Expanded(
               child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 8.h),
+                    SizedBox(height: 16.h),
 
-                    // Profile header card
+                    // 1. Profile Header Hero Card
                     if (isSantriLoading)
                       const ShimmerProfileHeader()
                     else
-                      _buildProfileHeader(
-                        colors,
-                        displayName,
-                        displayNis,
-                        profilePictureUrl,
+                      SantriContextHeader(
+                        margin: EdgeInsets.symmetric(horizontal: 20.w),
+                        name: displayName,
+                        nis: displayNis,
+                        subtitle: '$displayKelas  •  $displayProgram',
+                        profilePictureUrl: profilePictureUrl,
                       ),
-                    SizedBox(height: 28.h),
+                    SizedBox(height: 22.h),
 
-                    // INFORMASI AKADEMIK section
+                    // 2. INFORMASI AKADEMIK Section Title (Clean, no icon/subtitle)
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24.w),
-                      child: Text(
-                        t.detailSantri.informasiAkademik,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colors.textSecondary,
-                          letterSpacing: 0.8,
-                          fontFamily: 'Poppins',
-                        ),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: _buildSectionTitle(
+                        context: context,
+                        title: t.detailSantri.informasiAkademik,
+                        colors: colors,
+                        textTheme: textTheme,
                       ),
                     ),
                     SizedBox(height: 12.h),
 
-                    // Info card
+                    // Academic Info Card (Stacked format — safe for long pembimbing names)
                     if (isSantriLoading || isHalaqohLoading)
                       const ShimmerAcademicInfo()
                     else
                       Container(
-                        margin: EdgeInsets.symmetric(horizontal: 24.w),
+                        margin: EdgeInsets.symmetric(horizontal: 20.w),
                         decoration: BoxDecoration(
                           color: colors.surface,
-                          borderRadius: BorderRadius.circular(16.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: isDark
+                                ? colors.border
+                                : colors.border.withValues(alpha: 0.7),
+                            width: 0.8,
+                          ),
+                          boxShadow: isDark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.02),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                         ),
                         child: Column(
                           children: [
                             AcademicInfoRow(
-                              icon: Icons.school,
+                              icon: Icons.school_rounded,
                               iconColor: colors.primary,
-                              iconBgColor: colors.primary.withValues(alpha: 0.1),
+                              iconBgColor:
+                                  colors.primary.withValues(alpha: 0.1),
                               label: t.detailSantri.kelas,
                               value: displayKelas,
                             ),
                             AcademicInfoRow(
-                              icon: Icons.menu_book,
-                              iconColor: colors.blue,
-                              iconBgColor: colors.blue.withValues(alpha: 0.1),
+                              icon: Icons.menu_book_rounded,
+                              iconColor: colors.primary,
+                              iconBgColor:
+                                  colors.primary.withValues(alpha: 0.1),
                               label: t.detailSantri.program,
                               value: displayProgram,
                             ),
                             AcademicInfoRow(
-                              icon: Icons.auto_stories,
+                              icon: Icons.auto_stories_rounded,
                               iconColor: colors.primary,
-                              iconBgColor: colors.primary.withValues(alpha: 0.1),
+                              iconBgColor:
+                                  colors.primary.withValues(alpha: 0.1),
                               label: t.detailSantri.halaqoh,
                               value: displayHalaqoh,
                             ),
                             AcademicInfoRow(
-                              icon: Icons.groups,
-                              iconColor: colors.red,
-                              iconBgColor: colors.red.withValues(alpha: 0.1),
+                              icon: Icons.person_rounded,
+                              iconColor: colors.primary,
+                              iconBgColor:
+                                  colors.primary.withValues(alpha: 0.1),
                               label: t.detailSantri.pembimbing,
                               value: displayPembimbing,
                               showDivider: false,
@@ -234,25 +241,21 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
                           ],
                         ),
                       ),
-                    SizedBox(height: 28.h),
+                    SizedBox(height: 22.h),
 
-                    // PROGRESS HAFALAN section
+                    // 3. PROGRESS HAFALAN Section Title (Clean, no icon/subtitle)
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24.w),
-                      child: Text(
-                        t.detailSantri.progressHafalan,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colors.textSecondary,
-                          letterSpacing: 0.8,
-                          fontFamily: 'Poppins',
-                        ),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: _buildSectionTitle(
+                        context: context,
+                        title: t.detailSantri.progressHafalan,
+                        colors: colors,
+                        textTheme: textTheme,
                       ),
                     ),
                     SizedBox(height: 12.h),
 
-                    // Progress card (driven by admin target)
+                    // Progress Hafalan Card
                     BlocBuilder<ProgressHafalanCubit, ProgressHafalanState>(
                       builder: (context, progressState) {
                         bool isProgressLoading = false;
@@ -263,10 +266,20 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
                           loaded: (data) => progressData = data,
                           orElse: () {},
                         );
-                        if (isSantriLoading || isHalaqohLoading || isProgressLoading) {
+                        if (isSantriLoading ||
+                            isHalaqohLoading ||
+                            isProgressLoading) {
                           return const ShimmerProgressCard();
                         }
-                        return _buildProgressCard(colors, santri, target, progressData);
+                        return _buildProgressCard(
+                          colors: colors,
+                          textTheme: textTheme,
+                          isDark: isDark,
+                          santri: santri,
+                          target: target,
+                          progressData: progressData,
+                          extraJuz: extraJuz,
+                        );
                       },
                     ),
                     SizedBox(height: 40.h),
@@ -280,97 +293,161 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
     );
   }
 
-  /// Green gradient profile header with avatar, name, NIS
-  Widget _buildProfileHeader(
-    AppColorSet colors,
-    String displayName,
-    String displayNis,
-    String? profilePictureUrl,
-  ) {
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.symmetric(horizontal: 24.w),
-      padding: EdgeInsets.symmetric(vertical: 28.h),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [colors.primary, colors.primary.withValues(alpha: 0.82)],
+  @override
+  Widget wrappedRoute(BuildContext context) {
+    final santriState = context.read<SantriCubit>().state;
+    String? santriId;
+    santriState.maybeWhen(
+      loaded: (sList) {
+        try {
+          santriId = sList.firstWhere((s) => s.nis == nis).id;
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) {
+            final cubit = sl<ProgressHafalanCubit>();
+            if (santriId != null) {
+              cubit.watchProgress(santriId!);
+            }
+            return cubit;
+          },
         ),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Column(
-        children: [
-          // Avatar
-          Container(
-            width: 80.w,
-            height: 80.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: colors.textOnButton.withValues(alpha: 0.2),
-              border: Border.all(
-                color: colors.textOnButton.withValues(alpha: 0.4),
-                width: 3,
-              ),
-              image: profilePictureUrl != null && profilePictureUrl.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(profilePictureUrl),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: profilePictureUrl == null || profilePictureUrl.isEmpty
-                ? Icon(Icons.person, size: 40.sp, color: colors.textOnButton)
-                : null,
-          ),
-          SizedBox(height: 14.h),
-          // Name
-          Text(
-            displayName,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w700,
-              color: colors.textOnButton,
-              fontFamily: 'Poppins',
-            ),
-          ),
-          SizedBox(height: 4.h),
-          // NIS
-          Text(
-            t.absensi.nis(nis: displayNis),
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w400,
-              color: colors.textOnButton.withValues(alpha: 0.85),
-              fontFamily: 'Poppins',
-            ),
-          ),
-        ],
-      ),
+        BlocProvider(
+          create: (context) {
+            final cubit = sl<SantriExtraTargetCubit>();
+            if (santriId != null) {
+              cubit.watchExtraJuz(santriId!);
+            }
+            return cubit;
+          },
+        ),
+      ],
+      child: this,
     );
   }
 
-  /// Progress Hafalan card driven by admin-set memorization targets.
-  /// Shows target juz, completion count (0 for now), progress bar.
-  Widget _buildProgressCard(AppColorSet colors, SantriModel? santri, TargetHafalanModel? target, OverallHafalanProgress? progressData) {
-    final double juzTarget = target != null && santri != null ? TargetHafalanHelper.getTargetJuzCountDouble(target, santri.kelas, santri.program) : 0.0;
-    
-    double juzCompleted = 0.0;
+  /// Section title with vertical teal accent bar (▎ Title)
+  Widget _buildSectionTitle({
+    required BuildContext context,
+    required String title,
+    required AppColorSet colors,
+    required TextTheme textTheme,
+  }) {
+    return Row(
+      children: [
+        Container(
+          width: 3.5.w,
+          height: 16.h,
+          decoration: BoxDecoration(
+            color: colors.primary,
+            borderRadius: BorderRadius.circular(2.r),
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Text(
+          title,
+          style: textTheme.titleMedium?.copyWith(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+                color: colors.textPrimary,
+              ) ??
+              TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+                color: colors.textPrimary,
+                fontFamily: 'Poppins',
+              ),
+        ),
+      ],
+    );
+  }
+
+  /// Progress Hafalan card driven by admin-set and teacher extra memorization targets.
+  Widget _buildProgressCard({
+    required AppColorSet colors,
+    required TextTheme textTheme,
+    required bool isDark,
+    required SantriModel? santri,
+    required TargetHafalanModel? target,
+    required OverallHafalanProgress? progressData,
+    required List<int> extraJuz,
+  }) {
+    // ── Admin-defined target juz ──────────────────────────────────────────────
+    final adminJuzList = target != null && santri != null
+        ? TargetHafalanHelper.getTargetJuzList(
+            target,
+            santri.kelas,
+            santri.program,
+          )
+        : <int>[];
+
+    // ── Admin progress calculation ────────────────────────────────────────────
+    final double juzTargetAdmin = target != null && santri != null
+        ? TargetHafalanHelper.getTargetJuzCountDouble(
+            target,
+            santri.kelas,
+            santri.program,
+          )
+        : 0.0;
+
+    double juzCompletedAdmin = 0.0;
     if (target != null && santri != null && progressData != null) {
-      juzCompleted = TargetHafalanHelper.getCompletedJuzCountDouble(
+      juzCompletedAdmin = TargetHafalanHelper.getCompletedJuzCountDouble(
         targetModel: target,
         kelas: santri.kelas,
         programCode: santri.program,
         progressData: progressData,
       );
     } else if (progressData != null) {
-      for (final jp in progressData.juzProgressList) {
-        if (jp.totalAyat > 0) {
-          juzCompleted += jp.memorizedAyat / jp.totalAyat;
+      for (final juzNum in adminJuzList) {
+        final jp = progressData.juzProgressList
+            .where((j) => j.juzNumber == juzNum)
+            .firstOrNull;
+        if (jp != null && jp.totalAyat > 0) {
+          juzCompletedAdmin += jp.memorizedAyat / jp.totalAyat;
         }
       }
     }
+
+    final double progressAdmin = juzTargetAdmin > 0
+        ? (juzCompletedAdmin / juzTargetAdmin).clamp(0.0, 1.0)
+        : 0.0;
+    final double percentValueAdmin = progressAdmin * 100;
+
+    // ── Extra juz calculation (not in admin list) ─────────────────────────────
+    final progressJuzNums = progressData?.juzProgressList
+            .where((jp) => jp.memorizedAyat > 0)
+            .map((jp) => jp.juzNumber)
+            .toSet() ??
+        <int>{};
+
+    final extraJuzList = <int>{
+      ...extraJuz,
+      ...progressJuzNums,
+    }.difference(adminJuzList.toSet()).toList()..sort();
+
+    final int juzTargetExtra = extraJuzList.length;
+    double extraJuzCompleted = 0.0;
+    if (progressData != null) {
+      for (final juzNum in extraJuzList) {
+        final jp = progressData.juzProgressList
+            .where((j) => j.juzNumber == juzNum)
+            .firstOrNull;
+        if (jp != null && jp.totalAyat > 0) {
+          extraJuzCompleted += jp.memorizedAyat / jp.totalAyat;
+        }
+      }
+    }
+
+    final double progressExtra = juzTargetExtra > 0
+        ? (extraJuzCompleted / juzTargetExtra).clamp(0.0, 1.0)
+        : 0.0;
+    final double percentValueExtra = progressExtra * 100;
 
     String formatPercent(double v) {
       if (v == 0) return '0';
@@ -384,9 +461,6 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
       return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
     }
 
-    final double progress = juzTarget > 0 ? juzCompleted / juzTarget : 0.0;
-    final String percent = formatPercent(progress * 100);
-    
     String formatJuz(double v) {
       if (v == 0) return '0';
       if (v == v.roundToDouble()) return v.toInt().toString();
@@ -395,108 +469,240 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
     }
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 24.w),
-      padding: EdgeInsets.all(18.w),
+      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: isDark ? colors.border : colors.border.withValues(alpha: 0.7),
+          width: 0.8,
+        ),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
-          Row(
-            children: [
-              Icon(Icons.menu_book, size: 20.sp, color: colors.primary),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  t.waliSantriDashboard.progressHafalan,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: colors.textPrimary,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-
-          // Juz completed + percentage
+          // ── BLOCK 1: TARGET UTAMA ──
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               RichText(
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '${formatJuz(juzCompleted)} ',
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.w800,
-                        color: colors.textPrimary,
-                        fontFamily: 'Poppins',
-                      ),
+                      text: '${formatJuz(juzCompletedAdmin)} ',
+                      style: textTheme.headlineSmall?.copyWith(
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.w800,
+                            color: colors.textPrimary,
+                          ) ??
+                          TextStyle(
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.w800,
+                            color: colors.textPrimary,
+                            fontFamily: 'Poppins',
+                          ),
                     ),
                     TextSpan(
                       text: t.waliSantriDashboard.juzTerselesaikan,
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w400,
-                        color: colors.textSecondary,
-                        fontFamily: 'Poppins',
-                      ),
+                      style: textTheme.bodySmall?.copyWith(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w400,
+                            color: colors.textSecondary,
+                          ) ??
+                          TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w400,
+                            color: colors.textSecondary,
+                            fontFamily: 'Poppins',
+                          ),
                     ),
                   ],
                 ),
               ),
-              Text(
-                '$percent%',
-                style: TextStyle(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.w800,
-                  color: colors.primary,
-                  fontFamily: 'Poppins',
+
+              // Percentage badge
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Text(
+                  '${formatPercent(percentValueAdmin)}%',
+                  style: textTheme.titleSmall?.copyWith(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w800,
+                        color: colors.primary,
+                      ) ??
+                      TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w800,
+                        color: colors.primary,
+                        fontFamily: 'Poppins',
+                      ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 14.h),
 
           // Progress bar
           ClipRRect(
-            borderRadius: BorderRadius.circular(6.r),
+            borderRadius: BorderRadius.circular(4.r),
             child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 10.h,
-              backgroundColor: colors.border.withValues(alpha: 0.3),
+              value: progressAdmin.clamp(0.0, 1.0),
+              minHeight: 8.h,
+              backgroundColor: colors.primary.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 10.h),
 
           // Target text
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              t.waliSantriDashboard.target(target: formatJuz(juzTarget)),
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
-                color: colors.textSecondary,
-                fontFamily: 'Poppins',
-              ),
+              t.waliSantriDashboard.target(target: formatJuz(juzTargetAdmin)),
+              style: textTheme.bodySmall?.copyWith(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: colors.textSecondary,
+                  ) ??
+                  TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: colors.textSecondary,
+                    fontFamily: 'Poppins',
+                  ),
             ),
           ),
+
+          // ── BLOCK 2: TARGET EKSTRA (Only shown if extraJuzList is not empty) ──
+          if (extraJuzList.isNotEmpty) ...[
+            SizedBox(height: 14.h),
+            Divider(
+              color: colors.border.withValues(alpha: 0.5),
+              height: 1,
+            ),
+            SizedBox(height: 14.h),
+            Text(
+              t.waliSantriDashboard.extraMemorization,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: colors.blue,
+                fontFamily: 'Poppins',
+                letterSpacing: 0.3,
+              ),
+            ),
+            SizedBox(height: 10.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${formatJuz(extraJuzCompleted)} ',
+                        style: textTheme.headlineSmall?.copyWith(
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w800,
+                              color: colors.textPrimary,
+                            ) ??
+                            TextStyle(
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w800,
+                              color: colors.textPrimary,
+                              fontFamily: 'Poppins',
+                            ),
+                      ),
+                      TextSpan(
+                        text: t.waliSantriDashboard.juzTerselesaikan,
+                        style: textTheme.bodySmall?.copyWith(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w400,
+                              color: colors.textSecondary,
+                            ) ??
+                            TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w400,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    '${formatPercent(percentValueExtra)}%',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w800,
+                      color: colors.blue,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4.r),
+              child: LinearProgressIndicator(
+                value: progressExtra.clamp(0.0, 1.0),
+                minHeight: 8.h,
+                backgroundColor: colors.blue.withValues(alpha: 0.1),
+                valueColor: AlwaysStoppedAnimation<Color>(colors.blue),
+              ),
+            ),
+            SizedBox(height: 10.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    t.waliSantriDashboard.juzList(juz: extraJuzList.join(', ')),
+                    style: TextStyle(
+                      fontSize: 11.5.sp,
+                      fontWeight: FontWeight.w500,
+                      color: colors.textSecondary,
+                      fontFamily: 'Poppins',
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  t.waliSantriDashboard.extraJuzTarget(count: juzTargetExtra),
+                  style: TextStyle(
+                    fontSize: 11.5.sp,
+                    fontWeight: FontWeight.w500,
+                    color: colors.textSecondary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

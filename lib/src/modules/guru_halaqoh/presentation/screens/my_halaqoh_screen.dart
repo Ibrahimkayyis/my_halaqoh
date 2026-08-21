@@ -1,27 +1,27 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
-import 'package:my_halaqoh/src/core/theme/app_colors.dart';
-import 'package:my_halaqoh/src/core/router/app_router.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
-import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
-import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
-import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
+import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/halaqoh_info_card.dart';
+import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/santri_list_item.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
-import 'package:my_halaqoh/src/modules/master_data/domain/helpers/target_hafalan_helper.dart';
-import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
-import 'package:my_halaqoh/src/core/widget/widgets.dart';
-import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
-import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
-import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/halaqoh_info_card.dart';
-import 'package:my_halaqoh/src/modules/guru_halaqoh/presentation/widgets/santri_list_item.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
-import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
-import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
 
 /// My Halaqoh screen showing halaqoh info card, search bar, and santri list.
 /// Uses CustomScrollView for a smooth, unified scrolling experience.
@@ -53,14 +53,15 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Retrieve Auth Context
+    // Retrieve States
     final halaqohState = context.watch<HalaqohCubit>().state;
     final santriState = context.watch<SantriCubit>().state;
     final targetHafalanState = context.watch<TargetHafalanCubit>().state;
 
-    // Gunakan ActiveSessionHelper agar super_admin yang sedang impersonasi
-    // guru bisa mendapatkan linkedDocId dari ImpersonationContext.
+    // Active session linked doc ID (supports super_admin impersonation)
     final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
 
     HalaqohModel? myHalaqoh;
@@ -92,9 +93,6 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
     }
 
     // Derive effective kelas/program from actual santri data.
-    // halaqoh.kelas is NOT updated during promoteAll(), so we use santri.kelas
-    // (which IS updated) as the source of truth. All santri in a halaqoh move
-    // up together, so the first active santri's kelas represents the whole group.
     final effectiveKelas = mySantriList.isNotEmpty
         ? mySantriList.first.kelas
         : (myHalaqoh?.kelas ?? '');
@@ -102,8 +100,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
         ? mySantriList.first.program
         : (myHalaqoh?.program ?? 'R');
 
-    // Look up the admin-defined target using the effective (up-to-date) kelas.
-    // Used for HalaqohInfoCard summary display.
+    // Look up the admin-defined target using effective kelas for the summary card.
     TargetHafalanModel? myTarget;
     if (myHalaqoh != null) {
       targetHafalanState.maybeWhen(
@@ -118,18 +115,17 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
       );
     }
 
-    // Extract the full targets list for per-santri lookup in the list
+    // Extract all targets for per-santri lookup
     final List<TargetHafalanModel> allTargets = [];
     targetHafalanState.maybeWhen(
       loaded: (targets) => allTargets.addAll(targets),
       orElse: () {},
     );
 
-    final filtered = mySantriList.where((sanitize) {
+    final filtered = mySantriList.where((santri) {
       if (_searchQuery.isEmpty) return true;
       final q = _searchQuery.toLowerCase();
-      return sanitize.nama.toLowerCase().contains(q) ||
-          sanitize.nis.contains(q);
+      return santri.nama.toLowerCase().contains(q) || santri.nis.contains(q);
     }).toList();
 
     return Scaffold(
@@ -137,34 +133,38 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
-          // UX Upgrade: Scroll pantulan halus ala iOS dan scroll bisa ditarik meskipun item sedikit
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
-          // UX Upgrade: Otomatis menutup keyboard jika user mulai men-scroll layar
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           slivers: [
-            // --- HEADER SECTION (SCROLLS WITH THE PAGE) ---
+            // --- HEADER SECTION ---
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: colors.surface,
                   borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(32.r),
+                    bottom: Radius.circular(24.r),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  border: isDark
+                      ? Border.all(color: colors.border, width: 0.5)
+                      : null,
+                  boxShadow: isDark
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 12.h),
+
                     // Halaqoh info card
                     if (isHalaqohLoading)
                       const ShimmerHalaqohInfoCard()
@@ -182,10 +182,21 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                             : t.myHalaqohScreen.pengampu,
                         target: t.myHalaqohScreen.target(
                           count: myTarget != null
-                              ? _formatJuz(TargetHafalanHelper.getTargetJuzCountDouble(myTarget!, effectiveKelas, effectiveProgram))
+                              ? _formatJuz(
+                                  TargetHafalanHelper.getTargetJuzCountDouble(
+                                    myTarget!,
+                                    effectiveKelas,
+                                    effectiveProgram,
+                                  ),
+                                )
                               : '0',
                           range: myTarget != null
-                              ? TargetHafalanHelper.getActiveSemesterSummary(myTarget!, effectiveKelas, effectiveProgram) ?? '-'
+                              ? TargetHafalanHelper.getActiveSemesterSummary(
+                                    myTarget!,
+                                    effectiveKelas,
+                                    effectiveProgram,
+                                  ) ??
+                                  '-'
                               : '-',
                         ),
                         totalSantri: t.myHalaqohScreen.total(
@@ -195,108 +206,99 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                     else
                       Padding(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 24.w,
+                          horizontal: 20.w,
                           vertical: 12.h,
                         ),
                         child: Text(
                           t.myHalaqohScreen.noHalaqohAssigned,
-                          style: TextStyle(
-                            color: colors.textSecondary,
-                            fontFamily: 'Poppins',
-                          ),
+                          style: textTheme.bodyMedium?.copyWith(
+                                color: colors.textSecondary,
+                              ) ??
+                              TextStyle(
+                                color: colors.textSecondary,
+                                fontFamily: 'Poppins',
+                              ),
                         ),
                       ),
-                    SizedBox(height: 20.h),
+                    SizedBox(height: 18.h),
 
-                    // Search bar
+                    // Search bar using shared AppTextField
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24.w),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: colors.background,
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(
-                            color: colors.border.withValues(alpha: 0.5),
-                          ),
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (value) =>
-                              setState(() => _searchQuery = value),
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontFamily: 'Poppins',
-                            color: colors.textPrimary,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: t.myHalaqohScreen.searchHint,
-                            hintStyle: TextStyle(
-                              fontSize: 13.sp,
-                              fontFamily: 'Poppins',
-                              color: colors.textSecondary.withValues(
-                                alpha: 0.6,
-                              ),
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              size: 20.sp,
-                              color: colors.textSecondary,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 12.h,
-                            ),
-                          ),
-                        ),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: AppTextField(
+                        controller: _searchController,
+                        hintText: t.myHalaqohScreen.searchHint,
+                        prefixIconData: Icons.search_rounded,
+                        textInputAction: TextInputAction.search,
+                        onChanged: (value) =>
+                            setState(() => _searchQuery = value),
                       ),
                     ),
-                    SizedBox(height: 24.h),
+                    SizedBox(height: 20.h),
 
-                    // Daftar Santri header
+                    // Daftar Santri section header (unified ▎ bar + pill badge)
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            t.myHalaqohScreen.daftarSantri,
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w700,
-                              color: colors.textPrimary,
-                              fontFamily: 'Poppins',
-                            ),
+                          Row(
+                            children: [
+                              Container(
+                                width: 3.5.w,
+                                height: 16.h,
+                                decoration: BoxDecoration(
+                                  color: colors.primary,
+                                  borderRadius: BorderRadius.circular(2.r),
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                t.myHalaqohScreen.daftarSantri,
+                                style: textTheme.titleMedium?.copyWith(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: colors.textPrimary,
+                                    ) ??
+                                    TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: colors.textPrimary,
+                                      fontFamily: 'Poppins',
+                                    ),
+                              ),
+                            ],
                           ),
                           Container(
                             padding: EdgeInsets.symmetric(
-                              horizontal: 12.w,
+                              horizontal: 10.w,
                               vertical: 4.h,
                             ),
                             decoration: BoxDecoration(
-                              color: colors.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(
-                                color: colors.primary.withValues(alpha: 0.3),
-                                width: 1,
-                              ),
+                              color: colors.primary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Text(
                               t.myHalaqohScreen.santriCount(
                                 count: '${filtered.length}',
                               ),
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: colors.primary,
-                                fontFamily: 'Poppins',
-                              ),
+                              style: textTheme.labelSmall?.copyWith(
+                                    fontSize: 11.5.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.primary,
+                                  ) ??
+                                  TextStyle(
+                                    fontSize: 11.5.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.primary,
+                                    fontFamily: 'Poppins',
+                                  ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 20.h),
+                    SizedBox(height: 16.h),
                   ],
                 ),
               ),
@@ -307,8 +309,8 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
               SliverPadding(
                 padding: EdgeInsets.only(
                   top: 16.h,
-                  left: 24.w,
-                  right: 24.w,
+                  left: 20.w,
+                  right: 20.w,
                   bottom: MediaQuery.of(context).padding.bottom + 24.h,
                 ),
                 sliver: SliverList(
@@ -317,23 +319,43 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                       padding: EdgeInsets.only(bottom: 12.h),
                       child: const ShimmerSantriListItem(),
                     );
-                  }, childCount: 4), // 4 dummy items
+                  }, childCount: 4),
                 ),
               )
             else if (filtered.isEmpty)
-              // UX Upgrade: Tampilan empty state jika hasil pencarian kosong
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: Center(
                   child: Padding(
-                    padding: EdgeInsets.only(top: 32.h),
-                    child: Text(
-                      t.myHalaqohScreen.santriNotFound,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: colors.textSecondary,
-                        fontFamily: 'Poppins',
-                      ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 20.w,
+                      vertical: 32.h,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off_rounded,
+                          size: 40.sp,
+                          color: colors.textSecondary.withValues(alpha: 0.4),
+                        ),
+                        SizedBox(height: 12.h),
+                        Text(
+                          t.myHalaqohScreen.santriNotFound,
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodyMedium?.copyWith(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: colors.textSecondary,
+                              ) ??
+                              TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: colors.textSecondary,
+                                fontFamily: 'Poppins',
+                              ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -342,8 +364,8 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
               SliverPadding(
                 padding: EdgeInsets.only(
                   top: 16.h,
-                  left: 24.w,
-                  right: 24.w,
+                  left: 20.w,
+                  right: 20.w,
                   bottom: MediaQuery.of(context).padding.bottom + 24.h,
                 ),
                 sliver: SliverList(
@@ -366,9 +388,6 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                                 orElse: () {},
                               );
 
-                              // ── Per-santri target lookup ──────────────────
-                              // Use santri.kelas & santri.program (updated on
-                              // promotion) NOT myHalaqoh.kelas which is stale.
                               final santriTarget = TargetHafalanHelper.findTarget(
                                 allTargets,
                                 santri.kelas,
@@ -400,6 +419,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                                       santri.program,
                                     )
                                   : 0.0;
+
                               String formatPercent(double v) {
                                 if (v == 0) return '0';
                                 if (v >= 1) {
@@ -418,9 +438,10 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                               final pct = formatPercent(progress * 100);
 
                               return Padding(
-                                padding: EdgeInsets.only(bottom: 12.h),
+                                padding: EdgeInsets.only(bottom: 4.h),
                                 child: SantriListItem(
                                   name: santri.nama,
+                                  profilePictureUrl: santri.profilePicture,
                                   progressText: t.myHalaqohScreen.progressText(
                                     completed: _formatJuz(completed),
                                     target: _formatJuz(targetJuz),

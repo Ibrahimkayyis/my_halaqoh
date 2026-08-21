@@ -824,27 +824,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       color: isFlashing
           ? colors.primary.withValues(alpha: 0.12)
           : Colors.transparent,
-      padding: EdgeInsets.symmetric(vertical: 12.h),
+      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w),
       child: Row(
         children: [
-          // Avatar
-          Container(
-            width: 38.w,
-            height: 38.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isPresent
-                  ? colors.primary.withValues(alpha: 0.15)
-                  : colors.border.withValues(alpha: 0.3),
-            ),
-            child: Icon(
-              Icons.person,
-              size: 20.sp,
-              color: isPresent ? colors.primary : colors.textSecondary,
-            ),
-          ),
-          SizedBox(width: 12.w),
-
           // Name + NIS
           Expanded(
             child: Column(
@@ -852,17 +834,20 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
               children: [
                 Text(
                   santri.nama,
+                  softWrap: true,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 14.5.sp,
                     fontWeight: FontWeight.w600,
                     color: isPresent ? colors.primary : colors.textPrimary,
                     fontFamily: 'Poppins',
                   ),
                 ),
+                SizedBox(height: 2.h),
                 Text(
                   t.absensi.barcodeScanner.nisLabel(nis: santri.nis),
                   style: TextStyle(
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
                     color: colors.textSecondary,
                     fontFamily: 'Poppins',
                   ),
@@ -870,6 +855,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
               ],
             ),
           ),
+          SizedBox(width: 12.w),
 
           // Checkbox
           AnimatedContainer(

@@ -22,7 +22,7 @@
     <!-- Background & Surface Colors -->
     <color name="surface">#FFFFFF</color>
     <color name="surfaceDark">#111827</color>
-    <color name="background">#F5F5F5</color>
+    <color name="background">#FAFAFA</color>
     <color name="backgroundDark">#0F172A</color>
     
     <!-- Border Colors -->

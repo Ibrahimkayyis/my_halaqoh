@@ -118,7 +118,7 @@ class ConfirmDeleteDialog extends StatelessWidget {
                         foregroundColor: colors.textPrimary,
                         side: BorderSide(color: colors.border, width: 1.5),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
                       child: Text(
@@ -145,7 +145,7 @@ class ConfirmDeleteDialog extends StatelessWidget {
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
                       child: Text(

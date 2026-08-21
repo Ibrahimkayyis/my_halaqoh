@@ -13,26 +13,32 @@ class ShimmerProfileHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(horizontal: 24.w),
-      padding: EdgeInsets.symmetric(vertical: 28.h),
+      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 18.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [colors.primary, colors.primary.withValues(alpha: 0.82)],
-        ),
+        color: colors.primary.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20.r),
       ),
-      child: Column(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Avatar placeholder
-          ShimmerBox(width: 80.w, height: 80.w, radius: 40.r),
-          SizedBox(height: 14.h),
-          // Name placeholder
-          ShimmerBox(width: 150.w, height: 24.h, radius: 4.r),
-          SizedBox(height: 8.h),
-          // NIS placeholder
-          ShimmerBox(width: 100.w, height: 16.h, radius: 4.r),
+          ShimmerBox(width: 56.w, height: 56.w, radius: 28.r),
+          SizedBox(width: 14.w),
+          // Name and NIS placeholders
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ShimmerBox(width: 160.w, height: 18.h, radius: 4.r),
+                SizedBox(height: 6.h),
+                ShimmerBox(width: 90.w, height: 12.h, radius: 4.r),
+                SizedBox(height: 4.h),
+                ShimmerBox(width: 120.w, height: 12.h, radius: 4.r),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -49,15 +55,15 @@ class ShimmerAcademicInfo extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 24.w),
-      padding: EdgeInsets.symmetric(vertical: 16.h),
+      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       decoration: BoxDecoration(
         color: isDark ? colors.surface.withValues(alpha: 0.5) : colors.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -67,16 +73,17 @@ class ShimmerAcademicInfo extends StatelessWidget {
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Icon box placeholder
-                ShimmerBox(width: 40.w, height: 40.w, radius: 10.r),
-                SizedBox(width: 16.w),
-                // Text placeholder
+                ShimmerBox(width: 38.w, height: 38.w, radius: 10.r),
+                SizedBox(width: 14.w),
+                // Stacked text placeholder
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ShimmerBox(width: 60.w, height: 12.h, radius: 4.r),
-                    SizedBox(height: 6.h),
+                    SizedBox(height: 4.h),
                     ShimmerBox(width: 140.w, height: 16.h, radius: 4.r),
                   ],
                 ),
@@ -99,15 +106,15 @@ class ShimmerProgressCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 24.w),
-      padding: EdgeInsets.all(20.w),
+      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: isDark ? colors.surface.withValues(alpha: 0.5) : colors.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -115,34 +122,24 @@ class ShimmerProgressCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row placeholder
-          Row(
-            children: [
-              Icon(Icons.menu_book, size: 20.sp, color: colors.textSecondary.withValues(alpha: 0.5)),
-              SizedBox(width: 8.w),
-              ShimmerBox(width: 140.w, height: 20.h, radius: 4.r),
-            ],
-          ),
-          SizedBox(height: 16.h),
-
           // Juz completed + percentage placeholder
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ShimmerBox(width: 100.w, height: 28.h, radius: 4.r),
-              ShimmerBox(width: 60.w, height: 28.h, radius: 4.r),
+              ShimmerBox(width: 150.w, height: 26.h, radius: 4.r),
+              ShimmerBox(width: 50.w, height: 26.h, radius: 12.r),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 14.h),
 
           // Progress bar placeholder
-          ShimmerBox(width: double.infinity, height: 10.h, radius: 6.r),
-          SizedBox(height: 8.h),
+          ShimmerBox(width: double.infinity, height: 8.h, radius: 4.r),
+          SizedBox(height: 10.h),
 
           // Target text placeholder
           Align(
             alignment: Alignment.centerRight,
-            child: ShimmerBox(width: 80.w, height: 14.h, radius: 4.r),
+            child: ShimmerBox(width: 90.w, height: 14.h, radius: 4.r),
           ),
         ],
       ),

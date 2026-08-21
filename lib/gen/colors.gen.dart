@@ -14,8 +14,8 @@ import 'package:flutter/material.dart';
 class ColorName {
   ColorName._();
 
-  /// Color: #F5F5F5
-  static const Color background = Color(0xFFF5F5F5);
+  /// Color: #FAFAFA
+  static const Color background = Color(0xFFFAFAFA);
 
   /// Color: #0F172A
   static const Color backgroundDark = Color(0xFF0F172A);

@@ -6,6 +6,7 @@ import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/quran/quran_service.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/progress_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/target_hafalan_model.dart';
@@ -186,13 +187,21 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
 
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Green gradient profile card
-                    _buildProfileCard(colors),
-                    SizedBox(height: 20.h),
+                    SizedBox(height: 12.h),
+
+                    // Profile Context Header
+                    SantriContextHeader(
+                      name: name,
+                      nis: nis,
+                      subtitle: santri != null && santri!.kelas.isNotEmpty ? 'Kelas: ${santri!.kelas}' : null,
+                      profilePictureUrl: santri?.profilePicture,
+                    ),
+                    SizedBox(height: 22.h),
 
                     // Progress Per Surat header
                     Text(
@@ -231,60 +240,6 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
     );
   }
 
-  Widget _buildProfileCard(AppColorSet colors) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(18.w),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colors.primary, colors.primary.withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50.w,
-            height: 50.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.2),
-            ),
-            child: Icon(Icons.person, size: 26.sp, color: Colors.white),
-          ),
-          SizedBox(width: 14.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  t.progressHafalanPerSurat.nisLabel(nis: nis),
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSurahCard(Map<String, dynamic> surah, AppColorSet colors) {
     final surahName = surah['name'] as String;

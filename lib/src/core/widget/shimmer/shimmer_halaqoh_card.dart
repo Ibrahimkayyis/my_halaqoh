@@ -24,11 +24,11 @@ class ShimmerHalaqohCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 6.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: isDark ? colors.surface.withValues(alpha: 0.5) : colors.surface,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),

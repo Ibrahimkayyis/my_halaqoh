@@ -1,8 +1,7 @@
-import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
@@ -44,9 +43,7 @@ class WaliSantriDashboardWrapperScreen extends StatefulWidget {
 class _WaliSantriDashboardWrapperScreenState
     extends State<WaliSantriDashboardWrapperScreen> {
   final _pageController = PageController(initialPage: 0);
-  final NotchBottomBarController _controller = NotchBottomBarController(
-    index: 0,
-  );
+  int _currentIndex = 0;
 
   bool _fcmTokenInitialized = false;
 
@@ -111,9 +108,10 @@ class _WaliSantriDashboardWrapperScreenState
   /// the navigation is deferred to the next rendered frame.
   void _navigateToTab(int index) {
     if (!mounted) return;
+    if (_currentIndex != index) {
+      setState(() => _currentIndex = index);
+    }
     if (_pageController.hasClients) {
-      // Controller is attached — navigate immediately.
-      _controller.jumpTo(index);
       _pageController.jumpToPage(index);
     } else {
       // PageController not yet attached (too early on cold launch).
@@ -125,7 +123,6 @@ class _WaliSantriDashboardWrapperScreenState
         if (pending == null) return;
         _pendingTabIndex = null;
         if (_pageController.hasClients) {
-          _controller.jumpTo(pending);
           _pageController.jumpToPage(pending);
         }
       });
@@ -182,6 +179,29 @@ class _WaliSantriDashboardWrapperScreenState
       const WaliSantriProfileScreen(),
     ];
 
+    final navItems = <AppLiquidNavItem>[
+      AppLiquidNavItem(
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home,
+        label: t.waliSantriNav.home,
+      ),
+      AppLiquidNavItem(
+        icon: Icons.menu_book_outlined,
+        selectedIcon: Icons.menu_book,
+        label: t.waliSantriNav.hafalan,
+      ),
+      AppLiquidNavItem(
+        icon: Icons.checklist_outlined,
+        selectedIcon: Icons.checklist,
+        label: t.waliSantriNav.absensi,
+      ),
+      AppLiquidNavItem(
+        icon: Icons.person_outline,
+        selectedIcon: Icons.person,
+        label: t.waliSantriNav.profile,
+      ),
+    ];
+
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         state.maybeWhen(
@@ -198,56 +218,32 @@ class _WaliSantriDashboardWrapperScreenState
       },
       child: Scaffold(
         backgroundColor: colors.background,
+        extendBody: true,
         body: PageView(
           controller: _pageController,
           physics: const NeverScrollableScrollPhysics(),
           children: pages,
         ),
-        extendBody: true,
-        bottomNavigationBar: AnimatedNotchBottomBar(
-          notchBottomBarController: _controller,
-          color: colors.surface,
-          showLabel: true,
-          textOverflow: TextOverflow.visible,
-          maxLine: 1,
-          shadowElevation: 5,
-          kBottomRadius: 20.0,
-          notchColor: colors.primary,
-          removeMargins: false,
-          showShadow: true,
-          durationInMilliSeconds: 300,
-          itemLabelStyle: TextStyle(
-            fontSize: 9.sp,
-            fontFamily: 'Poppins',
-            color: colors.textSecondary,
+        bottomNavigationBar: AppLiquidBottomNav(
+          currentIndex: _currentIndex,
+          items: navItems,
+          theme: AppLiquidNavTheme(
+            surfaceColor: colors.surface,
+            blurSigma: 0,
+            accentColor: colors.primary,
+            selectedColor: Colors.white,
+            unselectedColor: colors.textSecondary,
+            borderColor: colors.border.withValues(alpha: 0.6),
+            height: 70,
+            bottomGap: 12,
+            horizontalMargin: 16,
+            iconSize: 22,
+            labelFontSize: 10,
           ),
-          elevation: 2,
-          bottomBarItems: [
-            BottomBarItem(
-              inActiveItem: Icon(Icons.home, color: colors.textSecondary),
-              activeItem: Icon(Icons.home, color: colors.textOnButton),
-              itemLabel: t.waliSantriNav.home,
-            ),
-            BottomBarItem(
-              inActiveItem: Icon(Icons.menu_book, color: colors.textSecondary),
-              activeItem: Icon(Icons.menu_book, color: colors.textOnButton),
-              itemLabel: t.waliSantriNav.hafalan,
-            ),
-            BottomBarItem(
-              inActiveItem: Icon(Icons.checklist, color: colors.textSecondary),
-              activeItem: Icon(Icons.checklist, color: colors.textOnButton),
-              itemLabel: t.waliSantriNav.absensi,
-            ),
-            BottomBarItem(
-              inActiveItem: Icon(Icons.person, color: colors.textSecondary),
-              activeItem: Icon(Icons.person, color: colors.textOnButton),
-              itemLabel: t.waliSantriNav.profile,
-            ),
-          ],
           onTap: (index) {
+            setState(() => _currentIndex = index);
             _pageController.jumpToPage(index);
           },
-          kIconSize: 24.0,
         ),
       ),
     );

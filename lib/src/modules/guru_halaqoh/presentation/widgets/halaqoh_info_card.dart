@@ -25,21 +25,22 @@ class HalaqohInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(horizontal: 24.w),
+      margin: EdgeInsets.symmetric(horizontal: 20.w),
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colors.primary,
-            colors.primary.withValues(alpha: 0.82),
-          ],
-        ),
+        gradient: colors.primaryGradient,
         borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: colors.primary.withValues(alpha: 0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +48,7 @@ class HalaqohInfoCard extends StatelessWidget {
           // Badges row
           Row(
             children: [
-              _buildBadge(kelas, colors),
+              _buildBadge(kelas, colors, textTheme),
               SizedBox(width: 8.w),
               Text(
                 '•',
@@ -59,12 +60,17 @@ class HalaqohInfoCard extends StatelessWidget {
               SizedBox(width: 8.w),
               Text(
                 program,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w500,
-                  color: colors.textOnButton.withValues(alpha: 0.9),
-                  fontFamily: 'Poppins',
-                ),
+                style: textTheme.bodySmall?.copyWith(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w500,
+                      color: colors.textOnButton.withValues(alpha: 0.9),
+                    ) ??
+                    TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w500,
+                      color: colors.textOnButton.withValues(alpha: 0.9),
+                      fontFamily: 'Poppins',
+                    ),
               ),
             ],
           ),
@@ -73,27 +79,32 @@ class HalaqohInfoCard extends StatelessWidget {
           // Halaqoh name
           Text(
             halaqohName,
-            style: TextStyle(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w700,
-              color: colors.textOnButton,
-              fontFamily: 'Poppins',
-            ),
+            style: textTheme.headlineSmall?.copyWith(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textOnButton,
+                ) ??
+                TextStyle(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textOnButton,
+                  fontFamily: 'Poppins',
+                ),
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 12.h),
 
           // Info rows
-          _buildInfoRow(Icons.person_outline, pengampu, colors),
+          _buildInfoRow(Icons.person_outline, pengampu, colors, textTheme),
           SizedBox(height: 6.h),
-          _buildInfoRow(Icons.flag_outlined, target, colors),
+          _buildInfoRow(Icons.flag_outlined, target, colors, textTheme),
           SizedBox(height: 6.h),
-          _buildInfoRow(Icons.groups_outlined, totalSantri, colors),
+          _buildInfoRow(Icons.groups_outlined, totalSantri, colors, textTheme),
         ],
       ),
     );
   }
 
-  Widget _buildBadge(String text, AppColorSet colors) {
+  Widget _buildBadge(String text, AppColorSet colors, TextTheme textTheme) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
@@ -102,17 +113,27 @@ class HalaqohInfoCard extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w600,
-          color: colors.textOnButton,
-          fontFamily: 'Poppins',
-        ),
+        style: textTheme.labelSmall?.copyWith(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              color: colors.textOnButton,
+            ) ??
+            TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              color: colors.textOnButton,
+              fontFamily: 'Poppins',
+            ),
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text, AppColorSet colors) {
+  Widget _buildInfoRow(
+    IconData icon,
+    String text,
+    AppColorSet colors,
+    TextTheme textTheme,
+  ) {
     return Row(
       children: [
         Icon(
@@ -124,12 +145,17 @@ class HalaqohInfoCard extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              color: colors.textOnButton.withValues(alpha: 0.9),
-              fontFamily: 'Poppins',
-            ),
+            style: textTheme.bodySmall?.copyWith(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w400,
+                  color: colors.textOnButton.withValues(alpha: 0.9),
+                ) ??
+                TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w400,
+                  color: colors.textOnButton.withValues(alpha: 0.9),
+                  fontFamily: 'Poppins',
+                ),
           ),
         ),
       ],

@@ -16,14 +16,7 @@ class ShimmerHalaqohInfoCard extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 24.w),
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colors.primary,
-            colors.primary.withValues(alpha: 0.82),
-          ],
-        ),
+        gradient: colors.primaryGradient,
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Column(

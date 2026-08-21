@@ -106,7 +106,7 @@ class ConfirmLogoutDialog extends StatelessWidget {
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         side: BorderSide(color: colors.border),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
                       child: Text(
@@ -129,7 +129,7 @@ class ConfirmLogoutDialog extends StatelessWidget {
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                         elevation: 0,
                       ),

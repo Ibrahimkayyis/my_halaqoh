@@ -34,8 +34,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
   late int _currentMonth;
   late int _currentYear;
 
-  List<String> get _monthNames => t.calendar.months;
-
   List<String> get _dayAbbr => t.calendar.daysAbbr;
 
   // Session keys and abbreviations are computed from the resolved programType
@@ -146,108 +144,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
     });
   }
 
-  Future<void> _selectMonthYear(
-    BuildContext context,
-    AppColorSet colors,
-  ) async {
-    int pickerYear = _currentYear;
-
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setDialogState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              contentPadding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 16.h),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    onPressed: () => setDialogState(() => pickerYear--),
-                    icon: Icon(
-                      Icons.chevron_left,
-                      color: colors.primary,
-                      size: 24.sp,
-                    ),
-                  ),
-                  Text(
-                    '$pickerYear',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Poppins',
-                      color: colors.textPrimary,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => setDialogState(() => pickerYear++),
-                    icon: Icon(
-                      Icons.chevron_right,
-                      color: colors.primary,
-                      size: 24.sp,
-                    ),
-                  ),
-                ],
-              ),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 2.2,
-                  ),
-                  itemCount: 12,
-                  itemBuilder: (_, idx) {
-                    final m = idx + 1;
-                    final isSelected =
-                        m == _currentMonth && pickerYear == _currentYear;
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _currentMonth = m;
-                          _currentYear = pickerYear;
-                        });
-                        Navigator.pop(ctx);
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? colors.primary
-                              : colors.primary.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          _monthNames[idx].substring(0, 3),
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins',
-                            color: isSelected
-                                ? Colors.white
-                                : colors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
@@ -324,120 +220,86 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
 
           return Scaffold(
             backgroundColor: colors.background,
+            floatingActionButtonLocation: ExpandableFabMenu.location,
+            floatingActionButton: ExpandableFabMenu(
+              items: [
+                ExpandableFabItem(
+                  icon: Icons.info_outline,
+                  label: 'Lihat Keterangan',
+                  onTap: () {
+                    _showKeteranganDialog(
+                      context,
+                      colors,
+                      effectiveProgramType,
+                    );
+                  },
+                ),
+                ExpandableFabItem(
+                  icon: Icons.download_rounded,
+                  label: t.absensiHalaqoh.downloadLaporan,
+                  onTap: () {
+                    LaporanKonfigurasiHalaqohSheet.show(
+                      context,
+                      records: allRecords,
+                      santriList: mySantriList,
+                      halaqohName: myHalaqoh?.nama ?? '-',
+                      kelas: myHalaqoh?.kelas ?? '-',
+                      programType: effectiveProgramType,
+                      guruNama: myHalaqoh?.guruNama ?? '-',
+                      initialMonth: _currentMonth,
+                      initialYear: _currentYear,
+                    );
+                  },
+                ),
+              ],
+            ),
             body: SafeArea(
               child: Column(
                 children: [
                   // ── Top bar: back + month selector + calendar picker ──
                   Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 8.h,
-                    ),
+                    padding: EdgeInsets.fromLTRB(8.w, 8.h, 20.w, 8.h),
                     child: Row(
                       children: [
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Container(
-                            width: 40.w,
-                            height: 40.w,
-                            decoration: BoxDecoration(
-                              color: colors.surface,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(
-                                color: colors.border,
-                                width: 1,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.arrow_back,
-                              size: 20.sp,
-                              color: colors.textPrimary,
-                            ),
-                          ),
+                        IconButton(
+                          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+                          onPressed: () => Navigator.of(context).pop(),
                         ),
-                        SizedBox(width: 10.w),
+                        SizedBox(width: 4.w),
                         Expanded(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 12.w,
-                              vertical: 8.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.surface,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(
-                                color: colors.border,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                GestureDetector(
-                                  onTap: _prevMonth,
-                                  child: Icon(
-                                    Icons.chevron_left,
-                                    color: colors.primary,
-                                    size: 24.sp,
-                                  ),
-                                ),
-                                Text(
-                                  '${_monthNames[_currentMonth - 1]} $_currentYear',
-                                  style: TextStyle(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: colors.textPrimary,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: _nextMonth,
-                                  child: Icon(
-                                    Icons.chevron_right,
-                                    color: colors.primary,
-                                    size: 24.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          child: AppMonthSelector(
+                            month: _currentMonth,
+                            year: _currentYear,
+                            onPrev: _prevMonth,
+                            onNext: _nextMonth,
                           ),
                         ),
                         SizedBox(width: 10.w),
-                        GestureDetector(
-                          onTap: () => _selectMonthYear(context, colors),
-                          child: Container(
-                            width: 40.w,
-                            height: 40.w,
-                            decoration: BoxDecoration(
-                              color: colors.surface,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(
-                                color: colors.border,
-                                width: 1,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.calendar_month,
-                              size: 20.sp,
-                              color: colors.primary,
-                            ),
-                          ),
+                        AppCalendarPickerButton(
+                          currentMonth: _currentMonth,
+                          currentYear: _currentYear,
+                          onSelected: (month, year) {
+                            setState(() {
+                              _currentMonth = month;
+                              _currentYear = year;
+                            });
+                          },
                         ),
                       ],
                     ),
                   ),
 
-                  // ── Horizontal scroll hint banner (Selalu Tampil) ──
+                  // ── Horizontal scroll hint banner ──
                   Container(
                     width: double.infinity,
-                    margin: EdgeInsets.fromLTRB(16.w, 0, 16.w, 6.h),
+                    margin: EdgeInsets.fromLTRB(20.w, 0, 20.w, 8.h),
                     padding: EdgeInsets.symmetric(
                       horizontal: 12.w,
                       vertical: 8.h,
                     ),
                     decoration: BoxDecoration(
                       color: colors.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(10.r),
+                      borderRadius: BorderRadius.circular(8.r),
                       border: Border.all(
                         color: colors.primary.withValues(alpha: 0.25),
                         width: 1,
@@ -479,52 +341,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                       verticalCtrl: _namesVerticalCtrl,
                       getDayAbbr: _getDayAbbr,
                       buildDot: _buildDot,
-                    ),
-                  ),
-
-                  // ── Footer: actions ──
-                  Container(
-                    padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 16.h),
-                    decoration: BoxDecoration(
-                      color: colors.surface,
-                      border: Border(
-                        top: BorderSide(color: colors.border, width: 0.5),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CustomOutlinedButton(
-                          width: double.infinity,
-                          onPressed: () {
-                            _showKeteranganDialog(context, colors, effectiveProgramType);
-                          },
-                          icon: Icons.info_outline,
-                          label: 'Lihat Keterangan',
-                          borderRadius: 24.r,
-                        ),
-                        SizedBox(height: 12.h),
-                        PrimaryButton(
-                          width: double.infinity,
-                          onPressed: () {
-                            LaporanKonfigurasiHalaqohSheet.show(
-                              context,
-                              records: allRecords,
-                              santriList: mySantriList,
-                              halaqohName: myHalaqoh?.nama ?? '-',
-                              kelas: myHalaqoh?.kelas ?? '-',
-                              programType: effectiveProgramType,
-                              guruNama: myHalaqoh?.guruNama ?? '-',
-                              initialMonth: _currentMonth,
-                              initialYear: _currentYear,
-                            );
-                          },
-                          icon: Icons.download,
-                          label: t.absensiHalaqoh.downloadLaporan,
-                          borderRadius: 24.r,
-                        ),
-                        SizedBox(height: 4.h),
-                      ],
                     ),
                   ),
                 ],
@@ -651,9 +467,9 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
         return Dialog(
           backgroundColor: colors.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(24.r),
           ),
-          insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
+          insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 40.h),
           child: Padding(
             padding: EdgeInsets.all(20.w),
             child: Column(
@@ -974,7 +790,8 @@ class _SyncedTableState extends State<_SyncedTable> {
             child: SingleChildScrollView(
               controller: widget.verticalCtrl,
               child: Column(
-                children: List.generate(widget.santriList.length, (i) {
+                children: [
+                  ...List.generate(widget.santriList.length, (i) {
                   final santri = widget.santriList[i];
                   final nis = santri.nis;
                   final isEvenRow = i.isEven;
@@ -1116,7 +933,9 @@ class _SyncedTableState extends State<_SyncedTable> {
                     ),
                   );
                 }),
-              ),
+                SizedBox(height: 80.h),
+              ],
+            ),
             ),
           ),
         ),

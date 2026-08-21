@@ -372,7 +372,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
           builder: (ctx) => AlertDialog(
             backgroundColor: colors.surface,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(24.r),
             ),
             title: Row(
               children: [
@@ -449,7 +449,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
           builder: (ctx) => AlertDialog(
             backgroundColor: colors.surface,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(24.r),
             ),
             title: Row(
               children: [
@@ -545,7 +545,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
               decoration: BoxDecoration(
                 color: colors.surface,
                 borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(32.r),
+                  bottom: Radius.circular(24.r),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -570,16 +570,15 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                     ),
 
                     if (!_isLoading) ...[
-                      // Header card info (Diberi warna background agar kontras dengan putih)
+                      // Header card info
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: Container(
                           width: double.infinity,
-                          padding: EdgeInsets.all(18.w),
+                          padding: EdgeInsets.all(16.w),
                           decoration: BoxDecoration(
-                            color: colors
-                                .background, // Sedikit gelap untuk pembeda
-                            borderRadius: BorderRadius.circular(16.r),
+                            color: colors.background,
+                            borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
                               color: colors.border.withValues(alpha: 0.5),
                             ),
@@ -622,11 +621,11 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                                   _buildGridStatCard(
                                     label: t.detailAbsensiHariIni.hadirBarcode,
                                     value: '${stats['hadir_barcode']}',
-                                    bgColor: const Color(0xFF16A34A).withValues(alpha: 0.08),
-                                    textColor: const Color(0xFF16A34A),
+                                    bgColor: colors.primary.withValues(alpha: 0.08),
+                                    textColor: colors.primary,
                                     isLarge: true,
                                   ),
-                                  SizedBox(height: 12.h),
+                                  SizedBox(height: 10.h),
                                   // Row 2: Hadir (Tanpa Kartu) & Hadir (Terlambat) - 2 columns
                                   Row(
                                     children: [
@@ -639,7 +638,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                                           height: 100.h,
                                         ),
                                       ),
-                                      SizedBox(width: 12.w),
+                                      SizedBox(width: 10.w),
                                       Expanded(
                                         child: _buildGridStatCard(
                                           label: t.detailAbsensiHariIni.terlambat,
@@ -651,7 +650,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 12.h),
+                                  SizedBox(height: 10.h),
                                   // Row 3: Sakit, Izin, Alfa, Belum Absen - 4 columns
                                   Row(
                                     children: [
@@ -710,7 +709,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
 
                       // Tab Selector
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: _myHalaqoh?.program == 'T'
                             ? _buildTakhassusSelector(colors)
                             : AppTabSelector(
@@ -722,43 +721,69 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
 
                       // List header "Daftar Kehadiran Santri"
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
-                        child: Text(
-                          t.detailAbsensiHariIni.daftarKehadiranSantri,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: colors.textPrimary,
-                            fontFamily: 'Poppins',
-                          ),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 3.5.w,
+                              height: 16.h,
+                              decoration: BoxDecoration(
+                                color: colors.primary,
+                                borderRadius: BorderRadius.circular(2.r),
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              t.detailAbsensiHariIni.daftarKehadiranSantri,
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colors.textPrimary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 20.h), // Spasi ke sudut melengkung bawah
+                      SizedBox(height: 16.h),
                     ] else ...[
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: const ShimmerDetailAbsensiHeader(),
                       ),
                       SizedBox(height: 16.h),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: const ShimmerTabSelector(),
                       ),
                       SizedBox(height: 24.h),
                       // List header "Daftar Kehadiran Santri"
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
-                        child: Text(
-                          t.detailAbsensiHariIni.daftarKehadiranSantri,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: colors.textPrimary,
-                            fontFamily: 'Poppins',
-                          ),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 3.5.w,
+                              height: 16.h,
+                              decoration: BoxDecoration(
+                                color: colors.primary,
+                                borderRadius: BorderRadius.circular(2.r),
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              t.detailAbsensiHariIni.daftarKehadiranSantri,
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colors.textPrimary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 20.h),
+                      SizedBox(height: 16.h),
                     ],
                   ],
                 ),
@@ -771,8 +796,8 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
             SliverPadding(
               padding: EdgeInsets.only(
                 top: 16.h,
-                left: 24.w,
-                right: 24.w,
+                left: 20.w,
+                right: 20.w,
                 bottom: 100.h,
               ),
               sliver: SliverList(
@@ -785,10 +810,9 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
             SliverPadding(
               padding: EdgeInsets.only(
                 top: 16.h,
-                left: 24.w,
-                right: 24.w,
-                bottom: 100
-                    .h, // Spasi aman agar tidak tertutup FloatingActionButton
+                left: 20.w,
+                right: 20.w,
+                bottom: 100.h,
               ),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
@@ -857,11 +881,10 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
             height: 42.h,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              // Ubah background unselected agar lebih menyatu dengan container surface
               color: isSelected
                   ? colors.primary.withValues(alpha: 0.1)
                   : colors.background,
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(8.r),
               border: isSelected
                   ? Border.all(color: colors.primary.withValues(alpha: 0.5))
                   : Border.all(color: colors.border.withValues(alpha: 0.4)),
@@ -891,7 +914,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
     bool isSmall = false,
     double? height,
   }) {
-    final borderRadius = BorderRadius.circular(isSmall ? 10.r : 14.r);
+    final borderRadius = BorderRadius.circular(isSmall ? 8.r : 12.r);
     final padding = isLarge
         ? EdgeInsets.symmetric(vertical: 18.h, horizontal: 16.w)
         : isSmall
@@ -971,7 +994,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: showScannedStyle
             ? Border.all(
                 color: colors.primary.withValues(alpha: 0.3),
@@ -989,82 +1012,52 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Bagian Atas: Avatar, Nama, dan NIS ──
+          // ── Bagian Atas: Nama dan NIS ──
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar
-              Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: showScannedStyle
-                      ? colors.primary.withValues(alpha: 0.1)
-                      : colors.border.withValues(alpha: 0.3),
-                  border: Border.all(
-                    color: showScannedStyle
-                        ? colors.primary.withValues(alpha: 0.2)
-                        : colors.border,
-                    width: 1.5,
-                  ),
-                ),
-                child: Icon(
-                  Icons.person,
-                  size: 20.sp,
-                  color: showScannedStyle ? colors.primary : colors.textSecondary,
-                ),
-              ),
-              SizedBox(width: 12.w),
-
               // Nama dan NIS
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w600,
-                              color: showScannedStyle
-                                  ? colors.primary
-                                  : colors.textPrimary,
-                              fontFamily: 'Poppins',
-                              height: 1.3,
-                            ),
-                          ),
-                        ),
-                        if (showScannedStyle) ...[
-                          SizedBox(width: 8.w),
-                          Padding(
-                            padding: EdgeInsets.only(top: 2.h),
-                            child: Icon(
-                              Icons.qr_code_rounded,
-                              size: 16.sp,
-                              color: colors.primary,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    SizedBox(height: 4.h),
                     Text(
-                      nis,
+                      name,
+                      softWrap: true,
                       style: TextStyle(
-                        fontSize: 11.sp,
+                        fontSize: 14.5.sp,
+                        fontWeight: FontWeight.w600,
+                        color: showScannedStyle
+                            ? colors.primary
+                            : colors.textPrimary,
+                        fontFamily: 'Poppins',
+                        height: 1.3,
+                      ),
+                    ),
+                    SizedBox(height: 3.h),
+                    Text(
+                      nis.startsWith('NIS') ? nis : 'NIS: $nis',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
                         color: colors.textSecondary,
                         fontFamily: 'Poppins',
-                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
                 ),
               ),
+              if (showScannedStyle) ...[
+                SizedBox(width: 8.w),
+                Padding(
+                  padding: EdgeInsets.only(top: 2.h),
+                  child: Icon(
+                    Icons.qr_code_rounded,
+                    size: 18.sp,
+                    color: colors.primary,
+                  ),
+                ),
+              ],
             ],
           ),
 
@@ -1083,12 +1076,12 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
 
   // ── Locked Status Badge ───────────────────────────────────────────────────
   Widget _buildLockedStatusBadge(AppColorSet colors) {
-    final barcodeColor = const Color(0xFF16A34A);
+    final barcodeColor = colors.primary;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: barcodeColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10.r),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(
           color: barcodeColor.withValues(alpha: 0.3),
           width: 1,
@@ -1176,9 +1169,9 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
           color: _getStatusBorderColor(currentStatus, colors),
           width: 1,
         ),
-        closedBorderRadius: BorderRadius.circular(10.r),
+        closedBorderRadius: BorderRadius.circular(8.r),
         closedFillColor: _getStatusBgColor(currentStatus, colors),
-        expandedBorderRadius: BorderRadius.circular(10.r),
+        expandedBorderRadius: BorderRadius.circular(8.r),
         expandedFillColor: colors.surface,
         expandedBorder: Border.all(color: colors.border, width: 1),
         closedSuffixIcon: Icon(
@@ -1202,7 +1195,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
       case 'hadir_manual':
         return colors.primary.withValues(alpha: 0.1);
       case 'hadir_barcode':
-        return const Color(0xFF16A34A).withValues(alpha: 0.1);
+        return colors.primary.withValues(alpha: 0.1);
       case 'terlambat':
         return const Color(0xFFF3722C).withValues(alpha: 0.1);
       case 'sakit':
@@ -1222,7 +1215,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
       case 'hadir_manual':
         return colors.primary.withValues(alpha: 0.3);
       case 'hadir_barcode':
-        return const Color(0xFF16A34A).withValues(alpha: 0.3);
+        return colors.primary.withValues(alpha: 0.3);
       case 'terlambat':
         return const Color(0xFFF3722C).withValues(alpha: 0.3);
       case 'sakit':
@@ -1242,7 +1235,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
       case 'hadir_manual':
         return colors.primary;
       case 'hadir_barcode':
-        return const Color(0xFF16A34A);
+        return colors.primary;
       case 'terlambat':
         return const Color(0xFFF3722C);
       case 'sakit':

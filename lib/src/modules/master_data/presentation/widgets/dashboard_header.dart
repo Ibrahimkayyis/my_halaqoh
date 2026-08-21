@@ -28,11 +28,7 @@ class DashboardHeader extends StatelessWidget {
         bottom: 30.h,
       ),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [colors.primary, colors.primary.withValues(alpha: 0.85)],
-        ),
+        gradient: colors.primaryGradient,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30.r),
           bottomRight: Radius.circular(30.r),

@@ -45,7 +45,7 @@ class AppTabSelector extends StatelessWidget {
         height: height ?? 42.h,
         decoration: BoxDecoration(
           color: colors.border.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(8.r),
         ),
         child: TabBar(
           controller: controller,

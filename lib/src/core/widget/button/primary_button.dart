@@ -20,7 +20,7 @@ class PrimaryButton extends StatelessWidget {
   /// Defaults to 50.h minimum
   final double? height;
 
-  /// Custom border radius. Defaults to 14.r
+  /// Custom border radius. Defaults to 8.r (radius.sm)
   final double? borderRadius;
 
   const PrimaryButton({
@@ -74,7 +74,7 @@ class PrimaryButton extends StatelessWidget {
 
     Widget button = DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius ?? 14.r),
+        borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
         boxShadow: onPressed == null || isLoading
             ? []
             : [
@@ -93,7 +93,7 @@ class PrimaryButton extends StatelessWidget {
           disabledBackgroundColor: themeBgColor.withValues(alpha: 0.5),
           disabledForegroundColor: themeFgColor.withValues(alpha: 0.8),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius ?? 14.r),
+            borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
           ),
           elevation: 0,
           // Tambahkan padding vertikal agar teks punya ruang bernapas di atas/bawah

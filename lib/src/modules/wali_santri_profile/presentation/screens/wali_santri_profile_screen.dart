@@ -1,23 +1,28 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
-import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/cubits/wali_santri_profile_cubit.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/cubits/wali_santri_profile_state.dart';
 
-/// Profile screen for Wali Santri role — avatar, name, class badge, menu items, logout
+/// Profile screen for Wali Santri role with Unified Single-Scroll, Hero Identity Card,
+/// and direct photo change/delete capability.
 @RoutePage()
 class WaliSantriProfileScreen extends StatefulWidget {
   const WaliSantriProfileScreen({super.key});
@@ -30,6 +35,7 @@ class WaliSantriProfileScreen extends StatefulWidget {
 class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
   late final WaliSantriProfileCubit _profileCubit;
   String? _lastLoadedId;
+  bool _isUploadingPhoto = false;
 
   @override
   void initState() {
@@ -43,10 +49,179 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
     super.dispose();
   }
 
+  /// Show bottom sheet for photo options (Pick new or Delete directly)
+  void _showPhotoOptionsSheet(
+    BuildContext context,
+    SantriModel? santri,
+    String linkedDocId,
+  ) {
+    if (santri == null || linkedDocId.isEmpty) return;
+
+    final colors = AppColors.of(context);
+    final hasPhoto = santri.profilePicture != null && santri.profilePicture!.isNotEmpty;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: colors.border,
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'Foto Profil Santri',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                ListTile(
+                  leading: Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      color: colors.primary,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Icon(Icons.photo_library_outlined,
+                        color: Colors.white, size: 20.sp),
+                  ),
+                  title: Text(
+                    'Pilih dari Galeri',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  onTap: () async {
+                    Navigator.of(ctx).pop();
+                    final picker = ImagePicker();
+                    final pickedFile = await picker.pickImage(
+                      source: ImageSource.gallery,
+                      imageQuality: 70,
+                    );
+                    if (pickedFile != null && mounted) {
+                      setState(() => _isUploadingPhoto = true);
+                      final url = await _profileCubit.uploadPhoto(
+                        linkedDocId,
+                        File(pickedFile.path),
+                      );
+                      if (!mounted) return;
+                      if (url != null) {
+                        final updated = santri.copyWith(
+                          profilePicture: url,
+                          updatedAt: DateTime.now(),
+                        );
+                        await _profileCubit.updateProfile(updated);
+                        if (!mounted) return;
+                        _profileCubit.loadProfile(linkedDocId);
+                        try {
+                          context.read<SantriCubit>().updateSantri(updated);
+                        } catch (_) {}
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Foto profil santri berhasil diperbarui',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp),
+                            ),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                          ),
+                        );
+                      }
+                      setState(() => _isUploadingPhoto = false);
+                    }
+                  },
+                ),
+                if (hasPhoto)
+                  ListTile(
+                    leading: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: colors.error,
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(Icons.delete_outline_rounded,
+                          color: Colors.white, size: 20.sp),
+                    ),
+                    title: Text(
+                      'Hapus Foto Profil',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: colors.error,
+                      ),
+                    ),
+                    onTap: () async {
+                      Navigator.of(ctx).pop();
+                      setState(() => _isUploadingPhoto = true);
+                      final updated = santri.copyWith(
+                        profilePicture: null,
+                        updatedAt: DateTime.now(),
+                      );
+                      final success = await _profileCubit.updateProfile(updated);
+                      if (!mounted) return;
+                      if (success) {
+                        _profileCubit.loadProfile(linkedDocId);
+                        try {
+                          context.read<SantriCubit>().updateSantri(updated);
+                        } catch (_) {}
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Foto profil santri berhasil dihapus',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp),
+                            ),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                          ),
+                        );
+                      }
+                      setState(() => _isUploadingPhoto = false);
+                    },
+                  ),
+                SizedBox(height: 8.h),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-
     final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
 
     // Dynamically load profile when linked student switches
@@ -104,88 +279,105 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
             orElse: () {},
           );
 
+          final displayName = santri?.nama ?? (santriName.isNotEmpty ? santriName : t.guruProfile.loading);
+          final displayNis = santri?.nis ?? nis;
+          final classBadge = myHalaqoh != null
+              ? '${t.progressHafalanPerJuz.kelasLabel(kelas: myHalaqoh!.kelas)} | ${myHalaqoh!.program == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler}'
+              : (santri != null ? '${t.progressHafalanPerJuz.kelasLabel(kelas: santri!.kelas)} | ${santri!.program == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler}' : '');
+
           return Scaffold(
             backgroundColor: colors.background,
-            body: Column(
-              children: [
-                _buildHeader(
-                  colors: colors,
-                  name: santri?.nama ?? (santriName.isNotEmpty ? santriName : t.guruProfile.loading),
-                  nis: santri?.nis ?? nis,
-                  badge: myHalaqoh != null
-                      ? '${t.progressHafalanPerJuz.kelasLabel(kelas: myHalaqoh!.kelas)} | ${myHalaqoh!.program == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler}'
-                      : '${t.progressHafalanPerJuz.kelasLabel(kelas: '?')} | ?',
-                  profilePictureUrl: santri?.profilePicture,
-                ),
-                // ── Menu sections ──
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 24.h),
+            body: SafeArea(
+              bottom: false,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                child: Column(
+                  children: [
+                    // ── Hero Profile Identity Card ──
+                    _buildHeroCard(
+                      context: context,
+                      colors: colors,
+                      santri: santri,
+                      name: displayName,
+                      nis: displayNis,
+                      badge: classBadge,
+                      profilePictureUrl: santri?.profilePicture,
+                      linkedDocId: linkedDocId,
+                    ),
+                    SizedBox(height: 24.h),
 
-                        // Card 1 — Edit Profile & Ubah Password
-                        _buildMenuCard(
-                          colors,
-                          items: [
-                            _MenuItem(
-                              icon: Icons.person,
-                              label: t.guruProfile.editProfile,
-                              onTap: () {
-                                context.router.push(
-                                  const WaliSantriEditProfileRoute(),
-                                );
-                              },
-                            ),
-                            _MenuItem(
-                              icon: Icons.lock,
-                              label: t.guruProfile.ubahPassword,
-                              onTap: () {
-                                context.router.push(
-                                  const WaliSantriUbahPasswordRoute(),
-                                );
-                              },
-                            ),
-                          ],
+                    // ── Section 1: Akun & Keamanan ──
+                    _buildSectionHeader(colors, 'AKUN & KEAMANAN'),
+                    SizedBox(height: 8.h),
+                    _buildMenuCard(
+                      colors,
+                      items: [
+                        _MenuItemData(
+                          icon: Icons.lock_outline,
+                          label: t.guruProfile.ubahPassword,
+                          onTap: () => context.router.push(const WaliSantriUbahPasswordRoute()),
                         ),
-                        SizedBox(height: 14.h),
-
-                        // Card 2 — Pengaturan & Tentang Aplikasi
-                        _buildMenuCard(
-                          colors,
-                          items: [
-                            _MenuItem(
-                              icon: Icons.settings,
-                              label: t.guruProfile.pengaturan,
-                              onTap: () {
-                                context.router.push(
-                                  const WaliSantriPengaturanRoute(),
-                                );
-                              },
-                            ),
-                            _MenuItem(
-                              icon: Icons.info_outline,
-                              label: t.guruProfile.tentangAplikasi,
-                              onTap: () {
-                                context.router.push(
-                                  const TentangAplikasiRoute(),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 14.h),
-
-                        // Logout button
-                        _buildLogoutCard(colors, context),
-                        SizedBox(height: 16.h),
-                        SizedBox(height: 100.h), // space for bottom nav
                       ],
                     ),
-                  ),
+                    SizedBox(height: 20.h),
+
+                    // ── Section 2: Preferensi & Informasi ──
+                    _buildSectionHeader(colors, 'PREFERENSI & INFORMASI'),
+                    SizedBox(height: 8.h),
+                    _buildMenuCard(
+                      colors,
+                      items: [
+                        _MenuItemData(
+                          icon: Icons.settings_outlined,
+                          label: t.guruProfile.pengaturan,
+                          onTap: () => context.router.push(const WaliSantriPengaturanRoute()),
+                        ),
+                        _MenuItemData(
+                          icon: Icons.info_outline,
+                          label: t.guruProfile.tentangAplikasi,
+                          onTap: () => context.router.push(const TentangAplikasiRoute()),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20.h),
+
+                    // ── Section 3: Sesi ──
+                    _buildSectionHeader(colors, 'SESI'),
+                    SizedBox(height: 8.h),
+                    _buildMenuCard(
+                      colors,
+                      items: [
+                        _MenuItemData(
+                          icon: Icons.logout_rounded,
+                          label: 'Keluar Akun',
+                          isDestructive: true,
+                          onTap: () async {
+                            final confirmed = await ConfirmLogoutDialog.show(context);
+                            if (confirmed && context.mounted) {
+                              final authCubit = context.read<AuthCubit>();
+                              context.router.replaceAll([const LoginRoute()]);
+                              await authCubit.logout();
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 24.h),
+
+                    // ── App Version Footer ──
+                    Text(
+                      'MyHalaqoh v1.0.0',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 11.sp,
+                        color: colors.textSecondary.withValues(alpha: 0.6),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 100.h), // Safe spacing for bottom navigation
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         },
@@ -193,117 +385,227 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
     );
   }
 
-  /// Green gradient header with avatar, santri name, and class badge
-  Widget _buildHeader({
+  /// Hero Profile Identity Card with Avatar (with Camera badge & tap), Name, NIS, Class Badge, and Edit Profile Button
+  Widget _buildHeroCard({
+    required BuildContext context,
     required AppColorSet colors,
+    required SantriModel? santri,
     required String name,
     required String nis,
     required String badge,
+    required String linkedDocId,
     String? profilePictureUrl,
   }) {
     return Container(
       width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colors.primary, colors.primary.withValues(alpha: 0.85)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32.r),
-          bottomRight: Radius.circular(32.r),
-        ),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: colors.border.withValues(alpha: 0.6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.only(top: 24.h, bottom: 32.h),
-          child: Column(
-            children: [
-              // Avatar circle — shows profile picture if available
-              Container(
-                width: 100.w,
-                height: 100.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.2),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.5),
-                    width: 3,
+      child: Column(
+        children: [
+          // Avatar circle with camera badge overlay (tappable to change/delete photo)
+          GestureDetector(
+            onTap: _isUploadingPhoto
+                ? null
+                : () => _showPhotoOptionsSheet(context, santri, linkedDocId),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 84.w,
+                  height: 84.w,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors.surface,
+                    border: Border.all(
+                      color: colors.primary,
+                      width: 2.5,
+                    ),
                   ),
-                  image: profilePictureUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(profilePictureUrl),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
+                  child: ClipOval(
+                    child: profilePictureUrl != null && profilePictureUrl.isNotEmpty
+                        ? Image.network(
+                            profilePictureUrl,
+                            fit: BoxFit.cover,
+                            width: 84.w,
+                            height: 84.w,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.person_rounded,
+                              size: 44.sp,
+                              color: colors.primary,
+                            ),
+                          )
+                        : Icon(
+                            Icons.person_rounded,
+                            size: 44.sp,
+                            color: colors.primary,
+                          ),
+                  ),
                 ),
-                child: profilePictureUrl == null
-                    ? Icon(Icons.person, size: 52.sp, color: Colors.white)
-                    : null,
-              ),
-              SizedBox(height: 14.h),
+                // Camera Badge Overlay
+                Positioned(
+                  bottom: -2,
+                  right: -2,
+                  child: Container(
+                    width: 28.w,
+                    height: 28.w,
+                    decoration: BoxDecoration(
+                      color: colors.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: colors.surface, width: 2),
+                    ),
+                    child: Icon(
+                      Icons.camera_alt_rounded,
+                      size: 14.sp,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                if (_isUploadingPhoto)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black54,
+                      ),
+                      child: const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          SizedBox(height: 12.h),
 
-              // Name
-              Text(
-                name,
+          // Name (soft-wrapping)
+          Text(
+            name,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: colors.textPrimary,
+              height: 1.25,
+            ),
+            textAlign: TextAlign.center,
+            softWrap: true,
+          ),
+
+          // NIS
+          if (nis.isNotEmpty) ...[
+            SizedBox(height: 3.h),
+            Text(
+              t.progressHafalanPerJuz.nisLabel(nis: nis),
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+          if (badge.isNotEmpty) ...[
+            SizedBox(height: 10.h),
+            // Class & Program Badge (Solid Primary with White Text)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
+              decoration: BoxDecoration(
+                color: colors.primary,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Text(
+                badge,
                 style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
                   fontFamily: 'Poppins',
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 4.h),
-
-              // NIS
-              if (nis.isNotEmpty)
-                Text(
-                  t.progressHafalanPerJuz.nisLabel(nis: nis),
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-              SizedBox(height: 6.h),
-
-              // Class badge
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                child: Text(
-                  badge,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                    fontFamily: 'Poppins',
-                  ),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
-            ],
+            ),
+          ],
+          SizedBox(height: 16.h),
+
+          // Quick Action: Edit Profile Button
+          SizedBox(
+            width: double.infinity,
+            height: 38.h,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                await context.router.push(const WaliSantriEditProfileRoute());
+                if (context.mounted && linkedDocId.isNotEmpty) {
+                  _profileCubit.loadProfile(linkedDocId);
+                  try {
+                    context.read<SantriCubit>().watchAll();
+                  } catch (_) {}
+                }
+              },
+              icon: Icon(Icons.edit_outlined, size: 16.sp, color: colors.primary),
+              label: Text(
+                t.guruProfile.editProfile,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: colors.primary,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: colors.primary, width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                backgroundColor: colors.surface,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Section Header text
+  Widget _buildSectionHeader(AppColorSet colors, String title) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: EdgeInsets.only(left: 4.w),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 11.5.sp,
+            fontWeight: FontWeight.w600,
+            color: colors.textSecondary,
+            letterSpacing: 0.8,
           ),
         ),
       ),
     );
   }
 
-  /// Rounded card containing menu items with dividers between them
-  Widget _buildMenuCard(AppColorSet colors, {required List<_MenuItem> items}) {
+  /// Rounded card containing menu items with dividers
+  Widget _buildMenuCard(AppColorSet colors, {required List<_MenuItemData> items}) {
     return Container(
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: colors.border.withValues(alpha: 0.6)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
@@ -311,100 +613,60 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
       child: Column(
         children: [
           for (int i = 0; i < items.length; i++) ...[
-            _buildMenuItem(items[i], colors),
-            if (i < items.length - 1)
+            if (i > 0)
               Divider(
                 height: 1,
-                indent: 60.w,
-                endIndent: 20.w,
+                thickness: 1,
+                indent: 52.w,
+                endIndent: 16.w,
                 color: colors.border.withValues(alpha: 0.5),
               ),
+            _buildMenuItemTile(colors, items[i]),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildMenuItem(_MenuItem item, AppColorSet colors) {
-    return InkWell(
-      onTap: item.onTap,
-      borderRadius: BorderRadius.circular(16.r),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
-        child: Row(
-          children: [
-            // Icon circle
-            Container(
-              width: 40.w,
-              height: 40.w,
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(item.icon, size: 20.sp, color: colors.primary),
-            ),
-            SizedBox(width: 14.w),
+  /// Single menu tile with Solid Primary / Solid Error Icon Box
+  Widget _buildMenuItemTile(AppColorSet colors, _MenuItemData item) {
+    final itemColor = item.isDestructive ? colors.error : colors.textPrimary;
+    final iconBgColor = item.isDestructive ? colors.error : colors.primary;
 
-            // Label
-            Expanded(
-              child: Text(
-                item.label,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w500,
-                  color: colors.textPrimary,
-                  fontFamily: 'Poppins',
-                ),
-              ),
-            ),
-
-            // Chevron
-            Icon(Icons.chevron_right, size: 22.sp, color: colors.primary),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Logout card
-  Widget _buildLogoutCard(AppColorSet colors, BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
-        onTap: () async {
-          final confirmed = await ConfirmLogoutDialog.show(context);
-          if (confirmed && context.mounted) {
-            final authCubit = context.read<AuthCubit>();
-            context.router.replaceAll([const LoginRoute()]);
-            await authCubit.logout();
-          }
-        },
+        onTap: item.onTap,
         borderRadius: BorderRadius.circular(16.r),
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.logout, size: 20.sp, color: Colors.redAccent),
-              SizedBox(width: 8.w),
-              Text(
-                t.guruProfile.keluar,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.redAccent,
-                  fontFamily: 'Poppins',
+              Container(
+                width: 36.w,
+                height: 36.w,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
+                child: Icon(item.icon, size: 18.sp, color: Colors.white),
+              ),
+              SizedBox(width: 14.w),
+              Expanded(
+                child: Text(
+                  item.label,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w500,
+                    color: itemColor,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20.sp,
+                color: colors.textSecondary.withValues(alpha: 0.5),
               ),
             ],
           ),
@@ -414,15 +676,16 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
   }
 }
 
-/// Helper model for menu items
-class _MenuItem {
+class _MenuItemData {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool isDestructive;
 
-  const _MenuItem({
+  const _MenuItemData({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.isDestructive = false,
   });
 }

@@ -267,11 +267,7 @@ class TentangAplikasiScreen extends StatelessWidget {
   ) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colors.primary, colors.primary.withValues(alpha: 0.75)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: colors.primaryGradient,
       ),
       child: SafeArea(
         child: Column(

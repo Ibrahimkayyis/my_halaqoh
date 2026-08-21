@@ -1,4 +1,3 @@
-import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,8 +10,11 @@ import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/domain/models/hafalan_santri_model.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/riwayat_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/widgets/laporan_konfigurasi_hafalan_sheet.dart';
 
@@ -203,8 +205,78 @@ class _RiwayatHafalanSantriScreenState
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
+    // Look up real santri data by NIS
+    final santriState = context.watch<SantriCubit>().state;
+    SantriModel? santri;
+    santriState.maybeWhen(
+      loaded: (list) {
+        try {
+          santri = list.firstWhere((s) => s.nis == widget.nis);
+        } catch (_) {}
+      },
+      orElse: () {},
+    );
+
     return Scaffold(
       backgroundColor: colors.background,
+      floatingActionButtonLocation: ExpandableFabMenu.location,
+      floatingActionButton: ExpandableFabMenu(
+        items: [
+          ExpandableFabItem(
+            icon: Icons.analytics_outlined,
+            label: 'Lihat Progress',
+            onTap: () {
+              context.router.push(
+                ProgressHafalanPerJuzRoute(
+                  santriId: widget.santriId,
+                  name: widget.name,
+                  nis: widget.nis,
+                ),
+              );
+            },
+          ),
+          ExpandableFabItem(
+            icon: Icons.menu_book_outlined,
+            label: 'Buka Mutaba\'ah',
+            onTap: () {
+              context.router.push(
+                MutabaahSantriRoute(
+                  santriId: widget.santriId,
+                  name: widget.name,
+                  nis: widget.nis,
+                ),
+              );
+            },
+          ),
+          ExpandableFabItem(
+            icon: Icons.download_rounded,
+            label: 'Unduh Laporan',
+            onTap: () {
+              HalaqohModel? myHalaqoh;
+              final linkedDocId =
+                  ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
+              context.read<HalaqohCubit>().state.maybeWhen(
+                loaded: (list) {
+                  try {
+                    myHalaqoh =
+                        list.firstWhere((h) => h.guruId == linkedDocId);
+                  } catch (_) {}
+                },
+                orElse: () {},
+              );
+              LaporanKonfigurasiHafalanSheet.show(
+                context,
+                santriId: widget.santriId,
+                santriName: widget.name,
+                santriNis: widget.nis,
+                halaqoh: myHalaqoh,
+                initialMonth: _currentMonth,
+                initialYear: _currentYear,
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -264,13 +336,23 @@ class _RiwayatHafalanSantriScreenState
                           .length;
 
                       return SingleChildScrollView(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Profile card
-                            _buildProfileCard(colors),
                             SizedBox(height: 16.h),
+
+                            // Profile Context Header
+                            SantriContextHeader(
+                              name: santri?.nama ?? widget.name,
+                              nis: santri?.nis ?? widget.nis,
+                              subtitle: santri != null && santri!.kelas.isNotEmpty
+                                  ? 'Kelas ${santri!.kelas}${santri!.program}'
+                                  : null,
+                              profilePictureUrl: santri?.profilePicture,
+                            ),
+                            SizedBox(height: 22.h),
 
                             // ── Month navigator ──
                             Row(
@@ -301,109 +383,61 @@ class _RiwayatHafalanSantriScreenState
 
                             // Stats cards — IntrinsicHeight memastikan kedua card
                             // sama tingginya meski label berbeda panjang.
-                             _buildCombinedStatCard(
-                               totalBaru,
-                               totalMurajaah,
-                               colors,
-                             ),
-                            SizedBox(height: 16.h),
+                            _buildCombinedStatCard(
+                              totalBaru,
+                              totalMurajaah,
+                              colors,
+                            ),
+                            SizedBox(height: 20.h),
 
-                            // Filter + Buka Mutaba'ah
+                            // ── Section Header: Setoran Terbaru ──
                             Row(
                               children: [
-                                Flexible(
-                                  child: CustomDropdown<String>(
-                                    items: _filterOptions,
-                                    initialItem: _filterOptions[_selectedFilterIndex],
-                                    onChanged: (value) {
-                                      if (value != null) {
-                                        final idx = _filterOptions.indexOf(value);
-                                        setState(() {
-                                          _selectedFilterIndex = idx >= 0 ? idx : 0;
-                                          _expandedIndex = null;
-                                        });
-                                      }
-                                    },
-                                    decoration: CustomDropdownDecoration(
-                                      closedFillColor: colors.surface,
-                                      closedBorder: Border.all(
-                                        color: colors.border,
-                                        width: 1,
-                                      ),
-                                      closedBorderRadius: BorderRadius.circular(
-                                        10.r,
-                                      ),
-                                      expandedFillColor: colors.surface,
-                                      expandedBorder: Border.all(
-                                        color: colors.border,
-                                        width: 1,
-                                      ),
-                                      expandedBorderRadius:
-                                          BorderRadius.circular(10.r),
-                                      headerStyle: TextStyle(
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: colors.textPrimary,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                      listItemStyle: TextStyle(
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: colors.textPrimary,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                    ),
+                                Container(
+                                  width: 3.5.w,
+                                  height: 16.h,
+                                  decoration: BoxDecoration(
+                                    color: colors.primary,
+                                    borderRadius: BorderRadius.circular(2.r),
                                   ),
                                 ),
-                                SizedBox(width: 10.w),
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      context.router.push(
-                                        MutabaahSantriRoute(
-                                          santriId: widget.santriId,
-                                          name: widget.name,
-                                          nis: widget.nis,
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 10.h,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: colors.primary,
-                                        borderRadius: BorderRadius.circular(
-                                          10.r,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.menu_book,
-                                            size: 16.sp,
-                                            color: colors.textOnButton,
-                                          ),
-                                          SizedBox(width: 6.w),
-                                          Text(
-                                            t.riwayatHafalanSantri.bukaMutabaah,
-                                            style: TextStyle(
-                                              fontSize: 12.sp,
-                                              fontWeight: FontWeight.w700,
-                                              color: colors.textOnButton,
-                                              fontFamily: 'Poppins',
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  'Setoran Terbaru',
+                                  style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: colors.textPrimary,
+                                    fontFamily: 'Poppins',
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 16.h),
+                            SizedBox(height: 12.h),
+
+                            // ── Filter Segmented Chips ──
+                            Row(
+                              children: [
+                                _buildFilterChip(
+                                  0,
+                                  _filterOptions[0],
+                                  colors,
+                                ),
+                                SizedBox(width: 8.w),
+                                _buildFilterChip(
+                                  1,
+                                  _filterOptions[1],
+                                  colors,
+                                ),
+                                SizedBox(width: 8.w),
+                                _buildFilterChip(
+                                  2,
+                                  _filterOptions[2],
+                                  colors,
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 14.h),
 
                             // Records list (grouped by submission)
                             if (groups.isEmpty)
@@ -424,53 +458,7 @@ class _RiwayatHafalanSantriScreenState
                               ...groups.asMap().entries.map(
                                 (e) => _buildGroupCard(e.value, e.key, colors),
                               ),
-                            SizedBox(height: 16.h),
-
-                            // Lihat Progress button
-                            CustomOutlinedButton(
-                              width: double.infinity,
-                              height: 48.h,
-                              onPressed: () {
-                                context.router.push(
-                                  ProgressHafalanPerJuzRoute(
-                                    santriId: widget.santriId,
-                                    name: widget.name,
-                                    nis: widget.nis,
-                                  ),
-                                );
-                              },
-                              icon: Icons.menu_book,
-                              label: t.riwayatHafalanSantri.lihatProgress,
-                            ),
-                            SizedBox(height: 10.h),
-
-                            // Download Laporan button
-                            CustomOutlinedButton(
-                              width: double.infinity,
-                              height: 48.h,
-                              onPressed: () {
-                                HalaqohModel? myHalaqoh;
-                                final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
-                                context.read<HalaqohCubit>().state.maybeWhen(
-                                  loaded: (list) {
-                                    try { myHalaqoh = list.firstWhere((h) => h.guruId == linkedDocId); } catch (_) {}
-                                  },
-                                  orElse: () {},
-                                );
-                                LaporanKonfigurasiHafalanSheet.show(
-                                  context,
-                                  santriId:     widget.santriId,
-                                  santriName:   widget.name,
-                                  santriNis:    widget.nis,
-                                  halaqoh:      myHalaqoh,
-                                  initialMonth: _currentMonth,
-                                  initialYear:  _currentYear,
-                                );
-                              },
-                              icon: Icons.download,
-                              label: t.riwayatHafalanSantri.downloadLaporan,
-                            ),
-                            SizedBox(height: 24.h),
+                            SizedBox(height: 80.h),
                           ],
                         ),
                       );
@@ -485,58 +473,49 @@ class _RiwayatHafalanSantriScreenState
     );
   }
 
-  // ── Profile Card ──
-  Widget _buildProfileCard(AppColorSet colors) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(18.w),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colors.primary, colors.primary.withValues(alpha: 0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50.w,
-            height: 50.w,
+
+  Widget _buildFilterChip(int index, String label, AppColorSet colors) {
+    final isSelected = _selectedFilterIndex == index;
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _selectedFilterIndex = index;
+              _expandedIndex = null;
+            });
+          },
+          borderRadius: BorderRadius.circular(8.r),
+          child: Container(
+            height: 34.h,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.2),
+              color: isSelected
+                  ? colors.primary.withValues(alpha: 0.1)
+                  : colors.surface,
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(
+                color: isSelected
+                    ? colors.primary
+                    : colors.border.withValues(alpha: 0.7),
+                width: isSelected ? 1.2 : 0.8,
+              ),
             ),
-            child: Icon(Icons.person, size: 26.sp, color: Colors.white),
-          ),
-          SizedBox(width: 14.w),
-          // FIX: Expanded prevents overflow when name is long
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.name,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    fontFamily: 'Poppins',
-                  ),
+            child: Center(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.5.sp,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? colors.primary : colors.textSecondary,
+                  fontFamily: 'Poppins',
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  t.riwayatHafalanSantri.nisLabel(nis: widget.nis),
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

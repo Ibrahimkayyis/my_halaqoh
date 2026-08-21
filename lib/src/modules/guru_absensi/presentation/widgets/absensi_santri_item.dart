@@ -2,132 +2,110 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 
-/// Santri list item for absensi screen — avatar, name, NIS, and RIWAYAT ABSENSI button
+/// Santri list item for absensi screen — clean interactive card with full name, NIS, and chevron.
 class AbsensiSantriItem extends StatelessWidget {
   final String name;
   final String nis;
-  final String riwayatLabel;
   final VoidCallback? onRiwayatTap;
 
   const AbsensiSantriItem({
     super.key,
     required this.name,
     required this.nis,
-    required this.riwayatLabel,
     this.onRiwayatTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      margin: EdgeInsets.only(bottom: 10.h),
+      margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(14.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: isDark ? colors.border : colors.border.withValues(alpha: 0.7),
+          width: 0.8,
+        ),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Avatar
-          Container(
-            width: 44.w,
-            height: 44.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: colors.primary.withValues(alpha: 0.1),
-              border: Border.all(
-                color: colors.primary.withValues(alpha: 0.2),
-                width: 1.5,
-              ),
-            ),
-            child: Icon(Icons.person, size: 22.sp, color: colors.primary),
-          ),
-          SizedBox(width: 12.w),
-
-          // Name, NIS, and button — stacked vertically, takes remaining width
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16.r),
+        child: InkWell(
+          onTap: onRiwayatTap,
+          borderRadius: BorderRadius.circular(16.r),
+          splashColor: colors.primary.withValues(alpha: 0.08),
+          highlightColor: colors.primary.withValues(alpha: 0.04),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Name — full width, wraps naturally
-                Text(
-                  name,
-                  softWrap: true,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: colors.primary,
-                    fontFamily: 'Poppins',
-                    height: 1.3,
-                  ),
-                ),
-                SizedBox(height: 2.h),
-
-                // NIS
-                Text(
-                  nis,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w400,
-                    color: colors.textSecondary,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                SizedBox(height: 8.h),
-
-                // Riwayat Absensi button — aligned to left
-                GestureDetector(
-                  onTap: onRiwayatTap,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colors.primary.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(
-                        color: colors.primary.withValues(alpha: 0.2),
-                        width: 1,
+                // Name & NIS Column (Full width, soft-wrapping)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        name,
+                        softWrap: true,
+                        style: textTheme.titleMedium?.copyWith(
+                              fontSize: 14.5.sp,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                              height: 1.25,
+                            ) ??
+                            TextStyle(
+                              fontSize: 14.5.sp,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                              fontFamily: 'Poppins',
+                              height: 1.25,
+                            ),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 12.sp,
-                          color: colors.primary,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          riwayatLabel,
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w600,
-                            color: colors.primary,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ],
-                    ),
+                      SizedBox(height: 3.h),
+                      Text(
+                        'NIS: $nis',
+                        style: textTheme.bodySmall?.copyWith(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w400,
+                              color: colors.textSecondary,
+                            ) ??
+                            TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w400,
+                              color: colors.textSecondary,
+                              fontFamily: 'Poppins',
+                            ),
+                      ),
+                    ],
                   ),
+                ),
+                SizedBox(width: 8.w),
+
+                // Chevron tap affordance
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22.sp,
+                  color: colors.textSecondary.withValues(alpha: 0.5),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -41,7 +41,7 @@ class _SubmissionGroup {
   String get ayatDisplay {
     if (records.length == 1) {
       final r = records.first;
-      return t.riwayatHafalanSantri.ayatRange(start: '${r.ayatMulai}', end: '${r.ayatSelesai}');
+      return '${r.ayatMulai}-${r.ayatSelesai}';
     }
     return t.mutabaahSantri.suratCount(count: records.length);
   }
@@ -232,7 +232,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                   child: isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : SingleChildScrollView(
-                          padding: EdgeInsets.symmetric(horizontal: 24.w),
+                          padding: EdgeInsets.symmetric(horizontal: 20.w),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -247,7 +247,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
                                       onNext: _nextMonth,
                                     ),
                                   ),
-                                  SizedBox(width: 8.w),
+                                  SizedBox(width: 10.w),
                                   AppCalendarPickerButton(
                                     currentMonth: _currentMonth,
                                     currentYear: _currentYear,
@@ -781,7 +781,7 @@ class _WaliSantriMutabaahScreenState extends State<WaliSantriMutabaahScreen> {
             SizedBox(
               width: 55.w,
               child: Text(
-                t.riwayatHafalanSantri.ayatRange(start: '${record.ayatMulai}', end: '${record.ayatSelesai}'),
+                '${record.ayatMulai}-${record.ayatSelesai}',
                 style: TextStyle(
                   fontSize: 11.sp,
                   color: colors.textSecondary.withValues(alpha: 0.8),
