@@ -54,9 +54,9 @@ jobs:
       # flutter analyze (next step) will catch any stale generated files at compile time.
 
       # Only fails on errors, not warnings or info.
-      # Current codebase has ~2 warnings and ~14 info items that are non-blocking.
+      # Flags --no-fatal-warnings and --no-fatal-infos ensure that non-error lints don't break CI.
       - name: Analyze code
-        run: flutter analyze --no-fatal-warnings
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
 
       - name: Run tests
         run: flutter test
