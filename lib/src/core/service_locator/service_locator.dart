@@ -129,6 +129,7 @@ import 'package:my_halaqoh/src/modules/notifications/domain/repositories/notific
 
 // Notifications — Presentation Layer
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_cubit.dart';
+import 'package:my_halaqoh/src/modules/notifications/data/services/wali_santri_notification_service.dart';
 
 // Guru Laporan — Presentation Layer
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_absensi_cubit.dart';
@@ -367,6 +368,11 @@ Future<void> initDependencies() async {
   // subscription persists for the entire app session without being torn down
   // on screen disposal.
   sl.registerSingleton<NotificationCubit>(NotificationCubit(sl(), sl()));
+
+  // Wali Santri In-App Notification Service
+  sl.registerLazySingleton<WaliSantriNotificationService>(
+    () => WaliSantriNotificationService(sl<FirebaseFirestore>(), sl<SharedPreferences>()),
+  );
 
   // ── Guru Laporan — Cubit ──────────────────────────────────────────────────
   // Factory — scoped to the LaporanKonfigurasiSheet bottom sheet lifetime.

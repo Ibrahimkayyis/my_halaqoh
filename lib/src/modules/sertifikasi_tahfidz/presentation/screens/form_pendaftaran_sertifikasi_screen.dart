@@ -1,12 +1,18 @@
+import 'dart:async';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
+import 'package:my_halaqoh/src/core/quran/quran_service.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/domain/repositories/hafalan_santri_repository.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
@@ -14,7 +20,7 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cu
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 
 /// Form screen for Teacher to register a santri for Tahfidz Certification Exam.
-/// Features a searchable CustomDropdown, dynamic Juz selection, and unified top bar.
+/// Features real santri dropdown, dynamic 100% completed Juz calculation from Firestore, and clean UI.
 @RoutePage()
 class FormPendaftaranSertifikasiScreen extends StatefulWidget {
   final SantriModel? preselectedSantri;
@@ -41,29 +47,86 @@ class _FormPendaftaranSertifikasiScreenState
   String? _santriError;
   String? _juzError;
 
-  // Placeholder map of completed juz for santri in halaqoh
-  final Map<String, List<int>> _santriCompletedJuzMap = {
-    'default': [30, 29],
-  };
+  // Real completed juz state
+  List<int> _completedJuz = [];
+  bool _isLoadingCompletedJuz = false;
+  StreamSubscription? _ziyadahSubscription;
 
   @override
   void initState() {
     super.initState();
     _selectedSantri = widget.preselectedSantri;
+    _selectedJuz = widget.preselectedJuz;
+
     if (_selectedSantri != null) {
-      final completedList = _getCompletedJuzForSantri(_selectedSantri!);
-      _selectedJuz = widget.preselectedJuz ?? (completedList.isNotEmpty ? completedList.first : null);
+      _loadCompletedJuzForSantri(_selectedSantri!.id);
     }
   }
 
-  List<int> _getCompletedJuzForSantri(SantriModel santri) {
-    return _santriCompletedJuzMap[santri.id] ?? _santriCompletedJuzMap['default'] ?? [30];
+  @override
+  void dispose() {
+    _ziyadahSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _loadCompletedJuzForSantri(String santriId) {
+    setState(() {
+      _isLoadingCompletedJuz = true;
+      _completedJuz = [];
+    });
+
+    _ziyadahSubscription?.cancel();
+    _ziyadahSubscription = sl<HafalanSantriRepository>()
+        .watchAllZiyadahBySantriId(santriId)
+        .listen(
+      (ziyadahList) {
+        final segments = ziyadahList.map((item) {
+          return {
+            'surah_id': item.surahId,
+            'ayat_start': item.ayatMulai,
+            'ayat_end': item.ayatSelesai,
+          };
+        }).toList();
+
+        final progress = QuranService.instance.calculateProgress(segments);
+        final completed = progress.juzProgressList
+            .where((j) => j.percentage >= 100 || j.memorizedAyat >= j.totalAyat)
+            .map((j) => j.juzNumber)
+            .toList()
+          ..sort();
+
+        if (mounted) {
+          setState(() {
+            _completedJuz = completed;
+            _isLoadingCompletedJuz = false;
+
+            if (_selectedJuz != null && !completed.contains(_selectedJuz)) {
+              _selectedJuz = completed.isNotEmpty ? completed.first : null;
+            } else if (_selectedJuz == null && completed.isNotEmpty) {
+              _selectedJuz = completed.first;
+            }
+          });
+        }
+      },
+      onError: (e) {
+        if (mounted) {
+          setState(() {
+            _isLoadingCompletedJuz = false;
+            _completedJuz = [];
+          });
+        }
+      },
+    );
+
+    sl<HafalanSantriRepository>().seedFromRemoteIfEmpty(santriId);
   }
 
   void _handleSubmit() async {
     setState(() {
-      _santriError = _selectedSantri == null ? 'Silakan pilih santri yang akan diuji' : null;
-      _juzError = _selectedJuz == null ? 'Silakan pilih juz yang akan diujikan' : null;
+      _santriError =
+          _selectedSantri == null ? 'Silakan pilih santri yang akan diuji' : null;
+      _juzError =
+          _selectedJuz == null ? 'Silakan pilih juz yang akan diujikan' : null;
     });
 
     if (_selectedSantri == null || _selectedJuz == null) {
@@ -74,8 +137,8 @@ class _FormPendaftaranSertifikasiScreenState
       _isSubmitting = true;
     });
 
-    // Simulate server submission delay
-    await Future.delayed(const Duration(milliseconds: 600));
+    // Simulate registration submission
+    await Future.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) return;
 
@@ -153,17 +216,36 @@ class _FormPendaftaranSertifikasiScreenState
     final santriState = context.watch<SantriCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
 
+    final currentGuruId = ActiveSessionHelper.getActiveLinkedDocId(context);
+
     String guruName = 'Ustadz Pengampu';
     String halaqohName = 'Halaqoh Utama';
+    HalaqohModel? myHalaqoh;
+
     authState.maybeWhen(
-      authenticated: (user) => guruName = user.displayName,
+      authenticated: (user) {
+        guruName = user.displayName;
+      },
       orElse: () {},
     );
 
     halaqohState.maybeWhen(
       loaded: (list) {
-        if (list.isNotEmpty) {
-          halaqohName = list.first.nama;
+        if (currentGuruId != null && currentGuruId.isNotEmpty) {
+          final found = list.where((h) => h.guruId == currentGuruId).toList();
+          if (found.isNotEmpty) {
+            myHalaqoh = found.first;
+            halaqohName = myHalaqoh!.nama;
+            if (myHalaqoh!.guruNama.isNotEmpty) {
+              guruName = myHalaqoh!.guruNama;
+            }
+          } else if (list.isNotEmpty) {
+            myHalaqoh = list.first;
+            halaqohName = myHalaqoh!.nama;
+          }
+        } else if (list.isNotEmpty) {
+          myHalaqoh = list.first;
+          halaqohName = myHalaqoh!.nama;
         }
       },
       orElse: () {},
@@ -171,14 +253,29 @@ class _FormPendaftaranSertifikasiScreenState
 
     List<SantriModel> santriList = [];
     santriState.maybeWhen(
-      loaded: (list) => santriList = list,
+      loaded: (list) {
+        if (myHalaqoh != null) {
+          santriList = list
+              .where((s) =>
+                  s.halaqohId == myHalaqoh!.id ||
+                  myHalaqoh!.santriIds.contains(s.id))
+              .toList();
+        } else {
+          santriList = list;
+        }
+      },
       orElse: () {},
     );
 
-    final santriNames = santriList.map((s) => '${s.nama} (${s.nis})').toList();
-    final currentSantriDisplay = _selectedSantri != null ? '${_selectedSantri!.nama} (${_selectedSantri!.nis})' : null;
+    if (widget.preselectedSantri != null &&
+        !santriList.any((s) => s.id == widget.preselectedSantri!.id)) {
+      santriList = [widget.preselectedSantri!, ...santriList];
+    }
 
-    final completedJuz = _selectedSantri != null ? _getCompletedJuzForSantri(_selectedSantri!) : <int>[];
+    final santriNames = santriList.map((s) => '${s.nama} (${s.nis})').toList();
+    final currentSantriDisplay = _selectedSantri != null
+        ? '${_selectedSantri!.nama} (${_selectedSantri!.nis})'
+        : null;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -260,15 +357,17 @@ class _FormPendaftaranSertifikasiScreenState
                                   (s) => '${s.nama} (${s.nis})' == display,
                                 );
                                 _santriError = null;
-                                // Reset selected juz to first completed juz of newly selected student
-                                final newJuzList = _getCompletedJuzForSantri(_selectedSantri!);
-                                _selectedJuz = newJuzList.isNotEmpty ? newJuzList.first : null;
+                                _selectedJuz = null;
                                 _juzError = null;
                               } catch (_) {
                                 _selectedSantri = null;
                                 _selectedJuz = null;
+                                _completedJuz = [];
                               }
                             });
+                            if (_selectedSantri != null) {
+                              _loadCompletedJuzForSantri(_selectedSantri!.id);
+                            }
                           },
                           closedHeaderPadding: EdgeInsets.symmetric(
                             horizontal: 14.w,
@@ -316,7 +415,7 @@ class _FormPendaftaranSertifikasiScreenState
                         ),
                       ),
                       SizedBox(height: 8.h),
-                      _buildJuzSelector(completedJuz, colors, textTheme, isDark),
+                      _buildJuzSelector(colors, textTheme, isDark),
 
                       if (_juzError != null) ...[
                         SizedBox(height: 4.h),
@@ -412,7 +511,6 @@ class _FormPendaftaranSertifikasiScreenState
   }
 
   Widget _buildJuzSelector(
-    List<int> completedJuz,
     AppColorSet colors,
     TextTheme textTheme,
     bool isDark,
@@ -438,7 +536,41 @@ class _FormPendaftaranSertifikasiScreenState
       );
     }
 
-    if (completedJuz.isEmpty) {
+    if (_isLoadingCompletedJuz) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(
+            color: isDark ? colors.border : colors.border.withValues(alpha: 0.6),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 16.w,
+              height: 16.w,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: colors.primary,
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Text(
+              'Menghitung progres hafalan santri...',
+              style: textTheme.bodySmall?.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_completedJuz.isEmpty) {
       return Container(
         width: double.infinity,
         padding: EdgeInsets.all(12.w),
@@ -450,9 +582,21 @@ class _FormPendaftaranSertifikasiScreenState
             width: 0.8,
           ),
         ),
-        child: Text(
-          'Santri ini belum memiliki riwayat juz yang terselesaikan 100%.',
-          style: textTheme.bodySmall?.copyWith(color: colors.warning),
+        child: Row(
+          children: [
+            Icon(
+              Icons.info_outline_rounded,
+              size: 16.sp,
+              color: colors.warning,
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                'Santri ini belum memiliki riwayat juz yang terselesaikan 100%.',
+                style: textTheme.bodySmall?.copyWith(color: colors.warning),
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -460,7 +604,7 @@ class _FormPendaftaranSertifikasiScreenState
     return Wrap(
       spacing: 8.w,
       runSpacing: 8.h,
-      children: completedJuz.map((juz) {
+      children: _completedJuz.map((juz) {
         final isSelected = _selectedJuz == juz;
         return InkWell(
           onTap: () {

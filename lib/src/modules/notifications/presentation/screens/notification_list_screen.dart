@@ -1,34 +1,21 @@
+import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
-
-class NotificationItem {
-  final String id;
-  final String title;
-  final String message;
-  final String category; // 'sertifikasi' | 'absensi' | 'hafalan' | 'umum'
-  final DateTime timestamp;
-  bool isRead;
-
-  NotificationItem({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.category,
-    required this.timestamp,
-    this.isRead = false,
-  });
-}
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/notifications/data/services/wali_santri_notification_service.dart';
+import 'package:my_halaqoh/src/modules/notifications/domain/models/wali_santri_notification_item.dart';
 
 /// Notification list screen for Guru and Wali Santri.
-/// Role-specific filters:
-/// - Guru: Semua, Belum Dibaca, Sertifikasi
-/// - Wali Santri: Semua, Belum Dibaca, Sertifikasi, Absensi, Hafalan
+/// Integrates real data from Firestore for Wali Santri (Absensi & Hafalan).
 @RoutePage()
 class NotificationListScreen extends StatefulWidget {
   const NotificationListScreen({super.key});
@@ -39,58 +26,91 @@ class NotificationListScreen extends StatefulWidget {
 
 class _NotificationListScreenState extends State<NotificationListScreen> {
   String _selectedCategory = 'semua';
-
-  late List<NotificationItem> _notifications;
+  List<WaliSantriNotificationItem> _notifications = [];
+  bool _isLoading = true;
+  StreamSubscription? _notificationSub;
+  String? _currentUid;
 
   @override
   void initState() {
     super.initState();
-    _notifications = [
-      NotificationItem(
-        id: '1',
-        title: 'Jadwal Ujian Sertifikasi Diterbitkan',
-        message:
-            'Waka Tahfidz telah menjadwalkan Ujian Sertifikasi Juz 30 untuk santri Ahmad Rayhan Al-Fatih pada Senin, 24 Agustus 2026 (Penguji: Ustadz Ahmad Dahlan, Lc.).',
-        category: 'sertifikasi',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
-        isRead: false,
-      ),
-      NotificationItem(
-        id: '2',
-        title: 'Hasil Sertifikasi Juz 30: LULUS (Mumtaz)',
-        message:
-            'Alhamdulillah, santri Fathur Rahman Syah telah menyelesaikan Ujian Sertifikasi Juz 30 dengan Nilai 90.0 (Mumtaz). Santri kini berhak melanjutkan ke juz berikutnya.',
-        category: 'sertifikasi',
-        timestamp: DateTime.now().subtract(const Duration(hours: 3)),
-        isRead: false,
-      ),
-      NotificationItem(
-        id: '3',
-        title: 'Pemberitahuan Absensi Halaqoh',
-        message:
-            'Absensi Halaqoh Abu Bakar Ash-Shiddiq Sesi Siang hari ini telah selesai dicatat oleh Ustadz Salman Al-Farisi.',
-        category: 'absensi',
-        timestamp: DateTime.now().subtract(const Duration(hours: 5)),
-        isRead: true,
-      ),
-      NotificationItem(
-        id: '4',
-        title: 'Setoran Hafalan Baru',
-        message:
-            'Santri Muhammad Zaidan Akbar telah menyetorkan hafalan Surah Al-Mulk ayat 1-30 dengan kelancaran Mumtaz.',
-        category: 'hafalan',
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-        isRead: true,
-      ),
-    ];
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initNotifications());
   }
 
-  void _markAllAsRead() {
+  @override
+  void dispose() {
+    _notificationSub?.cancel();
+    super.dispose();
+  }
+
+  void _initNotifications() {
+    if (!mounted) return;
+
+    final authState = context.read<AuthCubit>().state;
+    String uid = '';
+    String role = 'guru';
+
+    authState.maybeWhen(
+      authenticated: (user) {
+        uid = user.uid;
+        role = user.role;
+      },
+      orElse: () {},
+    );
+
+    _currentUid = uid;
+    final isWaliSantri = role == 'santri' || role == 'wali_santri';
+
+    if (isWaliSantri) {
+      final santriId = ActiveSessionHelper.getActiveLinkedDocId(context);
+      if (santriId != null && santriId.isNotEmpty) {
+        _notificationSub?.cancel();
+        _notificationSub = sl<WaliSantriNotificationService>()
+            .watchNotificationsForSantri(santriId, uid)
+            .listen(
+          (items) {
+            if (mounted) {
+              setState(() {
+                _notifications = items;
+                _isLoading = false;
+              });
+            }
+          },
+          onError: (e) {
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          },
+        );
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } else {
+      // Guru / Admin (placeholder or future guru notification stream)
+      setState(() {
+        _notifications = [];
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _markAllAsRead() async {
+    if (_currentUid == null || _currentUid!.isEmpty) return;
+
+    final allIds = _notifications.map((n) => n.id).toList();
+    await sl<WaliSantriNotificationService>().markAllAsRead(_currentUid!, allIds);
+
     setState(() {
       for (var n in _notifications) {
         n.isRead = true;
       }
     });
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Semua pemberitahuan telah ditandai sebagai dibaca.'),
@@ -99,6 +119,53 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
         duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  void _handleItemTap(WaliSantriNotificationItem item) async {
+    if (_currentUid != null && _currentUid!.isNotEmpty) {
+      await sl<WaliSantriNotificationService>().markAsRead(_currentUid!, item.id);
+      setState(() {
+        item.isRead = true;
+      });
+    }
+
+    if (!mounted) return;
+
+    // Resolve active santri info for navigation
+    final santriState = context.read<SantriCubit>().state;
+    final targetSantriId = ActiveSessionHelper.getActiveLinkedDocId(context);
+    String santriName = 'Santri';
+    String santriNis = '0';
+    String programType = 'reguler';
+
+    santriState.maybeWhen(
+      loaded: (list) {
+        final found = list.where((s) => s.id == targetSantriId).toList();
+        if (found.isNotEmpty) {
+          santriName = found.first.nama;
+          santriNis = found.first.nis;
+          programType = found.first.program == 'T' ? 'takhassus' : 'reguler';
+        }
+      },
+      orElse: () {},
+    );
+
+    if (item.category == 'absensi') {
+      context.router.push(
+        WaliSantriRiwayatAbsensiRoute(
+          name: santriName,
+          nis: santriNis,
+          programType: programType,
+        ),
+      );
+    } else if (item.category == 'hafalan') {
+      context.router.push(
+        WaliSantriRiwayatHafalanRoute(
+          name: santriName,
+          nis: santriNis,
+        ),
+      );
+    }
   }
 
   String _formatTimeAgo(DateTime dt) {
@@ -126,17 +193,9 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
       _selectedCategory = 'semua';
     }
 
-    final unreadCount = _notifications.where((n) {
-      if (!isWaliSantri && (n.category == 'absensi' || n.category == 'hafalan')) {
-        return false;
-      }
-      return !n.isRead;
-    }).length;
+    final unreadCount = _notifications.where((n) => !n.isRead).length;
 
     final filtered = _notifications.where((n) {
-      if (!isWaliSantri && (n.category == 'absensi' || n.category == 'hafalan')) {
-        return false;
-      }
       if (_selectedCategory == 'semua') return true;
       if (_selectedCategory == 'belum_dibaca') return !n.isRead;
       return n.category == _selectedCategory;
@@ -180,7 +239,8 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                       onTap: _markAllAsRead,
                       borderRadius: BorderRadius.circular(8.r),
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 10.w, vertical: 6.h),
                         decoration: BoxDecoration(
                           color: colors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8.r),
@@ -222,14 +282,15 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                   children: [
                     _buildCategoryChip('Semua', 'semua', null, colors, textTheme),
                     SizedBox(width: 8.w),
-                    _buildCategoryChip('Belum Dibaca', 'belum_dibaca', unreadCount, colors, textTheme),
-                    SizedBox(width: 8.w),
-                    _buildCategoryChip('Sertifikasi', 'sertifikasi', null, colors, textTheme),
+                    _buildCategoryChip('Belum Dibaca', 'belum_dibaca',
+                        unreadCount, colors, textTheme),
                     if (isWaliSantri) ...[
                       SizedBox(width: 8.w),
-                      _buildCategoryChip('Absensi', 'absensi', null, colors, textTheme),
+                      _buildCategoryChip(
+                          'Absensi', 'absensi', null, colors, textTheme),
                       SizedBox(width: 8.w),
-                      _buildCategoryChip('Hafalan', 'hafalan', null, colors, textTheme),
+                      _buildCategoryChip(
+                          'Hafalan', 'hafalan', null, colors, textTheme),
                     ],
                   ],
                 ),
@@ -238,26 +299,34 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
 
             // ── Notification Items List ──────────────────────────────
             Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                child: filtered.isEmpty
-                    ? _buildEmptyState(colors, textTheme)
-                    : ListView.separated(
-                        key: ValueKey<String>(_selectedCategory),
-                        physics: const BouncingScrollPhysics(),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 20.w, vertical: 12.h),
-                        itemCount: filtered.length,
-                        separatorBuilder: (context, index) => SizedBox(height: 10.h),
-                        itemBuilder: (context, index) {
-                          final item = filtered[index];
-                          return _buildNotificationCard(
-                              item, colors, textTheme, isDark);
-                        },
+              child: _isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: colors.primary,
                       ),
-              ),
+                    )
+                  : AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      child: filtered.isEmpty
+                          ? _buildEmptyState(colors, textTheme)
+                          : ListView.separated(
+                              key: ValueKey<String>(_selectedCategory),
+                              physics: const BouncingScrollPhysics(),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20.w, vertical: 12.h),
+                              itemCount: filtered.length,
+                              separatorBuilder: (context, index) =>
+                                  SizedBox(height: 10.h),
+                              itemBuilder: (context, index) {
+                                final item = filtered[index];
+                                return _buildNotificationCard(
+                                    item, colors, textTheme, isDark);
+                              },
+                            ),
+                    ),
             ),
           ],
         ),
@@ -345,7 +414,8 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
             if (count != null && count > 0) ...[
               SizedBox(width: 6.w),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
+                padding:
+                    EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? Colors.white.withValues(alpha: 0.25)
@@ -369,7 +439,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
   }
 
   Widget _buildNotificationCard(
-    NotificationItem item,
+    WaliSantriNotificationItem item,
     AppColorSet colors,
     TextTheme textTheme,
     bool isDark,
@@ -378,11 +448,6 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
     Color iconColor;
     String categoryName;
     switch (item.category) {
-      case 'sertifikasi':
-        icon = Icons.auto_stories_rounded;
-        iconColor = colors.primary;
-        categoryName = 'Sertifikasi';
-        break;
       case 'absensi':
         icon = Icons.event_available_rounded;
         iconColor = colors.blue;
@@ -421,14 +486,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(12.r),
         child: InkWell(
-          onTap: () {
-            setState(() {
-              item.isRead = true;
-            });
-            if (item.category == 'sertifikasi') {
-              context.router.push(const DaftarSertifikasiRoute());
-            }
-          },
+          onTap: () => _handleItemTap(item),
           borderRadius: BorderRadius.circular(12.r),
           child: IntrinsicHeight(
             child: Row(
@@ -488,13 +546,15 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                                 Icon(
                                   Icons.access_time_rounded,
                                   size: 11.sp,
-                                  color: colors.textSecondary.withValues(alpha: 0.7),
+                                  color: colors.textSecondary
+                                      .withValues(alpha: 0.7),
                                 ),
                                 SizedBox(width: 3.w),
                                 Text(
                                   _formatTimeAgo(item.timestamp),
                                   style: textTheme.labelSmall?.copyWith(
-                                    color: colors.textSecondary.withValues(alpha: 0.8),
+                                    color: colors.textSecondary
+                                        .withValues(alpha: 0.8),
                                     fontSize: 11.sp,
                                   ),
                                 ),
@@ -520,7 +580,9 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                         Text(
                           item.title,
                           style: textTheme.titleSmall?.copyWith(
-                            fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w700,
+                            fontWeight: item.isRead
+                                ? FontWeight.w600
+                                : FontWeight.w700,
                             color: colors.textPrimary,
                           ),
                         ),
@@ -536,26 +598,26 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                           ),
                         ),
 
-                        if (item.category == 'sertifikasi') ...[
-                          SizedBox(height: 8.h),
-                          Row(
-                            children: [
-                              Text(
-                                'Ketuk untuk melihat detail sertifikasi',
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: colors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(width: 4.w),
-                              Icon(
-                                Icons.arrow_forward_rounded,
-                                size: 12.sp,
+                        SizedBox(height: 6.h),
+                        Row(
+                          children: [
+                            Text(
+                              item.category == 'absensi'
+                                  ? 'Ketuk untuk melihat riwayat absensi'
+                                  : 'Ketuk untuk melihat riwayat hafalan',
+                              style: textTheme.labelSmall?.copyWith(
                                 color: colors.primary,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+                            SizedBox(width: 4.w),
+                            Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 12.sp,
+                              color: colors.primary,
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -568,3 +630,4 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
     );
   }
 }
+

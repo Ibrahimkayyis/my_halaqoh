@@ -148,19 +148,6 @@ class GuruDashboardHeader extends StatelessWidget {
                               size: 19.sp,
                               color: colors.textPrimary,
                             ),
-                            // Red unread badge dot
-                            Positioned(
-                              top: -1,
-                              right: -1,
-                              child: Container(
-                                width: 7.w,
-                                height: 7.w,
-                                decoration: BoxDecoration(
-                                  color: colors.error,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       ),

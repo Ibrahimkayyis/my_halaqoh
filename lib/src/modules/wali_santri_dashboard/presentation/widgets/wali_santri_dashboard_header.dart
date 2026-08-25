@@ -3,10 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
+import 'package:my_halaqoh/src/modules/notifications/data/services/wali_santri_notification_service.dart';
+import 'package:my_halaqoh/src/modules/notifications/domain/models/wali_santri_notification_item.dart';
 
 /// Wali Santri dashboard header featuring a brand logo + title on top left,
 /// logout button on top right, and an Islamic hero card with SVG mosque silhouette decoration.
@@ -43,6 +48,13 @@ class WaliSantriDashboardHeader extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasPhoto = profilePictureUrl != null && profilePictureUrl!.isNotEmpty;
+
+    final santriId = ActiveSessionHelper.getActiveLinkedDocId(context);
+    final authState = context.watch<AuthCubit>().state;
+    final uid = authState.maybeWhen(
+      authenticated: (user) => user.uid,
+      orElse: () => '',
+    );
 
     return Padding(
       padding: EdgeInsets.only(
@@ -141,28 +153,42 @@ class WaliSantriDashboardHeader extends StatelessWidget {
                                   ),
                                 ],
                         ),
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Icon(
-                              Icons.notifications_outlined,
-                              size: 19.sp,
-                              color: colors.textPrimary,
-                            ),
-                            // Red unread badge dot
-                            Positioned(
-                              top: -1,
-                              right: -1,
-                              child: Container(
-                                width: 7.w,
-                                height: 7.w,
-                                decoration: BoxDecoration(
-                                  color: colors.error,
-                                  shape: BoxShape.circle,
+                        child: StreamBuilder<List<WaliSantriNotificationItem>>(
+                          stream: (santriId != null &&
+                                  santriId.isNotEmpty &&
+                                  uid.isNotEmpty)
+                              ? sl<WaliSantriNotificationService>()
+                                  .watchNotificationsForSantri(santriId, uid)
+                              : const Stream.empty(),
+                          builder: (context, snapshot) {
+                            final items = snapshot.data ?? [];
+                            final hasUnread = items.any((n) => !n.isRead);
+
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Icon(
+                                  Icons.notifications_outlined,
+                                  size: 19.sp,
+                                  color: colors.textPrimary,
                                 ),
-                              ),
-                            ),
-                          ],
+                                // Red unread badge dot
+                                if (hasUnread)
+                                  Positioned(
+                                    top: -1,
+                                    right: -1,
+                                    child: Container(
+                                      width: 7.w,
+                                      height: 7.w,
+                                      decoration: BoxDecoration(
+                                        color: colors.error,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
