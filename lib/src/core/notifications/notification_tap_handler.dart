@@ -16,3 +16,6 @@ import 'package:flutter/foundation.dart';
 ///   `1`    — navigate to Hafalan tab
 ///   `2`    — navigate to Absensi tab
 final ValueNotifier<int?> pendingNotificationTab = ValueNotifier<int?>(null);
+
+/// Global [ValueNotifier] for direct route-based notification taps (e.g. 'sertifikasi').
+final ValueNotifier<String?> pendingNotificationRoute = ValueNotifier<String?>(null);

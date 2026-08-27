@@ -4,9 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
+import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_cubit.dart';
+import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_state.dart';
 
 /// Wali Santri dashboard header featuring a brand logo + title on top left,
 /// logout button on top right, and an Islamic hero card with SVG mosque silhouette decoration.
@@ -108,47 +111,125 @@ class WaliSantriDashboardHeader extends StatelessWidget {
                 ],
               ),
 
-              // Logout Button in rounded square container
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () async {
-                    final confirmed = await ConfirmLogoutDialog.show(context);
-                    if (confirmed && context.mounted) {
-                      final authCubit = context.read<AuthCubit>();
-                      context.router.replaceAll([const LoginRoute()]);
-                      await authCubit.logout();
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(12.r),
-                  child: Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: colors.surface,
+              // Top Right Actions: Notification Bell & Logout Button
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 1. Notification Button with unread indicator
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        context.router.push(const NotificationListRoute());
+                      },
                       borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: isDark
-                            ? colors.border
-                            : colors.border.withValues(alpha: 0.8),
-                        width: 0.8,
+                      child: Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: isDark
+                                ? colors.border
+                                : colors.border.withValues(alpha: 0.8),
+                            width: 0.8,
+                          ),
+                          boxShadow: isDark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                        ),
+                        child: BlocProvider.value(
+                          value: sl<NotificationBadgeCubit>(),
+                          child: BlocBuilder<NotificationBadgeCubit,
+                              NotificationBadgeState>(
+                            builder: (context, badgeState) {
+                              final hasUnread = badgeState.maybeWhen(
+                                loaded: (_, unreadCount) => unreadCount > 0,
+                                orElse: () => false,
+                              );
+
+                              return Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Icon(
+                                    Icons.notifications_outlined,
+                                    size: 19.sp,
+                                    color: colors.textPrimary,
+                                  ),
+                                  // Red unread badge dot
+                                  if (hasUnread)
+                                    Positioned(
+                                      top: -1,
+                                      right: -1,
+                                      child: Container(
+                                        width: 7.w,
+                                        height: 7.w,
+                                        decoration: BoxDecoration(
+                                          color: colors.error,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
                       ),
-                      boxShadow: isDark
-                          ? []
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                    ),
-                    child: Icon(
-                      Icons.logout_rounded,
-                      size: 18.sp,
-                      color: Colors.redAccent,
                     ),
                   ),
-                ),
+
+                  SizedBox(width: 8.w),
+
+                  // 2. Logout Button in rounded square container
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () async {
+                        final confirmed = await ConfirmLogoutDialog.show(context);
+                        if (confirmed && context.mounted) {
+                          final authCubit = context.read<AuthCubit>();
+                          context.router.replaceAll([const LoginRoute()]);
+                          await authCubit.logout();
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(12.r),
+                      child: Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: isDark
+                                ? colors.border
+                                : colors.border.withValues(alpha: 0.8),
+                            width: 0.8,
+                          ),
+                          boxShadow: isDark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                        ),
+                        child: Icon(
+                          Icons.logout_rounded,
+                          size: 18.sp,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

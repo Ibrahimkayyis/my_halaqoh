@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +13,7 @@ import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_cubit.dart';
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_cubit.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_absensi/presentation/screens/wali_santri_riwayat_absensi_screen.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_dashboard/presentation/screens/wali_santri_dashboard_screen.dart';
@@ -75,7 +78,38 @@ class _WaliSantriDashboardWrapperScreenState
         },
         orElse: () {},
       );
+
+      // Start the global notification badge pipeline for this session.
+      _startNotificationBadge();
     });
+  }
+
+  /// Starts the global [NotificationBadgeCubit] live subscription.
+  ///
+  /// Uses [ActiveSessionHelper] so super_admin impersonation resolves the
+  /// impersonated santri's linkedDocId correctly, while [uid] stays the real
+  /// logged-in account (used as the SharedPreferences read-state key).
+  void _startNotificationBadge() {
+    if (!mounted) return;
+    final authState = context.read<AuthCubit>().state;
+    String uid = '';
+    authState.maybeWhen(
+      authenticated: (user) => uid = user.uid,
+      orElse: () {},
+    );
+    if (uid.isEmpty) return;
+
+    final linkedDocId = ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
+    final role = ActiveSessionHelper.getActiveRole(context) ?? '';
+    if (linkedDocId.isEmpty) return;
+
+    final isWaliSantri = role == 'santri' || role == 'wali_santri';
+
+    unawaited(sl<NotificationBadgeCubit>().start(
+      isWaliSantri: isWaliSantri,
+      linkedDocId: linkedDocId,
+      uid: uid,
+    ));
   }
 
   /// Helper to initialize FCM token exactly once per session

@@ -290,6 +290,22 @@ class BarcodeScannerRouteArgs {
 }
 
 /// generated route for
+/// [DaftarSertifikasiScreen]
+class DaftarSertifikasiRoute extends PageRouteInfo<void> {
+  const DaftarSertifikasiRoute({List<PageRouteInfo>? children})
+    : super(DaftarSertifikasiRoute.name, initialChildren: children);
+
+  static const String name = 'DaftarSertifikasiRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const DaftarSertifikasiScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [DashboardWrapperScreen]
 class DashboardWrapperRoute extends PageRouteInfo<void> {
   const DashboardWrapperRoute({List<PageRouteInfo>? children})
@@ -455,6 +471,74 @@ class EditProfileRoute extends PageRouteInfo<void> {
       return const EditProfileScreen();
     },
   );
+}
+
+/// generated route for
+/// [FormPendaftaranSertifikasiScreen]
+class FormPendaftaranSertifikasiRoute
+    extends PageRouteInfo<FormPendaftaranSertifikasiRouteArgs> {
+  FormPendaftaranSertifikasiRoute({
+    Key? key,
+    SantriModel? preselectedSantri,
+    int? preselectedJuz,
+    List<PageRouteInfo>? children,
+  }) : super(
+         FormPendaftaranSertifikasiRoute.name,
+         args: FormPendaftaranSertifikasiRouteArgs(
+           key: key,
+           preselectedSantri: preselectedSantri,
+           preselectedJuz: preselectedJuz,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'FormPendaftaranSertifikasiRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<FormPendaftaranSertifikasiRouteArgs>(
+        orElse: () => const FormPendaftaranSertifikasiRouteArgs(),
+      );
+      return FormPendaftaranSertifikasiScreen(
+        key: args.key,
+        preselectedSantri: args.preselectedSantri,
+        preselectedJuz: args.preselectedJuz,
+      );
+    },
+  );
+}
+
+class FormPendaftaranSertifikasiRouteArgs {
+  const FormPendaftaranSertifikasiRouteArgs({
+    this.key,
+    this.preselectedSantri,
+    this.preselectedJuz,
+  });
+
+  final Key? key;
+
+  final SantriModel? preselectedSantri;
+
+  final int? preselectedJuz;
+
+  @override
+  String toString() {
+    return 'FormPendaftaranSertifikasiRouteArgs{key: $key, preselectedSantri: $preselectedSantri, preselectedJuz: $preselectedJuz}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! FormPendaftaranSertifikasiRouteArgs) return false;
+    return key == other.key &&
+        preselectedSantri == other.preselectedSantri &&
+        preselectedJuz == other.preselectedJuz;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^ preselectedSantri.hashCode ^ preselectedJuz.hashCode;
 }
 
 /// generated route for
@@ -825,6 +909,22 @@ class MyHalaqohRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const MyHalaqohScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [NotificationListScreen]
+class NotificationListRoute extends PageRouteInfo<void> {
+  const NotificationListRoute({List<PageRouteInfo>? children})
+    : super(NotificationListRoute.name, initialChildren: children);
+
+  static const String name = 'NotificationListRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const NotificationListScreen();
     },
   );
 }
@@ -1663,11 +1763,13 @@ class WaliSantriProgressPerSuratRoute
     name,
     builder: (data) {
       final args = data.argsAs<WaliSantriProgressPerSuratRouteArgs>();
-      return WaliSantriProgressPerSuratScreen(
-        key: args.key,
-        name: args.name,
-        nis: args.nis,
-        juzNumber: args.juzNumber,
+      return WrappedRoute(
+        child: WaliSantriProgressPerSuratScreen(
+          key: args.key,
+          name: args.name,
+          nis: args.nis,
+          juzNumber: args.juzNumber,
+        ),
       );
     },
   );

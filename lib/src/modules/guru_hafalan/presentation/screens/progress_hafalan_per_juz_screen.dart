@@ -19,6 +19,10 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_ex
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/target_hafalan_state.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/domain/models/sertifikasi_model.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/cubits/sertifikasi_cubit.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/cubits/sertifikasi_state.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/widgets/juz_sertifikasi_badge.dart';
 
 /// Progress Hafalan Per Juz — shows juz-level progress cards for a santri
 @RoutePage()
@@ -45,6 +49,9 @@ class ProgressHafalanPerJuzScreen extends StatefulWidget
         BlocProvider(
           create: (_) =>
               sl<SantriExtraTargetCubit>()..watchExtraJuz(santriId),
+        ),
+        BlocProvider(
+          create: (_) => sl<SertifikasiCubit>()..watchBySantriId(santriId),
         ),
       ],
       child: this,
@@ -613,12 +620,30 @@ class _ProgressHafalanPerJuzScreenState
                     SizedBox(height: 14.h),
 
                     // Juz cards or contextual empty state
-                    if (juzDisplayData.isEmpty)
-                      _buildEmptyState(colors, target, santri)
-                    else
-                      ...juzDisplayData.map(
-                        (juz) => _buildJuzCard(context, juz, colors),
-                      ),
+                    Builder(builder: (context) {
+                      // Read sertifikasi list for this santri
+                      final sertifikasiState =
+                          context.watch<SertifikasiCubit>().state;
+                      final List<SertifikasiModel> sertifikasiList = [];
+                      sertifikasiState.maybeWhen(
+                        loaded: (list) => sertifikasiList.addAll(list),
+                        orElse: () {},
+                      );
+
+                      if (juzDisplayData.isEmpty) {
+                        return _buildEmptyState(colors, target, santri);
+                      }
+                      return Column(
+                        children: juzDisplayData
+                            .map((juz) => _buildJuzCard(
+                                  context,
+                                  juz,
+                                  colors,
+                                  sertifikasiList,
+                                ))
+                            .toList(),
+                      );
+                    }),
                     SizedBox(height: 80.h), // Extra space for FAB
                   ],
                 ),
@@ -748,10 +773,25 @@ class _ProgressHafalanPerJuzScreenState
     BuildContext context,
     Map<String, dynamic> juz,
     AppColorSet colors,
+    List<SertifikasiModel> sertifikasiList,
   ) {
     final juzNum = juz['juz'] as int;
     final total = juz['total'] as int;
     final completed = juz['completed'] as int;
+
+    // Determine the most relevant sertifikasi item for this juz:
+    // Priority: passed > scheduled > pending > failed
+    SertifikasiModel? certItem;
+    final certForJuz = sertifikasiList.where((s) => s.juz == juzNum).toList();
+    if (certForJuz.isNotEmpty) {
+      const priority = ['passed', 'scheduled', 'pending', 'failed'];
+      for (final status in priority) {
+        try {
+          certItem = certForJuz.firstWhere((s) => s.status == status);
+          break;
+        } catch (_) {}
+      }
+    }
 
     String formatPercent(double v) {
       if (v == 0) return '0';
@@ -770,6 +810,9 @@ class _ProgressHafalanPerJuzScreenState
 
     final progress = total > 0 ? completed / total : 0.0;
 
+    // If certified (passed), show a subtle green border on the card
+    final isCertified = certItem?.status == 'passed';
+
     return GestureDetector(
       onTap: () {
         context.router.push(
@@ -787,6 +830,12 @@ class _ProgressHafalanPerJuzScreenState
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: BorderRadius.circular(14.r),
+          border: isCertified
+              ? Border.all(
+                  color: colors.success.withValues(alpha: 0.4),
+                  width: 1.2,
+                )
+              : null,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -796,6 +845,7 @@ class _ProgressHafalanPerJuzScreenState
           ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -835,6 +885,13 @@ class _ProgressHafalanPerJuzScreenState
                 ),
               ],
             ),
+
+            // Sertifikasi badge — shown when there is any cert activity for this juz
+            if (certItem != null) ...[
+              SizedBox(height: 8.h),
+              JuzSertifikasiBadge(item: certItem),
+            ],
+
             SizedBox(height: 10.h),
             Row(
               children: [

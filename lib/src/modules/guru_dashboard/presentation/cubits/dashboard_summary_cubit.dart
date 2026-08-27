@@ -132,18 +132,25 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
         ? setoranCount / totalSantri
         : 0.0;
 
-    // ── 3. Latest Setoran — 3 most recent records ──
-    // Try today's records first; if fewer than 3, fill from all-time
-    List<LatestSetoranItem> latestSetoran;
-    if (todayHafalan.length >= 3) {
-      latestSetoran = todayHafalan.take(3).map(_toSetoranItem).toList();
-    } else {
-      final recent = _hafalanRepo.getRecentHafalanBySantriIds(
-        _santriIds,
-        limit: 3,
-      );
-      latestSetoran = recent.map(_toSetoranItem).toList();
+    // ── 3. Latest Setoran — group into submission groups ──
+    final allRecentHafalan = _hafalanRepo.getRecentHafalanBySantriIds(
+      _santriIds,
+      limit: 50,
+    );
+
+    // Merge today's records with recent records (deduped by ID)
+    final combinedMap = <String, HafalanSantriModel>{};
+    for (final h in todayHafalan) {
+      combinedMap[h.id] = h;
     }
+    for (final h in allRecentHafalan) {
+      combinedMap[h.id] = h;
+    }
+    final sortedRecords = combinedMap.values.toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    final groupedSubmissions = _groupIntoSubmissions(sortedRecords);
+    final latestSetoran = groupedSubmissions.take(3).toList();
 
     emit(DashboardSummaryState.loaded(
       attendedCount: attendedCount,
@@ -155,14 +162,43 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
     ));
   }
 
-  /// Convert a HafalanSantriModel to LatestSetoranItem.
-  LatestSetoranItem _toSetoranItem(dynamic h) {
-    final name = _santriNameMap[h.santriId] ?? 'Santri';
-    return LatestSetoranItem(
-      santriName: name,
-      surahInfo: '${h.surahName} ${h.ayatMulai} - ${h.ayatSelesai}',
-      score: h.nilaiKelancaran,
-    );
+  /// Groups a flat list of records into submission groups.
+  /// Records belong to the same submission when they share santriId,
+  /// tanggalSetoran, jenis, nilaiKelancaran, and nilaiTajwid.
+  List<LatestSetoranItem> _groupIntoSubmissions(List<HafalanSantriModel> records) {
+    final Map<String, List<HafalanSantriModel>> grouped = {};
+
+    for (final record in records) {
+      final key =
+          '${record.santriId}_${record.tanggalSetoran.toIso8601String()}_${record.jenis}_${record.nilaiKelancaran}_${record.nilaiTajwid}';
+      grouped.putIfAbsent(key, () => []).add(record);
+    }
+
+    final groups = grouped.entries.map((entry) {
+      final list = entry.value;
+      final first = list.first;
+      final santriName = _santriNameMap[first.santriId] ?? 'Santri';
+      return LatestSetoranItem(
+        santriId: first.santriId,
+        santriName: santriName,
+        tanggalSetoran: first.tanggalSetoran,
+        jenis: first.jenis,
+        nilaiKelancaran: first.nilaiKelancaran,
+        nilaiTajwid: first.nilaiTajwid,
+        records: list,
+      );
+    }).toList();
+
+    // Sort newest first
+    groups.sort((a, b) {
+      final aCreated = a.records.isNotEmpty ? a.records.first.createdAt : a.tanggalSetoran;
+      final bCreated = b.records.isNotEmpty ? b.records.first.createdAt : b.tanggalSetoran;
+      final cmp = bCreated.compareTo(aCreated);
+      if (cmp != 0) return cmp;
+      return b.tanggalSetoran.compareTo(a.tanggalSetoran);
+    });
+
+    return groups;
   }
 
   @override

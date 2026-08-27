@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
+import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
+import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/domain/repositories/auth_repository.dart';
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_cubit.dart';
 import 'auth_state.dart';
@@ -83,6 +85,15 @@ class AuthCubit extends Cubit<AuthState> {
     }
 
     await _repository.signOut();
+
+    // Stop the global notification badge pipeline (cancels Firestore streams).
+    unawaited(sl<NotificationBadgeCubit>().stop());
+
+    // Clear the ActivityLogService in-memory user meta cache so a different
+    // account logging in on this device never reuses stale role/displayName
+    // metadata (rule §13.5.4).
+    sl<ActivityLogService>().clearCache();
+
     emit(const AuthState.unauthenticated());
   }
 

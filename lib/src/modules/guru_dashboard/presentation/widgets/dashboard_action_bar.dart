@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 
-/// 3-Column Action Bar for main daily features: Absensi, Hafalan, and Halaqoh.
+/// 4-Column Action Bar for main daily features: Absensi, Hafalan, Halaqoh, and Sertifikasi.
 /// Separated with elegant vertical dividers and primary themed icon boxes.
 class DashboardActionBar extends StatelessWidget {
   final VoidCallback onAbsensiTap;
   final VoidCallback onHafalanTap;
   final VoidCallback onHalaqohTap;
+  final VoidCallback onSertifikasiTap;
 
   const DashboardActionBar({
     super.key,
     required this.onAbsensiTap,
     required this.onHafalanTap,
     required this.onHalaqohTap,
+    required this.onSertifikasiTap,
   });
 
   @override
@@ -24,7 +26,7 @@ class DashboardActionBar extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20.w),
-      padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 6.w),
+      padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 4.w),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(18.r),
@@ -67,7 +69,7 @@ class DashboardActionBar extends StatelessWidget {
           _buildActionItem(
             context: context,
             icon: Icons.menu_book_rounded,
-            label: 'Hafalan',
+            label: 'Setoran',
             onTap: onHafalanTap,
             colors: colors,
             textTheme: textTheme,
@@ -86,6 +88,23 @@ class DashboardActionBar extends StatelessWidget {
             icon: Icons.groups_rounded,
             label: 'Halaqoh',
             onTap: onHalaqohTap,
+            colors: colors,
+            textTheme: textTheme,
+          ),
+
+          // Vertical Divider
+          Container(
+            width: 1,
+            height: 38.h,
+            color: colors.border.withValues(alpha: 0.6),
+          ),
+
+          // 4. Sertifikasi
+          _buildActionItem(
+            context: context,
+            icon: Icons.workspace_premium_rounded,
+            label: 'Sertifikasi',
+            onTap: onSertifikasiTap,
             colors: colors,
             textTheme: textTheme,
           ),

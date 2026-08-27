@@ -73,6 +73,12 @@ Future<void> _initNotificationChannels() async {
     description: 'Notifikasi setoran hafalan santri dari guru halaqoh.',
     importance: Importance.high,
   );
+  const sertifikasiChannel = AndroidNotificationChannel(
+    'my_halaqoh_sertifikasi',
+    'Notifikasi Sertifikasi Tahfidz MyHalaqoh',
+    description: 'Notifikasi jadwal, hasil, dan kelulusan ujian sertifikasi tahfidz.',
+    importance: Importance.high,
+  );
   final plugin = FlutterLocalNotificationsPlugin();
   const initSettings = InitializationSettings(
     android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -85,6 +91,7 @@ Future<void> _initNotificationChannels() async {
       final payload = response.payload;
       if (payload == 'absensi') pendingNotificationTab.value = 2;
       if (payload == 'hafalan') pendingNotificationTab.value = 1;
+      if (payload == 'sertifikasi') pendingNotificationRoute.value = 'sertifikasi';
     },
   );
   final androidImpl =
@@ -92,6 +99,7 @@ Future<void> _initNotificationChannels() async {
           AndroidFlutterLocalNotificationsPlugin>();
   await androidImpl?.createNotificationChannel(absensiChannel);
   await androidImpl?.createNotificationChannel(hafalanChannel);
+  await androidImpl?.createNotificationChannel(sertifikasiChannel);
 }
 
 void _setupNotificationTapHandlers() {
@@ -108,12 +116,16 @@ void _setupNotificationTapHandlers() {
     if (notification == null) return;
 
     final type = message.data['type'] as String? ?? '';
-    final channelId = type == 'hafalan'
-        ? 'my_halaqoh_hafalan'
-        : 'my_halaqoh_absensi';
-    final channelName = type == 'hafalan'
-        ? 'Notifikasi Hafalan MyHalaqoh'
-        : 'Notifikasi Absensi MyHalaqoh';
+    final channelId = type == 'sertifikasi'
+        ? 'my_halaqoh_sertifikasi'
+        : type == 'hafalan'
+            ? 'my_halaqoh_hafalan'
+            : 'my_halaqoh_absensi';
+    final channelName = type == 'sertifikasi'
+        ? 'Notifikasi Sertifikasi Tahfidz MyHalaqoh'
+        : type == 'hafalan'
+            ? 'Notifikasi Hafalan MyHalaqoh'
+            : 'Notifikasi Absensi MyHalaqoh';
 
     final plugin = FlutterLocalNotificationsPlugin();
     plugin.show(
@@ -141,6 +153,8 @@ void _handleRemoteMessageTap(RemoteMessage message) {
     pendingNotificationTab.value = 2;
   } else if (type == 'hafalan') {
     pendingNotificationTab.value = 1;
+  } else if (type == 'sertifikasi') {
+    pendingNotificationRoute.value = 'sertifikasi';
   }
 }
 
@@ -232,10 +246,35 @@ void main() async {
   runApp(TranslationProvider(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
-  MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   final _appRouter = AppRouter(sl<AuthCubit>());
+
+  @override
+  void initState() {
+    super.initState();
+    pendingNotificationRoute.addListener(_onPendingRouteChanged);
+  }
+
+  void _onPendingRouteChanged() {
+    final route = pendingNotificationRoute.value;
+    if (route == 'sertifikasi') {
+      _appRouter.push(const DaftarSertifikasiRoute());
+      pendingNotificationRoute.value = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    pendingNotificationRoute.removeListener(_onPendingRouteChanged);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

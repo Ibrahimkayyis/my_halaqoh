@@ -26,6 +26,7 @@ import 'package:my_halaqoh/src/modules/auth/data/repositories_impl/auth_reposito
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/core/services/storage_service.dart';
 import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
+import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_cubit.dart';
 
 // Master Data — Data Layer
 import 'package:my_halaqoh/src/modules/master_data/data/datasources/local/master_data_local_datasource.dart';
@@ -129,11 +130,19 @@ import 'package:my_halaqoh/src/modules/notifications/domain/repositories/notific
 
 // Notifications — Presentation Layer
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_cubit.dart';
+import 'package:my_halaqoh/src/modules/notifications/data/services/wali_santri_notification_service.dart';
 
 // Guru Laporan — Presentation Layer
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_absensi_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_absensi_halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_hafalan_cubit.dart';
+
+// Sertifikasi Tahfidz — Data & Domain Layer
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/data/datasources/remote/source/abstract/sertifikasi_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/data/datasources/remote/source/implementation/sertifikasi_remote_datasource_impl.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/domain/repositories/sertifikasi_repository.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/data/repositories_impl/sertifikasi_repository_impl.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/cubits/sertifikasi_cubit.dart';
 
 // Super Admin — Data Layer
 import 'package:my_halaqoh/src/modules/super_admin/data/datasources/remote/source/abstract/activity_log_remote_datasource.dart';
@@ -367,6 +376,26 @@ Future<void> initDependencies() async {
   // subscription persists for the entire app session without being torn down
   // on screen disposal.
   sl.registerSingleton<NotificationCubit>(NotificationCubit(sl(), sl()));
+
+  // Wali Santri In-App Notification Service
+  sl.registerLazySingleton<WaliSantriNotificationService>(
+    () => WaliSantriNotificationService(sl<FirebaseFirestore>(), sl<SharedPreferences>()),
+  );
+
+  // ── Notification Badge — global unread indicator pipeline ─────────────────
+  // Singleton (not Factory): the live Firestore subscription must outlive
+  // navigation so dashboard headers receive updates regardless of which tab
+  // is visible. Started by the dashboard wrappers on login; stopped on logout.
+  sl.registerSingleton<NotificationBadgeCubit>(NotificationBadgeCubit(sl()));
+
+  // ── Sertifikasi Tahfidz — DataSource & Repository ─────────────────────────
+  sl.registerLazySingleton<SertifikasiRemoteDataSource>(
+    () => SertifikasiRemoteDataSourceImpl(sl<FirebaseFirestore>()),
+  );
+  sl.registerLazySingleton<SertifikasiRepository>(
+    () => SertifikasiRepositoryImpl(sl()),
+  );
+  sl.registerFactory<SertifikasiCubit>(() => SertifikasiCubit(sl()));
 
   // ── Guru Laporan — Cubit ──────────────────────────────────────────────────
   // Factory — scoped to the LaporanKonfigurasiSheet bottom sheet lifetime.

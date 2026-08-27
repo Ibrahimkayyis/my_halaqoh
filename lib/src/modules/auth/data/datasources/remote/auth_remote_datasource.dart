@@ -102,11 +102,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> signOut() async {
-    unawaited(_activityLog.log(
+    // EXCEPTION to the "always unawaited()" rule: the logout log entry MUST be
+    // awaited BEFORE Firebase Auth sign-out. Once _firebaseAuth.signOut()
+    // completes, the auth token is revoked and any in-flight write to
+    // /activity_log is rejected by security rules with permission-denied
+    // (allow create: if isAuthenticated()). Awaiting here guarantees the
+    // audit trail records the logout event while the session is still valid.
+    await _activityLog.log(
       action: 'logout',
       module: 'auth',
       description: 'Pengguna logout dari aplikasi',
-    ));
+    );
     await _firebaseAuth.signOut();
   }
 

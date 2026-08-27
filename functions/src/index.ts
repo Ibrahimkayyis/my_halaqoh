@@ -9,6 +9,7 @@ import { onDeleteUser } from "./deleteUserAccount";
 import { seedAdmin } from "./adminSeeder";
 import { sendAbsensiNotification } from "./sendAbsensiNotification";
 import { sendHafalanNotification } from "./sendHafalanNotification";
+import { sendSertifikasiNotification } from "./sendSertifikasiNotification";
 import { resetUserPassword } from "./resetUserPassword";
 import { bulkCreateUserAccounts } from "./bulkCreateUserAccounts";
 
@@ -32,6 +33,7 @@ export {
     seedAdmin,
     sendAbsensiNotification,
     sendHafalanNotification,
+    sendSertifikasiNotification,
     resetUserPassword,
     bulkCreateUserAccounts,
 };

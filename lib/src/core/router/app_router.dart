@@ -54,6 +54,12 @@ import 'package:my_halaqoh/src/modules/super_admin/presentation/screens/santri_p
 import 'package:my_halaqoh/src/modules/super_admin/presentation/screens/activity_log_screen.dart';
 import 'package:my_halaqoh/src/modules/super_admin/presentation/screens/activity_log_detail_screen.dart';
 import 'package:my_halaqoh/src/modules/super_admin/domain/models/activity_log_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
+// Sertifikasi Tahfidz
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/screens/daftar_sertifikasi_screen.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/screens/form_pendaftaran_sertifikasi_screen.dart';
+// Notifications
+import 'package:my_halaqoh/src/modules/notifications/presentation/screens/notification_list_screen.dart';
 
 part 'app_router.gr.dart';
 
@@ -361,6 +367,28 @@ class AppRouter extends RootStackRouter {
         AuthGuard(_authCubit),
         RoleGuard(_authCubit, allowedRoles: ['super_admin']),
       ],
+    ),
+
+    // ── Sertifikasi Tahfidz routes ──────────────────────────────────────
+    AutoRoute(
+      page: DaftarSertifikasiRoute.page,
+      guards: [
+        AuthGuard(_authCubit),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'santri', 'admin', 'super_admin']),
+      ],
+    ),
+    AutoRoute(
+      page: FormPendaftaranSertifikasiRoute.page,
+      guards: [
+        AuthGuard(_authCubit),
+        RoleGuard(_authCubit, allowedRoles: ['guru', 'admin', 'super_admin']),
+      ],
+    ),
+
+    // ── Notification routes ─────────────────────────────────────────────
+    AutoRoute(
+      page: NotificationListRoute.page,
+      guards: [AuthGuard(_authCubit)],
     ),
 
     // ── Shared routes (all authenticated roles) ────────────────────
