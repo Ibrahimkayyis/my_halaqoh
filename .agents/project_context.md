@@ -1,7 +1,7 @@
 # MyHalaqoh — Project Context (Source of Truth)
 
 > **Purpose:** Authoritative system prompt for any AI model working on this codebase. Every AI-generated change **must** conform to the rules documented here.
-> **Last Updated:** 2026-06-28
+> **Last Updated:** 2026-08-26
 
 ---
 
@@ -58,6 +58,7 @@
 - **Attendance (Absensi)** — QR/barcode-based session recording; offline-first with Hive.
 - **Hafalan Monitoring** — Quran memorization recording & progress tracking; offline-first with Hive.
 - **Target Hafalan** — Curriculum targets per grade/program (Admin-defined).
+- **Sertifikasi Tahfidz** — Ujian sertifikasi hafalan 1 juz penuh: guru mengajukan, admin menjadwalkan ujian & menugaskan penguji, penguji menginput nilai, dengan notifikasi FCM ke guru/wali santri/penguji pada setiap transisi status.
 - **Santri Extra Targets** — Teacher-added individual juz targets beyond the admin curriculum.
 - **PDF Reports** — Absensi and Hafalan PDF generation & sharing.
 - **Push Notifications** — FCM notifications to Wali Santri on attendance & hafalan events.
@@ -95,7 +96,7 @@ lib/
     │   │   └── activity_log_service.dart  # Cross-cutting audit log writer (NEW)
     │   ├── theme/cubit/ + data/       # Theme cubit & SharedPreferences repo
     │   └── widget/                    # Global reusable widgets (barrel: widgets.dart)
-    └── modules/                       # Feature modules (15 total)
+    └── modules/                       # Feature modules (16 total)
         ├── about/                     # About screen (presentation only)
         ├── auth/
         ├── master_data/               # Guru, Santri, Halaqoh, Target, Kelas, Program, ExtraTarget
@@ -107,6 +108,7 @@ lib/
         ├── guru_laporan/              # Full Clean Architecture (PDF reports) (NEW)
         ├── guru_profile/              # Full Clean Architecture
         ├── super_admin/               # Full Clean Architecture (NEW)
+        ├── sertifikasi_tahfidz/       # Full Clean Architecture — remote only (NO Hive/offline-first)
         ├── wali_santri_dashboard/
         ├── wali_santri_absensi/       # Presentation only
         ├── wali_santri_hafalan/       # Full Clean Architecture
@@ -181,6 +183,7 @@ Global singleton: `final sl = GetIt.instance;` in `service_locator.dart`.
 16. Notifications: Remote DS → Repository → `NotificationCubit` (Singleton)
 17. **Guru Laporan:** `LaporanAbsensiCubit` (Factory), `LaporanAbsensiHalaqohCubit` (Factory), `LaporanHafalanCubit` (Factory) *(new)*
 18. **Super Admin:** `ActivityLogRemoteDataSource` → `ActivityLogRepository` → `ActivityLogCubit` (Factory); `ImpersonationCubit` (Singleton) *(new)*
+19. **Sertifikasi Tahfidz:** `SertifikasiRemoteDataSource` → `SertifikasiRepository` → `SertifikasiCubit` (Factory). Remote-only — no local datasource, no SyncService, no ActivityLogService.
 
 **Registration rules:**
 
@@ -313,21 +316,24 @@ class XxxCubit extends Cubit<XxxState> {
 | Collection | Doc ID | Key Fields |
 |---|---|---|
 | `/users/{uid}` | Firebase Auth UID | `uid`, `identifier`, `role` ("admin"/"guru"/"santri"/"super_admin"), `programType` ("R"/"T"), `displayName`, `linkedDocId`, `fcmToken?`, `fcmTokenUpdatedAt?` |
-| `/guru/{id}` | Auto | `nip`, `nama`, `phone?`, `profilePicture?`, `program` ("R"/"T"), `authUid?`, `createdAt`, `updatedAt` |
-| `/santri/{id}` | Auto | `nis`, `nama`, `kelas`, `program` ("R"/"T"), `halaqohId?`, `waliSantri` (embedded), `authUid?`, `profilePicture?`, `createdAt`, `updatedAt` |
+| `/guru/{id}` | Auto | `nip`, `nama`, `email?`, `phone?`, `profilePicture?`, `program` ("R"/"T"), `authUid?`, `createdAt`, `updatedAt` |
+| `/santri/{id}` | Auto | `nis`, `nama`, `kelas`, `program` ("R"/"T"), `halaqohId?`, `waliSantri` (embedded), `authUid?`, `profilePicture?`, `isAlumni` (default `false` — alumni kelas 12 diarsipkan, disembunyikan dari daftar aktif), `createdAt`, `updatedAt` |
 | `/halaqoh/{id}` | Auto | `nama`, `kelas`, `program`, `guruId`, `guruNama` (denorm.), `santriIds[]`, `jumlahSantri`, `createdAt`, `updatedAt` |
-| `/targetHafalan/{id}` | `"{kelas}_{program}"` | `kelas`, `program` ("Reguler"/"Takhassus"), `targetJuz`, `juzList[]`, `tahunAjaran`, `createdAt`, `updatedAt` |
+| `/targetHafalan/{id}` | `"{kelas}_{program}"` | `kelas`, `program` ("Reguler"/"Takhassus"), `tahunAjaran`, `semesterAktif?` (1 atau 2, ditetapkan admin), `createdAt`, `updatedAt`. **Catatan:** isi kurikulum (juz per periode) BUKAN disimpan di sini — berupa konstanta compile-time di `CurriculumData`. Model hanya menyimpan metadata konfigurasi admin. |
 | `/santriExtraTarget/{santriId}` | `santriId` | `santriId`, `extraJuz[]`, `updatedAt` |
 | `/absensi/{id}` | Auto | `halaqohId`, `guruId`, `tanggal`, `sesi`, `records[]` (embedded `AbsensiRecordEntry`), `isSynced`, `createdAt`, `updatedAt`, `notifiedAt?` (server-only) |
-| `/hafalan/{id}` | Auto | `santriId`, `guruId`, `halaqohId`, `tanggalSetoran`, `jenis`, `surahId`, `surahName`, `ayatMulai`, `ayatSelesai`, `juz`, `nilaiKelancaran`, `nilaiTajwid`, `createdAt`, `isSynced`, `notifiedAt?` (server-only) |
+| `/hafalan_santri/{id}` | Auto | `santriId`, `guruId`, `halaqohId`, `tanggalSetoran`, `jenis`, `surahId`, `surahName`, `ayatMulai`, `ayatSelesai`, `juz`, `nilaiKelancaran`, `nilaiTajwid`, `createdAt`, `isSynced`, `notifiedAt?` (server-only). ⚠️ Nama koleksi adalah `hafalan_santri` — bukan `/hafalan`. |
+| `/sertifikasi_tahfidz/{id}` | Auto | Target: `santriId`, `santriNama` (denorm.), `nis`, `kelas`, `program`, `profilePicture?`; Halaqoh/Guru: `halaqohId`, `halaqohNama` (denorm.), `guruId`, `guruNama` (denorm.); Ujian: `juz`, `catatanGuru?`, `status` (`pending`/`scheduled`/`rejected`/`passed`/`failed`), `tanggalUjian?`, `sesiUjian?`, `pengujiId?`, `pengujiNama?`, `catatanAdmin?`, `alasanPenolakan?`; Hasil: `nilai?`, `predikat?`, `catatanPenguji?`; Timestamps: `createdAt`, `updatedAt`, `completedAt?`, plus server-only dedup fields: `scheduledNotifiedAt?`, `rejectedNotifiedAt?`, `gradedNotifiedAt?` |
 | `/kelas/{id}` | Auto (e.g., `"7"`) | `id`, `nama`, `urutan`, `nextKelasId?`, `createdAt`, `updatedAt` |
 | `/program/{id}` | Auto (e.g., `"R"`) | `id`, `nama`, `createdAt`, `updatedAt` |
 | `/activity_log/{id}` | Auto | `userId`, `userRole`, `userName`, `action`, `module`, `entityId?`, `entityName?`, `description?`, `metadata?`, `createdAt` |
 
+> ✅ Skema di atas diverifikasi langsung terhadap database produksi `my-halaqoh` (Firestore `(default)`, edisi STANDARD, native mode, lokasi `asia-southeast2`) pada 2026-08-26 via REST API `listCollectionIds` + sampling dokumen.
+
 **Schema design principles:**
 1. **Denormalization:** `guruNama` in halaqoh; `nama`/`nis` in `AbsensiRecordEntry`.
 2. **Embedded documents:** `WaliSantriModel` inside santri; `AbsensiRecordEntry` list inside absensi.
-3. **Server-only fields:** `notifiedAt` on absensi and hafalan — **written only by Cloud Functions**. The Flutter client must **never** set this field.
+3. **Server-only fields:** `notifiedAt` on absensi and hafalan_santri, plus `scheduledNotifiedAt` / `rejectedNotifiedAt` / `gradedNotifiedAt` on sertifikasi_tahfidz — all **written only by Cloud Functions** as deduplication timestamps. The Flutter client must **never** set any of these fields.
 4. **Program codes:** Master data uses `"R"`/`"T"` short codes; `targetHafalan` uses `"Reguler"`/`"Takhassus"`. Use `TargetHafalanHelper.programCodeToFullName()` to convert.
 5. **Timestamps:** Firestore `Timestamp` ↔ Dart `DateTime` conversion is handled exclusively in Mapper classes.
 6. **Activity logs:** Never cached locally. Always streamed directly from Firestore in the super admin console.
@@ -473,6 +479,7 @@ Firebase Auth persists sessions natively. On cold start, `AuthCubit.checkAuthSta
 Wali Santri receive FCM notifications when:
 - A guru records attendance (`sendAbsensiNotification` Cloud Function — `asia-southeast2`)
 - A guru submits hafalan (`sendHafalanNotification` Cloud Function — `asia-southeast2`)
+- A sertifikasi_tahfidz document changes status via `sendSertifikasiNotification` Cloud Function (`asia-southeast2`, trigger `onDocumentWritten` on `sertifikasi_tahfidz/{docId}`): `pending→scheduled` (ujian dijadwalkan), `pending→rejected` (pengajuan ditolak), `scheduled→passed` / `scheduled→failed` (hasil ujian). Recipients: Guru Pengampu + Wali Santri + Penguji (jika berbeda dari guru). Deduplication per-status via server-only timestamps (`scheduledNotifiedAt` / `rejectedNotifiedAt` / `gradedNotifiedAt`). FCM data payload: `{ type: "sertifikasi", sertifikasiId, santriId, status, juz }`.
 
 The Flutter client is **passive** — it only manages the FCM device token. Cloud Functions dispatch notifications.
 
@@ -496,6 +503,8 @@ Three tap scenarios are handled:
 |---|---|
 | `my_halaqoh_absensi` | Notifikasi Absensi MyHalaqoh |
 | `my_halaqoh_hafalan` | Notifikasi Hafalan MyHalaqoh |
+
+> ⚠️ `sendSertifikasiNotification` mengirim notifikasi dengan channelId `"my_halaqoh_sertifikasi"`, namun channel ini **belum** didaftarkan di `_initNotificationChannels()` di `main.dart`. Di Android 8+ notifikasi akan jatuh ke channel default sampai channel tersebut ditambahkan di sisi aplikasi.
 
 ### 7.4 Background Handler Constraint
 
@@ -782,7 +791,7 @@ class XxxMapper {
 5. **No raw Firebase instances in Cubits or UI** — always DataSource → Repository → Cubit.
 6. **Never reuse Hive Type IDs.** Next available: **10**.
 7. **Never edit generated files** (`.freezed.dart`, `.g.dart`, `.gr.dart`, `gen/`).
-8. **Never write `notifiedAt` from the Flutter client.** Server-only Cloud Function field.
+8. **Never write server-only notification timestamps from the Flutter client** — `notifiedAt` (absensi, hafalan_santri), `scheduledNotifiedAt` / `rejectedNotifiedAt` / `gradedNotifiedAt` (sertifikasi_tahfidz). All are Cloud Function fields.
 9. **`NotificationCubit` and `ImpersonationCubit` must be Singletons.**
 10. **No GetIt/Cubits/BuildContext in `_firebaseMessagingBackgroundHandler`.** Separate isolate.
 11. **All `ActivityLogService.log()` calls must be wrapped with `unawaited()`.** Never `await`.
@@ -827,6 +836,7 @@ class XxxMapper {
 
 1. Always inject via `sl<ActivityLogService>()` — never instantiate directly.
 2. All call sites must use `unawaited()` — logging is fire-and-forget.
+   **EXCEPTION:** the `'logout'` action in `AuthRemoteDataSourceImpl.signOut()` MUST be awaited **before** `_firebaseAuth.signOut()`. Once Firebase Auth signs out, the token is revoked and any in-flight `/activity_log` write is rejected by security rules with `permission-denied` — so the logout event would never be recorded.
 3. Never surface logging failures to the user — they are swallowed internally.
 4. Call `sl<ActivityLogService>().clearCache()` inside `AuthCubit.logout()`.
 

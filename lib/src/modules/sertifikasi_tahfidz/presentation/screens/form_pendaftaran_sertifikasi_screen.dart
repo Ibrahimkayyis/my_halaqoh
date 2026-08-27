@@ -18,6 +18,9 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_c
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/domain/helpers/sertifikasi_status_helper.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/domain/models/sertifikasi_model.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/domain/repositories/sertifikasi_repository.dart';
 
 /// Form screen for Teacher to register a santri for Tahfidz Certification Exam.
 /// Features real santri dropdown, dynamic 100% completed Juz calculation from Firestore, and clean UI.
@@ -121,7 +124,12 @@ class _FormPendaftaranSertifikasiScreenState
     sl<HafalanSantriRepository>().seedFromRemoteIfEmpty(santriId);
   }
 
-  void _handleSubmit() async {
+  void _handleSubmit({
+    required String guruId,
+    required String guruNama,
+    required String halaqohId,
+    required String halaqohNama,
+  }) async {
     setState(() {
       _santriError =
           _selectedSantri == null ? 'Silakan pilih santri yang akan diuji' : null;
@@ -137,8 +145,25 @@ class _FormPendaftaranSertifikasiScreenState
       _isSubmitting = true;
     });
 
-    // Simulate registration submission
-    await Future.delayed(const Duration(milliseconds: 500));
+    final model = SertifikasiModel(
+      id: '',
+      santriId: _selectedSantri!.id,
+      santriNama: _selectedSantri!.nama,
+      nis: _selectedSantri!.nis,
+      kelas: _selectedSantri!.kelas,
+      program: _selectedSantri!.program,
+      profilePicture: _selectedSantri!.profilePicture,
+      halaqohId: halaqohId,
+      halaqohNama: halaqohNama,
+      guruId: guruId,
+      guruNama: guruNama,
+      juz: _selectedJuz!,
+      status: SertifikasiStatusHelper.statusPending,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    final result = await sl<SertifikasiRepository>().add(model);
 
     if (!mounted) return;
 
@@ -146,18 +171,30 @@ class _FormPendaftaranSertifikasiScreenState
       _isSubmitting = false;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Pendaftaran Sertifikasi Juz $_selectedJuz untuk ${_selectedSantri!.nama} berhasil diajukan.',
-        ),
-        backgroundColor: AppColors.of(context).success,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-      ),
+    result.fold(
+      (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error),
+            backgroundColor: AppColors.of(context).error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      },
+      (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Pendaftaran Sertifikasi Juz $_selectedJuz untuk ${_selectedSantri!.nama} berhasil diajukan.',
+            ),
+            backgroundColor: AppColors.of(context).success,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        context.router.maybePop();
+      },
     );
-
-    context.router.maybePop();
   }
 
   CustomDropdownDecoration _dropdownDecoration(AppColorSet colors) {
@@ -481,7 +518,14 @@ class _FormPendaftaranSertifikasiScreenState
 
                       // ── Submit Button ─────────────────────────────────────
                       PrimaryButton(
-                        onPressed: _isSubmitting ? null : _handleSubmit,
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => _handleSubmit(
+                                  guruId: currentGuruId ?? '',
+                                  guruNama: guruName,
+                                  halaqohId: myHalaqoh?.id ?? '',
+                                  halaqohNama: halaqohName,
+                                ),
                         isLoading: _isSubmitting,
                         label: 'Kirim Pendaftaran Sertifikasi',
                         icon: Icons.send_rounded,

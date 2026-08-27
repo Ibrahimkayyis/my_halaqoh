@@ -6,7 +6,7 @@ import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/domain/models/sertifi
 import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/widgets/detail_sertifikasi_sheet.dart';
 
 /// Clean list item displaying a single Tahfidz Certification entry.
-/// Shows Santri Name, status badge, and chevron action button.
+/// Shows full Santri Name without truncation, status badge, and chevron action button.
 class SertifikasiCard extends StatelessWidget {
   final SertifikasiModel item;
   final VoidCallback? onTap;
@@ -44,6 +44,7 @@ class SertifikasiCard extends StatelessWidget {
             ),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Initial Avatar
               CircleAvatar(
@@ -68,25 +69,55 @@ class SertifikasiCard extends StatelessWidget {
               ),
               SizedBox(width: 12.w),
 
-              // Santri Name & Juz
+              // Santri Name, Juz/Kelas, and Status Badge
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Full Name (No maxLines, no ellipsis, renders full name)
                     Text(
                       item.santriNama,
                       style: textTheme.titleSmall?.copyWith(
                         color: colors.textPrimary,
                         fontWeight: FontWeight.w600,
+                        fontSize: 13.5.sp,
+                        height: 1.25,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 3.h),
                     Text(
                       'Juz ${item.juz} • Kelas ${item.kelas}',
                       style: textTheme.labelSmall?.copyWith(
                         color: colors.textSecondary,
+                        fontSize: 11.5.sp,
+                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    // Status Badge Pill
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 3.5.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusBg,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(statusIcon, size: 11.sp, color: statusFg),
+                          SizedBox(width: 4.w),
+                          Text(
+                            statusLabel,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: statusFg,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11.sp,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -95,40 +126,14 @@ class SertifikasiCard extends StatelessWidget {
 
               SizedBox(width: 8.w),
 
-              // Status Badge Pill
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 8.w,
-                  vertical: 4.h,
-                ),
-                decoration: BoxDecoration(
-                  color: statusBg,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(statusIcon, size: 11.sp, color: statusFg),
-                    SizedBox(width: 4.w),
-                    Text(
-                      statusLabel,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: statusFg,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11.sp,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(width: 4.w),
-
               // Chevron Action Button
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20.sp,
-                color: colors.textSecondary.withValues(alpha: 0.6),
+              Padding(
+                padding: EdgeInsets.only(top: 2.h),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20.sp,
+                  color: colors.textSecondary.withValues(alpha: 0.6),
+                ),
               ),
             ],
           ),

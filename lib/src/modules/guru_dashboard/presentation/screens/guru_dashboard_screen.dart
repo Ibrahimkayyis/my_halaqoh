@@ -305,9 +305,7 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
                         return Column(
                           children: latestSetoran.map((item) {
                             return SetoranItem(
-                              name: item.santriName,
-                              surahInfo: item.surahInfo,
-                              score: item.score,
+                              item: item,
                             );
                           }).toList(),
                         );

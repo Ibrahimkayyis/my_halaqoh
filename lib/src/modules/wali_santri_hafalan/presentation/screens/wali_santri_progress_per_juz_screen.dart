@@ -23,6 +23,10 @@ import 'package:my_halaqoh/src/core/quran/hafalan_progress.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_hafalan/presentation/cubits/wali_santri_progress_hafalan_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_extra_target_state.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/domain/models/sertifikasi_model.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/cubits/sertifikasi_cubit.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/cubits/sertifikasi_state.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/widgets/juz_sertifikasi_badge.dart';
 
 /// Progress Hafalan Per Juz — shows juz-level progress cards for a santri (Wali Santri view)
 @RoutePage()
@@ -45,6 +49,7 @@ class _WaliSantriProgressPerJuzScreenState
     extends State<WaliSantriProgressPerJuzScreen> {
   late WaliSantriProgressHafalanCubit _progressCubit;
   late SantriExtraTargetCubit _extraTargetCubit;
+  late SertifikasiCubit _sertifikasiCubit;
   String? _loadedLinkedDocId;
 
   @override
@@ -52,12 +57,14 @@ class _WaliSantriProgressPerJuzScreenState
     super.initState();
     _progressCubit = sl<WaliSantriProgressHafalanCubit>();
     _extraTargetCubit = sl<SantriExtraTargetCubit>();
+    _sertifikasiCubit = sl<SertifikasiCubit>();
   }
 
   @override
   void dispose() {
     _progressCubit.close();
     _extraTargetCubit.close();
+    _sertifikasiCubit.close();
     super.dispose();
   }
 
@@ -67,6 +74,7 @@ class _WaliSantriProgressPerJuzScreenState
       _progressCubit.watchProgress(linkedDocId);
       // linkedDocId == santriId for wali santri accounts
       _extraTargetCubit.watchExtraJuz(linkedDocId);
+      _sertifikasiCubit.watchBySantriId(linkedDocId);
     }
   }
 
@@ -136,7 +144,9 @@ class _WaliSantriProgressPerJuzScreenState
       value: _progressCubit,
       child: BlocProvider.value(
         value: _extraTargetCubit,
-        child: BlocBuilder<WaliSantriProgressHafalanCubit, WaliSantriProgressHafalanState>(
+        child: BlocProvider.value(
+          value: _sertifikasiCubit,
+          child: BlocBuilder<WaliSantriProgressHafalanCubit, WaliSantriProgressHafalanState>(
         builder: (context, progressState) {
           OverallHafalanProgress? progressData;
           progressState.maybeWhen(
@@ -265,13 +275,32 @@ class _WaliSantriProgressPerJuzScreenState
                           ),
                           SizedBox(height: 14.h),
 
+                          SizedBox(height: 14.h),
+
                           // Juz cards or contextual empty state
-                          if (juzDisplayData.isEmpty)
-                            _buildEmptyState(colors, target, santri)
-                          else
-                            ...juzDisplayData.map(
-                              (juz) => _buildJuzCard(context, juz, colors),
-                            ),
+                          Builder(builder: (context) {
+                            final sertifikasiState =
+                                context.watch<SertifikasiCubit>().state;
+                            final List<SertifikasiModel> sertifikasiList = [];
+                            sertifikasiState.maybeWhen(
+                              loaded: (list) => sertifikasiList.addAll(list),
+                              orElse: () {},
+                            );
+
+                            if (juzDisplayData.isEmpty) {
+                              return _buildEmptyState(colors, target, santri);
+                            }
+                            return Column(
+                              children: juzDisplayData
+                                  .map((juz) => _buildJuzCard(
+                                        context,
+                                        juz,
+                                        colors,
+                                        sertifikasiList,
+                                      ))
+                                  .toList(),
+                            );
+                          }),
                           SizedBox(height: 24.h),
                         ],
                       ),
@@ -284,6 +313,7 @@ class _WaliSantriProgressPerJuzScreenState
         },
       ),
     ),
+  ),
   );
 }
 
@@ -373,10 +403,25 @@ class _WaliSantriProgressPerJuzScreenState
     BuildContext context,
     Map<String, dynamic> juz,
     AppColorSet colors,
+    List<SertifikasiModel> sertifikasiList,
   ) {
     final juzNum = juz['juz'] as int;
     final total = juz['total'] as int;
     final completed = juz['completed'] as int;
+
+    // Determine the most relevant sertifikasi item for this juz:
+    // Priority: passed > scheduled > pending > failed
+    SertifikasiModel? certItem;
+    final certForJuz = sertifikasiList.where((s) => s.juz == juzNum).toList();
+    if (certForJuz.isNotEmpty) {
+      const priority = ['passed', 'scheduled', 'pending', 'failed'];
+      for (final status in priority) {
+        try {
+          certItem = certForJuz.firstWhere((s) => s.status == status);
+          break;
+        } catch (_) {}
+      }
+    }
 
     String formatPercent(double v) {
       if (v == 0) return '0';
@@ -394,6 +439,9 @@ class _WaliSantriProgressPerJuzScreenState
     final percentStr = formatPercent(progressVal);
     final progress = total > 0 ? completed / total : 0.0;
 
+    // If certified (passed), show a subtle green border on the card
+    final isCertified = certItem?.status == 'passed';
+
     return GestureDetector(
       onTap: () {
         context.router.push(
@@ -410,6 +458,12 @@ class _WaliSantriProgressPerJuzScreenState
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: BorderRadius.circular(14.r),
+          border: isCertified
+              ? Border.all(
+                  color: colors.success.withValues(alpha: 0.4),
+                  width: 1.2,
+                )
+              : null,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -419,6 +473,7 @@ class _WaliSantriProgressPerJuzScreenState
           ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -461,6 +516,13 @@ class _WaliSantriProgressPerJuzScreenState
                 ),
               ],
             ),
+
+            // Sertifikasi badge — shown when there is any cert activity for this juz
+            if (certItem != null) ...[
+              SizedBox(height: 8.h),
+              JuzSertifikasiBadge(item: certItem),
+            ],
+
             SizedBox(height: 10.h),
             Row(
               children: [

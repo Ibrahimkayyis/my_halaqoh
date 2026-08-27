@@ -14,11 +14,11 @@ void main() {
       );
       expect(
         SertifikasiStatusHelper.getStatusLabel(SertifikasiStatusHelper.statusPassed),
-        'Lulus Sertifikasi',
+        'Tersertifikasi',
       );
       expect(
         SertifikasiStatusHelper.getStatusLabel(SertifikasiStatusHelper.statusFailed),
-        'Perlu Mengulang',
+        'Perlu Mengulang Sertifikasi',
       );
       expect(
         SertifikasiStatusHelper.getStatusLabel(SertifikasiStatusHelper.statusRejected),

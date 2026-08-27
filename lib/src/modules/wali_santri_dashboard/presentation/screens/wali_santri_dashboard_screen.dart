@@ -200,6 +200,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
                             loaded: (juzList) => extraJuz.addAll(juzList),
                             orElse: () {},
                           );
+
                           return WaliSantriProgressCard(
                             santri: mySantri,
                             target: myTarget,

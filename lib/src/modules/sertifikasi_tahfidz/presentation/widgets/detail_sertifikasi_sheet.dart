@@ -160,14 +160,14 @@ class DetailSertifikasiSheet extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Nilai Akhir',
+                          'Nilai Ujian',
                           style: textTheme.titleMedium?.copyWith(
                             color: colors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
-                          '${item.nilaiTotal?.toStringAsFixed(1) ?? "-"} / 100',
+                          '${item.nilai ?? "-"} / 100',
                           style: textTheme.headlineSmall?.copyWith(
                             color: item.status == SertifikasiStatusHelper.statusPassed
                                 ? colors.success
@@ -198,17 +198,6 @@ class DetailSertifikasiSheet extends StatelessWidget {
                         ],
                       ),
                     ],
-                    SizedBox(height: 8.h),
-                    Divider(height: 1, color: colors.border.withValues(alpha: 0.6)),
-                    SizedBox(height: 8.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildScoreItem('Kelancaran', item.nilaiKelancaran, colors, textTheme),
-                        _buildScoreItem('Tajwid', item.nilaiTajwid, colors, textTheme),
-                        _buildScoreItem('Makhroj', item.nilaiMakhroj, colors, textTheme),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -314,29 +303,5 @@ class DetailSertifikasiSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildScoreItem(
-    String label,
-    double? score,
-    AppColorSet colors,
-    TextTheme textTheme,
-  ) {
-    return Column(
-      children: [
-        Text(
-          score != null ? score.toStringAsFixed(0) : '-',
-          style: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: colors.textPrimary,
-          ),
-        ),
-        SizedBox(height: 2.h),
-        Text(
-          label,
-          style: textTheme.labelSmall?.copyWith(
-            color: colors.textSecondary,
-          ),
-        ),
-      ],
-    );
-  }
+
 }

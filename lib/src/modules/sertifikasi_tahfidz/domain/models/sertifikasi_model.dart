@@ -1,4 +1,4 @@
-﻿import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'sertifikasi_model.freezed.dart';
 part 'sertifikasi_model.g.dart';
@@ -43,10 +43,7 @@ abstract class SertifikasiModel with _$SertifikasiModel {
     String? alasanPenolakan,
 
     /// Exam Score & Evaluation (filled after exam)
-    double? nilaiKelancaran,
-    double? nilaiTajwid,
-    double? nilaiMakhroj,
-    double? nilaiTotal,
+    int? nilai,
     String? predikat,
     String? catatanPenguji,
 

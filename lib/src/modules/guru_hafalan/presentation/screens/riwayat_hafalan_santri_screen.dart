@@ -721,8 +721,14 @@ class _RiwayatHafalanSantriScreenState
     int index,
     AppColorSet colors,
   ) {
-    final dayStr = group.tanggalSetoran.day.toString().padLeft(2, '0');
+    const monthAbbr = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+    ];
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final dayName = _getDayName(group.tanggalSetoran);
+    final formattedDate = '$dayName, ${group.tanggalSetoran.day} ${monthAbbr[group.tanggalSetoran.month - 1]}';
     final isZiyadah = group.jenis == 'Ziyadah';
     final isShowingDelete = _activeDeleteIndex == index;
     final isExpanded = _expandedIndex == index;
@@ -741,230 +747,302 @@ class _RiwayatHafalanSantriScreenState
           _activeDeleteIndex = isShowingDelete ? null : index;
         });
       },
-      child: AnimatedContainer(
+      child: AnimatedSize(
         duration: const Duration(milliseconds: 200),
-        margin: EdgeInsets.only(bottom: 10.h),
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(14.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+        curve: Curves.easeInOut,
+        child: Container(
+          margin: EdgeInsets.only(bottom: 8.h),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 14.h,
+          ),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: isDark
+                  ? colors.border
+                  : (isShowingDelete
+                      ? colors.error.withValues(alpha: 0.5)
+                      : colors.border.withValues(alpha: 0.6)),
+              width: isShowingDelete ? 1.2 : 0.8,
             ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                // Day info
-                Column(
-                  children: [
-                    Text(
-                      dayName,
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w500,
-                        color: colors.textSecondary,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    Text(
-                      dayStr,
-                      style: TextStyle(
-                        fontSize: 22.sp,
-                        fontWeight: FontWeight.w800,
-                        color: colors.textPrimary,
-                        fontFamily: 'Poppins',
-                      ),
+            boxShadow: isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
-                ),
-                SizedBox(width: 16.w),
-
-                // Surah info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            isZiyadah
-                                ? t.riwayatHafalanSantri.hafalanBaru
-                                : t.riwayatHafalanSantri.murajaah,
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w500,
-                              color: colors.textSecondary,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          if (hasMultiple) ...[
-                            SizedBox(width: 6.w),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Surah info & tags
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Row 1: Type label (Hafalan Baru / Muraja'ah) + Multiple surah chip + Date
+                        Row(
+                          children: [
                             Container(
                               padding: EdgeInsets.symmetric(
                                 horizontal: 6.w,
-                                vertical: 1.h,
+                                vertical: 2.h,
                               ),
                               decoration: BoxDecoration(
-                                color: colors.primary.withValues(alpha: 0.1),
+                                color: colors.primary.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(4.r),
                               ),
                               child: Text(
-                                '${group.records.length} surat',
-                                style: TextStyle(
-                                  fontSize: 9.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: colors.primary,
-                                  fontFamily: 'Poppins',
-                                ),
+                                isZiyadah
+                                    ? t.riwayatHafalanSantri.hafalanBaru
+                                    : t.riwayatHafalanSantri.murajaah,
+                                style: textTheme.labelSmall?.copyWith(
+                                      fontSize: 9.5.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.primary,
+                                    ) ??
+                                    TextStyle(
+                                      fontSize: 9.5.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.primary,
+                                      fontFamily: 'Poppins',
+                                    ),
                               ),
                             ),
+                            if (hasMultiple) ...[
+                              SizedBox(width: 6.w),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 6.w,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colors.primary.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Text(
+                                  t.riwayatHafalanSantri.suratCount(count: group.records.length),
+                                  style: textTheme.labelSmall?.copyWith(
+                                        fontSize: 9.5.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: colors.primary,
+                                      ) ??
+                                      TextStyle(
+                                        fontSize: 9.5.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: colors.primary,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                ),
+                              ),
+                            ],
+                            SizedBox(width: 8.w),
+                            Text(
+                              formattedDate,
+                              style: textTheme.labelSmall?.copyWith(
+                                    fontSize: 10.5.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: colors.textSecondary,
+                                  ) ??
+                                  TextStyle(
+                                    fontSize: 10.5.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: colors.textSecondary,
+                                    fontFamily: 'Poppins',
+                                  ),
+                            ),
                           ],
-                        ],
-                      ),
-                      Text(
-                        group.surahDisplay,
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w700,
-                          color: colors.textPrimary,
-                          fontFamily: 'Poppins',
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        group.ayatDisplay,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          color: colors.textSecondary,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                        SizedBox(height: 4.h),
 
-                // Score, expand icon & delete
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${group.avgScore}',
-                      style: TextStyle(
-                        fontSize: 22.sp,
-                        fontWeight: FontWeight.w800,
-                        color: colors.textPrimary,
-                        fontFamily: 'Poppins',
+                        // Row 2: Surah Name (Prominent bold text)
+                        Text(
+                          group.surahDisplay,
+                          style: textTheme.titleMedium?.copyWith(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colors.textPrimary,
+                                height: 1.25,
+                              ) ??
+                              TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colors.textPrimary,
+                                fontFamily: 'Poppins',
+                                height: 1.25,
+                              ),
+                          softWrap: true,
+                        ),
+                        SizedBox(height: 3.h),
+
+                        // Row 3: Ayat details
+                        Text(
+                          group.ayatDisplay,
+                          style: textTheme.bodySmall?.copyWith(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                                color: colors.textSecondary,
+                              ) ??
+                              TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                                color: colors.textSecondary,
+                                fontFamily: 'Poppins',
+                              ),
+                          softWrap: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+
+                  // Numeric Score Pill
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(
+                        color: colors.border,
+                        width: 1,
                       ),
                     ),
-                    if (hasMultiple) ...[
-                      SizedBox(width: 4.w),
-                      AnimatedRotation(
-                        turns: isExpanded ? 0.5 : 0,
-                        duration: const Duration(milliseconds: 200),
-                        child: Icon(
-                          Icons.expand_more,
-                          size: 20.sp,
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ],
-                    if (isShowingDelete) ...[
-                      SizedBox(width: 12.w),
-                      GestureDetector(
-                        onTap: () async {
-                          final confirmed = await ConfirmDeleteDialog.show(context);
-                          if (confirmed && mounted) {
-                            setState(() {
-                              _activeDeleteIndex = null;
-                            });
-                            
-                            final messenger = ScaffoldMessenger.of(context);
-                            final appColors = AppColors.of(context);
-                            final cubit = context.read<RiwayatHafalanCubit>();
-
-                            final success = await cubit.deleteSubmissionGroup(group.records);
-
-                            if (mounted) {
-                              messenger.showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    success
-                                        ? t.riwayatHafalanSantri.deleteSuccess
-                                        : t.riwayatHafalanSantri.deleteFailed,
-                                    style: const TextStyle(fontFamily: 'Poppins'),
-                                  ),
-                                  backgroundColor: success
-                                      ? appColors.primary
-                                      : appColors.error,
-                                ),
-                              );
-                            }
-                          }
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(8.w),
-                          decoration: BoxDecoration(
-                            color: colors.red.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.delete_outline,
-                            size: 20.sp,
-                            color: colors.red,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-
-            // ── Expanded detail: show each surah in the group ──
-            if (isExpanded && hasMultiple) ...[
-              SizedBox(height: 8.h),
-              Divider(
-                color: colors.border.withValues(alpha: 0.5),
-                height: 1,
-              ),
-              SizedBox(height: 8.h),
-              ...group.detailLines.map(
-                (line) => Padding(
-                  padding: EdgeInsets.only(left: 38.w, bottom: 4.h),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 5.w,
-                        height: 5.w,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colors.primary.withValues(alpha: 0.6),
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: Text(
-                          line,
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: colors.textSecondary,
+                    child: Text(
+                      '${group.avgScore}',
+                      style: textTheme.titleSmall?.copyWith(
+                            fontSize: 13.5.sp,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textPrimary,
+                          ) ??
+                          TextStyle(
+                            fontSize: 13.5.sp,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textPrimary,
                             fontFamily: 'Poppins',
                           ),
+                    ),
+                  ),
+
+                  // Expand icon if has multiple surahs
+                  if (hasMultiple) ...[
+                    SizedBox(width: 4.w),
+                    AnimatedRotation(
+                      turns: isExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 20.sp,
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+
+                  // Delete button (on long-press)
+                  if (isShowingDelete) ...[
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap: () async {
+                        final confirmed = await ConfirmDeleteDialog.show(context);
+                        if (confirmed && mounted) {
+                          setState(() {
+                            _activeDeleteIndex = null;
+                          });
+
+                          final messenger = ScaffoldMessenger.of(context);
+                          final appColors = AppColors.of(context);
+                          final cubit = context.read<RiwayatHafalanCubit>();
+
+                          final success = await cubit.deleteSubmissionGroup(group.records);
+
+                          if (mounted) {
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  success
+                                      ? t.riwayatHafalanSantri.deleteSuccess
+                                      : t.riwayatHafalanSantri.deleteFailed,
+                                  style: const TextStyle(fontFamily: 'Poppins'),
+                                ),
+                                backgroundColor: success
+                                    ? appColors.primary
+                                    : appColors.error,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(6.w),
+                        decoration: BoxDecoration(
+                          color: colors.error.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.delete_outline,
+                          size: 18.sp,
+                          color: colors.error,
                         ),
                       ),
-                    ],
+                    ),
+                  ],
+                ],
+              ),
+
+              // ── Expanded detail: show each surah in the group ──
+              if (isExpanded && hasMultiple) ...[
+                SizedBox(height: 10.h),
+                Divider(
+                  color: colors.border.withValues(alpha: 0.6),
+                  height: 1,
+                ),
+                SizedBox(height: 8.h),
+                ...group.detailLines.map(
+                  (line) => Padding(
+                    padding: EdgeInsets.symmetric(vertical: 2.5.h, horizontal: 2.w),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 4.5.w,
+                          height: 4.5.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colors.primary.withValues(alpha: 0.7),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            line,
+                            style: textTheme.bodySmall?.copyWith(
+                                  fontSize: 11.5.sp,
+                                  color: colors.textSecondary,
+                                ) ??
+                                TextStyle(
+                                  fontSize: 11.5.sp,
+                                  color: colors.textSecondary,
+                                  fontFamily: 'Poppins',
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

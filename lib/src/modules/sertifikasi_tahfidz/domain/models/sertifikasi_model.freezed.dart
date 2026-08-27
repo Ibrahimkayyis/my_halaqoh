@@ -23,7 +23,7 @@ mixin _$SertifikasiModel {
  String? get catatanGuru;/// Status: 'pending' | 'scheduled' | 'rejected' | 'passed' | 'failed'
  String get status;/// Scheduling info (filled by Waka Tahfidz)
  DateTime? get tanggalUjian; String? get sesiUjian; String? get pengujiId; String? get pengujiNama; String? get catatanAdmin; String? get alasanPenolakan;/// Exam Score & Evaluation (filled after exam)
- double? get nilaiKelancaran; double? get nilaiTajwid; double? get nilaiMakhroj; double? get nilaiTotal; String? get predikat; String? get catatanPenguji;/// Timestamps
+ int? get nilai; String? get predikat; String? get catatanPenguji;/// Timestamps
  DateTime get createdAt; DateTime get updatedAt; DateTime? get completedAt;
 /// Create a copy of SertifikasiModel
 /// with the given fields replaced by the non-null parameter values.
@@ -37,16 +37,16 @@ $SertifikasiModelCopyWith<SertifikasiModel> get copyWith => _$SertifikasiModelCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SertifikasiModel&&(identical(other.id, id) || other.id == id)&&(identical(other.santriId, santriId) || other.santriId == santriId)&&(identical(other.santriNama, santriNama) || other.santriNama == santriNama)&&(identical(other.nis, nis) || other.nis == nis)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.halaqohNama, halaqohNama) || other.halaqohNama == halaqohNama)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.guruNama, guruNama) || other.guruNama == guruNama)&&(identical(other.juz, juz) || other.juz == juz)&&(identical(other.catatanGuru, catatanGuru) || other.catatanGuru == catatanGuru)&&(identical(other.status, status) || other.status == status)&&(identical(other.tanggalUjian, tanggalUjian) || other.tanggalUjian == tanggalUjian)&&(identical(other.sesiUjian, sesiUjian) || other.sesiUjian == sesiUjian)&&(identical(other.pengujiId, pengujiId) || other.pengujiId == pengujiId)&&(identical(other.pengujiNama, pengujiNama) || other.pengujiNama == pengujiNama)&&(identical(other.catatanAdmin, catatanAdmin) || other.catatanAdmin == catatanAdmin)&&(identical(other.alasanPenolakan, alasanPenolakan) || other.alasanPenolakan == alasanPenolakan)&&(identical(other.nilaiKelancaran, nilaiKelancaran) || other.nilaiKelancaran == nilaiKelancaran)&&(identical(other.nilaiTajwid, nilaiTajwid) || other.nilaiTajwid == nilaiTajwid)&&(identical(other.nilaiMakhroj, nilaiMakhroj) || other.nilaiMakhroj == nilaiMakhroj)&&(identical(other.nilaiTotal, nilaiTotal) || other.nilaiTotal == nilaiTotal)&&(identical(other.predikat, predikat) || other.predikat == predikat)&&(identical(other.catatanPenguji, catatanPenguji) || other.catatanPenguji == catatanPenguji)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SertifikasiModel&&(identical(other.id, id) || other.id == id)&&(identical(other.santriId, santriId) || other.santriId == santriId)&&(identical(other.santriNama, santriNama) || other.santriNama == santriNama)&&(identical(other.nis, nis) || other.nis == nis)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.halaqohNama, halaqohNama) || other.halaqohNama == halaqohNama)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.guruNama, guruNama) || other.guruNama == guruNama)&&(identical(other.juz, juz) || other.juz == juz)&&(identical(other.catatanGuru, catatanGuru) || other.catatanGuru == catatanGuru)&&(identical(other.status, status) || other.status == status)&&(identical(other.tanggalUjian, tanggalUjian) || other.tanggalUjian == tanggalUjian)&&(identical(other.sesiUjian, sesiUjian) || other.sesiUjian == sesiUjian)&&(identical(other.pengujiId, pengujiId) || other.pengujiId == pengujiId)&&(identical(other.pengujiNama, pengujiNama) || other.pengujiNama == pengujiNama)&&(identical(other.catatanAdmin, catatanAdmin) || other.catatanAdmin == catatanAdmin)&&(identical(other.alasanPenolakan, alasanPenolakan) || other.alasanPenolakan == alasanPenolakan)&&(identical(other.nilai, nilai) || other.nilai == nilai)&&(identical(other.predikat, predikat) || other.predikat == predikat)&&(identical(other.catatanPenguji, catatanPenguji) || other.catatanPenguji == catatanPenguji)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,santriId,santriNama,nis,kelas,program,profilePicture,halaqohId,halaqohNama,guruId,guruNama,juz,catatanGuru,status,tanggalUjian,sesiUjian,pengujiId,pengujiNama,catatanAdmin,alasanPenolakan,nilaiKelancaran,nilaiTajwid,nilaiMakhroj,nilaiTotal,predikat,catatanPenguji,createdAt,updatedAt,completedAt]);
+int get hashCode => Object.hashAll([runtimeType,id,santriId,santriNama,nis,kelas,program,profilePicture,halaqohId,halaqohNama,guruId,guruNama,juz,catatanGuru,status,tanggalUjian,sesiUjian,pengujiId,pengujiNama,catatanAdmin,alasanPenolakan,nilai,predikat,catatanPenguji,createdAt,updatedAt,completedAt]);
 
 @override
 String toString() {
-  return 'SertifikasiModel(id: $id, santriId: $santriId, santriNama: $santriNama, nis: $nis, kelas: $kelas, program: $program, profilePicture: $profilePicture, halaqohId: $halaqohId, halaqohNama: $halaqohNama, guruId: $guruId, guruNama: $guruNama, juz: $juz, catatanGuru: $catatanGuru, status: $status, tanggalUjian: $tanggalUjian, sesiUjian: $sesiUjian, pengujiId: $pengujiId, pengujiNama: $pengujiNama, catatanAdmin: $catatanAdmin, alasanPenolakan: $alasanPenolakan, nilaiKelancaran: $nilaiKelancaran, nilaiTajwid: $nilaiTajwid, nilaiMakhroj: $nilaiMakhroj, nilaiTotal: $nilaiTotal, predikat: $predikat, catatanPenguji: $catatanPenguji, createdAt: $createdAt, updatedAt: $updatedAt, completedAt: $completedAt)';
+  return 'SertifikasiModel(id: $id, santriId: $santriId, santriNama: $santriNama, nis: $nis, kelas: $kelas, program: $program, profilePicture: $profilePicture, halaqohId: $halaqohId, halaqohNama: $halaqohNama, guruId: $guruId, guruNama: $guruNama, juz: $juz, catatanGuru: $catatanGuru, status: $status, tanggalUjian: $tanggalUjian, sesiUjian: $sesiUjian, pengujiId: $pengujiId, pengujiNama: $pengujiNama, catatanAdmin: $catatanAdmin, alasanPenolakan: $alasanPenolakan, nilai: $nilai, predikat: $predikat, catatanPenguji: $catatanPenguji, createdAt: $createdAt, updatedAt: $updatedAt, completedAt: $completedAt)';
 }
 
 
@@ -57,7 +57,7 @@ abstract mixin class $SertifikasiModelCopyWith<$Res>  {
   factory $SertifikasiModelCopyWith(SertifikasiModel value, $Res Function(SertifikasiModel) _then) = _$SertifikasiModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String santriId, String santriNama, String nis, String kelas, String program, String? profilePicture, String halaqohId, String halaqohNama, String guruId, String guruNama, int juz, String? catatanGuru, String status, DateTime? tanggalUjian, String? sesiUjian, String? pengujiId, String? pengujiNama, String? catatanAdmin, String? alasanPenolakan, double? nilaiKelancaran, double? nilaiTajwid, double? nilaiMakhroj, double? nilaiTotal, String? predikat, String? catatanPenguji, DateTime createdAt, DateTime updatedAt, DateTime? completedAt
+ String id, String santriId, String santriNama, String nis, String kelas, String program, String? profilePicture, String halaqohId, String halaqohNama, String guruId, String guruNama, int juz, String? catatanGuru, String status, DateTime? tanggalUjian, String? sesiUjian, String? pengujiId, String? pengujiNama, String? catatanAdmin, String? alasanPenolakan, int? nilai, String? predikat, String? catatanPenguji, DateTime createdAt, DateTime updatedAt, DateTime? completedAt
 });
 
 
@@ -74,7 +74,7 @@ class _$SertifikasiModelCopyWithImpl<$Res>
 
 /// Create a copy of SertifikasiModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? santriId = null,Object? santriNama = null,Object? nis = null,Object? kelas = null,Object? program = null,Object? profilePicture = freezed,Object? halaqohId = null,Object? halaqohNama = null,Object? guruId = null,Object? guruNama = null,Object? juz = null,Object? catatanGuru = freezed,Object? status = null,Object? tanggalUjian = freezed,Object? sesiUjian = freezed,Object? pengujiId = freezed,Object? pengujiNama = freezed,Object? catatanAdmin = freezed,Object? alasanPenolakan = freezed,Object? nilaiKelancaran = freezed,Object? nilaiTajwid = freezed,Object? nilaiMakhroj = freezed,Object? nilaiTotal = freezed,Object? predikat = freezed,Object? catatanPenguji = freezed,Object? createdAt = null,Object? updatedAt = null,Object? completedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? santriId = null,Object? santriNama = null,Object? nis = null,Object? kelas = null,Object? program = null,Object? profilePicture = freezed,Object? halaqohId = null,Object? halaqohNama = null,Object? guruId = null,Object? guruNama = null,Object? juz = null,Object? catatanGuru = freezed,Object? status = null,Object? tanggalUjian = freezed,Object? sesiUjian = freezed,Object? pengujiId = freezed,Object? pengujiNama = freezed,Object? catatanAdmin = freezed,Object? alasanPenolakan = freezed,Object? nilai = freezed,Object? predikat = freezed,Object? catatanPenguji = freezed,Object? createdAt = null,Object? updatedAt = null,Object? completedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,santriId: null == santriId ? _self.santriId : santriId // ignore: cast_nullable_to_non_nullable
@@ -96,11 +96,8 @@ as String?,pengujiId: freezed == pengujiId ? _self.pengujiId : pengujiId // igno
 as String?,pengujiNama: freezed == pengujiNama ? _self.pengujiNama : pengujiNama // ignore: cast_nullable_to_non_nullable
 as String?,catatanAdmin: freezed == catatanAdmin ? _self.catatanAdmin : catatanAdmin // ignore: cast_nullable_to_non_nullable
 as String?,alasanPenolakan: freezed == alasanPenolakan ? _self.alasanPenolakan : alasanPenolakan // ignore: cast_nullable_to_non_nullable
-as String?,nilaiKelancaran: freezed == nilaiKelancaran ? _self.nilaiKelancaran : nilaiKelancaran // ignore: cast_nullable_to_non_nullable
-as double?,nilaiTajwid: freezed == nilaiTajwid ? _self.nilaiTajwid : nilaiTajwid // ignore: cast_nullable_to_non_nullable
-as double?,nilaiMakhroj: freezed == nilaiMakhroj ? _self.nilaiMakhroj : nilaiMakhroj // ignore: cast_nullable_to_non_nullable
-as double?,nilaiTotal: freezed == nilaiTotal ? _self.nilaiTotal : nilaiTotal // ignore: cast_nullable_to_non_nullable
-as double?,predikat: freezed == predikat ? _self.predikat : predikat // ignore: cast_nullable_to_non_nullable
+as String?,nilai: freezed == nilai ? _self.nilai : nilai // ignore: cast_nullable_to_non_nullable
+as int?,predikat: freezed == predikat ? _self.predikat : predikat // ignore: cast_nullable_to_non_nullable
 as String?,catatanPenguji: freezed == catatanPenguji ? _self.catatanPenguji : catatanPenguji // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -190,10 +187,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String santriId,  String santriNama,  String nis,  String kelas,  String program,  String? profilePicture,  String halaqohId,  String halaqohNama,  String guruId,  String guruNama,  int juz,  String? catatanGuru,  String status,  DateTime? tanggalUjian,  String? sesiUjian,  String? pengujiId,  String? pengujiNama,  String? catatanAdmin,  String? alasanPenolakan,  double? nilaiKelancaran,  double? nilaiTajwid,  double? nilaiMakhroj,  double? nilaiTotal,  String? predikat,  String? catatanPenguji,  DateTime createdAt,  DateTime updatedAt,  DateTime? completedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String santriId,  String santriNama,  String nis,  String kelas,  String program,  String? profilePicture,  String halaqohId,  String halaqohNama,  String guruId,  String guruNama,  int juz,  String? catatanGuru,  String status,  DateTime? tanggalUjian,  String? sesiUjian,  String? pengujiId,  String? pengujiNama,  String? catatanAdmin,  String? alasanPenolakan,  int? nilai,  String? predikat,  String? catatanPenguji,  DateTime createdAt,  DateTime updatedAt,  DateTime? completedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SertifikasiModel() when $default != null:
-return $default(_that.id,_that.santriId,_that.santriNama,_that.nis,_that.kelas,_that.program,_that.profilePicture,_that.halaqohId,_that.halaqohNama,_that.guruId,_that.guruNama,_that.juz,_that.catatanGuru,_that.status,_that.tanggalUjian,_that.sesiUjian,_that.pengujiId,_that.pengujiNama,_that.catatanAdmin,_that.alasanPenolakan,_that.nilaiKelancaran,_that.nilaiTajwid,_that.nilaiMakhroj,_that.nilaiTotal,_that.predikat,_that.catatanPenguji,_that.createdAt,_that.updatedAt,_that.completedAt);case _:
+return $default(_that.id,_that.santriId,_that.santriNama,_that.nis,_that.kelas,_that.program,_that.profilePicture,_that.halaqohId,_that.halaqohNama,_that.guruId,_that.guruNama,_that.juz,_that.catatanGuru,_that.status,_that.tanggalUjian,_that.sesiUjian,_that.pengujiId,_that.pengujiNama,_that.catatanAdmin,_that.alasanPenolakan,_that.nilai,_that.predikat,_that.catatanPenguji,_that.createdAt,_that.updatedAt,_that.completedAt);case _:
   return orElse();
 
 }
@@ -211,10 +208,10 @@ return $default(_that.id,_that.santriId,_that.santriNama,_that.nis,_that.kelas,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String santriId,  String santriNama,  String nis,  String kelas,  String program,  String? profilePicture,  String halaqohId,  String halaqohNama,  String guruId,  String guruNama,  int juz,  String? catatanGuru,  String status,  DateTime? tanggalUjian,  String? sesiUjian,  String? pengujiId,  String? pengujiNama,  String? catatanAdmin,  String? alasanPenolakan,  double? nilaiKelancaran,  double? nilaiTajwid,  double? nilaiMakhroj,  double? nilaiTotal,  String? predikat,  String? catatanPenguji,  DateTime createdAt,  DateTime updatedAt,  DateTime? completedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String santriId,  String santriNama,  String nis,  String kelas,  String program,  String? profilePicture,  String halaqohId,  String halaqohNama,  String guruId,  String guruNama,  int juz,  String? catatanGuru,  String status,  DateTime? tanggalUjian,  String? sesiUjian,  String? pengujiId,  String? pengujiNama,  String? catatanAdmin,  String? alasanPenolakan,  int? nilai,  String? predikat,  String? catatanPenguji,  DateTime createdAt,  DateTime updatedAt,  DateTime? completedAt)  $default,) {final _that = this;
 switch (_that) {
 case _SertifikasiModel():
-return $default(_that.id,_that.santriId,_that.santriNama,_that.nis,_that.kelas,_that.program,_that.profilePicture,_that.halaqohId,_that.halaqohNama,_that.guruId,_that.guruNama,_that.juz,_that.catatanGuru,_that.status,_that.tanggalUjian,_that.sesiUjian,_that.pengujiId,_that.pengujiNama,_that.catatanAdmin,_that.alasanPenolakan,_that.nilaiKelancaran,_that.nilaiTajwid,_that.nilaiMakhroj,_that.nilaiTotal,_that.predikat,_that.catatanPenguji,_that.createdAt,_that.updatedAt,_that.completedAt);case _:
+return $default(_that.id,_that.santriId,_that.santriNama,_that.nis,_that.kelas,_that.program,_that.profilePicture,_that.halaqohId,_that.halaqohNama,_that.guruId,_that.guruNama,_that.juz,_that.catatanGuru,_that.status,_that.tanggalUjian,_that.sesiUjian,_that.pengujiId,_that.pengujiNama,_that.catatanAdmin,_that.alasanPenolakan,_that.nilai,_that.predikat,_that.catatanPenguji,_that.createdAt,_that.updatedAt,_that.completedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -231,10 +228,10 @@ return $default(_that.id,_that.santriId,_that.santriNama,_that.nis,_that.kelas,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String santriId,  String santriNama,  String nis,  String kelas,  String program,  String? profilePicture,  String halaqohId,  String halaqohNama,  String guruId,  String guruNama,  int juz,  String? catatanGuru,  String status,  DateTime? tanggalUjian,  String? sesiUjian,  String? pengujiId,  String? pengujiNama,  String? catatanAdmin,  String? alasanPenolakan,  double? nilaiKelancaran,  double? nilaiTajwid,  double? nilaiMakhroj,  double? nilaiTotal,  String? predikat,  String? catatanPenguji,  DateTime createdAt,  DateTime updatedAt,  DateTime? completedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String santriId,  String santriNama,  String nis,  String kelas,  String program,  String? profilePicture,  String halaqohId,  String halaqohNama,  String guruId,  String guruNama,  int juz,  String? catatanGuru,  String status,  DateTime? tanggalUjian,  String? sesiUjian,  String? pengujiId,  String? pengujiNama,  String? catatanAdmin,  String? alasanPenolakan,  int? nilai,  String? predikat,  String? catatanPenguji,  DateTime createdAt,  DateTime updatedAt,  DateTime? completedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _SertifikasiModel() when $default != null:
-return $default(_that.id,_that.santriId,_that.santriNama,_that.nis,_that.kelas,_that.program,_that.profilePicture,_that.halaqohId,_that.halaqohNama,_that.guruId,_that.guruNama,_that.juz,_that.catatanGuru,_that.status,_that.tanggalUjian,_that.sesiUjian,_that.pengujiId,_that.pengujiNama,_that.catatanAdmin,_that.alasanPenolakan,_that.nilaiKelancaran,_that.nilaiTajwid,_that.nilaiMakhroj,_that.nilaiTotal,_that.predikat,_that.catatanPenguji,_that.createdAt,_that.updatedAt,_that.completedAt);case _:
+return $default(_that.id,_that.santriId,_that.santriNama,_that.nis,_that.kelas,_that.program,_that.profilePicture,_that.halaqohId,_that.halaqohNama,_that.guruId,_that.guruNama,_that.juz,_that.catatanGuru,_that.status,_that.tanggalUjian,_that.sesiUjian,_that.pengujiId,_that.pengujiNama,_that.catatanAdmin,_that.alasanPenolakan,_that.nilai,_that.predikat,_that.catatanPenguji,_that.createdAt,_that.updatedAt,_that.completedAt);case _:
   return null;
 
 }
@@ -246,7 +243,7 @@ return $default(_that.id,_that.santriId,_that.santriNama,_that.nis,_that.kelas,_
 @JsonSerializable()
 
 class _SertifikasiModel implements SertifikasiModel {
-  const _SertifikasiModel({required this.id, required this.santriId, required this.santriNama, required this.nis, required this.kelas, required this.program, this.profilePicture, required this.halaqohId, required this.halaqohNama, required this.guruId, required this.guruNama, required this.juz, this.catatanGuru, this.status = 'pending', this.tanggalUjian, this.sesiUjian, this.pengujiId, this.pengujiNama, this.catatanAdmin, this.alasanPenolakan, this.nilaiKelancaran, this.nilaiTajwid, this.nilaiMakhroj, this.nilaiTotal, this.predikat, this.catatanPenguji, required this.createdAt, required this.updatedAt, this.completedAt});
+  const _SertifikasiModel({required this.id, required this.santriId, required this.santriNama, required this.nis, required this.kelas, required this.program, this.profilePicture, required this.halaqohId, required this.halaqohNama, required this.guruId, required this.guruNama, required this.juz, this.catatanGuru, this.status = 'pending', this.tanggalUjian, this.sesiUjian, this.pengujiId, this.pengujiNama, this.catatanAdmin, this.alasanPenolakan, this.nilai, this.predikat, this.catatanPenguji, required this.createdAt, required this.updatedAt, this.completedAt});
   factory _SertifikasiModel.fromJson(Map<String, dynamic> json) => _$SertifikasiModelFromJson(json);
 
 /// Document ID in Firestore
@@ -277,10 +274,7 @@ class _SertifikasiModel implements SertifikasiModel {
 @override final  String? catatanAdmin;
 @override final  String? alasanPenolakan;
 /// Exam Score & Evaluation (filled after exam)
-@override final  double? nilaiKelancaran;
-@override final  double? nilaiTajwid;
-@override final  double? nilaiMakhroj;
-@override final  double? nilaiTotal;
+@override final  int? nilai;
 @override final  String? predikat;
 @override final  String? catatanPenguji;
 /// Timestamps
@@ -301,16 +295,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SertifikasiModel&&(identical(other.id, id) || other.id == id)&&(identical(other.santriId, santriId) || other.santriId == santriId)&&(identical(other.santriNama, santriNama) || other.santriNama == santriNama)&&(identical(other.nis, nis) || other.nis == nis)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.halaqohNama, halaqohNama) || other.halaqohNama == halaqohNama)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.guruNama, guruNama) || other.guruNama == guruNama)&&(identical(other.juz, juz) || other.juz == juz)&&(identical(other.catatanGuru, catatanGuru) || other.catatanGuru == catatanGuru)&&(identical(other.status, status) || other.status == status)&&(identical(other.tanggalUjian, tanggalUjian) || other.tanggalUjian == tanggalUjian)&&(identical(other.sesiUjian, sesiUjian) || other.sesiUjian == sesiUjian)&&(identical(other.pengujiId, pengujiId) || other.pengujiId == pengujiId)&&(identical(other.pengujiNama, pengujiNama) || other.pengujiNama == pengujiNama)&&(identical(other.catatanAdmin, catatanAdmin) || other.catatanAdmin == catatanAdmin)&&(identical(other.alasanPenolakan, alasanPenolakan) || other.alasanPenolakan == alasanPenolakan)&&(identical(other.nilaiKelancaran, nilaiKelancaran) || other.nilaiKelancaran == nilaiKelancaran)&&(identical(other.nilaiTajwid, nilaiTajwid) || other.nilaiTajwid == nilaiTajwid)&&(identical(other.nilaiMakhroj, nilaiMakhroj) || other.nilaiMakhroj == nilaiMakhroj)&&(identical(other.nilaiTotal, nilaiTotal) || other.nilaiTotal == nilaiTotal)&&(identical(other.predikat, predikat) || other.predikat == predikat)&&(identical(other.catatanPenguji, catatanPenguji) || other.catatanPenguji == catatanPenguji)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SertifikasiModel&&(identical(other.id, id) || other.id == id)&&(identical(other.santriId, santriId) || other.santriId == santriId)&&(identical(other.santriNama, santriNama) || other.santriNama == santriNama)&&(identical(other.nis, nis) || other.nis == nis)&&(identical(other.kelas, kelas) || other.kelas == kelas)&&(identical(other.program, program) || other.program == program)&&(identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture)&&(identical(other.halaqohId, halaqohId) || other.halaqohId == halaqohId)&&(identical(other.halaqohNama, halaqohNama) || other.halaqohNama == halaqohNama)&&(identical(other.guruId, guruId) || other.guruId == guruId)&&(identical(other.guruNama, guruNama) || other.guruNama == guruNama)&&(identical(other.juz, juz) || other.juz == juz)&&(identical(other.catatanGuru, catatanGuru) || other.catatanGuru == catatanGuru)&&(identical(other.status, status) || other.status == status)&&(identical(other.tanggalUjian, tanggalUjian) || other.tanggalUjian == tanggalUjian)&&(identical(other.sesiUjian, sesiUjian) || other.sesiUjian == sesiUjian)&&(identical(other.pengujiId, pengujiId) || other.pengujiId == pengujiId)&&(identical(other.pengujiNama, pengujiNama) || other.pengujiNama == pengujiNama)&&(identical(other.catatanAdmin, catatanAdmin) || other.catatanAdmin == catatanAdmin)&&(identical(other.alasanPenolakan, alasanPenolakan) || other.alasanPenolakan == alasanPenolakan)&&(identical(other.nilai, nilai) || other.nilai == nilai)&&(identical(other.predikat, predikat) || other.predikat == predikat)&&(identical(other.catatanPenguji, catatanPenguji) || other.catatanPenguji == catatanPenguji)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,santriId,santriNama,nis,kelas,program,profilePicture,halaqohId,halaqohNama,guruId,guruNama,juz,catatanGuru,status,tanggalUjian,sesiUjian,pengujiId,pengujiNama,catatanAdmin,alasanPenolakan,nilaiKelancaran,nilaiTajwid,nilaiMakhroj,nilaiTotal,predikat,catatanPenguji,createdAt,updatedAt,completedAt]);
+int get hashCode => Object.hashAll([runtimeType,id,santriId,santriNama,nis,kelas,program,profilePicture,halaqohId,halaqohNama,guruId,guruNama,juz,catatanGuru,status,tanggalUjian,sesiUjian,pengujiId,pengujiNama,catatanAdmin,alasanPenolakan,nilai,predikat,catatanPenguji,createdAt,updatedAt,completedAt]);
 
 @override
 String toString() {
-  return 'SertifikasiModel(id: $id, santriId: $santriId, santriNama: $santriNama, nis: $nis, kelas: $kelas, program: $program, profilePicture: $profilePicture, halaqohId: $halaqohId, halaqohNama: $halaqohNama, guruId: $guruId, guruNama: $guruNama, juz: $juz, catatanGuru: $catatanGuru, status: $status, tanggalUjian: $tanggalUjian, sesiUjian: $sesiUjian, pengujiId: $pengujiId, pengujiNama: $pengujiNama, catatanAdmin: $catatanAdmin, alasanPenolakan: $alasanPenolakan, nilaiKelancaran: $nilaiKelancaran, nilaiTajwid: $nilaiTajwid, nilaiMakhroj: $nilaiMakhroj, nilaiTotal: $nilaiTotal, predikat: $predikat, catatanPenguji: $catatanPenguji, createdAt: $createdAt, updatedAt: $updatedAt, completedAt: $completedAt)';
+  return 'SertifikasiModel(id: $id, santriId: $santriId, santriNama: $santriNama, nis: $nis, kelas: $kelas, program: $program, profilePicture: $profilePicture, halaqohId: $halaqohId, halaqohNama: $halaqohNama, guruId: $guruId, guruNama: $guruNama, juz: $juz, catatanGuru: $catatanGuru, status: $status, tanggalUjian: $tanggalUjian, sesiUjian: $sesiUjian, pengujiId: $pengujiId, pengujiNama: $pengujiNama, catatanAdmin: $catatanAdmin, alasanPenolakan: $alasanPenolakan, nilai: $nilai, predikat: $predikat, catatanPenguji: $catatanPenguji, createdAt: $createdAt, updatedAt: $updatedAt, completedAt: $completedAt)';
 }
 
 
@@ -321,7 +315,7 @@ abstract mixin class _$SertifikasiModelCopyWith<$Res> implements $SertifikasiMod
   factory _$SertifikasiModelCopyWith(_SertifikasiModel value, $Res Function(_SertifikasiModel) _then) = __$SertifikasiModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String santriId, String santriNama, String nis, String kelas, String program, String? profilePicture, String halaqohId, String halaqohNama, String guruId, String guruNama, int juz, String? catatanGuru, String status, DateTime? tanggalUjian, String? sesiUjian, String? pengujiId, String? pengujiNama, String? catatanAdmin, String? alasanPenolakan, double? nilaiKelancaran, double? nilaiTajwid, double? nilaiMakhroj, double? nilaiTotal, String? predikat, String? catatanPenguji, DateTime createdAt, DateTime updatedAt, DateTime? completedAt
+ String id, String santriId, String santriNama, String nis, String kelas, String program, String? profilePicture, String halaqohId, String halaqohNama, String guruId, String guruNama, int juz, String? catatanGuru, String status, DateTime? tanggalUjian, String? sesiUjian, String? pengujiId, String? pengujiNama, String? catatanAdmin, String? alasanPenolakan, int? nilai, String? predikat, String? catatanPenguji, DateTime createdAt, DateTime updatedAt, DateTime? completedAt
 });
 
 
@@ -338,7 +332,7 @@ class __$SertifikasiModelCopyWithImpl<$Res>
 
 /// Create a copy of SertifikasiModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? santriId = null,Object? santriNama = null,Object? nis = null,Object? kelas = null,Object? program = null,Object? profilePicture = freezed,Object? halaqohId = null,Object? halaqohNama = null,Object? guruId = null,Object? guruNama = null,Object? juz = null,Object? catatanGuru = freezed,Object? status = null,Object? tanggalUjian = freezed,Object? sesiUjian = freezed,Object? pengujiId = freezed,Object? pengujiNama = freezed,Object? catatanAdmin = freezed,Object? alasanPenolakan = freezed,Object? nilaiKelancaran = freezed,Object? nilaiTajwid = freezed,Object? nilaiMakhroj = freezed,Object? nilaiTotal = freezed,Object? predikat = freezed,Object? catatanPenguji = freezed,Object? createdAt = null,Object? updatedAt = null,Object? completedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? santriId = null,Object? santriNama = null,Object? nis = null,Object? kelas = null,Object? program = null,Object? profilePicture = freezed,Object? halaqohId = null,Object? halaqohNama = null,Object? guruId = null,Object? guruNama = null,Object? juz = null,Object? catatanGuru = freezed,Object? status = null,Object? tanggalUjian = freezed,Object? sesiUjian = freezed,Object? pengujiId = freezed,Object? pengujiNama = freezed,Object? catatanAdmin = freezed,Object? alasanPenolakan = freezed,Object? nilai = freezed,Object? predikat = freezed,Object? catatanPenguji = freezed,Object? createdAt = null,Object? updatedAt = null,Object? completedAt = freezed,}) {
   return _then(_SertifikasiModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,santriId: null == santriId ? _self.santriId : santriId // ignore: cast_nullable_to_non_nullable
@@ -360,11 +354,8 @@ as String?,pengujiId: freezed == pengujiId ? _self.pengujiId : pengujiId // igno
 as String?,pengujiNama: freezed == pengujiNama ? _self.pengujiNama : pengujiNama // ignore: cast_nullable_to_non_nullable
 as String?,catatanAdmin: freezed == catatanAdmin ? _self.catatanAdmin : catatanAdmin // ignore: cast_nullable_to_non_nullable
 as String?,alasanPenolakan: freezed == alasanPenolakan ? _self.alasanPenolakan : alasanPenolakan // ignore: cast_nullable_to_non_nullable
-as String?,nilaiKelancaran: freezed == nilaiKelancaran ? _self.nilaiKelancaran : nilaiKelancaran // ignore: cast_nullable_to_non_nullable
-as double?,nilaiTajwid: freezed == nilaiTajwid ? _self.nilaiTajwid : nilaiTajwid // ignore: cast_nullable_to_non_nullable
-as double?,nilaiMakhroj: freezed == nilaiMakhroj ? _self.nilaiMakhroj : nilaiMakhroj // ignore: cast_nullable_to_non_nullable
-as double?,nilaiTotal: freezed == nilaiTotal ? _self.nilaiTotal : nilaiTotal // ignore: cast_nullable_to_non_nullable
-as double?,predikat: freezed == predikat ? _self.predikat : predikat // ignore: cast_nullable_to_non_nullable
+as String?,nilai: freezed == nilai ? _self.nilai : nilai // ignore: cast_nullable_to_non_nullable
+as int?,predikat: freezed == predikat ? _self.predikat : predikat // ignore: cast_nullable_to_non_nullable
 as String?,catatanPenguji: freezed == catatanPenguji ? _self.catatanPenguji : catatanPenguji // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable

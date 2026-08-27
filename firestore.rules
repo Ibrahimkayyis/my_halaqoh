@@ -89,5 +89,10 @@ service cloud.firestore {
     match /santriExtraTarget/{santriId} {
       allow read, write: if isAuthenticated();
     }
+
+    // Sertifikasi Tahfidz: allow authenticated users to read and write
+    match /sertifikasi_tahfidz/{documentId} {
+      allow read, write: if isAuthenticated();
+    }
   }
 }

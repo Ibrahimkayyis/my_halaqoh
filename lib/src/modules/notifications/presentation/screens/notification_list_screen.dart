@@ -11,8 +11,13 @@ import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart'
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
-import 'package:my_halaqoh/src/modules/notifications/data/services/wali_santri_notification_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_cubit.dart';
+import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_state.dart';
 import 'package:my_halaqoh/src/modules/notifications/domain/models/wali_santri_notification_item.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/data/datasources/remote/mapper/sertifikasi_mapper.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/domain/models/sertifikasi_model.dart';
+import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/widgets/detail_sertifikasi_sheet.dart';
 
 /// Notification list screen for Guru and Wali Santri.
 /// Integrates real data from Firestore for Wali Santri (Absensi & Hafalan).
@@ -48,61 +53,78 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
 
     final authState = context.read<AuthCubit>().state;
     String uid = '';
-    String role = 'guru';
 
     authState.maybeWhen(
-      authenticated: (user) {
-        uid = user.uid;
-        role = user.role;
-      },
+      authenticated: (user) => uid = user.uid,
       orElse: () {},
     );
 
     _currentUid = uid;
-    final isWaliSantri = role == 'santri' || role == 'wali_santri';
 
-    if (isWaliSantri) {
-      final santriId = ActiveSessionHelper.getActiveLinkedDocId(context);
-      if (santriId != null && santriId.isNotEmpty) {
-        _notificationSub?.cancel();
-        _notificationSub = sl<WaliSantriNotificationService>()
-            .watchNotificationsForSantri(santriId, uid)
-            .listen(
-          (items) {
-            if (mounted) {
-              setState(() {
-                _notifications = items;
-                _isLoading = false;
-              });
-            }
-          },
-          onError: (e) {
-            if (mounted) {
-              setState(() {
-                _isLoading = false;
-              });
-            }
-          },
-        );
+    if (uid.isEmpty) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final badgeCubit = sl<NotificationBadgeCubit>();
+
+    // Ensure the global pipeline runs even if the dashboard wrapper has not
+    // started it yet (e.g., deep link straight into this screen).
+    if (!badgeCubit.isRunning) {
+      final linkedDocId =
+          ActiveSessionHelper.getActiveLinkedDocId(context) ?? '';
+      final role = ActiveSessionHelper.getActiveRole(context) ?? '';
+      if (linkedDocId.isNotEmpty) {
+        unawaited(badgeCubit.start(
+          isWaliSantri: role == 'santri' || role == 'wali_santri',
+          linkedDocId: linkedDocId,
+          uid: uid,
+        ));
       } else {
+        // No linked document — nothing to stream. Show the empty state
+        // instead of an endless spinner.
         setState(() {
           _isLoading = false;
         });
+        return;
       }
-    } else {
-      // Guru / Admin (placeholder or future guru notification stream)
-      setState(() {
-        _notifications = [];
-        _isLoading = false;
-      });
     }
+
+    // Single source of truth: consume the global badge cubit instead of
+    // creating a second parallel Firestore subscription here.
+    void applyBadgeState(NotificationBadgeState state) {
+      state.maybeWhen(
+        loaded: (items, _) {
+          if (mounted) {
+            setState(() {
+              _notifications = items;
+              _isLoading = false;
+            });
+          }
+        },
+        orElse: () {},
+      );
+    }
+
+    _notificationSub?.cancel();
+    _notificationSub = badgeCubit.stream.listen(applyBadgeState);
+
+    // IMPORTANT: Cubit.stream does NOT replay the current state to late
+    // subscribers — it only emits future changes. If the pipeline is already
+    // running (started by the dashboard wrapper), the `loaded` emission
+    // happened BEFORE this screen existed, so consume the current state
+    // synchronously or _isLoading would never turn off.
+    applyBadgeState(badgeCubit.state);
   }
 
   void _markAllAsRead() async {
     if (_currentUid == null || _currentUid!.isEmpty) return;
 
-    final allIds = _notifications.map((n) => n.id).toList();
-    await sl<WaliSantriNotificationService>().markAllAsRead(_currentUid!, allIds);
+    // Mark all as read via the global badge cubit — the service fires a
+    // reactive re-emission so every listening badge updates instantly.
+    await sl<NotificationBadgeCubit>().markAllAsRead();
 
     setState(() {
       for (var n in _notifications) {
@@ -123,13 +145,34 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
 
   void _handleItemTap(WaliSantriNotificationItem item) async {
     if (_currentUid != null && _currentUid!.isNotEmpty) {
-      await sl<WaliSantriNotificationService>().markAsRead(_currentUid!, item.id);
+      await sl<NotificationBadgeCubit>().markAsRead(item);
       setState(() {
         item.isRead = true;
       });
     }
 
     if (!mounted) return;
+
+    if (item.category == 'sertifikasi') {
+      final cachedModel = item.metadata?['sertifikasiModel'] as SertifikasiModel?;
+      if (cachedModel != null) {
+        DetailSertifikasiSheet.show(context, cachedModel);
+        return;
+      }
+      if (item.entityId != null && item.entityId!.isNotEmpty) {
+        final doc = await FirebaseFirestore.instance
+            .collection('sertifikasi_tahfidz')
+            .doc(item.entityId!)
+            .get();
+        if (doc.exists && mounted) {
+          DetailSertifikasiSheet.show(
+            context,
+            SertifikasiMapper.fromFirestore(doc),
+          );
+        }
+      }
+      return;
+    }
 
     // Resolve active santri info for navigation
     final santriState = context.read<SantriCubit>().state;
@@ -292,6 +335,9 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                       _buildCategoryChip(
                           'Hafalan', 'hafalan', null, colors, textTheme),
                     ],
+                    SizedBox(width: 8.w),
+                    _buildCategoryChip(
+                        'Sertifikasi', 'sertifikasi', null, colors, textTheme),
                   ],
                 ),
               ),
@@ -458,6 +504,11 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
         iconColor = colors.success;
         categoryName = 'Hafalan';
         break;
+      case 'sertifikasi':
+        icon = Icons.workspace_premium_rounded;
+        iconColor = colors.primary;
+        categoryName = 'Sertifikasi';
+        break;
       default:
         icon = Icons.notifications_rounded;
         iconColor = colors.warning;
@@ -604,7 +655,9 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                             Text(
                               item.category == 'absensi'
                                   ? 'Ketuk untuk melihat riwayat absensi'
-                                  : 'Ketuk untuk melihat riwayat hafalan',
+                                  : item.category == 'hafalan'
+                                      ? 'Ketuk untuk melihat riwayat hafalan'
+                                      : 'Ketuk untuk melihat detail sertifikasi',
                               style: textTheme.labelSmall?.copyWith(
                                 color: colors.primary,
                                 fontWeight: FontWeight.w600,

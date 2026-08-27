@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 
 /// Helper for Sertifikasi Tahfidz status, badges, predicates, and styling.
@@ -21,9 +21,9 @@ class SertifikasiStatusHelper {
       case statusRejected:
         return 'Ditolak';
       case statusPassed:
-        return 'Lulus Sertifikasi';
+        return 'Tersertifikasi';
       case statusFailed:
-        return 'Perlu Mengulang';
+        return 'Perlu Mengulang Sertifikasi';
       default:
         return status;
     }
@@ -83,12 +83,12 @@ class SertifikasiStatusHelper {
     }
   }
 
-  /// Determines predicate based on total score (0 - 100 scale).
-  static String calculatePredikat(double score) {
-    if (score >= 90.0) return 'Mumtaz (Istimewa)';
-    if (score >= 80.0) return 'Jayyid Jiddan (Sangat Baik)';
-    if (score >= 70.0) return 'Jayyid (Baik)';
-    if (score >= 60.0) return 'Maqbul (Cukup)';
+  /// Determines predicate based on score (0 - 100 scale).
+  static String calculatePredikat(num score) {
+    if (score >= 90) return 'Mumtaz (Istimewa)';
+    if (score >= 80) return 'Jayyid Jiddan (Sangat Baik)';
+    if (score >= 70) return 'Jayyid (Baik)';
+    if (score >= 60) return 'Maqbul (Cukup)';
     return 'Rasib (Kurang)';
   }
 }
