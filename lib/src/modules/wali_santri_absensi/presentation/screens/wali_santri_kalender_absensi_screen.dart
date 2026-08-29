@@ -122,12 +122,7 @@ class _WaliSantriKalenderAbsensiScreenState
   String _statusToCode(String status) {
     switch (status) {
       case 'hadir':
-      case 'hadir_barcode':
         return 'H';
-      case 'hadir_manual':
-        return 'HT';
-      case 'terlambat':
-        return 'T';
       case 'sakit':
         return 'S';
       case 'izin':
@@ -473,10 +468,6 @@ class _WaliSantriKalenderAbsensiScreenState
     switch (status) {
       case 'H':
         return colors.primary;
-      case 'HT':
-        return colors.green;
-      case 'T':
-        return const Color(0xFFF3722C);
       case 'S':
         return colors.yellow;
       case 'I':

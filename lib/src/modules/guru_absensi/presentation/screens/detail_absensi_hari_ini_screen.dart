@@ -1,4 +1,3 @@
-import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -58,15 +57,6 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
   late String _currentSesi;
   List<String> _sessionKeys = [];
   List<String> _sessionLabels = [];
-
-  final List<String> _statusOptions = [
-    'belum',
-    'hadir_manual',
-    'terlambat',
-    'sakit',
-    'izin',
-    'alfa',
-  ];
 
   @override
   void initState() {
@@ -141,7 +131,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
           i:
               widget.selectedSesi == _currentSesi &&
                   widget.scannedNisList.contains(_mySantriList[i].nis)
-              ? 'hadir_barcode'
+              ? 'hadir'
               : existingMap[_mySantriList[i].nis] ?? 'belum',
       };
     } else {
@@ -150,7 +140,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
           i:
               widget.selectedSesi == _currentSesi &&
                   widget.scannedNisList.contains(_mySantriList[i].nis)
-              ? 'hadir_barcode'
+              ? 'hadir'
               : 'belum',
       };
     }
@@ -184,17 +174,14 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
 
   // ── Stats ──────────────────────────────────────────────────────────────────
   Map<String, int> get _stats {
-    int hadirBarcode = 0, hadirManual = 0, terlambat = 0, sakit = 0, izin = 0, alfa = 0, belum = 0;
+    int hadir = 0, sakit = 0, izin = 0, alfa = 0, belum = 0;
     for (final status in _santriStatuses.values) {
       switch (status) {
+        case 'hadir':
         case 'hadir_barcode':
-          hadirBarcode++;
-          break;
         case 'hadir_manual':
-          hadirManual++;
-          break;
         case 'terlambat':
-          terlambat++;
+          hadir++;
           break;
         case 'sakit':
           sakit++;
@@ -211,35 +198,12 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
       }
     }
     return {
-      'hadir_barcode': hadirBarcode,
-      'hadir_manual': hadirManual,
-      'terlambat': terlambat,
+      'hadir': hadir,
       'sakit': sakit,
       'izin': izin,
       'alfa': alfa,
       'belum': belum,
     };
-  }
-
-  String _getStatusLabel(String status) {
-    switch (status) {
-      case 'hadir':
-        return t.detailAbsensiHariIni.hadir;
-      case 'hadir_barcode':
-        return t.detailAbsensiHariIni.hadirBarcode;
-      case 'hadir_manual':
-        return t.detailAbsensiHariIni.hadirManual;
-      case 'terlambat':
-        return t.detailAbsensiHariIni.terlambat;
-      case 'sakit':
-        return t.detailAbsensiHariIni.sakit;
-      case 'izin':
-        return t.detailAbsensiHariIni.izin;
-      case 'alfa':
-        return t.detailAbsensiHariIni.alfa;
-      default:
-        return t.detailAbsensiHariIni.belumDiabsen;
-    }
   }
 
   String _getSessionLabel(String sesi) {
@@ -257,6 +221,15 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
       default:
         return sesi;
     }
+  }
+
+  // ── Hadir Semua handler ───────────────────────────────────────────────────
+  void _handleHadirSemua() {
+    setState(() {
+      for (int i = 0; i < _mySantriList.length; i++) {
+        _santriStatuses[i] = 'hadir';
+      }
+    });
   }
 
   // ── Save handler ──────────────────────────────────────────────────────────
@@ -617,41 +590,16 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                               SizedBox(height: 14.h),
                               Column(
                                 children: [
-                                  // Row 1: Hadir (Scan Barcode) - full width
+                                  // Row 1: Hadir - full width
                                   _buildGridStatCard(
-                                    label: t.detailAbsensiHariIni.hadirBarcode,
-                                    value: '${stats['hadir_barcode']}',
+                                    label: t.detailAbsensiHariIni.hadir,
+                                    value: '${stats['hadir']}',
                                     bgColor: colors.primary.withValues(alpha: 0.08),
                                     textColor: colors.primary,
                                     isLarge: true,
                                   ),
                                   SizedBox(height: 10.h),
-                                  // Row 2: Hadir (Tanpa Kartu) & Hadir (Terlambat) - 2 columns
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _buildGridStatCard(
-                                          label: t.detailAbsensiHariIni.hadirManual,
-                                          value: '${stats['hadir_manual']}',
-                                          bgColor: colors.green.withValues(alpha: 0.08),
-                                          textColor: colors.green,
-                                          height: 100.h,
-                                        ),
-                                      ),
-                                      SizedBox(width: 10.w),
-                                      Expanded(
-                                        child: _buildGridStatCard(
-                                          label: t.detailAbsensiHariIni.terlambat,
-                                          value: '${stats['terlambat']}',
-                                          bgColor: const Color(0xFFF3722C).withValues(alpha: 0.08),
-                                          textColor: const Color(0xFFF3722C),
-                                          height: 100.h,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 10.h),
-                                  // Row 3: Sakit, Izin, Alfa, Belum Absen - 4 columns
+                                  // Row 2: Sakit, Izin, Alfa, Belum Absen - 4 columns
                                   Row(
                                     children: [
                                       Expanded(
@@ -743,6 +691,87 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+
+                      // Quick Action Strip (Option 3)
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 14.w,
+                            vertical: 10.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(
+                              color: colors.primary.withValues(alpha: 0.18),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.checklist_rounded,
+                                    size: 18.sp,
+                                    color: colors.primary,
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Text(
+                                    'Aksi Cepat',
+                                    style: TextStyle(
+                                      fontSize: 12.5.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.textPrimary,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: _handleHadirSemua,
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                      vertical: 6.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colors.primary,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.done_all_rounded,
+                                          size: 15.sp,
+                                          color: colors.textOnButton,
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        Text(
+                                          t.detailAbsensiHariIni.hadirSemua,
+                                          style: TextStyle(
+                                            fontSize: 11.5.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: colors.textOnButton,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       SizedBox(height: 16.h),
@@ -986,8 +1015,8 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
     AppColorSet colors,
   ) {
     final currentStatus = _santriStatuses[index] ?? 'belum';
-    final isLocked = currentStatus == 'hadir_barcode';
-    final showScannedStyle = wasScanned || isLocked;
+    final isLocked = wasScanned && currentStatus == 'hadir';
+    final showScannedStyle = wasScanned;
 
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
@@ -1061,14 +1090,11 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
             ],
           ),
 
-          // ── Bagian Bawah: Dropdown Status atau Locked Badge ──
-          SizedBox(height: 14.h),
-          SizedBox(
-            width: double.infinity,
-            child: isLocked
-                ? _buildLockedStatusBadge(colors)
-                : _buildStatusDropdown(index, currentStatus, colors),
-          ),
+          // ── Bagian Bawah: Segmented Status Chips atau Locked Badge ──
+          SizedBox(height: 12.h),
+          isLocked
+              ? _buildLockedStatusBadge(colors)
+              : _buildStatusChips(index, currentStatus, colors),
         ],
       ),
     );
@@ -1099,7 +1125,7 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
               ),
               SizedBox(width: 8.w),
               Text(
-                t.detailAbsensiHariIni.hadirBarcode,
+                t.detailAbsensiHariIni.hadir,
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
@@ -1119,133 +1145,77 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
     );
   }
 
-  // ── Status dropdown ────────────────────────────────────────────────────────
-  Widget _buildStatusDropdown(
+  // ── 1-Tap Status Chips ─────────────────────────────────────────────────────
+  Widget _buildStatusChips(
     int index,
     String currentStatus,
     AppColorSet colors,
   ) {
-    return CustomDropdown<String>(
-      items: _statusOptions,
-      initialItem: currentStatus,
-      onChanged: (value) {
-        if (value != null) setState(() => _santriStatuses[index] = value);
-      },
-      listItemBuilder: (context, item, isSelected, onItemSelect) {
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          child: Text(
-            _getStatusLabel(item),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins',
-              color: _getStatusTextColor(item, colors),
+    final statusItems = [
+      ('hadir', t.detailAbsensiHariIni.hadir, colors.primary),
+      ('sakit', t.detailAbsensiHariIni.sakit, colors.yellow),
+      ('izin', t.detailAbsensiHariIni.izin, colors.blue),
+      ('alfa', t.detailAbsensiHariIni.alfa, colors.red),
+    ];
+
+    return Row(
+      children: statusItems.map((item) {
+        final (statusKey, label, activeColor) = item;
+        final isSelected = currentStatus == statusKey ||
+            (statusKey == 'hadir' &&
+                (currentStatus == 'hadir_barcode' ||
+                    currentStatus == 'hadir_manual' ||
+                    currentStatus == 'terlambat'));
+
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 3.w),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    if (isSelected) {
+                      _santriStatuses[index] = 'belum';
+                    } else {
+                      _santriStatuses[index] = statusKey;
+                    }
+                  });
+                },
+                borderRadius: BorderRadius.circular(8.r),
+                child: Container(
+                  height: 36.h,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? activeColor.withValues(alpha: 0.12)
+                        : colors.background,
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(
+                      color: isSelected
+                          ? activeColor
+                          : colors.border.withValues(alpha: 0.7),
+                      width: isSelected ? 1.2 : 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.5.sp,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected ? activeColor : colors.textSecondary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         );
-      },
-      headerBuilder: (context, selectedItem, enabled) {
-        return Text(
-          _getStatusLabel(selectedItem),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 11.sp,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Poppins',
-            color: _getStatusTextColor(selectedItem, colors),
-          ),
-        );
-      },
-      closedHeaderPadding: EdgeInsets.symmetric(
-        horizontal: 10.w,
-        vertical: 8.h,
-      ),
-      decoration: CustomDropdownDecoration(
-        closedBorder: Border.all(
-          color: _getStatusBorderColor(currentStatus, colors),
-          width: 1,
-        ),
-        closedBorderRadius: BorderRadius.circular(8.r),
-        closedFillColor: _getStatusBgColor(currentStatus, colors),
-        expandedBorderRadius: BorderRadius.circular(8.r),
-        expandedFillColor: colors.surface,
-        expandedBorder: Border.all(color: colors.border, width: 1),
-        closedSuffixIcon: Icon(
-          Icons.keyboard_arrow_down,
-          size: 16.sp,
-          color: _getStatusTextColor(currentStatus, colors),
-        ),
-        expandedSuffixIcon: Icon(
-          Icons.keyboard_arrow_up,
-          size: 16.sp,
-          color: colors.primary,
-        ),
-      ),
+      }).toList(),
     );
-  }
-
-  // ── Color helpers ──────────────────────────────────────────────────────────
-  Color _getStatusBgColor(String status, AppColorSet colors) {
-    switch (status) {
-      case 'hadir':
-      case 'hadir_manual':
-        return colors.primary.withValues(alpha: 0.1);
-      case 'hadir_barcode':
-        return colors.primary.withValues(alpha: 0.1);
-      case 'terlambat':
-        return const Color(0xFFF3722C).withValues(alpha: 0.1);
-      case 'sakit':
-        return colors.yellow.withValues(alpha: 0.1);
-      case 'izin':
-        return colors.blue.withValues(alpha: 0.1);
-      case 'alfa':
-        return colors.red.withValues(alpha: 0.1);
-      default:
-        return colors.border.withValues(alpha: 0.2);
-    }
-  }
-
-  Color _getStatusBorderColor(String status, AppColorSet colors) {
-    switch (status) {
-      case 'hadir':
-      case 'hadir_manual':
-        return colors.primary.withValues(alpha: 0.3);
-      case 'hadir_barcode':
-        return colors.primary.withValues(alpha: 0.3);
-      case 'terlambat':
-        return const Color(0xFFF3722C).withValues(alpha: 0.3);
-      case 'sakit':
-        return colors.yellow.withValues(alpha: 0.3);
-      case 'izin':
-        return colors.blue.withValues(alpha: 0.3);
-      case 'alfa':
-        return colors.red.withValues(alpha: 0.3);
-      default:
-        return colors.border;
-    }
-  }
-
-  Color _getStatusTextColor(String status, AppColorSet colors) {
-    switch (status) {
-      case 'hadir':
-      case 'hadir_manual':
-        return colors.primary;
-      case 'hadir_barcode':
-        return colors.primary;
-      case 'terlambat':
-        return const Color(0xFFF3722C);
-      case 'sakit':
-        return colors.yellow;
-      case 'izin':
-        return colors.blue;
-      case 'alfa':
-        return colors.red;
-      default:
-        return colors.textSecondary;
-    }
   }
 }

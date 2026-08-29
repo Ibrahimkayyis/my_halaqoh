@@ -56,8 +56,19 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             BarcodeScannerRoute(selectedDate: date, selectedSesi: sesi),
           );
         },
+        onAbsensiManual: (date, sesi) => _handleAbsensiManual(date, sesi),
         onTandaiSemuaHadir: (date, sesi) =>
             _handleTandaiSemuaHadir(mySantriList, date, sesi),
+      ),
+    );
+  }
+
+  void _handleAbsensiManual(DateTime date, String sesi) {
+    context.router.push(
+      DetailAbsensiHariIniRoute(
+        scannedNisList: const [],
+        selectedDate: date,
+        selectedSesi: sesi,
       ),
     );
   }

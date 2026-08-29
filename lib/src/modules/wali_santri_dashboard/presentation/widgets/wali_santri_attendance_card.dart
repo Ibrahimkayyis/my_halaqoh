@@ -26,7 +26,7 @@ class WaliSantriAttendanceCard extends StatelessWidget {
     int month,
     int year,
   ) {
-    int hadirBarcode = 0, hadirManual = 0, terlambat = 0, sakit = 0, izin = 0, alfa = 0;
+    int hadir = 0, sakit = 0, izin = 0, alfa = 0;
 
     for (final record in allRecords) {
       if (record.tanggal.month != month || record.tanggal.year != year) {
@@ -38,14 +38,7 @@ class WaliSantriAttendanceCard extends StatelessWidget {
 
       switch (entry.first.status) {
         case 'hadir':
-        case 'hadir_barcode':
-          hadirBarcode++;
-          break;
-        case 'hadir_manual':
-          hadirManual++;
-          break;
-        case 'terlambat':
-          terlambat++;
+          hadir++;
           break;
         case 'sakit':
           sakit++;
@@ -60,9 +53,7 @@ class WaliSantriAttendanceCard extends StatelessWidget {
     }
 
     return {
-      'hadir_barcode': hadirBarcode,
-      'hadir_manual': hadirManual,
-      'terlambat': terlambat,
+      'hadir': hadir,
       'sakit': sakit,
       'izin': izin,
       'alfa': alfa,
@@ -84,14 +75,10 @@ class WaliSantriAttendanceCard extends StatelessWidget {
     final periodName = DateFormat.yMMMM(t.$meta.locale.languageCode).format(now);
 
     // ── Statistical Calculations ──────────────────────────────────────────────
-    final int hadirBarcode = stats['hadir_barcode'] ?? 0;
-    final int hadirManual = stats['hadir_manual'] ?? 0;
-    final int terlambat = stats['terlambat'] ?? 0;
+    final int totalHadir = stats['hadir'] ?? 0;
     final int sakit = stats['sakit'] ?? 0;
     final int izin = stats['izin'] ?? 0;
     final int alfa = stats['alfa'] ?? 0;
-
-    final int totalHadir = hadirBarcode + hadirManual + terlambat;
     final int totalAbsen = sakit + izin + alfa;
     final int totalRecordedSessions = totalHadir + totalAbsen;
 
@@ -284,41 +271,16 @@ class WaliSantriAttendanceCard extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
 
-          // ── Status Breakdown Grid (2x3 Clean Soft Pills) ───────────────────
+          // ── Status Breakdown Grid (2x2 Clean Soft Pills) ───────────────────
           IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
                   child: _buildStatusChip(
-                    label: t.detailAbsensiHariIni.hadirBarcode,
-                    count: hadirBarcode,
+                    label: t.detailAbsensiHariIni.hadir,
+                    count: totalHadir,
                     accentColor: colors.primary,
-                    colors: colors,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: _buildStatusChip(
-                    label: t.detailAbsensiHariIni.hadirManual,
-                    count: hadirManual,
-                    accentColor: colors.green,
-                    colors: colors,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 8.h),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: _buildStatusChip(
-                    label: t.detailAbsensiHariIni.terlambat,
-                    count: terlambat,
-                    accentColor: const Color(0xFFF3722C),
                     colors: colors,
                   ),
                 ),

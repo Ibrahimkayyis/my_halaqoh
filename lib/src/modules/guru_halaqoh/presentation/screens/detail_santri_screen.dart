@@ -127,15 +127,6 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
       );
     }
 
-    final adminJuzList = target != null && santri != null
-        ? TargetHafalanHelper.getTargetJuzList(
-            target,
-            santri!.kelas,
-            santri!.program,
-          )
-        : <int>[];
-    final totalTargetJuz = <int>{...adminJuzList, ...extraJuz}.length;
-
     // Use real data with fallbacks to route params
     final displayName = santri?.nama ?? name;
     final displayNis = santri?.nis ?? nis;
@@ -315,6 +306,7 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
                           return const ShimmerProgressCard();
                         }
                         return _buildProgressCard(
+                          context: context,
                           colors: colors,
                           textTheme: textTheme,
                           isDark: isDark,
@@ -322,34 +314,13 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
                           target: target,
                           progressData: progressData,
                           extraJuz: extraJuz,
+                          passedCerts: passedCerts,
                         );
                       },
                     ),
                     SizedBox(height: 22.h),
 
-                    // 4. JUZ TERSERTIFIKASI Section Title
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: _buildSectionTitle(
-                        context: context,
-                        title: 'Juz Tersertifikasi',
-                        colors: colors,
-                        textTheme: textTheme,
-                      ),
-                    ),
-                    SizedBox(height: 12.h),
-
-                    _buildSertifikasiSection(
-                      context: context,
-                      colors: colors,
-                      textTheme: textTheme,
-                      isDark: isDark,
-                      totalTargetJuz: totalTargetJuz,
-                      passedCerts: passedCerts,
-                    ),
-                    SizedBox(height: 22.h),
-
-                    // 5. UJIAN SERTIFIKASI Section Title
+                    // 4. UJIAN SERTIFIKASI Section Title
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20.w),
                       child: _buildSectionTitle(
@@ -545,6 +516,7 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
 
   /// Progress Hafalan card driven by admin-set and teacher extra memorization targets.
   Widget _buildProgressCard({
+    required BuildContext context,
     required AppColorSet colors,
     required TextTheme textTheme,
     required bool isDark,
@@ -552,6 +524,7 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
     required TargetHafalanModel? target,
     required OverallHafalanProgress? progressData,
     required List<int> extraJuz,
+    required List<SertifikasiModel> passedCerts,
   }) {
     // ── Admin-defined target juz ──────────────────────────────────────────────
     final adminJuzList = target != null && santri != null
@@ -879,272 +852,77 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
               ],
             ),
           ],
-        ],
-      ),
-    );
-  }
 
-  /// Separate section showing certified juz and summary for this santri
-  Widget _buildSertifikasiSection({
-    required BuildContext context,
-    required AppColorSet colors,
-    required TextTheme textTheme,
-    required bool isDark,
-    required int totalTargetJuz,
-    required List<SertifikasiModel> passedCerts,
-  }) {
-    // Sort certs by juz number
-    final sortedCerts = List<SertifikasiModel>.from(passedCerts)
-      ..sort((a, b) => a.juz.compareTo(b.juz));
-
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20.w),
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: isDark ? colors.border : colors.border.withValues(alpha: 0.7),
-          width: 0.8,
-        ),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header summary row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: colors.success.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Icon(
-                      Icons.verified_rounded,
-                      size: 20.sp,
-                      color: colors.success,
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${passedCerts.length} ',
-                              style: textTheme.headlineSmall?.copyWith(
-                                    fontSize: 20.sp,
-                                    fontWeight: FontWeight.w800,
-                                    color: colors.textPrimary,
-                                  ) ??
-                                  TextStyle(
-                                    fontSize: 20.sp,
-                                    fontWeight: FontWeight.w800,
-                                    color: colors.textPrimary,
-                                    fontFamily: 'Poppins',
-                                  ),
-                            ),
-                            TextSpan(
-                              text: totalTargetJuz > 0
-                                  ? 'dari $totalTargetJuz Juz Target'
-                                  : 'Juz Tersertifikasi',
-                              style: textTheme.bodySmall?.copyWith(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: colors.textSecondary,
-                                  ) ??
-                                  TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: colors.textSecondary,
-                                    fontFamily: 'Poppins',
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        'Ujian 1 Juz Lengkap',
-                        style: textTheme.labelSmall?.copyWith(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w500,
-                              color: colors.textSecondary,
-                            ) ??
-                            TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w500,
-                              color: colors.textSecondary,
-                              fontFamily: 'Poppins',
-                            ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              if (passedCerts.isNotEmpty)
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 9.w,
-                    vertical: 4.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.success.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: colors.success.withValues(alpha: 0.3),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Text(
-                    'Tersertifikasi',
-                    style: textTheme.labelSmall?.copyWith(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w700,
-                          color: colors.success,
-                        ) ??
-                        TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w700,
-                          color: colors.success,
-                          fontFamily: 'Poppins',
-                        ),
-                  ),
-                ),
-            ],
-          ),
+          // ── BLOCK 3: JUZ TERSERTIFIKASI ──
           SizedBox(height: 14.h),
           Divider(
             color: colors.border.withValues(alpha: 0.5),
             height: 1,
           ),
-          SizedBox(height: 12.h),
-
-          // List of certified juz or empty state
+          SizedBox(height: 14.h),
+          Text(
+            'Juz Tersertifikasi',
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+              color: colors.textPrimary,
+              fontFamily: 'Poppins',
+              letterSpacing: 0.3,
+            ),
+          ),
+          SizedBox(height: 10.h),
           if (passedCerts.isEmpty)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 6.h),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    size: 16.sp,
-                    color: colors.textSecondary.withValues(alpha: 0.7),
-                  ),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: Text(
-                      'Belum ada juz yang lulus sertifikasi.',
-                      style: textTheme.bodySmall?.copyWith(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w400,
-                            color: colors.textSecondary,
-                          ) ??
-                          TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w400,
-                            color: colors.textSecondary,
-                            fontFamily: 'Poppins',
-                          ),
-                    ),
-                  ),
-                ],
+            Text(
+              'Belum ada juz yang tersertifikasi',
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+                color: colors.textSecondary,
+                fontFamily: 'Poppins',
               ),
             )
           else ...[
-            Text(
-              'Daftar Juz yang Telah Lulus Ujian:',
-              style: textTheme.labelMedium?.copyWith(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: colors.textPrimary,
-                  ) ??
-                  TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: colors.textPrimary,
-                    fontFamily: 'Poppins',
-                  ),
-            ),
-            SizedBox(height: 10.h),
-            Wrap(
-              spacing: 8.w,
-              runSpacing: 8.h,
-              children: sortedCerts.map((cert) {
-                return InkWell(
-                  onTap: () => DetailSertifikasiSheet.show(context, cert),
-                  borderRadius: BorderRadius.circular(8.r),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colors.success.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(
-                        color: colors.success.withValues(alpha: 0.35),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.verified_rounded,
-                          size: 14.sp,
-                          color: colors.success,
-                        ),
-                        SizedBox(width: 6.w),
-                        Text(
-                          'Juz ${cert.juz}',
-                          style: TextStyle(
-                            fontSize: 12.5.sp,
-                            fontWeight: FontWeight.w700,
-                            color: colors.success,
-                            fontFamily: 'Poppins',
+            Builder(
+              builder: (context) {
+                final sortedCerts = List<SertifikasiModel>.from(passedCerts)
+                  ..sort((a, b) => a.juz.compareTo(b.juz));
+                return Wrap(
+                  spacing: 8.w,
+                  runSpacing: 8.h,
+                  children: sortedCerts.map((cert) {
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => DetailSertifikasiSheet.show(context, cert),
+                        borderRadius: BorderRadius.circular(8.r),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 6.h,
                           ),
-                        ),
-                        if (cert.predikat != null &&
-                            cert.predikat!.isNotEmpty) ...[
-                          SizedBox(width: 4.w),
-                          Text(
-                            '· ${cert.predikat}',
+                          decoration: BoxDecoration(
+                            color: colors.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(
+                              color: colors.primary.withValues(alpha: 0.25),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Text(
+                            'Juz ${cert.juz}',
                             style: TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w500,
-                              color: colors.success,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: colors.primary,
                               fontFamily: 'Poppins',
                             ),
                           ),
-                        ],
-                        SizedBox(width: 4.w),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          size: 14.sp,
-                          color: colors.success.withValues(alpha: 0.7),
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  }).toList(),
                 );
-              }).toList(),
+              },
             ),
           ],
         ],

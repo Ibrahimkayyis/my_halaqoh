@@ -1314,15 +1314,6 @@ class TranslationsDetailAbsensiHariIniEn {
 	/// en: 'Present'
 	String get hadir => 'Present';
 
-	/// en: 'Present (Barcode Scan)'
-	String get hadirBarcode => 'Present (Barcode Scan)';
-
-	/// en: 'Present (No Card)'
-	String get hadirManual => 'Present (No Card)';
-
-	/// en: 'Present (Late)'
-	String get terlambat => 'Present (Late)';
-
 	/// en: 'Sick'
 	String get sakit => 'Sick';
 
@@ -1340,6 +1331,9 @@ class TranslationsDetailAbsensiHariIniEn {
 
 	/// en: 'Student Attendance List'
 	String get daftarKehadiranSantri => 'Student Attendance List';
+
+	/// en: 'All Present'
+	String get hadirSemua => 'All Present';
 
 	/// en: 'Attendance successfully saved!'
 	String get saveSuccess => 'Attendance successfully saved!';
@@ -2748,6 +2742,9 @@ class TranslationsAbsensiMulaiAbsensiEn {
 	/// en: 'Maghrib'
 	String get maghrib => 'Maghrib';
 
+	/// en: 'Manual Attendance'
+	String get manualAttendance => 'Manual Attendance';
+
 	/// en: 'Mark All Present'
 	String get markAllPresent => 'Mark All Present';
 }
@@ -3299,6 +3296,7 @@ extension on Translations {
 			case 'absensi.mulaiAbsensi.siang': return 'Noon';
 			case 'absensi.mulaiAbsensi.soreAshar': return 'Afternoon/Ashar';
 			case 'absensi.mulaiAbsensi.maghrib': return 'Maghrib';
+			case 'absensi.mulaiAbsensi.manualAttendance': return 'Manual Attendance';
 			case 'absensi.mulaiAbsensi.markAllPresent': return 'Mark All Present';
 			case 'riwayatAbsensi.title': return 'Attendance History';
 			case 'riwayatAbsensi.ringkasanKehadiran': return 'Attendance Summary';
@@ -3376,15 +3374,13 @@ extension on Translations {
 			case 'absensiHalaqoh.swipeHint': return 'Swipe date row left/right to view daily data';
 			case 'detailAbsensiHariIni.title': return 'Today\'s Attendance Detail';
 			case 'detailAbsensiHariIni.hadir': return 'Present';
-			case 'detailAbsensiHariIni.hadirBarcode': return 'Present (Barcode Scan)';
-			case 'detailAbsensiHariIni.hadirManual': return 'Present (No Card)';
-			case 'detailAbsensiHariIni.terlambat': return 'Present (Late)';
 			case 'detailAbsensiHariIni.sakit': return 'Sick';
 			case 'detailAbsensiHariIni.izin': return 'Excused';
 			case 'detailAbsensiHariIni.alfa': return 'Absent';
 			case 'detailAbsensiHariIni.belumAbsen': return 'Not Yet';
 			case 'detailAbsensiHariIni.belumDiabsen': return 'Not Recorded';
 			case 'detailAbsensiHariIni.daftarKehadiranSantri': return 'Student Attendance List';
+			case 'detailAbsensiHariIni.hadirSemua': return 'All Present';
 			case 'detailAbsensiHariIni.saveSuccess': return 'Attendance successfully saved!';
 			case 'detailAbsensiHariIni.saveFailed': return 'Failed to save attendance';
 			case 'detailAbsensiHariIni.warningBelumTitle': return 'Some Students Not Recorded';

@@ -322,6 +322,7 @@
       "siang": "Siang",
       "soreAshar": "Sore/Ashar",
       "maghrib": "Maghrib",
+      "manualAttendance": "Absensi Manual",
       "markAllPresent": "Tandai Semua Hadir"
     }
   },
@@ -398,15 +399,13 @@
   "detailAbsensiHariIni": {
     "title": "Detail Absensi Hari Ini",
     "hadir": "Hadir",
-    "hadirBarcode": "Hadir (Scan Barcode)",
-    "hadirManual": "Hadir (Tanpa Kartu)",
-    "terlambat": "Hadir (Terlambat)",
     "sakit": "Sakit",
     "izin": "Izin",
     "alfa": "Alfa",
     "belumAbsen": "Belum Absen",
     "belumDiabsen": "Belum absen",
     "daftarKehadiranSantri": "Daftar Kehadiran Santri",
+    "hadirSemua": "Hadir Semua",
     "saveSuccess": "Absensi berhasil disimpan!",
     "saveFailed": "Gagal menyimpan absensi",
     "warningBelumTitle": "Ada Santri Belum Diabsen",

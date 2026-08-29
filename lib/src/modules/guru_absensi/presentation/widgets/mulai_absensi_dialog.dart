@@ -10,11 +10,13 @@ import 'package:my_halaqoh/src/core/widget/widgets.dart';
 class MulaiAbsensiDialog extends StatefulWidget {
   final String programType;
   final void Function(DateTime date, String sesi) onScanBarcode;
+  final void Function(DateTime date, String sesi)? onAbsensiManual;
   final void Function(DateTime date, String sesi)? onTandaiSemuaHadir;
 
   const MulaiAbsensiDialog({
     super.key,
     required this.onScanBarcode,
+    this.onAbsensiManual,
     this.onTandaiSemuaHadir,
     this.programType = 'reguler',
   });
@@ -161,6 +163,22 @@ class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
                 },
                 icon: Icons.qr_code_scanner,
                 label: t.absensi.scanBarcode,
+              ),
+              SizedBox(height: 10.h),
+
+              // ── Absensi Manual button ──
+              CustomOutlinedButton(
+                width: double.infinity,
+                height: 48.h,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  widget.onAbsensiManual?.call(
+                    _selectedDate,
+                    _selectedSesi,
+                  );
+                },
+                icon: Icons.edit_note_rounded,
+                label: t.absensi.mulaiAbsensi.manualAttendance,
               ),
               SizedBox(height: 10.h),
 

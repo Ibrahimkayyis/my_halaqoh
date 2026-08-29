@@ -196,21 +196,7 @@ class _AttendanceLegendCardState extends State<AttendanceLegendCard> {
                           _buildListRow(
                             color: colors.primary,
                             code: 'H',
-                            label: t.detailAbsensiHariIni.hadirBarcode,
-                            colors: colors,
-                          ),
-                          SizedBox(height: 6.h),
-                          _buildListRow(
-                            color: colors.green,
-                            code: 'HT',
-                            label: t.detailAbsensiHariIni.hadirManual,
-                            colors: colors,
-                          ),
-                          SizedBox(height: 6.h),
-                          _buildListRow(
-                            color: const Color(0xFFF3722C),
-                            code: 'T',
-                            label: t.detailAbsensiHariIni.terlambat,
+                            label: t.detailAbsensiHariIni.hadir,
                             colors: colors,
                           ),
                           SizedBox(height: 6.h),
@@ -323,16 +309,12 @@ class _AttendanceLegendCardState extends State<AttendanceLegendCard> {
     );
   }
 
-  /// Compact 6-dot preview shown when the card is collapsed.
+  /// Compact 4-dot preview shown when the card is collapsed.
   Widget _buildMiniPreviewDots(AppColorSet colors) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildDot(colors.primary),
-        SizedBox(width: 4.w),
-        _buildDot(colors.green),
-        SizedBox(width: 4.w),
-        _buildDot(const Color(0xFFF3722C)),
         SizedBox(width: 4.w),
         _buildDot(colors.yellow),
         SizedBox(width: 4.w),

@@ -104,11 +104,7 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
 
       // Count 'hadir' in this session
       attendedCount = latestSession.records
-          .where((r) =>
-              r.status == 'hadir' ||
-              r.status == 'hadir_barcode' ||
-              r.status == 'hadir_manual' ||
-              r.status == 'terlambat')
+          .where((r) => r.status == 'hadir')
           .length;
 
       final sessionTotal = latestSession.records.length;
