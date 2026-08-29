@@ -322,6 +322,7 @@
       "siang": "Noon",
       "soreAshar": "Afternoon/Ashar",
       "maghrib": "Maghrib",
+      "manualAttendance": "Manual Attendance",
       "markAllPresent": "Mark All Present"
     }
   },
@@ -398,15 +399,13 @@
   "detailAbsensiHariIni": {
     "title": "Today's Attendance Detail",
     "hadir": "Present",
-    "hadirBarcode": "Present (Barcode Scan)",
-    "hadirManual": "Present (No Card)",
-    "terlambat": "Present (Late)",
     "sakit": "Sick",
     "izin": "Excused",
     "alfa": "Absent",
     "belumAbsen": "Not Yet",
     "belumDiabsen": "Not Recorded",
     "daftarKehadiranSantri": "Student Attendance List",
+    "hadirSemua": "All Present",
     "saveSuccess": "Attendance successfully saved!",
     "saveFailed": "Failed to save attendance",
     "warningBelumTitle": "Some Students Not Recorded",

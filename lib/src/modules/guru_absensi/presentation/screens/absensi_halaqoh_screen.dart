@@ -100,12 +100,7 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
   String _statusToCode(String status) {
     switch (status) {
       case 'hadir':
-      case 'hadir_barcode':
         return 'H';
-      case 'hadir_manual':
-        return 'HT';
-      case 'terlambat':
-        return 'T';
       case 'sakit':
         return 'S';
       case 'izin':
@@ -412,12 +407,6 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
       case 'H':
         dotColor = colors.primary;
         break;
-      case 'HT':
-        dotColor = colors.green;
-        break;
-      case 'T':
-        dotColor = const Color(0xFFF3722C);
-        break;
       case 'S':
         dotColor = colors.yellow;
         break;
@@ -529,17 +518,15 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _legendDot(colors.primary, t.detailAbsensiHariIni.hadirBarcode, colors),
-                                  SizedBox(height: 12.h),
-                                  _legendDot(colors.green, t.detailAbsensiHariIni.hadirManual, colors),
-                                  SizedBox(height: 12.h),
-                                  _legendDot(const Color(0xFFF3722C), t.detailAbsensiHariIni.terlambat, colors),
+                                  _legendDot(colors.primary, t.detailAbsensiHariIni.hadir, colors),
                                   SizedBox(height: 12.h),
                                   _legendDot(colors.yellow, t.absensiHalaqoh.sakit, colors),
                                   SizedBox(height: 12.h),
                                   _legendDot(colors.blue, t.absensiHalaqoh.izin, colors),
                                   SizedBox(height: 12.h),
                                   _legendDot(colors.red, t.absensiHalaqoh.alfa, colors),
+                                  SizedBox(height: 12.h),
+                                  _legendDot(colors.border, t.detailAbsensiHariIni.belumAbsen, colors),
                                 ],
                               ),
                             ],

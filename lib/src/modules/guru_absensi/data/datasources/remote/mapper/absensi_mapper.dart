@@ -6,6 +6,22 @@ import '../../../../domain/models/absensi_record_entry.dart';
 class AbsensiMapper {
   const AbsensiMapper._();
 
+  /// Normalizes legacy status values to the current simplified set.
+  ///
+  /// Historical Firestore documents may contain 'hadir_barcode', 'hadir_manual',
+  /// or 'terlambat' which are all treated as 'hadir' after the attendance
+  /// status refactor. This ensures backward compatibility without DB migration.
+  static String _normalizeStatus(String raw) {
+    switch (raw) {
+      case 'hadir_barcode':
+      case 'hadir_manual':
+      case 'terlambat':
+        return 'hadir';
+      default:
+        return raw;
+    }
+  }
+
   static AbsensiModel fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
@@ -17,7 +33,7 @@ class AbsensiMapper {
         santriId: map['santriId'] as String,
         nis: map['nis'] as String,
         nama: map['nama'] as String,
-        status: map['status'] as String,
+        status: _normalizeStatus(map['status'] as String),
       );
     }).toList();
 

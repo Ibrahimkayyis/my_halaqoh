@@ -131,12 +131,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
   String _statusToCode(String status) {
     switch (status) {
       case 'hadir':
-      case 'hadir_barcode':
         return 'H';
-      case 'hadir_manual':
-        return 'HT';
-      case 'terlambat':
-        return 'T';
       case 'sakit':
         return 'S';
       case 'izin':
@@ -149,23 +144,12 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
   }
 
   Map<String, int> _computeStats(Map<int, Map<String, String>> attendanceData) {
-    int hadirBarcode = 0,
-        hadirManual = 0,
-        terlambat = 0,
-        sakit = 0,
-        izin = 0,
-        alfa = 0;
+    int hadir = 0, sakit = 0, izin = 0, alfa = 0;
     for (final data in attendanceData.values) {
       for (final status in data.values) {
         switch (status) {
           case 'H':
-            hadirBarcode++;
-            break;
-          case 'HT':
-            hadirManual++;
-            break;
-          case 'T':
-            terlambat++;
+            hadir++;
             break;
           case 'S':
             sakit++;
@@ -180,9 +164,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
       }
     }
     return {
-      'hadir_barcode': hadirBarcode,
-      'hadir_manual': hadirManual,
-      'terlambat': terlambat,
+      'hadir': hadir,
       'sakit': sakit,
       'izin': izin,
       'alfa': alfa,
@@ -542,10 +524,6 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
       case 'H':
         bgColor = colors.primary;
         label = 'H';
-        break;
-      case 'T':
-        bgColor = const Color(0xFFF3722C);
-        label = 'T';
         break;
       case 'S':
         bgColor = colors.yellow;

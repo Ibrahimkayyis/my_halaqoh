@@ -17,9 +17,7 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 ///    counter values (without badge/box wrappers).
 class AttendanceSummaryCard extends StatefulWidget {
   /// Attendance counts map containing keys:
-  /// - 'hadir_barcode'
-  /// - 'hadir_manual'
-  /// - 'terlambat'
+  /// - 'hadir'
   /// - 'sakit'
   /// - 'izin'
   /// - 'alfa'
@@ -55,10 +53,7 @@ class _AttendanceSummaryCardState extends State<AttendanceSummaryCard> {
     _isExpanded = widget.initiallyExpanded;
   }
 
-  int get _hadirTotal =>
-      (widget.stats['hadir_barcode'] ?? 0) +
-      (widget.stats['hadir_manual'] ?? 0) +
-      (widget.stats['terlambat'] ?? 0);
+  int get _hadirTotal => widget.stats['hadir'] ?? 0;
 
   int get _izinCount => widget.stats['izin'] ?? 0;
   int get _sakitCount => widget.stats['sakit'] ?? 0;
@@ -207,28 +202,12 @@ class _AttendanceSummaryCardState extends State<AttendanceSummaryCard> {
                           ),
                           SizedBox(height: 8.h),
 
-                          // Clean List of 6 Metric Rows with Abbreviation Code Badges
+                          // Clean List of 4 Metric Rows with Abbreviation Code Badges
                           _buildCleanRow(
                             color: colors.primary,
                             code: 'H',
-                            label: t.detailAbsensiHariIni.hadirBarcode,
-                            count: widget.stats['hadir_barcode'] ?? 0,
-                            colors: colors,
-                          ),
-                          _buildRowDivider(colors),
-                          _buildCleanRow(
-                            color: colors.green,
-                            code: 'HT',
-                            label: t.detailAbsensiHariIni.hadirManual,
-                            count: widget.stats['hadir_manual'] ?? 0,
-                            colors: colors,
-                          ),
-                          _buildRowDivider(colors),
-                          _buildCleanRow(
-                            color: const Color(0xFFF3722C),
-                            code: 'T',
-                            label: t.detailAbsensiHariIni.terlambat,
-                            count: widget.stats['terlambat'] ?? 0,
+                            label: t.detailAbsensiHariIni.hadir,
+                            count: widget.stats['hadir'] ?? 0,
                             colors: colors,
                           ),
                           _buildRowDivider(colors),

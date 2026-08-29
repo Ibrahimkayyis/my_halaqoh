@@ -639,15 +639,13 @@ class _TranslationsDetailAbsensiHariIniId extends TranslationsDetailAbsensiHariI
 	// Translations
 	@override String get title => 'Detail Absensi Hari Ini';
 	@override String get hadir => 'Hadir';
-	@override String get hadirBarcode => 'Hadir (Scan Barcode)';
-	@override String get hadirManual => 'Hadir (Tanpa Kartu)';
-	@override String get terlambat => 'Hadir (Terlambat)';
 	@override String get sakit => 'Sakit';
 	@override String get izin => 'Izin';
 	@override String get alfa => 'Alfa';
 	@override String get belumAbsen => 'Belum Absen';
 	@override String get belumDiabsen => 'Belum absen';
 	@override String get daftarKehadiranSantri => 'Daftar Kehadiran Santri';
+	@override String get hadirSemua => 'Hadir Semua';
 	@override String get saveSuccess => 'Absensi berhasil disimpan!';
 	@override String get saveFailed => 'Gagal menyimpan absensi';
 	@override String get warningBelumTitle => 'Ada Santri Belum Diabsen';
@@ -1299,6 +1297,7 @@ class _TranslationsAbsensiMulaiAbsensiId extends TranslationsAbsensiMulaiAbsensi
 	@override String get siang => 'Siang';
 	@override String get soreAshar => 'Sore/Ashar';
 	@override String get maghrib => 'Maghrib';
+	@override String get manualAttendance => 'Absensi Manual';
 	@override String get markAllPresent => 'Tandai Semua Hadir';
 }
 
@@ -1696,6 +1695,7 @@ extension on TranslationsId {
 			case 'absensi.mulaiAbsensi.siang': return 'Siang';
 			case 'absensi.mulaiAbsensi.soreAshar': return 'Sore/Ashar';
 			case 'absensi.mulaiAbsensi.maghrib': return 'Maghrib';
+			case 'absensi.mulaiAbsensi.manualAttendance': return 'Absensi Manual';
 			case 'absensi.mulaiAbsensi.markAllPresent': return 'Tandai Semua Hadir';
 			case 'riwayatAbsensi.title': return 'Riwayat Absensi';
 			case 'riwayatAbsensi.ringkasanKehadiran': return 'Ringkasan Kehadiran';
@@ -1773,15 +1773,13 @@ extension on TranslationsId {
 			case 'absensiHalaqoh.swipeHint': return 'Geser baris tanggal ke kiri/kanan untuk melihat data per hari';
 			case 'detailAbsensiHariIni.title': return 'Detail Absensi Hari Ini';
 			case 'detailAbsensiHariIni.hadir': return 'Hadir';
-			case 'detailAbsensiHariIni.hadirBarcode': return 'Hadir (Scan Barcode)';
-			case 'detailAbsensiHariIni.hadirManual': return 'Hadir (Tanpa Kartu)';
-			case 'detailAbsensiHariIni.terlambat': return 'Hadir (Terlambat)';
 			case 'detailAbsensiHariIni.sakit': return 'Sakit';
 			case 'detailAbsensiHariIni.izin': return 'Izin';
 			case 'detailAbsensiHariIni.alfa': return 'Alfa';
 			case 'detailAbsensiHariIni.belumAbsen': return 'Belum Absen';
 			case 'detailAbsensiHariIni.belumDiabsen': return 'Belum absen';
 			case 'detailAbsensiHariIni.daftarKehadiranSantri': return 'Daftar Kehadiran Santri';
+			case 'detailAbsensiHariIni.hadirSemua': return 'Hadir Semua';
 			case 'detailAbsensiHariIni.saveSuccess': return 'Absensi berhasil disimpan!';
 			case 'detailAbsensiHariIni.saveFailed': return 'Gagal menyimpan absensi';
 			case 'detailAbsensiHariIni.warningBelumTitle': return 'Ada Santri Belum Diabsen';

@@ -73,9 +73,8 @@ class AbsensiPdfBuilder {
       case 'hadir':
       case 'hadir_barcode':
       case 'hadir_manual':
-        return t.laporanConfig.pdf.presentCode;
       case 'terlambat':
-        return 'T';
+        return t.laporanConfig.pdf.presentCode;
       case 'sakit':
         return t.laporanConfig.pdf.sickCode;
       case 'izin':
