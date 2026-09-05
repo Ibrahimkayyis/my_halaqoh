@@ -12,6 +12,7 @@ import { sendHafalanNotification } from "./sendHafalanNotification";
 import { sendSertifikasiNotification } from "./sendSertifikasiNotification";
 import { resetUserPassword } from "./resetUserPassword";
 import { bulkCreateUserAccounts } from "./bulkCreateUserAccounts";
+import { deleteOwnAccount } from "./deleteOwnAccount";
 
 // Initialize the Firebase Admin SDK only once.
 // The guard prevents "default Firebase app already exists" errors when the
@@ -36,4 +37,6 @@ export {
     sendSertifikasiNotification,
     resetUserPassword,
     bulkCreateUserAccounts,
+    deleteOwnAccount,
 };
+

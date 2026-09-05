@@ -553,7 +553,11 @@
     "ubahPassword": "Ubah Password",
     "pengaturan": "Pengaturan",
     "tentangAplikasi": "Tentang Aplikasi",
+    "kebijakanPrivasi": "Kebijakan Privasi",
     "keluar": "Keluar",
+    "hapusAkun": "Hapus Akun",
+    "deleteAccountSuccess": "Akun Anda berhasil dihapus.",
+    "deleteAccountFailed": "Gagal menghapus akun: $error",
     "guruHalaqoh": "Guru Halaqoh",
     "appVersion": "MyHalaqoh App v$version",
     "loading": "Memuat...",
@@ -672,7 +676,11 @@
     "simpan": "Simpan",
     "logoutTitle": "Keluar Akun?",
     "logoutMessage": "Apakah Anda yakin ingin keluar dari akun ini? Anda harus masuk kembali untuk menggunakan aplikasi.",
-    "keluar": "Keluar"
+    "keluar": "Keluar",
+    "deleteAccountTitle": "Hapus Akun Anda?",
+    "deleteAccountMessage": "Tindakan ini akan menghapus akun login dan profil Anda secara permanen dari server. Anda tidak akan dapat masuk kembali ke aplikasi MyHalaqoh.\n\nApakah Anda yakin ingin menghapus akun?",
+    "deleteAccountWarning": "Aksi ini permanen dan tidak dapat dibatalkan.",
+    "deleteAccountConfirm": "Hapus Akun"
   },
   "masterDataSettings": {
     "title": "Pengaturan",
@@ -705,11 +713,13 @@
     "infoPlatform": "Platform",
     "infoLembaga": "Lembaga",
     "infoPlatformValue": "Android",
+    "kebijakanPrivasi": "Kebijakan Privasi",
+    "bukaKebijakanPrivasi": "Baca Kebijakan Privasi",
     "sectionKontak": "Kontak & Dukungan",
     "kontakDeskripsi": "Jika Anda memerlukan bantuan teknis atau memiliki pertanyaan seputar aplikasi, silakan hubungi administrator melalui WhatsApp.",
     "kontakButton": "Hubungi Admin via WhatsApp",
     "footer": "Dibuat dengan ❤️ untuk kemajuan pendidikan pesantren",
-    "copyright": "© 2026 MyHalaqoh. All rights reserved."
+    "copyright": "© 2026 MyHalaqoh. Seluruh hak cipta dilindungi undang-undang."
   },
   "general": {
     "warning": "Peringatan",

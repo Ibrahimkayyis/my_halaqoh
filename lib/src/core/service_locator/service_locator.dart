@@ -200,7 +200,12 @@ Future<void> initDependencies() async {
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(sl(), sl(), sl<ActivityLogService>()),
+    () => AuthRemoteDataSourceImpl(
+      sl(),
+      sl(),
+      sl<ActivityLogService>(),
+      sl<FirebaseFunctions>(),
+    ),
   );
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(sl()),

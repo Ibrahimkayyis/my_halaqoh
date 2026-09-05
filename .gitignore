@@ -50,6 +50,15 @@ android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 lib/firebase_options.dart
 
+# Keystore & Android Release Signing Keys
+*.jks
+*.keystore
+android/key.properties
+**/key.properties
+
+# Firebase CLI cache
+.firebase/
+
 # ============================================================
 # Files Generated / Temporary
 # ============================================================

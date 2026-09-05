@@ -551,7 +551,11 @@
     "ubahPassword": "Change Password",
     "pengaturan": "Settings",
     "tentangAplikasi": "About App",
+    "kebijakanPrivasi": "Privacy Policy",
     "keluar": "Logout",
+    "hapusAkun": "Delete Account",
+    "deleteAccountSuccess": "Your account has been successfully deleted.",
+    "deleteAccountFailed": "Failed to delete account: $error",
     "guruHalaqoh": "Halaqoh Teacher",
     "appVersion": "MyHalaqoh App v$version",
     "loading": "Loading...",
@@ -670,7 +674,11 @@
     "simpan": "Save",
     "logoutTitle": "Log Out?",
     "logoutMessage": "Are you sure you want to log out from this account? You will need to log in again to use the app.",
-    "keluar": "Log Out"
+    "keluar": "Log Out",
+    "deleteAccountTitle": "Delete Your Account?",
+    "deleteAccountMessage": "This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh.\n\nAre you sure you want to delete your account?",
+    "deleteAccountWarning": "This action is permanent and cannot be undone.",
+    "deleteAccountConfirm": "Delete Account"
   },
   "masterDataSettings": {
     "title": "Settings",
@@ -703,6 +711,8 @@
     "infoPlatform": "Platform",
     "infoLembaga": "Institution",
     "infoPlatformValue": "Android",
+    "kebijakanPrivasi": "Privacy Policy",
+    "bukaKebijakanPrivasi": "Read Privacy Policy",
     "sectionKontak": "Contact & Support",
     "kontakDeskripsi": "If you need technical assistance or have questions about the app, please contact the administrator via WhatsApp.",
     "kontakButton": "Contact Admin via WhatsApp",

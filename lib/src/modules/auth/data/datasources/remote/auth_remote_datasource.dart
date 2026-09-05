@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 import 'package:my_halaqoh/src/modules/auth/domain/models/user_model.dart';
@@ -11,6 +12,9 @@ abstract class AuthRemoteDataSource {
 
   /// Signs the user out of the application.
   Future<void> signOut();
+
+  /// Deletes the currently authenticated user's account permanently.
+  Future<void> deleteOwnAccount();
 
   /// Retrieves the current authenticated user's metadata from Firestore.
   /// Throws if no user is logged in.
@@ -24,12 +28,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
   final ActivityLogService _activityLog;
+  final FirebaseFunctions _functions;
 
   AuthRemoteDataSourceImpl(
     this._firebaseAuth,
     this._firestore,
-    this._activityLog,
-  );
+    this._activityLog, [
+    FirebaseFunctions? functions,
+  ]) : _functions = functions ?? FirebaseFunctions.instance;
 
   @override
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
@@ -115,6 +121,37 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     );
     await _firebaseAuth.signOut();
   }
+
+  @override
+  Future<void> deleteOwnAccount() async {
+    final currentUser = _firebaseAuth.currentUser;
+    if (currentUser == null) {
+      throw Exception('Tidak ada user yang sedang login');
+    }
+
+    final uid = currentUser.uid;
+
+    await _activityLog.log(
+      action: 'delete_account',
+      module: 'auth',
+      description: 'Pengguna meminta penghapusan akun mandiri ($uid)',
+    );
+
+    try {
+      final callable = _functions.httpsCallable('deleteOwnAccount');
+      await callable.call();
+    } on FirebaseFunctionsException catch (e) {
+      throw Exception(e.message ?? 'Gagal menghapus akun: ${e.code}');
+    } catch (e) {
+      throw Exception('Gagal menghapus akun: ${e.toString()}');
+    }
+
+    // Ensure client-side Firebase Auth session is cleanly cleared
+    try {
+      await _firebaseAuth.signOut();
+    } catch (_) {}
+  }
+
 
   @override
   Future<UserModel> getCurrentUserMeta() async {

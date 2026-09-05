@@ -6,11 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/constants/legal_constants.dart';
 import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
+import 'package:my_halaqoh/src/core/widget/dialog/confirm_delete_account_dialog.dart';
 import 'package:my_halaqoh/src/core/widget/dialog/confirm_logout_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
@@ -49,8 +52,40 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
     super.dispose();
   }
 
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    final uri = Uri.parse(LegalConstants.privacyPolicyUrl);
+    try {
+      final launched =
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Gagal membuka tautan Kebijakan Privasi.',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
+            backgroundColor: AppColors.of(context).error,
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Gagal membuka tautan Kebijakan Privasi.',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
+            backgroundColor: AppColors.of(context).error,
+          ),
+        );
+      }
+    }
+  }
+
   /// Show bottom sheet for photo options (Pick new or Delete directly)
   void _showPhotoOptionsSheet(
+
     BuildContext context,
     SantriModel? santri,
     String linkedDocId,
@@ -337,6 +372,11 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
                           label: t.guruProfile.tentangAplikasi,
                           onTap: () => context.router.push(const TentangAplikasiRoute()),
                         ),
+                        _MenuItemData(
+                          icon: Icons.privacy_tip_outlined,
+                          label: t.guruProfile.kebijakanPrivasi,
+                          onTap: () => _openPrivacyPolicy(context),
+                        ),
                       ],
                     ),
                     SizedBox(height: 20.h),
@@ -360,8 +400,95 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
                             }
                           },
                         ),
+                        _MenuItemData(
+                          icon: Icons.delete_forever_rounded,
+                          label: t.guruProfile.hapusAkun,
+                          isDestructive: true,
+                          onTap: () async {
+                            final confirmed =
+                                await ConfirmDeleteAccountDialog.show(context);
+                            if (confirmed && context.mounted) {
+                              final authCubit = context.read<AuthCubit>();
+                              final colors = AppColors.of(context);
+                              final scaffoldMessenger =
+                                  ScaffoldMessenger.of(context);
+
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (ctx) => Center(
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 28.w,
+                                      vertical: 24.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colors.surface,
+                                      borderRadius:
+                                          BorderRadius.circular(16.r),
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        CircularProgressIndicator(
+                                          color: colors.error,
+                                        ),
+                                        SizedBox(height: 16.h),
+                                        Text(
+                                          'Menghapus akun...',
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: colors.textPrimary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+
+                              final error = await authCubit.deleteAccount();
+                              if (context.mounted) {
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
+                                if (error == null) {
+                                  context.router
+                                      .replaceAll([const LoginRoute()]);
+                                  scaffoldMessenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        t.guruProfile.deleteAccountSuccess,
+                                        style: const TextStyle(
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                      backgroundColor: colors.primary,
+                                    ),
+                                  );
+                                } else {
+                                  scaffoldMessenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        t.guruProfile.deleteAccountFailed(
+                                          error: error,
+                                        ),
+                                        style: const TextStyle(
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                      backgroundColor: colors.error,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          },
+                        ),
                       ],
                     ),
+
                     SizedBox(height: 24.h),
 
                     // ── App Version Footer ──
