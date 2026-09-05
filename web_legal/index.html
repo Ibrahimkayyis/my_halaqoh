@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Informasi Resmi & Legal — MyHalaqoh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #115D69;
+            --primary-dark: #0D4A54;
+            --primary-light: #1A7A8A;
+            --bg-page: #F8FAFC;
+            --surface: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --error: #F43F5E;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 56px 24px 44px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(17, 93, 105, 0.15);
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-full);
+            padding: 5px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: -24px auto 40px;
+            padding: 0 20px;
+            flex: 1;
+            width: 100%;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            padding: 28px 24px;
+            box-shadow: 0 4px 16px -2px rgba(17, 93, 105, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px -4px rgba(17, 93, 105, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 18px;
+        }
+
+        .icon-privacy {
+            background: rgba(17, 93, 105, 0.1);
+            color: var(--primary);
+        }
+
+        .icon-delete {
+            background: rgba(244, 63, 94, 0.1);
+            color: var(--error);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 20px;
+            font-size: 13.5px;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e11d48;
+        }
+
+        .support-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            padding: 24px;
+            text-align: center;
+        }
+
+        .support-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .support-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 24px 20px;
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <span class="header-badge">Pondok Pesantren Hidayatullah Surabaya</span>
+        <h1>Portal Legal MyHalaqoh</h1>
+        <p>Pusat Informasi Kebijakan, Privasi Pengguna, dan Layanan Akun Resmi</p>
+    </header>
+
+    <main class="container">
+        <div class="grid">
+            <!-- Card Kebijakan Privasi -->
+            <div class="card">
+                <div>
+                    <div class="card-icon icon-privacy">🔒</div>
+                    <h2>Kebijakan Privasi</h2>
+                    <p>
+                        Pelajari bagaimana data santri, kehadiran, hafalan Al-Qur'an, dan informasi akun Anda dikumpulkan, dilindungi, dan dikelola secara aman.
+                    </p>
+                </div>
+                <a href="privacy_policy.html" class="btn btn-primary">Baca Kebijakan Privasi &rarr;</a>
+            </div>
+
+            <!-- Card Hapus Akun -->
+            <div class="card">
+                <div>
+                    <div class="card-icon icon-delete">🗑️</div>
+                    <h2>Permohonan Hapus Akun</h2>
+                    <p>
+                        Informasi panduan penghapusan akun mandiri secara instan via aplikasi atau melalui formulir web verifikasi admin pondok.
+                    </p>
+                </div>
+                <a href="account_deletion.html" class="btn btn-danger">Buka Formulir Hapus Akun &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Bantuan -->
+        <div class="support-card">
+            <h3>Butuh Bantuan Administrasi?</h3>
+            <p>Hubungi Administrator Pondok Pesantren Hidayatullah Luqman Al-Hakim Surabaya melalui WhatsApp resmi: <strong>+62 858-5013-2215</strong></p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 MyHalaqoh. Seluruh hak cipta dilindungi undang-undang.</p>
+    </footer>
+
+</body>
+</html>

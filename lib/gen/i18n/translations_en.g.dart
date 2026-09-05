@@ -1784,8 +1784,20 @@ class TranslationsGuruProfileEn {
 	/// en: 'About App'
 	String get tentangAplikasi => 'About App';
 
+	/// en: 'Privacy Policy'
+	String get kebijakanPrivasi => 'Privacy Policy';
+
 	/// en: 'Logout'
 	String get keluar => 'Logout';
+
+	/// en: 'Delete Account'
+	String get hapusAkun => 'Delete Account';
+
+	/// en: 'Your account has been successfully deleted.'
+	String get deleteAccountSuccess => 'Your account has been successfully deleted.';
+
+	/// en: 'Failed to delete account: $error'
+	String deleteAccountFailed({required Object error}) => 'Failed to delete account: ${error}';
 
 	/// en: 'Halaqoh Teacher'
 	String get guruHalaqoh => 'Halaqoh Teacher';
@@ -2167,6 +2179,15 @@ class TranslationsDialogsEn {
 
 	/// en: 'Log Out'
 	String get keluar => 'Log Out';
+
+	/// en: 'Delete Your Account?'
+	String get deleteAccountTitle => 'Delete Your Account?';
+
+	/// en: 'This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh. Are you sure you want to delete your account?'
+	String get deleteAccountMessage => 'This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh.\n\nAre you sure you want to delete your account?';
+
+	/// en: 'Delete Account'
+	String get deleteAccountConfirm => 'Delete Account';
 }
 
 // Path: masterDataSettings
@@ -2269,6 +2290,12 @@ class TranslationsTentangAplikasiScreenEn {
 
 	/// en: 'Android'
 	String get infoPlatformValue => 'Android';
+
+	/// en: 'Privacy Policy'
+	String get kebijakanPrivasi => 'Privacy Policy';
+
+	/// en: 'Read Privacy Policy'
+	String get bukaKebijakanPrivasi => 'Read Privacy Policy';
 
 	/// en: 'Contact & Support'
 	String get sectionKontak => 'Contact & Support';
@@ -3554,7 +3581,11 @@ extension on Translations {
 			case 'guruProfile.ubahPassword': return 'Change Password';
 			case 'guruProfile.pengaturan': return 'Settings';
 			case 'guruProfile.tentangAplikasi': return 'About App';
+			case 'guruProfile.kebijakanPrivasi': return 'Privacy Policy';
 			case 'guruProfile.keluar': return 'Logout';
+			case 'guruProfile.hapusAkun': return 'Delete Account';
+			case 'guruProfile.deleteAccountSuccess': return 'Your account has been successfully deleted.';
+			case 'guruProfile.deleteAccountFailed': return ({required Object error}) => 'Failed to delete account: ${error}';
 			case 'guruProfile.guruHalaqoh': return 'Halaqoh Teacher';
 			case 'guruProfile.appVersion': return ({required Object version}) => 'MyHalaqoh App v${version}';
 			case 'guruProfile.loading': return 'Loading...';
@@ -3662,6 +3693,9 @@ extension on Translations {
 			case 'dialogs.logoutTitle': return 'Log Out?';
 			case 'dialogs.logoutMessage': return 'Are you sure you want to log out from this account? You will need to log in again to use the app.';
 			case 'dialogs.keluar': return 'Log Out';
+			case 'dialogs.deleteAccountTitle': return 'Delete Your Account?';
+			case 'dialogs.deleteAccountMessage': return 'This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh.\n\nAre you sure you want to delete your account?';
+			case 'dialogs.deleteAccountConfirm': return 'Delete Account';
 			case 'masterDataSettings.title': return 'Settings';
 			case 'masterDataSettings.tentangAplikasi': return 'About App';
 			case 'masterDataSettings.keluar': return 'Log Out';
@@ -3690,6 +3724,8 @@ extension on Translations {
 			case 'tentangAplikasiScreen.infoPlatform': return 'Platform';
 			case 'tentangAplikasiScreen.infoLembaga': return 'Institution';
 			case 'tentangAplikasiScreen.infoPlatformValue': return 'Android';
+			case 'tentangAplikasiScreen.kebijakanPrivasi': return 'Privacy Policy';
+			case 'tentangAplikasiScreen.bukaKebijakanPrivasi': return 'Read Privacy Policy';
 			case 'tentangAplikasiScreen.sectionKontak': return 'Contact & Support';
 			case 'tentangAplikasiScreen.kontakDeskripsi': return 'If you need technical assistance or have questions about the app, please contact the administrator via WhatsApp.';
 			case 'tentangAplikasiScreen.kontakButton': return 'Contact Admin via WhatsApp';

@@ -46,6 +46,24 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<String, void>> deleteOwnAccount() async {
+    try {
+      await _remoteDataSource.deleteOwnAccount();
+      return const Right(null);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        return const Left(
+          'Demi keamanan, silakan keluar dan masuk kembali sebelum menghapus akun.',
+        );
+      }
+      return Left(_mapFirebaseAuthError(e));
+    } catch (e) {
+      return Left(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+
   String _mapFirebaseAuthError(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':

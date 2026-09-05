@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kebijakan Privasi — MyHalaqoh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #115D69;
+            --primary-dark: #0D4A54;
+            --primary-light: #1A7A8A;
+            --primary-bg: rgba(17, 93, 105, 0.06);
+            --bg-page: #F8FAFC;
+            --surface: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --border-light: #F3F4F6;
+            --error: #F43F5E;
+            --success: #10B981;
+            --warning: #FBBF24;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        /* Top Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 48px 24px 40px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(17, 93, 105, 0.15);
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-full);
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .header-meta {
+            margin-top: 16px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 860px;
+            margin: -24px auto 0;
+            padding: 0 20px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            padding: 36px 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px -2px rgba(17, 93, 105, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 22px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 20px 0 10px;
+        }
+
+        p {
+            font-size: 14.5px;
+            color: #374151;
+            margin-bottom: 14px;
+        }
+
+        ul, ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+            color: #374151;
+            font-size: 14.5px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Callout / Highlight box */
+        .callout {
+            background: var(--primary-bg);
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            margin: 20px 0;
+        }
+
+        .callout-warning {
+            background: rgba(244, 63, 94, 0.06);
+            border-left-color: var(--error);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        /* Action Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e11d48;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 48px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .header {
+                padding: 36px 16px 32px;
+            }
+            .header h1 {
+                font-size: 26px;
+            }
+            .card {
+                padding: 24px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <span class="header-badge">Dokumen Resmi</span>
+        <h1>Kebijakan Privasi</h1>
+        <p>Aplikasi Monitoring Halaqoh & Presensi Santri (MyHalaqoh)</p>
+        <div class="header-meta">
+            Pondok Pesantren Hidayatullah Luqman Al-Hakim Surabaya • Terakhir diperbarui: 5 September 2026
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- Ringkasan Singkat -->
+        <div class="card">
+            <h2>1. Pendahuluan</h2>
+            <p>
+                Selamat datang di <strong>MyHalaqoh</strong>. Kami berkomitmen untuk melindungi dan menghormati privasi seluruh pengguna aplikasi, termasuk Tenaga Pengajar (Guru/Ustadz), Wali Santri, dan Santri di lingkungan Pondok Pesantren Hidayatullah Luqman Al-Hakim Surabaya.
+            </p>
+            <p>
+                Kebijakan Privasi ini menjelaskan bagaimana informasi pribadi Anda dikumpulkan, digunakan, disimpan, dan dilindungi saat Anda menggunakan aplikasi mobile MyHalaqoh serta hak-hak yang Anda miliki terkait data pribadi Anda sesuai dengan peraturan perundang-undangan dan ketentuan Google Play Store Policy.
+            </p>
+        </div>
+
+        <!-- Data yang Dikumpulkan -->
+        <div class="card">
+            <h2>2. Data Pribadi yang Kami Kumpulkan</h2>
+            <p>Untuk mendukung kegiatan monitoring tahfidz dan presensi santri, aplikasi mengumpulkan data berikut:</p>
+            <ul>
+                <li><strong>Data Identitas Akun:</strong> Nomor Induk Pegawai (NIP), Nomor Induk Santri (NIS), nama lengkap, peran/role (Admin, Guru, Wali Santri), dan kata sandi yang dienkripsi.</li>
+                <li><strong>Data Akademik & Halaqoh:</strong> Riwayat kehadiran presensi harian santri, setoran hafalan Al-Qur'an (nama surat, rentang ayat, nilai setoran, status muraja'ah/ziyadah), sertifikasi juz, serta nama kelompok halaqoh.</li>
+                <li><strong>Data Kontak & Profil:</strong> Nomor telepon/WhatsApp (untuk layanan koordinasi), dan foto profil (opsional, jika diunggah pengguna).</li>
+                <li><strong>Informasi Perangkat & Token Notifikasi:</strong> Firebase Cloud Messaging (FCM) device token untuk mengirimkan notifikasi penting seperti pemberitahuan presensi dan perkembangan hafalan Al-Qur'an secara real-time ke perangkat Wali Santri.</li>
+            </ul>
+        </div>
+
+        <!-- Tujuan Penggunaan Data -->
+        <div class="card">
+            <h2>3. Tujuan Penggunaan Data</h2>
+            <p>Informasi yang dikumpulkan digunakan semata-mata untuk keperluan operasional pesantren, antara lain:</p>
+            <ol>
+                <li>Memfasilitasi pencatatan kehadiran santri pada sesi halaqoh pagi dan sore hari (termasuk verifikasi barcode scanner).</li>
+                <li>Mendokumentasikan dan memonitor capaian hafalan Al-Qur'an santri secara terukur dan transparan.</li>
+                <li>Menyampaikan laporan berkala dan kartu prestasi santri kepada orang tua/wali santri secara real-time.</li>
+                <li>Mengautentikasi pengguna dan mengamankan hak akses data sesuai peran masing-masing.</li>
+                <li>Membuat laporan rekapitulasi akademik internal pondok pesantren dalam bentuk dokumen cetak/PDF.</li>
+            </ol>
+        </div>
+
+        <!-- Layanan Pihak Ketiga -->
+        <div class="card">
+            <h2>4. Layanan Pihak Ketiga</h2>
+            <p>Aplikasi MyHalaqoh menggunakan infrastruktur cloud terpercaya dari <strong>Google Firebase</strong>:</p>
+            <ul>
+                <li><strong>Firebase Authentication:</strong> Pengelolaan sesi masuk dan verifikasi identitas akun pengguna yang aman.</li>
+                <li><strong>Cloud Firestore:</strong> Penyimpanan database terenkripsi untuk data halaqoh, presensi, dan hafalan.</li>
+                <li><strong>Firebase Cloud Storage:</strong> Penyimpanan berkas foto profil yang diunggah pengguna secara aman.</li>
+                <li><strong>Firebase Cloud Messaging (FCM):</strong> Pengiriman push notification perkembangan santri ke wali santri.</li>
+            </ul>
+            <p>Kami tidak menjual, menyewakan, atau membagikan data pribadi Anda kepada pihak ketiga manapun untuk tujuan periklanan atau komersial.</p>
+        </div>
+
+        <!-- Penghapusan Akun & Retensi Data -->
+        <div class="card">
+            <h2>5. Kebijakan Penghapusan Akun & Retensi Data</h2>
+            <p>
+                Sesuai dengan <strong>Google Play Store Account Deletion Policy</strong>, pengguna memiliki hak penuh untuk meminta penghapusan akun kapan saja.
+            </p>
+
+            <div class="callout">
+                <p><strong>Cara Menghapus Akun:</strong></p>
+                <p style="margin-top: 6px;">
+                    1. <strong>Melalui Aplikasi Mobile:</strong> Buka tab <em>Profil</em> &rarr; gulir ke bagian <em>Sesi</em> &rarr; pilih <em>Hapus Akun</em> &rarr; konfirmasi pada dialog peringatan.<br>
+                    2. <strong>Melalui Formulir Web:</strong> Pengguna juga dapat mengajukan permohonan penghapusan akun secara online melalui tautan berikut:
+                </p>
+                <div style="margin-top: 14px;">
+                    <a href="account_deletion.html" class="btn btn-danger" style="font-size: 13px; padding: 8px 18px;">Buka Formulir Hapus Akun Web</a>
+                </div>
+            </div>
+
+            <h3>Dampak Penghapusan Akun:</h3>
+            <ul>
+                <li><strong>Kredensial Login:</strong> Akun autentikasi Firebase Auth, kata sandi, dan metadata akun pengguna pada koleksi sistem akan dihapus secara permanen dan tidak dapat dipulihkan kembali.</li>
+                <li><strong>Token Notifikasi:</strong> Token FCM perangkat akan dihapus dari server sehingga perangkat tidak akan lagi menerima notifikasi.</li>
+                <li><strong>Pengecualian Arsip Akademik Institusional:</strong> Sesuai dengan kebijakan institusi pendidikan dan pedoman pengecualian resmi Google Play (*Legitimate Institutional Academic Records*), catatan historis presensi dan capaian setoran hafalan santri yang telah tercatat tetap diarsipkan di pangkalan data pondok pesantren demi integritas riwayat belajar santri dan pelaporan pendidikan.</li>
+            </ul>
+        </div>
+
+        <!-- Perlindungan Data Anak -->
+        <div class="card">
+            <h2>6. Perlindungan Privasi Santri (Anak)</h2>
+            <p>
+                Aplikasi MyHalaqoh digunakan di lingkungan pendidikan pesantren. Pembuatan akun santri dan pengelolaan data hafalan dilakukan di bawah pengawasan resmi ustadz/guru dan wali santri. Kami mematuhi seluruh kaidah perlindungan data anak dan tidak menampilkan iklan atau konten pihak ketiga yang tidak pantas di dalam aplikasi.
+            </p>
+        </div>
+
+        <!-- Kontak Pengembang -->
+        <div class="card">
+            <h2>7. Kontak & Dukungan</h2>
+            <p>
+                Apabila Anda memiliki pertanyaan, saran, atau permohonan terkait data pribadi dan Kebijakan Privasi ini, silakan hubungi tim pengelola kami:
+            </p>
+            <ul>
+                <li><strong>Lembaga:</strong> Pondok Pesantren Hidayatullah Luqman Al-Hakim Surabaya</li>
+                <li><strong>WhatsApp Administrator:</strong> +62 858-5013-2215</li>
+                <li><strong>Alamat:</strong> Jl. Kejawan Putih Tambak VI No.1, Mulyorejo, Surabaya, Jawa Timur 60112</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 MyHalaqoh. Seluruh hak cipta dilindungi undang-undang.</p>
+            <p style="margin-top: 4px;">
+                <a href="account_deletion.html">Formulir Permohonan Hapus Akun</a> • 
+                <a href="privacy_policy.html">Kebijakan Privasi</a>
+            </p>
+        </div>
+
+    </main>
+
+</body>
+</html>

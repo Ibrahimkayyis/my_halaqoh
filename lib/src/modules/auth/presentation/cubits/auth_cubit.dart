@@ -97,6 +97,39 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState.unauthenticated());
   }
 
+  /// Permanently deletes the currently authenticated user's account,
+  /// clears server FCM token, cancels notification pipelines, and cleans local caches.
+  /// Returns `null` on success, or an error message string if deletion failed.
+  Future<String?> deleteAccount() async {
+    emit(const AuthState.loading());
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      await sl<NotificationCubit>().clearToken(uid);
+    }
+
+    final result = await _repository.deleteOwnAccount();
+
+    unawaited(sl<NotificationBadgeCubit>().stop());
+    sl<ActivityLogService>().clearCache();
+    try {
+      await Hive.deleteFromDisk();
+    } catch (_) {}
+
+    return result.fold(
+      (failure) {
+        emit(AuthState.error(failure));
+        emit(const AuthState.unauthenticated());
+        return failure;
+      },
+      (_) {
+        emit(const AuthState.unauthenticated());
+        return null;
+      },
+    );
+  }
+
+
   /// Resets the Cubit back to [AuthState.initial].
   ///
   /// Called by [LoginScreen] immediately after displaying an error snackbar

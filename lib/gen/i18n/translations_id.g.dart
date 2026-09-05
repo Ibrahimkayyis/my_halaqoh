@@ -851,7 +851,11 @@ class _TranslationsGuruProfileId extends TranslationsGuruProfileEn {
 	@override String get ubahPassword => 'Ubah Password';
 	@override String get pengaturan => 'Pengaturan';
 	@override String get tentangAplikasi => 'Tentang Aplikasi';
+	@override String get kebijakanPrivasi => 'Kebijakan Privasi';
 	@override String get keluar => 'Keluar';
+	@override String get hapusAkun => 'Hapus Akun';
+	@override String get deleteAccountSuccess => 'Akun Anda berhasil dihapus.';
+	@override String deleteAccountFailed({required Object error}) => 'Gagal menghapus akun: ${error}';
 	@override String get guruHalaqoh => 'Guru Halaqoh';
 	@override String appVersion({required Object version}) => 'MyHalaqoh App v${version}';
 	@override String get loading => 'Memuat...';
@@ -1024,6 +1028,9 @@ class _TranslationsDialogsId extends TranslationsDialogsEn {
 	@override String get logoutTitle => 'Keluar Akun?';
 	@override String get logoutMessage => 'Apakah Anda yakin ingin keluar dari akun ini? Anda harus masuk kembali untuk menggunakan aplikasi.';
 	@override String get keluar => 'Keluar';
+	@override String get deleteAccountTitle => 'Hapus Akun Anda?';
+	@override String get deleteAccountMessage => 'Tindakan ini akan menghapus akun login dan profil Anda secara permanen dari server. Anda tidak akan dapat masuk kembali ke aplikasi MyHalaqoh.\n\nApakah Anda yakin ingin menghapus akun?';
+	@override String get deleteAccountConfirm => 'Hapus Akun';
 }
 
 // Path: masterDataSettings
@@ -1070,11 +1077,13 @@ class _TranslationsTentangAplikasiScreenId extends TranslationsTentangAplikasiSc
 	@override String get infoPlatform => 'Platform';
 	@override String get infoLembaga => 'Lembaga';
 	@override String get infoPlatformValue => 'Android';
+	@override String get kebijakanPrivasi => 'Kebijakan Privasi';
+	@override String get bukaKebijakanPrivasi => 'Baca Kebijakan Privasi';
 	@override String get sectionKontak => 'Kontak & Dukungan';
 	@override String get kontakDeskripsi => 'Jika Anda memerlukan bantuan teknis atau memiliki pertanyaan seputar aplikasi, silakan hubungi administrator melalui WhatsApp.';
 	@override String get kontakButton => 'Hubungi Admin via WhatsApp';
 	@override String get footer => 'Dibuat dengan ❤️ untuk kemajuan pendidikan pesantren';
-	@override String get copyright => '© 2026 MyHalaqoh. All rights reserved.';
+	@override String get copyright => '© 2026 MyHalaqoh. Seluruh hak cipta dilindungi undang-undang.';
 }
 
 // Path: general
@@ -1931,7 +1940,11 @@ extension on TranslationsId {
 			case 'guruProfile.ubahPassword': return 'Ubah Password';
 			case 'guruProfile.pengaturan': return 'Pengaturan';
 			case 'guruProfile.tentangAplikasi': return 'Tentang Aplikasi';
+			case 'guruProfile.kebijakanPrivasi': return 'Kebijakan Privasi';
 			case 'guruProfile.keluar': return 'Keluar';
+			case 'guruProfile.hapusAkun': return 'Hapus Akun';
+			case 'guruProfile.deleteAccountSuccess': return 'Akun Anda berhasil dihapus.';
+			case 'guruProfile.deleteAccountFailed': return ({required Object error}) => 'Gagal menghapus akun: ${error}';
 			case 'guruProfile.guruHalaqoh': return 'Guru Halaqoh';
 			case 'guruProfile.appVersion': return ({required Object version}) => 'MyHalaqoh App v${version}';
 			case 'guruProfile.loading': return 'Memuat...';
@@ -2039,6 +2052,9 @@ extension on TranslationsId {
 			case 'dialogs.logoutTitle': return 'Keluar Akun?';
 			case 'dialogs.logoutMessage': return 'Apakah Anda yakin ingin keluar dari akun ini? Anda harus masuk kembali untuk menggunakan aplikasi.';
 			case 'dialogs.keluar': return 'Keluar';
+			case 'dialogs.deleteAccountTitle': return 'Hapus Akun Anda?';
+			case 'dialogs.deleteAccountMessage': return 'Tindakan ini akan menghapus akun login dan profil Anda secara permanen dari server. Anda tidak akan dapat masuk kembali ke aplikasi MyHalaqoh.\n\nApakah Anda yakin ingin menghapus akun?';
+			case 'dialogs.deleteAccountConfirm': return 'Hapus Akun';
 			case 'masterDataSettings.title': return 'Pengaturan';
 			case 'masterDataSettings.tentangAplikasi': return 'Tentang Aplikasi';
 			case 'masterDataSettings.keluar': return 'Keluar';
@@ -2067,11 +2083,13 @@ extension on TranslationsId {
 			case 'tentangAplikasiScreen.infoPlatform': return 'Platform';
 			case 'tentangAplikasiScreen.infoLembaga': return 'Lembaga';
 			case 'tentangAplikasiScreen.infoPlatformValue': return 'Android';
+			case 'tentangAplikasiScreen.kebijakanPrivasi': return 'Kebijakan Privasi';
+			case 'tentangAplikasiScreen.bukaKebijakanPrivasi': return 'Baca Kebijakan Privasi';
 			case 'tentangAplikasiScreen.sectionKontak': return 'Kontak & Dukungan';
 			case 'tentangAplikasiScreen.kontakDeskripsi': return 'Jika Anda memerlukan bantuan teknis atau memiliki pertanyaan seputar aplikasi, silakan hubungi administrator melalui WhatsApp.';
 			case 'tentangAplikasiScreen.kontakButton': return 'Hubungi Admin via WhatsApp';
 			case 'tentangAplikasiScreen.footer': return 'Dibuat dengan ❤️ untuk kemajuan pendidikan pesantren';
-			case 'tentangAplikasiScreen.copyright': return '© 2026 MyHalaqoh. All rights reserved.';
+			case 'tentangAplikasiScreen.copyright': return '© 2026 MyHalaqoh. Seluruh hak cipta dilindungi undang-undang.';
 			case 'general.warning': return 'Peringatan';
 			case 'general.close': return 'Tutup';
 			case 'general.saving': return 'Menyimpan...';

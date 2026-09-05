@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permohonan Penghapusan Akun — MyHalaqoh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #115D69;
+            --primary-dark: #0D4A54;
+            --primary-light: #1A7A8A;
+            --primary-bg: rgba(17, 93, 105, 0.06);
+            --bg-page: #F8FAFC;
+            --surface: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --error: #F43F5E;
+            --success: #10B981;
+            --warning: #FBBF24;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        /* Top Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 44px 24px 38px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(17, 93, 105, 0.15);
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(244, 63, 94, 0.25);
+            border: 1px solid rgba(244, 63, 94, 0.5);
+            border-radius: var(--radius-full);
+            padding: 5px 14px;
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 14.5px;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 760px;
+            margin: -24px auto 0;
+            padding: 0 20px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            padding: 32px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px -2px rgba(17, 93, 105, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 14px;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 16px;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        /* Callout */
+        .callout-in-app {
+            background: rgba(17, 93, 105, 0.06);
+            border: 1.5px solid rgba(17, 93, 105, 0.2);
+            padding: 18px 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+        }
+
+        .callout-in-app h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .callout-in-app p {
+            margin: 0;
+            font-size: 13.5px;
+            color: #1f2937;
+        }
+
+        .callout-warning {
+            background: rgba(244, 63, 94, 0.06);
+            border-left: 4px solid var(--error);
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+        }
+
+        .callout-warning p {
+            margin: 0;
+            font-size: 13px;
+            color: #9f1239;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .required {
+            color: var(--error);
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 11px 14px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: #FAFAFA;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            background: #FFFFFF;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(17, 93, 105, 0.12);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            background: var(--error);
+            color: white;
+            padding: 14px 20px;
+            font-size: 14.5px;
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            background: #e11d48;
+            transform: translateY(-1px);
+        }
+
+        /* Success Card */
+        .success-box {
+            display: none;
+            background: #F0FDF4;
+            border: 1.5px solid #BBF7D0;
+            border-radius: var(--radius-md);
+            padding: 24px 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .success-box h3 {
+            color: var(--success);
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .success-box p {
+            color: #166534;
+            font-size: 13.5px;
+            margin: 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <span class="header-badge">Google Play Compliance</span>
+        <h1>Permohonan Hapus Akun</h1>
+        <p>Layanan Penghapusan Akun & Kredensial Pengguna MyHalaqoh</p>
+    </header>
+
+    <main class="container">
+
+        <!-- Cara Cepat In-App -->
+        <div class="callout-in-app">
+            <h3>⚡ Hapus Akun Lebih Cepat Melalui Aplikasi</h3>
+            <p>
+                Jika Anda masih memiliki akses ke aplikasi <strong>MyHalaqoh</strong> di HP Anda, Anda dapat menghapus akun secara instan tanpa menunggu verifikasi formulir:
+            </p>
+            <p style="margin-top: 8px; font-weight: 500;">
+                Buka tab <strong>Profil</strong> &rarr; Pilih <strong>Hapus Akun</strong> pada bagian Sesi &rarr; Konfirmasi <strong>"Hapus Akun"</strong>. Akun Anda akan langsung terhapus saat itu juga.
+            </p>
+        </div>
+
+        <!-- Formulir Web -->
+        <div class="card">
+            <h2>Formulir Permohonan Hapus Akun (Web)</h2>
+            <p>
+                Jika Anda sudah tidak dapat mengakses aplikasi MyHalaqoh atau ingin mengajukan permohonan penghapusan akun melalui web, silakan lengkapi formulir di bawah ini. Administrator pondok pesantren akan memverifikasi dan memproses permohonan Anda dalam 1–3 hari kerja.
+            </p>
+
+            <div class="callout-warning">
+                <p>
+                    <strong>Perhatian:</strong> Menghapus akun bersifat <strong>permanen</strong>. Anda tidak akan dapat masuk kembali ke aplikasi menggunakan NIP/NIS tersebut setelah proses penghapusan selesai.
+                </p>
+            </div>
+
+            <form id="deletionForm" onsubmit="handleFormSubmit(event)">
+                <div class="form-group">
+                    <label for="namaLengkap">Nama Lengkap <span class="required">*</span></label>
+                    <input type="text" id="namaLengkap" required placeholder="Contoh: Ustadz Ahmad / Fulan">
+                </div>
+
+                <div class="form-group">
+                    <label for="identifier">Nomor Induk Pegawai (NIP) atau Nomor Induk Santri (NIS) <span class="required">*</span></label>
+                    <input type="text" id="identifier" required placeholder="Contoh: 19850101... atau 2024001...">
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Peran / Status di Aplikasi <span class="required">*</span></label>
+                    <select id="role" required>
+                        <option value="">-- Pilih Peran Akun --</option>
+                        <option value="Guru / Ustadz">Guru / Ustadz Pengampu</option>
+                        <option value="Wali Santri">Wali Santri</option>
+                        <option value="Santri">Santri</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="whatsapp">Nomor HP / WhatsApp Terdaftar <span class="required">*</span></label>
+                    <input type="tel" id="whatsapp" required placeholder="Contoh: 081234567890">
+                </div>
+
+                <div class="form-group">
+                    <label for="alasan">Alasan Permohonan Penghapusan (Opsional)</label>
+                    <textarea id="alasan" placeholder="Tuliskan alasan permohonan (misal: sudah lulus alumni, mutasi, dll)"></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Ajukan Permohonan Hapus Akun
+                </button>
+            </form>
+
+            <div id="successBox" class="success-box">
+                <h3>Permohonan Berhasil Dikirim</h3>
+                <p>
+                    Data permohonan Anda telah disiapkan. Kami akan mengalihkan Anda ke WhatsApp Administrator resmi untuk verifikasi identitas dan eksekusi penghapusan akun.
+                </p>
+            </div>
+        </div>
+
+        <!-- Transparansi Data -->
+        <div class="card">
+            <h2>Data yang Dihapus & Disimpan</h2>
+            <ul>
+                <li><strong>Data yang Dihapus:</strong> Akun autentikasi Firebase, kata sandi, token push notifikasi (FCM), serta metadata akun login pengguna pada sistem.</li>
+                <li><strong>Data yang Tetap Diarsipkan:</strong> Catatan kehadiran dan riwayat setoran hafalan Al-Qur'an santri tetap diarsipkan pada basis data madrasah/pesantren untuk keperluan integritas arsip akademik (*Legitimate Institutional Records Exception*).</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 MyHalaqoh. Pondok Pesantren Hidayatullah Luqman Al-Hakim Surabaya.</p>
+            <p style="margin-top: 4px;">
+                <a href="privacy_policy.html">Kembali ke Kebijakan Privasi</a>
+            </p>
+        </div>
+
+    </main>
+
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const nama = document.getElementById('namaLengkap').value.trim();
+            const identifier = document.getElementById('identifier').value.trim();
+            const role = document.getElementById('role').value;
+            const hp = document.getElementById('whatsapp').value.trim();
+            const alasan = document.getElementById('alasan').value.trim() || '-';
+
+            const adminPhone = '6285850132215';
+            const message = `*PERMOHONAN HAPUS AKUN MYHALAQOH*\n\n` +
+                `Nama: ${nama}\n` +
+                `NIP/NIS: ${identifier}\n` +
+                `Peran: ${role}\n` +
+                `No. HP/WA: ${hp}\n` +
+                `Alasan: ${alasan}\n\n` +
+                `Mohon untuk memproses penghapusan akun dan kredensial saya dari sistem MyHalaqoh. Terima kasih.`;
+
+            document.getElementById('successBox').style.display = 'block';
+
+            setTimeout(() => {
+                const url = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
+                window.open(url, '_blank');
+            }, 1200);
+        }
+    </script>
+
+</body>
+</html>

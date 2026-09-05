@@ -12,6 +12,10 @@ abstract class AuthRepository {
   /// Sign out
   Future<Either<String, void>> signOut();
 
+  /// Deletes the currently authenticated user's account permanently.
+  Future<Either<String, void>> deleteOwnAccount();
+
   /// Expose the raw auth state stream
   Stream<User?> get authStateChanges;
 }
+

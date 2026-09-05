@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/assets.gen.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/constants/legal_constants.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -14,6 +15,25 @@ class TentangAplikasiScreen extends StatelessWidget {
   static const _adminWhatsApp = '+6285850132215';
   static const _pesantrenName =
       'Pondok Pesantren Hidayatullah Luqman Al-Hakim Surabaya';
+
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    final uri = Uri.parse(LegalConstants.privacyPolicyUrl);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Gagal membuka Kebijakan Privasi.',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
+            backgroundColor: AppColors.of(context).error,
+          ),
+        );
+      }
+    }
+  }
 
   Future<void> _openWhatsApp(BuildContext context) async {
     const message = 'Assalamu\'alaikum, saya ingin menghubungi tim MyHalaqoh.';
@@ -178,9 +198,49 @@ class TentangAplikasiScreen extends StatelessWidget {
                           colors,
                         ),
                         _buildInfoRow(s.infoLembaga, _pesantrenName, colors),
+                        SizedBox(height: 8.h),
+                        Divider(
+                          color: colors.border.withValues(alpha: 0.5),
+                          height: 1,
+                        ),
+                        SizedBox(height: 8.h),
+                        InkWell(
+                          onTap: () => _openPrivacyPolicy(context),
+                          borderRadius: BorderRadius.circular(8.r),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 6.h),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.privacy_tip_outlined,
+                                  size: 18.sp,
+                                  color: colors.primary,
+                                ),
+                                SizedBox(width: 10.w),
+                                Expanded(
+                                  child: Text(
+                                    s.kebijakanPrivasi,
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.primary,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.open_in_new_rounded,
+                                  size: 16.sp,
+                                  color: colors.primary,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
+
 
                   SizedBox(height: 16.h),
 
