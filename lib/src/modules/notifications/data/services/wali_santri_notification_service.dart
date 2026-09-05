@@ -98,7 +98,10 @@ class WaliSantriNotificationService {
               );
 
               if (matchingRecord != null && matchingRecord is Map) {
-                final status = (matchingRecord['status'] ?? 'Hadir').toString();
+                final rawStatus = (matchingRecord['status'] ?? 'hadir').toString();
+                if (rawStatus.trim().toLowerCase() == 'belum') continue;
+
+                final status = _formatAbsensiStatus(rawStatus);
                 final santriName = (matchingRecord['nama'] ?? 'Santri').toString();
                 final sesi = (data['sesi'] ?? 'Sesi').toString();
                 final tanggalTs = data['tanggal'] as Timestamp?;
@@ -391,5 +394,27 @@ class WaliSantriNotificationService {
     );
 
     return controller.stream;
+  }
+
+  /// Normalizes legacy or raw status strings to standard Indonesian labels ('Hadir', 'Sakit', 'Izin', 'Alfa').
+  /// Variants like 'hadir_barcode', 'hadir_manual', 'terlambat' are all unified into 'Hadir'.
+  static String _formatAbsensiStatus(String raw) {
+    switch (raw.trim().toLowerCase()) {
+      case 'hadir':
+      case 'hadir_barcode':
+      case 'hadir_manual':
+      case 'terlambat':
+        return 'Hadir';
+      case 'sakit':
+        return 'Sakit';
+      case 'izin':
+        return 'Izin';
+      case 'alfa':
+        return 'Alfa';
+      default:
+        return raw.isNotEmpty
+            ? '${raw[0].toUpperCase()}${raw.substring(1)}'
+            : raw;
+    }
   }
 }

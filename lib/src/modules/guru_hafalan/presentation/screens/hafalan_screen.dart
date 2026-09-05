@@ -13,6 +13,7 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.d
 import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/widgets/hafalan_santri_item.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
+import 'package:my_halaqoh/src/modules/guru_laporan/presentation/widgets/laporan_konfigurasi_hafalan_halaqoh_sheet.dart';
 
 /// Hafalan Santri Screen — unified search bar, section title with ▎ bar accent
 /// and pill badge counter, and clean santri card list with actions.
@@ -94,6 +95,65 @@ class _HafalanScreenState extends State<HafalanScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 14.h),
+
+                    // 1. Primary Action Button: Buat Laporan Hafalan
+                    if (myHalaqoh != null) ...[
+                      Container(
+                        width: double.infinity,
+                        height: 48.h,
+                        decoration: BoxDecoration(
+                          gradient: colors.primaryGradient,
+                          borderRadius: BorderRadius.circular(14.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.primary.withValues(alpha: 0.28),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              final now = DateTime.now();
+                              LaporanKonfigurasiHafalanHalaqohSheet.show(
+                                context,
+                                halaqoh: myHalaqoh!,
+                                santriList: mySantriList,
+                                initialMonth: now.month,
+                                initialYear: now.year,
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(14.r),
+                            splashColor: Colors.white.withValues(alpha: 0.15),
+                            highlightColor: Colors.white.withValues(alpha: 0.08),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.picture_as_pdf_rounded,
+                                  size: 20.sp,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  t.hafalan.buatLaporanHafalan,
+                                  style: TextStyle(
+                                    fontSize: 14.5.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 14.h),
+                    ],
 
                     // Search Bar (unified design)
                     Container(

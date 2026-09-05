@@ -11,67 +11,54 @@ import '../../domain/helpers/schedule_helper.dart';
 import '../../domain/models/laporan_absensi_config.dart';
 import '../../domain/models/laporan_absensi_halaqoh_config.dart';
 
-/// Pure static helper that builds a [pw.Document] for halaqoh-wide attendance
-/// and returns its bytes.
-///
-/// Table header layout (matches design reference):
-/// ```
-/// +-----+------------------+--------------------------------------------+
-/// | No. |      Nama        |               Kehadiran                    |
-/// |     |                  +-----------------------+--------------------+
-/// |     |                  |       Halaqoh         |    Keterangan      |
-/// |     |                  +-----------+-----------+-------+------+-----+
-/// |     |                  |    Max    |    Hdr    | Sakit | Izin | Alpa|
-/// +-----+------------------+-----------+-----------+-------+------+-----+
-/// ```
-///
-/// Max = schedule-aware total sessions for the block (see ScheduleHelper).
-/// Zero values in Sakit / Izin / Alpa are displayed as empty cells.
+class _BlockStats {
+  final int max;
+  int hadir = 0;
+  int sakit = 0;
+  int izin = 0;
+  int alpa = 0;
+  _BlockStats({required this.max});
+}
+
+/// PDF Builder for halaqoh-wide attendance reports with unified minimalist, modern editorial layout.
 class AbsensiHalaqohPdfBuilder {
   AbsensiHalaqohPdfBuilder._();
 
-  // ─── Colour helpers ───────────────────────────────────────────────────────
-  static PdfColor _toPdfColor(Color c) => PdfColor.fromInt(c.toARGB32());
+  static PdfColor _pc(Color c) => PdfColor.fromInt(c.toARGB32());
 
-  static final _primary = _toPdfColor(AppColors.light.primary);
-  static final _green = _toPdfColor(AppColors.light.green);
-  static final _yellow = _toPdfColor(AppColors.light.yellow);
-  static final _blue = _toPdfColor(AppColors.light.blue);
-  static final _red = _toPdfColor(AppColors.light.red);
-  static final _background = _toPdfColor(AppColors.light.background);
-  static final _textPrimary = _toPdfColor(AppColors.light.textPrimary);
-  static final _textSecondary = _toPdfColor(AppColors.light.textSecondary);
-  static final _border = _toPdfColor(AppColors.light.border);
-  static final _borderLight = _toPdfColor(AppColors.light.borderLight);
-  static final _surface = _toPdfColor(AppColors.light.surface);
+  // ── Palette (Minimalist, High Contrast, Institutional) ─────────────────────
+  static final _primary = _pc(AppColors.light.primary); // #115D69
+  static final _primaryDark = PdfColor.fromHex('#0C424B');
+  static final _primaryLight = PdfColor.fromHex('#E8F4F6');
+
+  // Status colors
+  static final _green = _pc(AppColors.light.green); // Hadir (#10B981)
+  static final _greenBg = PdfColor.fromHex('#ECFDF5');
+
+  static final _yellow = PdfColor.fromHex('#D97706'); // Sakit (#D97706)
+  static final _yellowBg = PdfColor.fromHex('#FFFBEB');
+
+  static final _blue = _pc(AppColors.light.blue); // Izin (#3B82F6)
+  static final _blueBg = PdfColor.fromHex('#EFF6FF');
+
+  static final _red = PdfColor.fromHex('#EF4444'); // Alpa (#EF4444)
+  static final _redBg = PdfColor.fromHex('#FEF2F2');
+
+  static final _textPri = PdfColor.fromHex('#0F172A'); // Slate 900
+  static final _textSec = PdfColor.fromHex('#64748B'); // Slate 500
+  static final _textMuted = PdfColor.fromHex('#94A3B8'); // Slate 400
+  static final _border = PdfColor.fromHex('#E2E8F0'); // Slate 200
+  static final _surface = PdfColor.fromHex('#F8FAFC'); // Slate 50
   static final _white = PdfColors.white;
 
-  // ─── Session keys ─────────────────────────────────────────────────────────
+  // ── Session keys ──────────────────────────────────────────────────────────
   static List<String> _sessionKeys(String programType) =>
       programType == 'takhassus'
       ? ['shubuh', 'dhuha', 'siang', 'ashar', 'maghrib']
       : ['shubuh', 'maghrib'];
 
-  // ─── Date utilities ───────────────────────────────────────────────────────
   static DateTime _midnight(DateTime d) => DateTime(d.year, d.month, d.day);
 
-  /// Returns [weekStart, weekEnd] pairs clipped to [start, end].
-  static List<(DateTime, DateTime)> _weeksIn(DateTime start, DateTime end) {
-    final s = _midnight(start);
-    final e = _midnight(end);
-    var mon = s.subtract(Duration(days: s.weekday - 1));
-    final result = <(DateTime, DateTime)>[];
-    while (!mon.isAfter(e)) {
-      final sun = mon.add(const Duration(days: 6));
-      final blockStart = mon.isBefore(s) ? s : mon;
-      final blockEnd = sun.isAfter(e) ? e : sun;
-      result.add((blockStart, blockEnd));
-      mon = mon.add(const Duration(days: 7));
-    }
-    return result;
-  }
-
-  /// Returns [monthStart, monthEnd] pairs clipped to [start, end].
   static List<(DateTime, DateTime)> _monthsIn(DateTime start, DateTime end) {
     final result = <(DateTime, DateTime)>[];
     var y = start.year;
@@ -91,12 +78,6 @@ class AbsensiHalaqohPdfBuilder {
     return result;
   }
 
-  // ─── Max computation ──────────────────────────────────────────────────────
-
-  /// Computes the theoretical maximum number of sessions for a block
-  /// using the **real per-weekday schedule** for [programType] (Reguler /
-  /// Takhassus), rather than the naïve `sessionsPerDay × days` formula
-  /// that overcounted weekend sessions.
   static int _computeMax(
     String programType,
     DateTime blockStart,
@@ -109,9 +90,6 @@ class AbsensiHalaqohPdfBuilder {
     );
   }
 
-  // ─── Aggregation ──────────────────────────────────────────────────────────
-
-  /// Counts hadir / sakit / izin / alpa per santri within [blockStart, blockEnd].
   static Map<String, _BlockStats> _aggregate(
     List<AbsensiModel> records,
     List<SantriModel> santriList,
@@ -163,14 +141,12 @@ class AbsensiHalaqohPdfBuilder {
     return result;
   }
 
-  // ─── Main entry ───────────────────────────────────────────────────────────
-
+  // ── Main entry ────────────────────────────────────────────────────────────
   static Future<Uint8List> build(
     LaporanAbsensiHalaqohConfig config,
     List<AbsensiModel> allRecords,
     List<SantriModel> santriList,
   ) async {
-    // 1. Load fonts & logo
     final regular = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Poppins/Poppins-Regular.ttf'),
     );
@@ -182,26 +158,23 @@ class AbsensiHalaqohPdfBuilder {
     );
     final logo = pw.MemoryImage(
       (await rootBundle.load(
-        'assets/images/my_halaqoh_logo.png',
+        'assets/images/my_halaqoh_logo_new.png',
       )).buffer.asUint8List(),
     );
 
-    // 2. Sort santri alphabetically
     final sorted = List<SantriModel>.from(santriList)
       ..sort((a, b) => a.nama.compareTo(b.nama));
 
-    // 3. Session keys for program type
     final sessionKeys = _sessionKeys(config.programType);
 
-    // 4. Compute time blocks based on report range
     final List<(DateTime, DateTime)> blocks;
     if (config.range == ReportRange.semester) {
       blocks = _monthsIn(config.startDate, config.endDate);
     } else {
-      blocks = _weeksIn(config.startDate, config.endDate);
+      // Monthly and weekly are consolidated single blocks for the period
+      blocks = [(config.startDate, config.endDate)];
     }
 
-    // 5. Period label for document header
     final fmtFull = DateFormat('dd MMMM yyyy', t.$meta.locale.languageCode);
     final fmtMonth = DateFormat('MMMM yyyy', t.$meta.locale.languageCode);
     final String period;
@@ -216,12 +189,10 @@ class AbsensiHalaqohPdfBuilder {
     }
     final printedOn = fmtFull.format(DateTime.now());
 
-    // 6. Page orientation: landscape for takhassus (more session columns)
     final pageFormat = config.programType == 'takhassus'
         ? PdfPageFormat.a4.landscape
         : PdfPageFormat.a4;
 
-    // 7. Build document
     final doc = pw.Document(
       title: '${t.laporanConfig.recapAttendance} – ${config.halaqohName}',
       author: 'MyHalaqoh',
@@ -230,15 +201,15 @@ class AbsensiHalaqohPdfBuilder {
     doc.addPage(
       pw.MultiPage(
         pageFormat: pageFormat,
-        margin: const pw.EdgeInsets.symmetric(horizontal: 36, vertical: 30),
+        margin: const pw.EdgeInsets.symmetric(horizontal: 36, vertical: 32),
         theme: pw.ThemeData.withFont(base: regular, bold: bold),
         build: (ctx) => [
           _buildHeader(logo, bold, semiBold, regular, period, printedOn),
           pw.SizedBox(height: 12),
-          _buildHalaqohInfo(config, semiBold, regular, bold),
-          pw.SizedBox(height: 16),
+          _buildHalaqohInfoCard(config, sorted.length, bold, semiBold, regular),
+          pw.SizedBox(height: 14),
           for (int i = 0; i < blocks.length; i++) ...[
-            if ((config.range == ReportRange.monthly || config.range == ReportRange.semester) && i > 0) pw.NewPage(),
+            if (config.range == ReportRange.semester && i > 0) pw.NewPage(),
             _buildBlockTable(
               blockIndex: i,
               blockStart: blocks[i].$1,
@@ -254,38 +225,17 @@ class AbsensiHalaqohPdfBuilder {
             ),
             if (i < blocks.length - 1) pw.SizedBox(height: 14),
           ],
+          pw.SizedBox(height: 10),
+          _buildLegend(regular, semiBold),
         ],
-        footer: (ctx) => pw.Padding(
-          padding: const pw.EdgeInsets.only(top: 8),
-          child: pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              pw.Text(
-                t.laporanConfig.pdf.systemName,
-                style: pw.TextStyle(
-                  font: regular,
-                  fontSize: 7,
-                  color: _textSecondary,
-                ),
-              ),
-              pw.Text(
-                t.laporanConfig.pdf.pageLabel(page: '${ctx.pageNumber}', total: '${ctx.pagesCount}'),
-                style: pw.TextStyle(
-                  font: semiBold,
-                  fontSize: 7,
-                  color: _textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
+        footer: (ctx) => _buildFooter(config.halaqohName, regular, semiBold, ctx),
       ),
     );
 
     return doc.save();
   }
 
-  // ─── Section builders ─────────────────────────────────────────────────────
+  // ── Global Header (Minimalist & Modern Letterhead) ─────────────────────────
 
   static pw.Widget _buildHeader(
     pw.MemoryImage logo,
@@ -296,26 +246,24 @@ class AbsensiHalaqohPdfBuilder {
     String printedOn,
   ) {
     return pw.Container(
-      padding: const pw.EdgeInsets.fromLTRB(16, 14, 16, 14),
+      padding: const pw.EdgeInsets.only(bottom: 12),
       decoration: pw.BoxDecoration(
-        color: _background,
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-        border: pw.Border.all(color: _border, width: 0.5),
+        border: pw.Border(
+          bottom: pw.BorderSide(color: _border, width: 1.2),
+        ),
       ),
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.center,
         children: [
+          // Logo (my_halaqoh_logo_new.png)
           pw.Container(
-            width: 48,
-            height: 48,
-            decoration: pw.BoxDecoration(
-              color: _primary,
-              shape: pw.BoxShape.circle,
-            ),
-            padding: const pw.EdgeInsets.all(6),
-            child: pw.Image(logo),
+            width: 38,
+            height: 38,
+            child: pw.Image(logo, fit: pw.BoxFit.contain),
           ),
-          pw.SizedBox(width: 14),
+          pw.SizedBox(width: 12),
+
+          // Title & Subtitle
           pw.Expanded(
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -324,52 +272,50 @@ class AbsensiHalaqohPdfBuilder {
                   'MyHalaqoh',
                   style: pw.TextStyle(
                     font: bold,
-                    fontSize: 15,
+                    fontSize: 14,
                     color: _primary,
+                    letterSpacing: 0.3,
                   ),
                 ),
-                pw.SizedBox(height: 2),
+                pw.SizedBox(height: 1),
                 pw.Text(
                   t.laporanConfig.pdf.titleHalaqohRecap,
                   style: pw.TextStyle(
-                    font: regular,
-                    fontSize: 8.5,
-                    color: _primary,
+                    font: semiBold,
+                    fontSize: 9,
+                    color: _textPri,
                   ),
                 ),
               ],
             ),
           ),
+
+          // Meta Pill (Period & Print Date)
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 3,
-                ),
+                padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: pw.BoxDecoration(
-                  color: _surface,
-                  borderRadius: const pw.BorderRadius.all(
-                    pw.Radius.circular(4),
-                  ),
+                  color: _primaryLight,
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
                 ),
                 child: pw.Text(
                   period,
                   style: pw.TextStyle(
                     font: semiBold,
-                    fontSize: 7.5,
-                    color: _primary,
+                    fontSize: 8,
+                    color: _primaryDark,
                   ),
                 ),
               ),
-              pw.SizedBox(height: 4),
+              pw.SizedBox(height: 3),
               pw.Text(
                 t.laporanConfig.pdf.printedAt(date: printedOn),
                 style: pw.TextStyle(
                   font: regular,
                   fontSize: 7,
-                  color: _primary,
+                  color: _textSec,
                 ),
               ),
             ],
@@ -379,67 +325,93 @@ class AbsensiHalaqohPdfBuilder {
     );
   }
 
-  static pw.Widget _buildHalaqohInfo(
+  // ── Halaqoh Information Card (Horizontal 4-Column Strip) ───────────────────
+
+  static pw.Widget _buildHalaqohInfoCard(
     LaporanAbsensiHalaqohConfig config,
+    int totalSantri,
+    pw.Font bold,
     pw.Font semiBold,
     pw.Font regular,
-    pw.Font bold,
   ) {
     return pw.Container(
       decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: _border),
+        color: _surface,
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+        border: pw.Border.all(color: _border, width: 0.8),
       ),
-      child: pw.Column(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Container(
-            width: double.infinity,
-            padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: pw.BoxDecoration(
-              color: _borderLight,
-              border: pw.Border.all(color: _border, width: 0.5),
-            ),
-            child: pw.Text(
-              t.laporanConfig.pdf.halaqohInfo,
-              style: pw.TextStyle(font: bold, fontSize: 9, color: _textPrimary),
+          _infoField(
+            label: t.laporanConfig.pdf.halaqoh,
+            value: config.halaqohName,
+            bold: semiBold,
+            regular: regular,
+          ),
+          _infoDivider(),
+          _infoField(
+            label: t.laporanConfig.pdf.musyrif,
+            value: config.guruNama,
+            bold: semiBold,
+            regular: regular,
+          ),
+          _infoDivider(),
+          _infoField(
+            label: t.laporanConfig.pdf.program,
+            value: config.programType == 'takhassus' ? 'Takhassus' : 'Reguler',
+            bold: semiBold,
+            regular: regular,
+          ),
+          _infoDivider(),
+          _infoField(
+            label: 'Total Santri',
+            value: '$totalSantri Santri',
+            bold: semiBold,
+            regular: regular,
+          ),
+        ],
+      ),
+    );
+  }
+
+  static pw.Widget _infoDivider() {
+    return pw.Container(
+      width: 1,
+      height: 22,
+      color: _border,
+      margin: const pw.EdgeInsets.symmetric(horizontal: 8),
+    );
+  }
+
+  static pw.Widget _infoField({
+    required String label,
+    required String value,
+    required pw.Font bold,
+    required pw.Font regular,
+  }) {
+    return pw.Expanded(
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            label.toUpperCase(),
+            style: pw.TextStyle(
+              font: regular,
+              fontSize: 6.5,
+              color: _textMuted,
+              letterSpacing: 0.3,
             ),
           ),
-          pw.Padding(
-            padding: const pw.EdgeInsets.all(12),
-            child: pw.Table(
-              columnWidths: const {
-                0: pw.FlexColumnWidth(1),
-                1: pw.FlexColumnWidth(1),
-              },
-              children: [
-                pw.TableRow(
-                  children: [
-                    _infoCell(t.laporanConfig.pdf.halaqoh, config.halaqohName, semiBold, regular),
-                    _infoCell(t.laporanConfig.pdf.musyrif, config.guruNama, semiBold, regular),
-                  ],
-                ),
-                pw.TableRow(
-                  children: [pw.SizedBox(height: 8), pw.SizedBox(height: 8)],
-                ),
-                pw.TableRow(
-                  children: [
-                    _infoCell(
-                      t.laporanConfig.pdf.program,
-                      config.programType == 'takhassus'
-                          ? 'Takhassus'
-                          : 'Reguler',
-                      semiBold,
-                      regular,
-                    ),
-                    _infoCell(
-                      t.laporanConfig.pdf.reportType,
-                      _rangeLabel(config.range),
-                      semiBold,
-                      regular,
-                    ),
-                  ],
-                ),
-              ],
+          pw.SizedBox(height: 2),
+          pw.Text(
+            value,
+            maxLines: 1,
+            style: pw.TextStyle(
+              font: bold,
+              fontSize: 8.5,
+              color: _textPri,
             ),
           ),
         ],
@@ -447,22 +419,8 @@ class AbsensiHalaqohPdfBuilder {
     );
   }
 
-  static String _rangeLabel(ReportRange r) {
-    switch (r) {
-      case ReportRange.weekly:
-        return t.laporanConfig.weekly;
-      case ReportRange.monthly:
-        return t.laporanConfig.monthly;
-      case ReportRange.semester:
-        return t.laporanConfig.custom;
-    }
-  }
+  // ── Block Table ───────────────────────────────────────────────────────────
 
-  /// Builds one attendance block (one week or one month depending on range).
-  ///
-  /// Uses [pw.LayoutBuilder] to compute the flexible Nama column width so that
-  /// the manually-drawn multi-level header and the data [pw.Table] share
-  /// identical column boundaries.
   static pw.Widget _buildBlockTable({
     required int blockIndex,
     required DateTime blockStart,
@@ -476,17 +434,19 @@ class AbsensiHalaqohPdfBuilder {
     required pw.Font regular,
     required bool isSemester,
   }) {
-    // Block title label
     final fmtFull = DateFormat('dd MMM', t.$meta.locale.languageCode);
     final fmtMonth = DateFormat('MMMM yyyy', t.$meta.locale.languageCode);
-    final String blockTitle = isSemester
-        ? fmtMonth.format(blockStart)
-        : '${t.laporanConfig.pdf.pekanShort(index: blockIndex + 1)}  (${fmtFull.format(blockStart)} – ${fmtFull.format(blockEnd)})';
+    final String blockTitle;
+    if (config.range == ReportRange.monthly) {
+      blockTitle = '${t.laporanConfig.monthly} — ${fmtMonth.format(blockStart)}';
+    } else if (isSemester) {
+      blockTitle = fmtMonth.format(blockStart);
+    } else {
+      blockTitle = '${t.laporanConfig.weekly} (${fmtFull.format(blockStart)} – ${fmtFull.format(blockEnd)})';
+    }
 
-    // Max sessions: uses the real per-weekday schedule (see ScheduleHelper)
     final maxSessions = _computeMax(config.programType, blockStart, blockEnd);
 
-    // Per-santri attendance counts for this block
     final statsMap = _aggregate(
       allRecords,
       santriList,
@@ -498,9 +458,8 @@ class AbsensiHalaqohPdfBuilder {
 
     return pw.LayoutBuilder(
       builder: (ctx, constraints) {
-        // Fixed widths (pt)
         const noWidth = 28.0;
-        const colW = 36.0; // each stat column: Max, Hdr, Sakit, Izin, Alpa
+        const colW = 38.0;
         const statCols = 5;
         final namaWidth = constraints!.maxWidth - noWidth - colW * statCols;
 
@@ -509,7 +468,7 @@ class AbsensiHalaqohPdfBuilder {
         return pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            // ── Title bar ────────────────────────────────────────────────
+            // Title bar
             pw.Container(
               width: double.infinity,
               padding: const pw.EdgeInsets.symmetric(
@@ -519,8 +478,8 @@ class AbsensiHalaqohPdfBuilder {
               decoration: pw.BoxDecoration(
                 color: _primary,
                 borderRadius: const pw.BorderRadius.only(
-                  topLeft: pw.Radius.circular(6),
-                  topRight: pw.Radius.circular(6),
+                  topLeft: pw.Radius.circular(4),
+                  topRight: pw.Radius.circular(4),
                 ),
               ),
               child: pw.Text(
@@ -529,7 +488,7 @@ class AbsensiHalaqohPdfBuilder {
               ),
             ),
 
-            // ── Multi-level merged header ─────────────────────────────────
+            // Multi-level merged header
             _buildMultiLevelHeader(
               noWidth: noWidth,
               namaWidth: namaWidth,
@@ -538,7 +497,7 @@ class AbsensiHalaqohPdfBuilder {
               semiBold: semiBold,
             ),
 
-            // ── Data rows (pw.Table, top border omitted to avoid doubling) ─
+            // Data rows
             pw.Table(
               border: pw.TableBorder(
                 left: borderSide,
@@ -575,16 +534,6 @@ class AbsensiHalaqohPdfBuilder {
     );
   }
 
-  // ─── Multi-level header ───────────────────────────────────────────────────
-
-  /// Renders the 3-row merged header that matches the design reference:
-  ///
-  /// Row 1 — "No." + "Nama" (full height) + "Kehadiran" (1/3 height)
-  /// Row 2 — "Halaqoh" (2 cols) + "Keterangan" (3 cols)
-  /// Row 3 — Max | Hdr | Sakit | Izin | Alpa
-  ///
-  /// "No." and "Nama" are drawn as tall containers that span all three
-  /// sub-rows; the stat columns are stacked inside a [pw.Column].
   static pw.Widget _buildMultiLevelHeader({
     required double noWidth,
     required double namaWidth,
@@ -592,19 +541,17 @@ class AbsensiHalaqohPdfBuilder {
     required pw.Font bold,
     required pw.Font semiBold,
   }) {
-    // Row heights (pt)
-    const double h1 = 15.0; // "Kehadiran"
-    const double h2 = 13.0; // "Halaqoh" / "Keterangan"
-    const double h3 = 14.0; // "Max", "Hdr", "Sakit", "Izin", "Alpa"
+    const double h1 = 15.0;
+    const double h2 = 13.0;
+    const double h3 = 14.0;
     final totalH = h1 + h2 + h3;
 
-    // ── helper: single bordered header cell ─────────────────────────────
     pw.Widget hCell({
       required double width,
       required double height,
       required String text,
       required pw.Font font,
-      double fontSize = 7.5,
+      double fontSize = 7,
       PdfColor? textColor,
       PdfColor? bgColor,
     }) {
@@ -614,7 +561,7 @@ class AbsensiHalaqohPdfBuilder {
         alignment: pw.Alignment.center,
         padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1),
         decoration: pw.BoxDecoration(
-          color: bgColor ?? _textPrimary,
+          color: bgColor ?? _primary,
           border: pw.Border.all(color: _border, width: 0.5),
         ),
         child: pw.Text(
@@ -632,28 +579,20 @@ class AbsensiHalaqohPdfBuilder {
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        // ── "No." — spans all 3 header rows ──────────────────────────────
         hCell(width: noWidth, height: totalH, text: t.laporanConfig.pdf.no, font: semiBold),
-
-        // ── "Nama" — spans all 3 header rows ─────────────────────────────
         hCell(width: namaWidth, height: totalH, text: t.laporanConfig.pdf.nameHeader, font: semiBold),
-
-        // ── "Kehadiran" group — 3 stacked sub-rows ────────────────────────
         pw.SizedBox(
           width: colWidth * 5,
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // Level 1 — "Kehadiran" spanning all 5 stat columns
               hCell(
                 width: colWidth * 5,
                 height: h1,
                 text: t.laporanConfig.pdf.kehadiranHeader,
                 font: bold,
-                fontSize: 8,
+                fontSize: 7.5,
               ),
-
-              // Level 2 — "Halaqoh" (Max + Hdr) | "Keterangan" (Sakit + Izin + Alpa)
               pw.Row(
                 children: [
                   hCell(
@@ -661,19 +600,17 @@ class AbsensiHalaqohPdfBuilder {
                     height: h2,
                     text: t.laporanConfig.pdf.halaqoh,
                     font: semiBold,
-                    fontSize: 7,
+                    fontSize: 6.5,
                   ),
                   hCell(
                     width: colWidth * 3,
                     height: h2,
                     text: t.laporanConfig.pdf.keteranganLabel,
                     font: semiBold,
-                    fontSize: 7,
+                    fontSize: 6.5,
                   ),
                 ],
               ),
-
-              // Level 3 — individual column labels
               pw.Row(
                 children: [
                   hCell(
@@ -719,12 +656,6 @@ class AbsensiHalaqohPdfBuilder {
     );
   }
 
-  // ─── Data row ─────────────────────────────────────────────────────────────
-
-  /// Builds one alternating-colour data row.
-  ///
-  /// Sakit / Izin / Alpa cells show an empty string when the value is zero,
-  /// matching the design reference.
   static pw.TableRow _buildDataRow({
     required int index,
     required SantriModel santri,
@@ -733,14 +664,11 @@ class AbsensiHalaqohPdfBuilder {
     required pw.Font semiBold,
   }) {
     final bg = index % 2 == 0 ? _white : _surface;
-
-    // Zero → blank for absence-type columns
     String blankIfZero(int v) => v == 0 ? '' : '$v';
 
     return pw.TableRow(
       decoration: pw.BoxDecoration(color: bg),
       children: [
-        // No.
         _padCell(
           pw.Text(
             '${index + 1}',
@@ -748,133 +676,203 @@ class AbsensiHalaqohPdfBuilder {
             style: pw.TextStyle(
               font: regular,
               fontSize: 7.5,
-              color: _textSecondary,
+              color: _textSec,
             ),
           ),
-          center: true,
         ),
-        // Nama — left-aligned
         _padCell(
           pw.Text(
             santri.nama,
             style: pw.TextStyle(
-              font: regular,
-              fontSize: 8,
-              color: _textPrimary,
+              font: semiBold,
+              fontSize: 7.5,
+              color: _textPri,
             ),
           ),
-          left: true,
+          align: pw.Alignment.centerLeft,
         ),
-        // Max
         _padCell(
           pw.Text(
             '${stats.max}',
             textAlign: pw.TextAlign.center,
             style: pw.TextStyle(
-              font: semiBold,
+              font: regular,
               fontSize: 7.5,
-              color: _textPrimary,
+              color: _textSec,
             ),
           ),
-          center: true,
         ),
-        // Hdr (Hadir)
         _padCell(
           pw.Text(
             '${stats.hadir}',
             textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(font: semiBold, fontSize: 8, color: _green),
+            style: pw.TextStyle(
+              font: semiBold,
+              fontSize: 7.5,
+              color: stats.hadir > 0 ? _green : _textSec,
+            ),
           ),
-          center: true,
         ),
-        // Sakit — blank when zero
         _padCell(
           pw.Text(
             blankIfZero(stats.sakit),
             textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(font: semiBold, fontSize: 8, color: _yellow),
+            style: pw.TextStyle(
+              font: stats.sakit > 0 ? semiBold : regular,
+              fontSize: 7.5,
+              color: stats.sakit > 0 ? _yellow : _textSec,
+            ),
           ),
-          center: true,
         ),
-        // Izin — blank when zero
         _padCell(
           pw.Text(
             blankIfZero(stats.izin),
             textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(font: semiBold, fontSize: 8, color: _blue),
+            style: pw.TextStyle(
+              font: stats.izin > 0 ? semiBold : regular,
+              fontSize: 7.5,
+              color: stats.izin > 0 ? _blue : _textSec,
+            ),
           ),
-          center: true,
         ),
-        // Alpa — blank when zero
         _padCell(
           pw.Text(
             blankIfZero(stats.alpa),
             textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(font: semiBold, fontSize: 8, color: _red),
+            style: pw.TextStyle(
+              font: stats.alpa > 0 ? semiBold : regular,
+              fontSize: 7.5,
+              color: stats.alpa > 0 ? _red : _textSec,
+            ),
           ),
-          center: true,
         ),
       ],
     );
   }
 
-  // ─── Padding helpers ─────────────────────────────────────────────────────
-
   static pw.Widget _padCell(
     pw.Widget child, {
-    bool center = false,
-    bool left = false,
+    pw.Alignment align = pw.Alignment.center,
   }) {
-    return pw.Padding(
-      padding: pw.EdgeInsets.symmetric(vertical: 5, horizontal: left ? 6 : 4),
+    return pw.Container(
+      alignment: align,
+      padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3.5),
       child: child,
     );
   }
 
-  // ─── Info cell (used in _buildHalaqohInfo) ────────────────────────────────
+  // ── Legend ────────────────────────────────────────────────────────────────
 
-  static pw.Widget _infoCell(
-    String label,
-    String value,
-    pw.Font semiBold,
-    pw.Font regular,
-  ) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.only(right: 8),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
+  static pw.Widget _buildLegend(pw.Font regular, pw.Font semiBold) {
+    final items = [
+      (t.laporanConfig.pdf.hdrHeader, t.laporanConfig.pdf.present, _green, _greenBg),
+      (t.laporanConfig.pdf.sick, t.laporanConfig.pdf.sick, _yellow, _yellowBg),
+      (t.laporanConfig.pdf.permit, t.laporanConfig.pdf.permit, _blue, _blueBg),
+      (t.laporanConfig.pdf.absent, t.laporanConfig.pdf.absent, _red, _redBg),
+    ];
+
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: pw.BoxDecoration(
+        color: _surface,
+        border: pw.Border.all(color: _border, width: 0.5),
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+      ),
+      child: pw.Row(
         children: [
           pw.Text(
-            label,
-            style: pw.TextStyle(
-              font: regular,
-              fontSize: 7.5,
-              color: _textSecondary,
-            ),
+            '${t.laporanConfig.pdf.keteranganLabel}:',
+            style: pw.TextStyle(font: semiBold, fontSize: 6.5, color: _textSec),
           ),
-          pw.SizedBox(height: 1),
-          pw.Text(
-            value,
-            style: pw.TextStyle(
-              font: semiBold,
-              fontSize: 9,
-              color: _textPrimary,
+          pw.SizedBox(width: 8),
+          pw.Expanded(
+            child: pw.Row(
+              children: items
+                  .map(
+                    (item) => pw.Padding(
+                      padding: const pw.EdgeInsets.only(right: 10),
+                      child: pw.Row(
+                        mainAxisSize: pw.MainAxisSize.min,
+                        children: [
+                          pw.Container(
+                            padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                            alignment: pw.Alignment.center,
+                            decoration: pw.BoxDecoration(
+                              color: item.$4,
+                              borderRadius: const pw.BorderRadius.all(
+                                pw.Radius.circular(2),
+                              ),
+                              border: pw.Border.all(color: item.$3, width: 0.5),
+                            ),
+                            child: pw.Text(
+                              item.$1,
+                              style: pw.TextStyle(
+                                font: semiBold,
+                                fontSize: 6,
+                                color: item.$3,
+                              ),
+                            ),
+                          ),
+                          pw.SizedBox(width: 3),
+                          pw.Text(
+                            item.$2,
+                            style: pw.TextStyle(
+                              font: regular,
+                              fontSize: 6.5,
+                              color: _textSec,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ],
       ),
     );
   }
-}
 
-// ─── Internal aggregation model ───────────────────────────────────────────────
+  // ── Footer ────────────────────────────────────────────────────────────────
 
-class _BlockStats {
-  final int max;
-  int hadir = 0;
-  int sakit = 0;
-  int izin = 0;
-  int alpa = 0;
-
-  _BlockStats({required this.max});
+  static pw.Widget _buildFooter(
+    String halaqohName,
+    pw.Font regular,
+    pw.Font semiBold,
+    pw.Context ctx,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.only(top: 8),
+      decoration: pw.BoxDecoration(
+        border: pw.Border(
+          top: pw.BorderSide(color: _border, width: 0.5),
+        ),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            'MyHalaqoh • $halaqohName',
+            style: pw.TextStyle(
+              font: regular,
+              fontSize: 6.5,
+              color: _textMuted,
+            ),
+          ),
+          pw.Text(
+            t.laporanConfig.pdf.pageLabel(
+              page: '${ctx.pageNumber}',
+              total: '${ctx.pagesCount}',
+            ),
+            style: pw.TextStyle(
+              font: semiBold,
+              fontSize: 6.5,
+              color: _textSec,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

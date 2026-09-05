@@ -9,45 +9,38 @@ import '../../../guru_absensi/domain/models/absensi_model.dart';
 import '../../domain/helpers/schedule_helper.dart';
 import '../../domain/models/laporan_absensi_config.dart';
 
-/// Pure static helper that builds a [pw.Document] and returns its bytes.
+/// PDF Builder for individual student Attendance reports with unified minimalist, modern editorial layout.
 class AbsensiPdfBuilder {
   AbsensiPdfBuilder._();
 
-  // ─── Helper Konversi Warna ─────────────────────────────────────────────────
-  static PdfColor _toPdfColor(Color color) =>
-      PdfColor.fromInt(color.toARGB32());
+  static PdfColor _pc(Color c) => PdfColor.fromInt(c.toARGB32());
 
-  // ─── Colour palette (Terhubung dengan AppColors.light) ───────────────────
-  // Kita menggunakan AppColors.light karena PDF umumnya dicetak di kertas putih/terang
+  // ── Palette (Minimalist, High Contrast, Institutional) ─────────────────────
+  static final _primary = _pc(AppColors.light.primary); // #115D69
+  static final _primaryDark = PdfColor.fromHex('#0C424B');
+  static final _primaryLight = PdfColor.fromHex('#E8F4F6');
 
-  // Warna Utama & Status
-  static final _primary = _toPdfColor(AppColors.light.primary);
-
-  static final _green = _toPdfColor(AppColors.light.green);
-  static final _yellow = _toPdfColor(AppColors.light.yellow);
-  static final _blue = _toPdfColor(AppColors.light.blue);
-  static final _red = _toPdfColor(AppColors.light.red);
-
-  // Warna Background, Teks & Border Semantik
-  static final _background = _toPdfColor(
-    AppColors.light.background,
-  ); // Ditambahkan untuk header
-  static final _textPrimary = _toPdfColor(AppColors.light.textPrimary);
-  static final _textSecondary = _toPdfColor(AppColors.light.textSecondary);
-  static final _border = _toPdfColor(AppColors.light.border);
-  static final _borderLight = _toPdfColor(AppColors.light.borderLight);
-  static final _surface = _toPdfColor(AppColors.light.surface);
-
-  // Background Status (Tetap menggunakan Hex karena belum ada di AppColors)
+  // Status colors
+  static final _green = _pc(AppColors.light.green); // Hadir (#10B981)
   static final _greenBg = PdfColor.fromHex('#ECFDF5');
+
+  static final _yellow = PdfColor.fromHex('#D97706'); // Sakit (#D97706)
   static final _yellowBg = PdfColor.fromHex('#FFFBEB');
+
+  static final _blue = _pc(AppColors.light.blue); // Izin (#3B82F6)
   static final _blueBg = PdfColor.fromHex('#EFF6FF');
+
+  static final _red = PdfColor.fromHex('#EF4444'); // Alpa (#EF4444)
   static final _redBg = PdfColor.fromHex('#FEF2F2');
-  static final _orange = PdfColor.fromHex('#F3722C');
-  static final _orangeBg = PdfColor.fromHex('#FFF5F0');
+
+  static final _textPri = PdfColor.fromHex('#0F172A'); // Slate 900
+  static final _textSec = PdfColor.fromHex('#64748B'); // Slate 500
+  static final _textMuted = PdfColor.fromHex('#94A3B8'); // Slate 400
+  static final _border = PdfColor.fromHex('#E2E8F0'); // Slate 200
+  static final _surface = PdfColor.fromHex('#F8FAFC'); // Slate 50
   static final _white = PdfColors.white;
 
-  // ─── Session definitions ───────────────────────────────────────────────────
+  // ── Session definitions ───────────────────────────────────────────────────
   static List<String> _sessionKeys(String programType) =>
       programType == 'takhassus'
       ? ['shubuh', 'dhuha', 'siang', 'ashar', 'maghrib']
@@ -67,7 +60,7 @@ class AbsensiPdfBuilder {
           t.laporanConfig.pdf.maghrib
         ];
 
-  // ─── Status helpers ────────────────────────────────────────────────────────
+  // ── Status helpers ────────────────────────────────────────────────────────
   static String _statusCode(String status) {
     switch (status.trim().toLowerCase()) {
       case 'hadir':
@@ -88,28 +81,29 @@ class AbsensiPdfBuilder {
 
   static PdfColor _codeColor(String code) {
     if (code == t.laporanConfig.pdf.presentCode) return _green;
-    if (code == 'T') return _orange;
     if (code == t.laporanConfig.pdf.sickCode) return _yellow;
     if (code == t.laporanConfig.pdf.permitCode) return _blue;
     if (code == t.laporanConfig.pdf.absentCode) return _red;
-    return _textSecondary;
+    return _textSec;
   }
 
   static PdfColor _codeBg(String code) {
     if (code == t.laporanConfig.pdf.presentCode) return _greenBg;
-    if (code == 'T') return _orangeBg;
     if (code == t.laporanConfig.pdf.sickCode) return _yellowBg;
     if (code == t.laporanConfig.pdf.permitCode) return _blueBg;
     if (code == t.laporanConfig.pdf.absentCode) return _redBg;
-    return _borderLight;
+    return _surface;
   }
 
-  // ─── Main entry ───────────────────────────────────────────────────────────
+  static DateTime _midnight(DateTime d) => DateTime(d.year, d.month, d.day);
+  static final _fmtKey = DateFormat('yyyy-MM-dd');
+  static final _fmtDate = DateFormat('dd/MM/yy');
+
+  // ── Main entry ────────────────────────────────────────────────────────────
   static Future<Uint8List> build(
     LaporanAbsensiConfig config,
     List<AbsensiModel> allRecords,
   ) async {
-    // 1. Load fonts & logo
     final regular = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Poppins/Poppins-Regular.ttf'),
     );
@@ -121,11 +115,10 @@ class AbsensiPdfBuilder {
     );
     final logo = pw.MemoryImage(
       (await rootBundle.load(
-        'assets/images/my_halaqoh_logo.png',
+        'assets/images/my_halaqoh_logo_new.png',
       )).buffer.asUint8List(),
     );
 
-    // 2. Filter records to date range
     final sD = _midnight(config.startDate);
     final eD = _midnight(config.endDate);
     final filtered = allRecords.where((r) {
@@ -133,7 +126,6 @@ class AbsensiPdfBuilder {
       return !d.isBefore(sD) && !d.isAfter(eD);
     }).toList();
 
-    // 3. Build per-day map  { 'yyyy-MM-dd' → { sesiKey → statusCode } }
     final keys = _sessionKeys(config.programType);
     final Map<String, Map<String, String>> byDay = {};
     for (final rec in filtered) {
@@ -147,11 +139,10 @@ class AbsensiPdfBuilder {
       byDay.putIfAbsent(dateKey, () => {})[sesiKey] = _statusCode(entry.status);
     }
 
-    // 4. Compute totals
     int hadir = 0, sakit = 0, izin = 0, alfa = 0;
     for (final day in byDay.values) {
       for (final code in day.values) {
-        if (code == t.laporanConfig.pdf.presentCode || code == 'T') {
+        if (code == t.laporanConfig.pdf.presentCode) {
           hadir++;
         } else if (code == t.laporanConfig.pdf.sickCode) {
           sakit++;
@@ -163,15 +154,12 @@ class AbsensiPdfBuilder {
       }
     }
 
-    // 5. Build sorted day list for the full range
     final dayCount = eD.difference(sD).inDays + 1;
     final days = List.generate(
       dayCount,
       (i) => DateTime(sD.year, sD.month, sD.day + i),
     );
 
-    // Use the real per-weekday schedule instead of a flat sessionsPerDay × dayCount.
-    // Mon–Thu = full sessions; Fri/Sat/Sun = reduced sessions (see ScheduleHelper).
     final totalScheduled = ScheduleHelper.totalScheduledSessions(
       sD,
       eD,
@@ -179,8 +167,6 @@ class AbsensiPdfBuilder {
     );
     final rate = totalScheduled > 0 ? hadir / totalScheduled : 0.0;
 
-    // 6. Period label
-    // 6. Period label
     final fmtFull = DateFormat('dd MMMM yyyy', t.$meta.locale.languageCode);
     final fmtMonth = DateFormat('MMMM yyyy', t.$meta.locale.languageCode);
     final period = config.range == ReportRange.monthly
@@ -188,10 +174,8 @@ class AbsensiPdfBuilder {
         : '${fmtFull.format(config.startDate)} – ${fmtFull.format(config.endDate)}';
     final printedOn = fmtFull.format(DateTime.now());
 
-    // 7. Session labels for this programType
     final sLabels = _sessionLabels(config.programType);
 
-    // ── Build document ────────────────────────────────────────────────────
     final doc = pw.Document(
       title: '${t.laporanConfig.attendanceReport} – ${config.santriName}',
       author: 'MyHalaqoh',
@@ -200,12 +184,12 @@ class AbsensiPdfBuilder {
     doc.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.symmetric(horizontal: 36, vertical: 30),
+        margin: const pw.EdgeInsets.symmetric(horizontal: 36, vertical: 32),
         theme: pw.ThemeData.withFont(base: regular, bold: bold),
         build: (ctx) => [
           _buildHeader(logo, bold, semiBold, regular, period, printedOn),
-          pw.SizedBox(height: 14),
-          _buildStudentInfo(config, semiBold, regular, bold),
+          pw.SizedBox(height: 12),
+          _buildStudentInfoCard(config, bold, semiBold, regular),
           pw.SizedBox(height: 14),
           _buildSummarySection(
             hadir,
@@ -218,44 +202,21 @@ class AbsensiPdfBuilder {
             semiBold,
             regular,
           ),
-          pw.SizedBox(height: 16),
+          pw.SizedBox(height: 14),
           _buildSectionTitle(t.laporanConfig.pdf.dailyDetailTitle, bold),
           pw.SizedBox(height: 6),
           _buildDetailTable(days, byDay, keys, sLabels, semiBold, regular),
           pw.SizedBox(height: 10),
           _buildLegend(regular, semiBold),
         ],
-        footer: (ctx) => pw.Padding(
-          padding: const pw.EdgeInsets.only(top: 8),
-          child: pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              pw.Text(
-                t.laporanConfig.pdf.systemName,
-                style: pw.TextStyle(
-                  font: regular,
-                  fontSize: 7,
-                  color: _textSecondary,
-                ),
-              ),
-              pw.Text(
-                t.laporanConfig.pdf.pageLabel(page: '${ctx.pageNumber}', total: '${ctx.pagesCount}'),
-                style: pw.TextStyle(
-                  font: semiBold,
-                  fontSize: 7,
-                  color: _textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
+        footer: (ctx) => _buildFooter(config.santriName, regular, semiBold, ctx),
       ),
     );
 
     return doc.save();
   }
 
-  // ─── Section builders ─────────────────────────────────────────────────────
+  // ── Global Header (Minimalist & Modern Letterhead) ─────────────────────────
 
   static pw.Widget _buildHeader(
     pw.MemoryImage logo,
@@ -266,27 +227,24 @@ class AbsensiPdfBuilder {
     String printedOn,
   ) {
     return pw.Container(
-      padding: const pw.EdgeInsets.fromLTRB(16, 14, 16, 14),
+      padding: const pw.EdgeInsets.only(bottom: 12),
       decoration: pw.BoxDecoration(
-        color: _background, // Background diganti menjadi _background
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-        // Ditambahkan border tipis agar header tetap terpisah jelas jika background sama dengan warna kertas
-        border: pw.Border.all(color: _border, width: 0.5),
+        border: pw.Border(
+          bottom: pw.BorderSide(color: _border, width: 1.2),
+        ),
       ),
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.center,
         children: [
+          // Logo (my_halaqoh_logo_new.png)
           pw.Container(
-            width: 48,
-            height: 48,
-            decoration: pw.BoxDecoration(
-              color: _primary, // Lingkaran logo menggunakan warna _primary
-              shape: pw.BoxShape.circle,
-            ),
-            padding: const pw.EdgeInsets.all(6),
-            child: pw.Image(logo),
+            width: 38,
+            height: 38,
+            child: pw.Image(logo, fit: pw.BoxFit.contain),
           ),
-          pw.SizedBox(width: 14),
+          pw.SizedBox(width: 12),
+
+          // Title & Subtitle
           pw.Expanded(
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -295,53 +253,50 @@ class AbsensiPdfBuilder {
                   'MyHalaqoh',
                   style: pw.TextStyle(
                     font: bold,
-                    fontSize: 15,
+                    fontSize: 14,
                     color: _primary,
-                  ), // Text warna _primary
+                    letterSpacing: 0.3,
+                  ),
                 ),
-                pw.SizedBox(height: 2),
+                pw.SizedBox(height: 1),
                 pw.Text(
                   t.laporanConfig.pdf.titleAttendance,
                   style: pw.TextStyle(
-                    font: regular,
-                    fontSize: 8.5,
-                    color: _primary, // Text warna _primary
+                    font: semiBold,
+                    fontSize: 9,
+                    color: _textPri,
                   ),
                 ),
               ],
             ),
           ),
+
+          // Meta Pill (Period & Print Date)
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 3,
-                ),
+                padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: pw.BoxDecoration(
-                  // Menggunakan _surface agar teks _primary tetap bisa terbaca (sebelumnya hardcode warna hijau tua)
-                  color: _surface,
-                  borderRadius: const pw.BorderRadius.all(
-                    pw.Radius.circular(4),
-                  ),
+                  color: _primaryLight,
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
                 ),
                 child: pw.Text(
                   period,
                   style: pw.TextStyle(
                     font: semiBold,
-                    fontSize: 7.5,
-                    color: _primary, // Text warna _primary
+                    fontSize: 8,
+                    color: _primaryDark,
                   ),
                 ),
               ),
-              pw.SizedBox(height: 4),
+              pw.SizedBox(height: 3),
               pw.Text(
                 t.laporanConfig.pdf.printedAt(date: printedOn),
                 style: pw.TextStyle(
                   font: regular,
                   fontSize: 7,
-                  color: _primary, // Text warna _primary
+                  color: _textSec,
                 ),
               ),
             ],
@@ -351,66 +306,100 @@ class AbsensiPdfBuilder {
     );
   }
 
-  static pw.Widget _buildStudentInfo(
+  // ── Student Information Card (Horizontal 4-Column Strip) ───────────────────
+
+  static pw.Widget _buildStudentInfoCard(
     LaporanAbsensiConfig config,
+    pw.Font bold,
     pw.Font semiBold,
     pw.Font regular,
-    pw.Font bold,
   ) {
     return pw.Container(
       decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: _border),
+        color: _surface,
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+        border: pw.Border.all(color: _border, width: 0.8),
       ),
-      child: pw.Column(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Container(
-            width: double.infinity,
-            padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: pw.BoxDecoration(
-              color: _borderLight,
-              border: pw.Border.all(color: _border, width: 0.5),
-            ),
-            child: pw.Text(
-              t.laporanConfig.pdf.studentInfo,
-              style: pw.TextStyle(font: bold, fontSize: 9, color: _textPrimary),
+          _infoField(
+            label: t.laporanConfig.pdf.studentName,
+            value: config.santriName,
+            bold: semiBold,
+            regular: regular,
+          ),
+          _infoDivider(),
+          _infoField(
+            label: t.laporanConfig.pdf.nis,
+            value: config.santriNis,
+            bold: semiBold,
+            regular: regular,
+          ),
+          _infoDivider(),
+          _infoField(
+            label: t.laporanConfig.pdf.halaqoh,
+            value: config.halaqohName,
+            bold: semiBold,
+            regular: regular,
+          ),
+          _infoDivider(),
+          _infoField(
+            label: t.laporanConfig.pdf.pembimbing,
+            value: config.guruNama,
+            bold: semiBold,
+            regular: regular,
+          ),
+        ],
+      ),
+    );
+  }
+
+  static pw.Widget _infoDivider() {
+    return pw.Container(
+      width: 1,
+      height: 22,
+      color: _border,
+      margin: const pw.EdgeInsets.symmetric(horizontal: 8),
+    );
+  }
+
+  static pw.Widget _infoField({
+    required String label,
+    required String value,
+    required pw.Font bold,
+    required pw.Font regular,
+  }) {
+    return pw.Expanded(
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            label.toUpperCase(),
+            style: pw.TextStyle(
+              font: regular,
+              fontSize: 6.5,
+              color: _textMuted,
+              letterSpacing: 0.3,
             ),
           ),
-          pw.Padding(
-            padding: const pw.EdgeInsets.all(12),
-            child: pw.Table(
-              columnWidths: {
-                0: const pw.FlexColumnWidth(1),
-                1: const pw.FlexColumnWidth(1),
-              },
-              children: [
-                pw.TableRow(
-                  children: [
-                    _infoCell(
-                      t.laporanConfig.pdf.studentName,
-                      config.santriName,
-                      semiBold,
-                      regular,
-                    ),
-                    _infoCell(t.laporanConfig.pdf.nis, config.santriNis, semiBold, regular),
-                  ],
-                ),
-                pw.TableRow(
-                  children: [pw.SizedBox(height: 8), pw.SizedBox(height: 8)],
-                ),
-                pw.TableRow(
-                  children: [
-                    _infoCell(t.laporanConfig.pdf.halaqoh, config.halaqohName, semiBold, regular),
-                    _infoCell(t.laporanConfig.pdf.pembimbing, config.guruNama, semiBold, regular),
-                  ],
-                ),
-              ],
+          pw.SizedBox(height: 2),
+          pw.Text(
+            value,
+            maxLines: 1,
+            style: pw.TextStyle(
+              font: bold,
+              fontSize: 8.5,
+              color: _textPri,
             ),
           ),
         ],
       ),
     );
   }
+
+  // ── Summary Section ───────────────────────────────────────────────────────
 
   static pw.Widget _buildSummarySection(
     int hadir,
@@ -424,138 +413,87 @@ class AbsensiPdfBuilder {
     pw.Font regular,
   ) {
     final pct = '${(rate * 100).toStringAsFixed(1)}%';
+    final rateColor = rate >= 0.85 ? _green : (rate >= 0.70 ? _yellow : _red);
+    final rateBg = rate >= 0.85 ? _greenBg : (rate >= 0.70 ? _yellowBg : _redBg);
 
     return pw.Container(
       decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: _border),
+        color: _surface,
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+        border: pw.Border.all(color: _border, width: 0.8),
       ),
+      padding: const pw.EdgeInsets.all(10),
       child: pw.Column(
         children: [
-          pw.Container(
-            width: double.infinity,
-            padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: pw.BoxDecoration(
-              color: _surface,
-              border: pw.Border(
-                bottom: pw.BorderSide(color: _border, width: 0.5),
+          pw.Row(
+            children: [
+              _statMetricCard(
+                value: '$hadir',
+                label: t.laporanConfig.pdf.present,
+                code: t.laporanConfig.pdf.presentCode,
+                color: _green,
+                bgColor: _greenBg,
+                bold: bold,
+                regular: regular,
               ),
-            ),
-            child: pw.Text(
-              t.laporanConfig.pdf.summaryAttendance,
-              style: pw.TextStyle(font: bold, fontSize: 9, color: _textPrimary),
-            ),
+              pw.SizedBox(width: 6),
+              _statMetricCard(
+                value: '$sakit',
+                label: t.laporanConfig.pdf.sick,
+                code: t.laporanConfig.pdf.sickCode,
+                color: _yellow,
+                bgColor: _yellowBg,
+                bold: bold,
+                regular: regular,
+              ),
+              pw.SizedBox(width: 6),
+              _statMetricCard(
+                value: '$izin',
+                label: t.laporanConfig.pdf.permit,
+                code: t.laporanConfig.pdf.permitCode,
+                color: _blue,
+                bgColor: _blueBg,
+                bold: bold,
+                regular: regular,
+              ),
+              pw.SizedBox(width: 6),
+              _statMetricCard(
+                value: '$alfa',
+                label: t.laporanConfig.pdf.absent,
+                code: t.laporanConfig.pdf.absentCode,
+                color: _red,
+                bgColor: _redBg,
+                bold: bold,
+                regular: regular,
+              ),
+            ],
           ),
-          pw.Padding(
-            padding: const pw.EdgeInsets.all(12),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+          pw.SizedBox(height: 8),
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: pw.BoxDecoration(
+              color: rateBg,
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+              border: pw.Border.all(color: rateColor, width: 0.5),
+            ),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Table(
-                  columnWidths: {
-                    0: const pw.FlexColumnWidth(1),
-                    1: const pw.FlexColumnWidth(1),
-                    2: const pw.FlexColumnWidth(1),
-                    3: const pw.FlexColumnWidth(1),
-                  },
+                pw.Row(
                   children: [
-                    pw.TableRow(
-                      children: [
-                        _statCard(
-                          '$hadir',
-                          t.laporanConfig.pdf.present,
-                          t.laporanConfig.pdf.presentCode,
-                          _green,
-                          _greenBg,
-                          bold,
-                          semiBold,
-                          regular,
-                        ),
-                        _statCard(
-                          '$sakit',
-                          t.laporanConfig.pdf.sick,
-                          t.laporanConfig.pdf.sickCode,
-                          _yellow,
-                          _yellowBg,
-                          bold,
-                          semiBold,
-                          regular,
-                        ),
-                        _statCard(
-                          '$izin',
-                          t.laporanConfig.pdf.permit,
-                          t.laporanConfig.pdf.permitCode,
-                          _blue,
-                          _blueBg,
-                          bold,
-                          semiBold,
-                          regular,
-                        ),
-                        _statCard(
-                          '$alfa',
-                          t.laporanConfig.pdf.absent,
-                          t.laporanConfig.pdf.absentCode,
-                          _red,
-                          _redBg,
-                          bold,
-                          semiBold,
-                          regular,
-                        ),
-                      ],
+                    pw.Text(
+                      '${t.laporanConfig.pdf.attendanceRate}: ',
+                      style: pw.TextStyle(font: regular, fontSize: 8, color: _textPri),
+                    ),
+                    pw.Text(
+                      pct,
+                      style: pw.TextStyle(font: bold, fontSize: 10, color: rateColor),
                     ),
                   ],
                 ),
-                pw.SizedBox(height: 12),
-                pw.Table(
-                  columnWidths: {
-                    0: const pw.FlexColumnWidth(1),
-                    1: const pw.FixedColumnWidth(180),
-                  },
-                  children: [
-                    pw.TableRow(
-                      verticalAlignment: pw.TableCellVerticalAlignment.middle,
-                      children: [
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.only(right: 12),
-                          child: pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Row(
-                                children: [
-                                  pw.Text(
-                                    '${t.laporanConfig.pdf.attendanceRate}  ',
-                                    style: pw.TextStyle(
-                                      font: regular,
-                                      fontSize: 8.5,
-                                      color: _textSecondary,
-                                    ),
-                                  ),
-                                  pw.Text(
-                                    pct,
-                                    style: pw.TextStyle(
-                                      font: bold,
-                                      fontSize: 13,
-                                      color: _green,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              pw.SizedBox(height: 2),
-                              pw.Text(
-                                t.laporanConfig.pdf.totalScheduled(hadir: '$hadir', total: '$totalScheduled'),
-                                style: pw.TextStyle(
-                                  font: regular,
-                                  fontSize: 7.5,
-                                  color: _textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        _progressBar(rate),
-                      ],
-                    ),
-                  ],
+                pw.Text(
+                  t.laporanConfig.pdf.totalScheduled(hadir: '$hadir', total: '$totalScheduled'),
+                  style: pw.TextStyle(font: regular, fontSize: 7.5, color: _textSec),
                 ),
               ],
             ),
@@ -565,26 +503,59 @@ class AbsensiPdfBuilder {
     );
   }
 
-  static pw.Widget _buildSectionTitle(String title, pw.Font bold) {
-    return pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
-      children: [
-        pw.Container(
-          width: 3,
-          height: 14,
-          decoration: pw.BoxDecoration(
-            color: _green,
-            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
-          ),
+  static pw.Widget _statMetricCard({
+    required String value,
+    required String label,
+    required String code,
+    required PdfColor color,
+    required PdfColor bgColor,
+    required pw.Font bold,
+    required pw.Font regular,
+  }) {
+    return pw.Expanded(
+      child: pw.Container(
+        padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        decoration: pw.BoxDecoration(
+          color: bgColor,
+          borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+          border: pw.Border.all(color: color, width: 0.5),
         ),
-        pw.SizedBox(width: 6),
-        pw.Text(
-          title,
-          style: pw.TextStyle(font: bold, fontSize: 10, color: _textPrimary),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            pw.Text(
+              value,
+              style: pw.TextStyle(
+                font: bold,
+                fontSize: 14,
+                color: color,
+              ),
+            ),
+            pw.SizedBox(height: 1),
+            pw.Text(
+              '$label ($code)',
+              style: pw.TextStyle(
+                font: regular,
+                fontSize: 6.5,
+                color: _textSec,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
+
+  // ── Section Title ─────────────────────────────────────────────────────────
+
+  static pw.Widget _buildSectionTitle(String title, pw.Font bold) {
+    return pw.Text(
+      title,
+      style: pw.TextStyle(font: bold, fontSize: 8.5, color: _textPri),
+    );
+  }
+
+  // ── Detail Table ──────────────────────────────────────────────────────────
 
   static pw.Widget _buildDetailTable(
     List<DateTime> days,
@@ -595,65 +566,83 @@ class AbsensiPdfBuilder {
     pw.Font regular,
   ) {
     final sessionCount = keys.length;
-    final double sessionColW = sessionCount <= 2 ? 46.0 : 42.0;
+    final double sessionColW = sessionCount <= 2 ? 52.0 : 42.0;
 
     final Map<int, pw.TableColumnWidth> colWidths = {
-      0: const pw.FixedColumnWidth(44),
-      1: const pw.FixedColumnWidth(26),
-      for (int i = 0; i < sessionCount; i++)
-        (i + 2): pw.FixedColumnWidth(sessionColW),
-      (sessionCount + 2): const pw.FlexColumnWidth(),
+      0: const pw.FixedColumnWidth(48), // Tanggal
+      1: const pw.FixedColumnWidth(30), // Hari
     };
+    for (int i = 0; i < sessionCount; i++) {
+      colWidths[i + 2] = pw.FixedColumnWidth(sessionColW);
+    }
+    colWidths[sessionCount + 2] = const pw.FlexColumnWidth();
 
     final headerRow = pw.TableRow(
-      decoration: pw.BoxDecoration(color: _textPrimary),
+      decoration: pw.BoxDecoration(color: _primary),
       children: [
-        _thCell(t.laporanConfig.pdf.dateHeader, semiBold, color: _white),
-        _thCell(t.laporanConfig.pdf.dayHeader, semiBold, color: _white),
-        for (final label in sLabels)
-          _thCell(
-            label,
-            semiBold,
-            color: _white,
-            fontSize: sessionCount > 2 ? 6.5 : 7.5,
-          ),
-        _thCell(
-          t.laporanConfig.pdf.keteranganLabel,
-          semiBold,
-          color: _white,
-          align: pw.TextAlign.left,
-        ),
+        _th(t.laporanConfig.pdf.dateShort, semiBold),
+        _th(t.laporanConfig.pdf.dayHeader, semiBold),
+        for (final lbl in sLabels) _th(lbl, semiBold),
+        _th(t.laporanConfig.pdf.keteranganLabel, semiBold),
       ],
     );
 
     final dataRows = days.asMap().entries.map((entry) {
       final idx = entry.key;
-      final date = entry.value;
-      final dayData = byDay[_fmtKey.format(date)] ?? {};
-      final note = _buildNote(dayData, keys);
+      final d = entry.value;
       final isEven = idx % 2 == 0;
-      final isFriday = date.weekday == DateTime.friday;
+      final bg = isEven ? _white : _surface;
+      final dateKey = _fmtKey.format(d);
+      final dayMap = byDay[dateKey] ?? {};
+
+      // Determine overall day status
+      final codes = dayMap.values.toList();
+      final String overallStatus;
+      final PdfColor overallColor;
+      final PdfColor overallBg;
+
+      if (codes.isEmpty) {
+        overallStatus = '-';
+        overallColor = _textSec;
+        overallBg = _surface;
+      } else if (codes.every((c) => c == t.laporanConfig.pdf.presentCode)) {
+        overallStatus = t.laporanConfig.pdf.present;
+        overallColor = _green;
+        overallBg = _greenBg;
+      } else if (codes.any((c) => c == t.laporanConfig.pdf.absentCode)) {
+        overallStatus = t.laporanConfig.pdf.absent;
+        overallColor = _red;
+        overallBg = _redBg;
+      } else if (codes.any((c) => c == t.laporanConfig.pdf.sickCode)) {
+        overallStatus = t.laporanConfig.pdf.sick;
+        overallColor = _yellow;
+        overallBg = _yellowBg;
+      } else if (codes.any((c) => c == t.laporanConfig.pdf.permitCode)) {
+        overallStatus = t.laporanConfig.pdf.permit;
+        overallColor = _blue;
+        overallBg = _blueBg;
+      } else if (codes.any((c) => c == t.laporanConfig.pdf.presentCode)) {
+        overallStatus = t.laporanConfig.pdf.present;
+        overallColor = _green;
+        overallBg = _greenBg;
+      } else {
+        overallStatus = '-';
+        overallColor = _textSec;
+        overallBg = _surface;
+      }
 
       return pw.TableRow(
-        decoration: pw.BoxDecoration(
-          color: isFriday
-              ? PdfColor.fromHex('#F0FDF4')
-              : (isEven ? _white : _surface),
-        ),
+        decoration: pw.BoxDecoration(color: bg),
         children: [
-          _tdCell(
-            DateFormat('dd/MM/yy', t.$meta.locale.languageCode).format(date),
+          _td(_fmtDate.format(d), regular, align: pw.TextAlign.center),
+          _td(
+            t.calendar.daysAbbr[(d.weekday - 1) % 7],
             regular,
             align: pw.TextAlign.center,
           ),
-          _tdCell(
-            _shortDay(date.weekday),
-            isFriday ? semiBold : regular,
-            align: pw.TextAlign.center,
-            color: isFriday ? _green : null,
-          ),
-          for (final key in keys) _statusCell(dayData[key] ?? '-', semiBold),
-          _tdCell(note, regular),
+          for (final k in keys)
+            _tdSessionBadge(dayMap[k] ?? '-', semiBold),
+          _tdStatusBadge(overallStatus, semiBold, overallColor, overallBg),
         ],
       );
     }).toList();
@@ -665,205 +654,135 @@ class AbsensiPdfBuilder {
     );
   }
 
+  // ── Legend ────────────────────────────────────────────────────────────────
+
   static pw.Widget _buildLegend(pw.Font regular, pw.Font semiBold) {
     final items = [
-      (t.laporanConfig.pdf.presentCode, t.laporanConfig.pdf.present),
-      (t.laporanConfig.pdf.sickCode, t.laporanConfig.pdf.sick),
-      (t.laporanConfig.pdf.permitCode, t.laporanConfig.pdf.permit),
-      (t.laporanConfig.pdf.absentCode, t.laporanConfig.pdf.absent),
-      ('-', t.laporanConfig.pdf.noSession),
+      (
+        t.laporanConfig.pdf.presentCode,
+        t.laporanConfig.pdf.present,
+        _green,
+        _greenBg,
+      ),
+      (
+        t.laporanConfig.pdf.sickCode,
+        t.laporanConfig.pdf.sick,
+        _yellow,
+        _yellowBg,
+      ),
+      (
+        t.laporanConfig.pdf.permitCode,
+        t.laporanConfig.pdf.permit,
+        _blue,
+        _blueBg,
+      ),
+      (
+        t.laporanConfig.pdf.absentCode,
+        t.laporanConfig.pdf.absent,
+        _red,
+        _redBg,
+      ),
     ];
 
     return pw.Container(
-      padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: pw.BoxDecoration(
         color: _surface,
         border: pw.Border.all(color: _border, width: 0.5),
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
       ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
+      child: pw.Row(
         children: [
           pw.Text(
-            t.laporanConfig.pdf.legenda,
-            style: pw.TextStyle(
-              font: semiBold,
-              fontSize: 7.5,
-              color: _textSecondary,
-            ),
+            '${t.laporanConfig.pdf.keteranganLabel}:',
+            style: pw.TextStyle(font: semiBold, fontSize: 6.5, color: _textSec),
           ),
-          pw.SizedBox(height: 6),
-          pw.Row(
-            children: items.map((item) {
-              final code = item.$1;
-              final label = item.$2;
-              final color = _codeColor(code);
-              final bg = _codeBg(code);
-              return pw.Padding(
-                padding: const pw.EdgeInsets.only(right: 10),
-                child: pw.Row(
-                  mainAxisSize: pw.MainAxisSize.min,
-                  children: [
-                    pw.Container(
-                      width: 18,
-                      height: 18,
-                      alignment: pw.Alignment.center,
-                      decoration: pw.BoxDecoration(
-                        color: code == '-' ? _borderLight : bg,
-                        shape: pw.BoxShape.circle,
-                        border: pw.Border.all(
-                          color: code == '-' ? _border : color,
-                          width: 0.8,
-                        ),
-                      ),
-                      child: pw.Text(
-                        code,
-                        textAlign: pw.TextAlign.center,
-                        style: pw.TextStyle(
-                          font: semiBold,
-                          fontSize: 7,
-                          color: code == '-' ? _textSecondary : color,
-                        ),
+          pw.SizedBox(width: 8),
+          pw.Expanded(
+            child: pw.Row(
+              children: items
+                  .map(
+                    (item) => pw.Padding(
+                      padding: const pw.EdgeInsets.only(right: 10),
+                      child: pw.Row(
+                        mainAxisSize: pw.MainAxisSize.min,
+                        children: [
+                          pw.Container(
+                            width: 18,
+                            height: 12,
+                            alignment: pw.Alignment.center,
+                            decoration: pw.BoxDecoration(
+                              color: item.$4,
+                              borderRadius: const pw.BorderRadius.all(
+                                pw.Radius.circular(2),
+                              ),
+                              border: pw.Border.all(color: item.$3, width: 0.5),
+                            ),
+                            child: pw.Text(
+                              item.$1,
+                              style: pw.TextStyle(
+                                font: semiBold,
+                                fontSize: 6,
+                                color: item.$3,
+                              ),
+                            ),
+                          ),
+                          pw.SizedBox(width: 3),
+                          pw.Text(
+                            item.$2,
+                            style: pw.TextStyle(
+                              font: regular,
+                              fontSize: 6.5,
+                              color: _textSec,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    pw.SizedBox(width: 4),
-                    pw.Text(
-                      label,
-                      style: pw.TextStyle(
-                        font: regular,
-                        fontSize: 7.5,
-                        color: _textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
+                  )
+                  .toList(),
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ─── Atomic widget helpers ────────────────────────────────────────────────
+  // ── Footer ────────────────────────────────────────────────────────────────
 
-  static pw.Widget _statCard(
-    String value,
-    String label,
-    String code,
-    PdfColor accent,
-    PdfColor bgColor,
-    pw.Font bold,
-    pw.Font semiBold,
+  static pw.Widget _buildFooter(
+    String santriName,
     pw.Font regular,
+    pw.Font semiBold,
+    pw.Context ctx,
   ) {
     return pw.Container(
-      margin: const pw.EdgeInsets.symmetric(horizontal: 3),
-      padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+      padding: const pw.EdgeInsets.only(top: 8),
       decoration: pw.BoxDecoration(
-        color: bgColor,
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
-        border: pw.Border.all(color: accent, width: 0.5),
+        border: pw.Border(
+          top: pw.BorderSide(color: _border, width: 0.5),
+        ),
       ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Container(
-            width: 22,
-            height: 22,
-            alignment: pw.Alignment.center,
-            decoration: pw.BoxDecoration(
-              color: accent,
-              shape: pw.BoxShape.circle,
-            ),
-            child: pw.Text(
-              code,
-              textAlign: pw.TextAlign.center,
-              style: pw.TextStyle(font: bold, fontSize: 8, color: _white),
-            ),
-          ),
-          pw.SizedBox(height: 5),
           pw.Text(
-            value,
-            textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(font: bold, fontSize: 22, color: accent),
-          ),
-          pw.SizedBox(height: 2),
-          pw.Text(
-            label,
-            textAlign: pw.TextAlign.center,
+            'MyHalaqoh • $santriName',
             style: pw.TextStyle(
               font: regular,
-              fontSize: 7.5,
-              color: _textSecondary,
+              fontSize: 6.5,
+              color: _textMuted,
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  static pw.Widget _progressBar(double rate) {
-    const totalW = 180.0;
-    final fillFraction = rate.clamp(0.0, 1.0);
-    final fillW = totalW * fillFraction;
-    final barColor = fillFraction >= 0.75
-        ? _green
-        : (fillFraction >= 0.5 ? _yellow : _red);
-
-    return pw.SizedBox(
-      width: totalW,
-      height: 10,
-      child: pw.Stack(
-        children: [
-          pw.Container(
-            width: totalW,
-            height: 10,
-            decoration: pw.BoxDecoration(
-              color: _border,
-              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
-            ),
-          ),
-          if (fillW > 0)
-            pw.Container(
-              width: fillW,
-              height: 10,
-              decoration: pw.BoxDecoration(
-                color: barColor,
-                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  static pw.Widget _infoCell(
-    String label,
-    String value,
-    pw.Font semiBold,
-    pw.Font regular,
-  ) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.only(right: 8),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
           pw.Text(
-            label,
-            style: pw.TextStyle(
-              font: regular,
-              fontSize: 7.5,
-              color: _textSecondary,
+            t.laporanConfig.pdf.pageLabel(
+              page: '${ctx.pageNumber}',
+              total: '${ctx.pagesCount}',
             ),
-          ),
-          pw.SizedBox(height: 1),
-          pw.Text(
-            value,
             style: pw.TextStyle(
               font: semiBold,
-              fontSize: 9,
-              color: _textPrimary,
+              fontSize: 6.5,
+              color: _textSec,
             ),
           ),
         ],
@@ -871,120 +790,87 @@ class AbsensiPdfBuilder {
     );
   }
 
-  static pw.Widget _thCell(
+  // ── Cell Helpers ──────────────────────────────────────────────────────────
+
+  static pw.Widget _th(
     String text,
     pw.Font font, {
     pw.TextAlign align = pw.TextAlign.center,
-    PdfColor? color,
-    double fontSize = 7.5, // ← tambah parameter ini
   }) {
     return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      padding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 4),
       child: pw.Text(
         text,
         textAlign: align,
-        style: pw.TextStyle(
-          font: font,
-          fontSize: fontSize, // ← gunakan di sini
-          color: color ?? _textPrimary,
-        ),
+        style: pw.TextStyle(font: font, fontSize: 6.5, color: _white),
       ),
     );
   }
 
-  static pw.Widget _tdCell(
+  static pw.Widget _td(
     String text,
     pw.Font font, {
     pw.TextAlign align = pw.TextAlign.left,
-    PdfColor? color,
   }) {
     return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      padding: const pw.EdgeInsets.symmetric(vertical: 3.5, horizontal: 4),
       child: pw.Text(
         text,
         textAlign: align,
-        style: pw.TextStyle(
-          font: font,
-          fontSize: 7.5,
-          color: color ?? _textSecondary,
-        ),
+        style: pw.TextStyle(font: font, fontSize: 7, color: _textPri),
       ),
     );
   }
 
-  static pw.Widget _statusCell(String code, pw.Font font) {
-    final accent = _codeColor(code);
+  static pw.Widget _tdSessionBadge(String code, pw.Font font) {
+    final color = _codeColor(code);
     final bg = _codeBg(code);
-    final isDash = code == '-';
-
     return pw.Padding(
-      padding: const pw.EdgeInsets.all(3),
+      padding: const pw.EdgeInsets.symmetric(vertical: 2, horizontal: 2),
       child: pw.Align(
         alignment: pw.Alignment.center,
         child: pw.Container(
-          width: 22,
-          height: 22,
+          width: 18,
+          height: 14,
           alignment: pw.Alignment.center,
           decoration: pw.BoxDecoration(
-            color: isDash ? null : bg,
-            shape: pw.BoxShape.circle,
-            border: isDash
-                ? pw.Border.all(color: _border, width: 0.5)
-                : pw.Border.all(color: accent, width: 0.5),
+            color: bg,
+            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
+            border: pw.Border.all(color: color, width: 0.5),
           ),
           child: pw.Text(
             code,
             textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(
-              font: font,
-              fontSize: 7.5,
-              color: isDash ? _textSecondary : accent,
-            ),
+            style: pw.TextStyle(font: font, fontSize: 6.5, color: color),
           ),
         ),
       ),
     );
   }
 
-  // ─── Utility ──────────────────────────────────────────────────────────────
-  static final _fmtKey = DateFormat('yyyy-MM-dd');
-
-  static DateTime _midnight(DateTime d) => DateTime(d.year, d.month, d.day);
-
-  static String _shortDay(int weekday) {
-    return t.calendar.daysAbbr[(weekday - 1) % 7];
-  }
-
-  static String _buildNote(Map<String, String> dayData, List<String> keys) {
-    final absent = <String>[];
-    for (final key in keys) {
-      if (dayData[key] == 'A') absent.add(_sesiLabel(key));
-    }
-    if (absent.isNotEmpty) return '${t.laporanConfig.pdf.absent}: ${absent.join(', ')}';
-
-    final sakit = <String>[];
-    for (final key in keys) {
-      if (dayData[key] == 'S') sakit.add(_sesiLabel(key));
-    }
-    if (sakit.isNotEmpty) return '${t.laporanConfig.pdf.sick}: ${sakit.join(', ')}';
-
-    return '';
-  }
-
-  static String _sesiLabel(String key) {
-    switch (key) {
-      case 'shubuh':
-        return t.laporanConfig.pdf.shubuh;
-      case 'dhuha':
-        return t.laporanConfig.pdf.dhuha;
-      case 'siang':
-        return t.laporanConfig.pdf.siang;
-      case 'ashar':
-        return t.laporanConfig.pdf.ashar;
-      case 'maghrib':
-        return t.laporanConfig.pdf.maghrib;
-      default:
-        return key;
-    }
+  static pw.Widget _tdStatusBadge(
+    String text,
+    pw.Font font,
+    PdfColor color,
+    PdfColor bg,
+  ) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2.5, horizontal: 4),
+      child: pw.Align(
+        alignment: pw.Alignment.centerLeft,
+        child: pw.Container(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+          decoration: pw.BoxDecoration(
+            color: bg,
+            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
+            border: pw.Border.all(color: color, width: 0.5),
+          ),
+          child: pw.Text(
+            text,
+            style: pw.TextStyle(font: font, fontSize: 6.5, color: color),
+          ),
+        ),
+      ),
+    );
   }
 }
