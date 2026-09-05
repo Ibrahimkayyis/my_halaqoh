@@ -677,6 +677,7 @@
     "keluar": "Log Out",
     "deleteAccountTitle": "Delete Your Account?",
     "deleteAccountMessage": "This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh.\n\nAre you sure you want to delete your account?",
+    "deleteAccountWarning": "This action is permanent and cannot be undone.",
     "deleteAccountConfirm": "Delete Account"
   },
   "masterDataSettings": {

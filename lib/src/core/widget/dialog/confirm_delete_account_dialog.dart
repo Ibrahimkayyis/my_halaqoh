@@ -122,7 +122,7 @@ class ConfirmDeleteAccountDialog extends StatelessWidget {
                     SizedBox(width: 10.w),
                     Expanded(
                       child: Text(
-                        'Aksi ini permanen dan tidak dapat dibatalkan.',
+                        t.dialogs.deleteAccountWarning,
                         style: TextStyle(
                           fontSize: 11.5.sp,
                           fontWeight: FontWeight.w500,

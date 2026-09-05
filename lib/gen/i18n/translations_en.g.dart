@@ -2186,6 +2186,9 @@ class TranslationsDialogsEn {
 	/// en: 'This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh. Are you sure you want to delete your account?'
 	String get deleteAccountMessage => 'This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh.\n\nAre you sure you want to delete your account?';
 
+	/// en: 'This action is permanent and cannot be undone.'
+	String get deleteAccountWarning => 'This action is permanent and cannot be undone.';
+
 	/// en: 'Delete Account'
 	String get deleteAccountConfirm => 'Delete Account';
 }
@@ -3695,6 +3698,7 @@ extension on Translations {
 			case 'dialogs.keluar': return 'Log Out';
 			case 'dialogs.deleteAccountTitle': return 'Delete Your Account?';
 			case 'dialogs.deleteAccountMessage': return 'This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh.\n\nAre you sure you want to delete your account?';
+			case 'dialogs.deleteAccountWarning': return 'This action is permanent and cannot be undone.';
 			case 'dialogs.deleteAccountConfirm': return 'Delete Account';
 			case 'masterDataSettings.title': return 'Settings';
 			case 'masterDataSettings.tentangAplikasi': return 'About App';

@@ -137,27 +137,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       description: 'Pengguna meminta penghapusan akun mandiri ($uid)',
     );
 
-    bool functionSuccess = false;
     try {
       final callable = _functions.httpsCallable('deleteOwnAccount');
       await callable.call();
-      functionSuccess = true;
-    } catch (_) {
-      functionSuccess = false;
-    }
-
-    if (!functionSuccess) {
-      // Fallback: Delete client-side Firebase Auth directly
-      try {
-        await currentUser.delete();
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'requires-recent-login') {
-          rethrow;
-        }
-        throw Exception('Gagal menghapus akun: ${e.message}');
-      } catch (e) {
-        throw Exception('Gagal menghapus akun: ${e.toString()}');
-      }
+    } on FirebaseFunctionsException catch (e) {
+      throw Exception(e.message ?? 'Gagal menghapus akun: ${e.code}');
+    } catch (e) {
+      throw Exception('Gagal menghapus akun: ${e.toString()}');
     }
 
     // Ensure client-side Firebase Auth session is cleanly cleared

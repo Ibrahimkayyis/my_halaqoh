@@ -1030,6 +1030,7 @@ class _TranslationsDialogsId extends TranslationsDialogsEn {
 	@override String get keluar => 'Keluar';
 	@override String get deleteAccountTitle => 'Hapus Akun Anda?';
 	@override String get deleteAccountMessage => 'Tindakan ini akan menghapus akun login dan profil Anda secara permanen dari server. Anda tidak akan dapat masuk kembali ke aplikasi MyHalaqoh.\n\nApakah Anda yakin ingin menghapus akun?';
+	@override String get deleteAccountWarning => 'Aksi ini permanen dan tidak dapat dibatalkan.';
 	@override String get deleteAccountConfirm => 'Hapus Akun';
 }
 
@@ -2054,6 +2055,7 @@ extension on TranslationsId {
 			case 'dialogs.keluar': return 'Keluar';
 			case 'dialogs.deleteAccountTitle': return 'Hapus Akun Anda?';
 			case 'dialogs.deleteAccountMessage': return 'Tindakan ini akan menghapus akun login dan profil Anda secara permanen dari server. Anda tidak akan dapat masuk kembali ke aplikasi MyHalaqoh.\n\nApakah Anda yakin ingin menghapus akun?';
+			case 'dialogs.deleteAccountWarning': return 'Aksi ini permanen dan tidak dapat dibatalkan.';
 			case 'dialogs.deleteAccountConfirm': return 'Hapus Akun';
 			case 'masterDataSettings.title': return 'Pengaturan';
 			case 'masterDataSettings.tentangAplikasi': return 'Tentang Aplikasi';

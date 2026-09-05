@@ -679,6 +679,7 @@
     "keluar": "Keluar",
     "deleteAccountTitle": "Hapus Akun Anda?",
     "deleteAccountMessage": "Tindakan ini akan menghapus akun login dan profil Anda secara permanen dari server. Anda tidak akan dapat masuk kembali ke aplikasi MyHalaqoh.\n\nApakah Anda yakin ingin menghapus akun?",
+    "deleteAccountWarning": "Aksi ini permanen dan tidak dapat dibatalkan.",
     "deleteAccountConfirm": "Hapus Akun"
   },
   "masterDataSettings": {

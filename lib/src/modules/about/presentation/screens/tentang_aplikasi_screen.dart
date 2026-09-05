@@ -19,7 +19,19 @@ class TentangAplikasiScreen extends StatelessWidget {
   Future<void> _openPrivacyPolicy(BuildContext context) async {
     final uri = Uri.parse(LegalConstants.privacyPolicyUrl);
     try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final launched =
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Gagal membuka Kebijakan Privasi.',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
+            backgroundColor: AppColors.of(context).error,
+          ),
+        );
+      }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

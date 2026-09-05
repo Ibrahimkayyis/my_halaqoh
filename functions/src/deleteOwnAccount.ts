@@ -94,7 +94,11 @@ export const deleteOwnAccount = onCall(async (request) => {
         } catch (authErr: any) {
             // If already deleted or user-not-found, proceed normally
             if (authErr.code !== "auth/user-not-found") {
-                console.warn(`Warning deleting Auth user ${uid}:`, authErr);
+                console.error(`Error deleting Auth user ${uid}:`, authErr);
+                throw new HttpsError(
+                    "internal",
+                    "Gagal menghapus akun: gagal menghapus kredensial login.",
+                );
             }
         }
 
