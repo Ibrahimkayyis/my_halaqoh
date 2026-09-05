@@ -136,6 +136,7 @@ import 'package:my_halaqoh/src/modules/notifications/data/services/wali_santri_n
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_absensi_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_absensi_halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/modules/guru_laporan/presentation/cubits/laporan_hafalan_halaqoh_cubit.dart';
 
 // Sertifikasi Tahfidz — Data & Domain Layer
 import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/data/datasources/remote/source/abstract/sertifikasi_remote_datasource.dart';
@@ -403,6 +404,7 @@ Future<void> initDependencies() async {
   sl.registerFactory<LaporanAbsensiCubit>(() => LaporanAbsensiCubit());
   sl.registerFactory<LaporanAbsensiHalaqohCubit>(() => LaporanAbsensiHalaqohCubit());
   sl.registerFactory<LaporanHafalanCubit>(() => LaporanHafalanCubit(sl()));
+  sl.registerFactory<LaporanHafalanHalaqohCubit>(() => LaporanHafalanHalaqohCubit(sl()));
 
   // ── Super Admin — DataSources ─────────────────────────────────────────────
   sl.registerLazySingleton<ActivityLogRemoteDataSource>(

@@ -1413,6 +1413,12 @@ class TranslationsHafalanEn {
 
 	/// en: 'NIS: $nis'
 	String nisLabel({required Object nis}) => 'NIS: ${nis}';
+
+	/// en: 'Download Report'
+	String get unduhLaporanHalaqoh => 'Download Report';
+
+	/// en: 'Create Memorization Report'
+	String get buatLaporanHafalan => 'Create Memorization Report';
 }
 
 // Path: inputHafalanForm
@@ -2356,6 +2362,9 @@ class TranslationsLaporanConfigEn {
 	/// en: 'Halaqoh Attendance Recap'
 	String get titleHalaqoh => 'Halaqoh Attendance Recap';
 
+	/// en: 'Halaqoh Memorization Recap'
+	String get titleHafalanHalaqoh => 'Halaqoh Memorization Recap';
+
 	/// en: 'Select period & configurations for student's PDF report.'
 	String get subtitleAbsensi => 'Select period & configurations for student\'s PDF report.';
 
@@ -2364,6 +2373,9 @@ class TranslationsLaporanConfigEn {
 
 	/// en: 'Select period to download full halaqoh recap.'
 	String get subtitleHalaqoh => 'Select period to download full halaqoh recap.';
+
+	/// en: 'Select period to download full halaqoh memorization recap.'
+	String get subtitleHafalanHalaqoh => 'Select period to download full halaqoh memorization recap.';
 
 	/// en: 'Time Range'
 	String get timeRange => 'Time Range';
@@ -2439,6 +2451,9 @@ class TranslationsLaporanConfigEn {
 
 	/// en: 'Memorization Report'
 	String get memorizationReport => 'Memorization Report';
+
+	/// en: 'Memorization Recap'
+	String get recapHafalan => 'Memorization Recap';
 
 	/// en: 'Preview'
 	String get btnPreview => 'Preview';
@@ -2822,6 +2837,12 @@ class TranslationsLaporanConfigPdfEn {
 
 	/// en: 'Student Memorization Progress Report'
 	String get titleMemorization => 'Student Memorization Progress Report';
+
+	/// en: 'Halaqoh Memorization Progress Report'
+	String get titleHafalanHalaqohRecap => 'Halaqoh Memorization Progress Report';
+
+	/// en: 'No memorization records in this period'
+	String get noSetoranInPeriod => 'No memorization records in this period';
 
 	/// en: 'Printed on: $date'
 	String printedAt({required Object date}) => 'Printed on: ${date}';
@@ -3412,6 +3433,8 @@ extension on Translations {
 			case 'hafalan.targetLabel': return ({required Object target}) => 'Target: ${target}';
 			case 'hafalan.successSave': return 'Memorization successfully saved!';
 			case 'hafalan.nisLabel': return ({required Object nis}) => 'NIS: ${nis}';
+			case 'hafalan.unduhLaporanHalaqoh': return 'Download Report';
+			case 'hafalan.buatLaporanHafalan': return 'Create Memorization Report';
 			case 'inputHafalanForm.nama': return ({required Object name}) => 'Name: ${name}';
 			case 'inputHafalanForm.ziyadah': return 'ZIYADAH';
 			case 'inputHafalanForm.murajaah': return 'MURAJAAH';
@@ -3692,9 +3715,11 @@ extension on Translations {
 			case 'laporanConfig.titleAbsensi': return 'Download Attendance Report';
 			case 'laporanConfig.titleHafalan': return 'Download Memorization Report';
 			case 'laporanConfig.titleHalaqoh': return 'Halaqoh Attendance Recap';
+			case 'laporanConfig.titleHafalanHalaqoh': return 'Halaqoh Memorization Recap';
 			case 'laporanConfig.subtitleAbsensi': return 'Select period & configurations for student\'s PDF report.';
 			case 'laporanConfig.subtitleHafalan': return 'Select period & configurations for student\'s PDF report.';
 			case 'laporanConfig.subtitleHalaqoh': return 'Select period to download full halaqoh recap.';
+			case 'laporanConfig.subtitleHafalanHalaqoh': return 'Select period to download full halaqoh memorization recap.';
 			case 'laporanConfig.timeRange': return 'Time Range';
 			case 'laporanConfig.weekly': return 'Weekly';
 			case 'laporanConfig.monthly': return 'Monthly';
@@ -3720,6 +3745,7 @@ extension on Translations {
 			case 'laporanConfig.attendanceReport': return 'Attendance Report';
 			case 'laporanConfig.recapAttendance': return 'Attendance Recap';
 			case 'laporanConfig.memorizationReport': return 'Memorization Report';
+			case 'laporanConfig.recapHafalan': return 'Memorization Recap';
 			case 'laporanConfig.btnPreview': return 'Preview';
 			case 'laporanConfig.btnShare': return 'Share';
 			case 'laporanConfig.btnCreateNewReport': return 'Create new report';
@@ -3741,6 +3767,8 @@ extension on Translations {
 			case 'laporanConfig.pdf.titleAttendance': return 'Student Attendance Report';
 			case 'laporanConfig.pdf.titleHalaqohRecap': return 'Halaqoh Attendance Recap Report';
 			case 'laporanConfig.pdf.titleMemorization': return 'Student Memorization Progress Report';
+			case 'laporanConfig.pdf.titleHafalanHalaqohRecap': return 'Halaqoh Memorization Progress Report';
+			case 'laporanConfig.pdf.noSetoranInPeriod': return 'No memorization records in this period';
 			case 'laporanConfig.pdf.printedAt': return ({required Object date}) => 'Printed on: ${date}';
 			case 'laporanConfig.pdf.studentInfo': return 'Student Information';
 			case 'laporanConfig.pdf.halaqohInfo': return 'Halaqoh Information';

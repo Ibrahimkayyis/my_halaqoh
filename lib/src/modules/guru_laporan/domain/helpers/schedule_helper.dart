@@ -45,7 +45,8 @@ class ScheduleHelper {
     DateTime date,
     String programType,
   ) {
-    final isTakhassus = programType.trim().toLowerCase() == 'takhassus';
+    final p = programType.trim().toLowerCase();
+    final isTakhassus = p == 'takhassus' || p == 't';
     switch (date.weekday) {
       case DateTime.friday:
         return isTakhassus ? _takhassusFri : _regulerFri;

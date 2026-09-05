@@ -168,7 +168,7 @@ export const sendAbsensiNotification = onDocumentWritten(
               halaqohNama: halaqohNama,
               tanggal: tanggal.toDate().toISOString(),
               sesi: sesi,
-              status: record.status,
+              status: _normalizeStatus(record.status),
             },
             android: {
               priority: "high",
@@ -263,19 +263,33 @@ export const sendAbsensiNotification = onDocumentWritten(
   }
 );
 
-// ── Formatting helpers ──────────────────────────────────────────────────────
+/**
+ * Normalizes attendance status values.
+ * Variants like 'hadir_barcode', 'hadir_manual', 'terlambat' are all unified to 'hadir'.
+ */
+function _normalizeStatus(raw: string): string {
+  switch (raw.trim().toLowerCase()) {
+    case "hadir_barcode":
+    case "hadir_manual":
+    case "terlambat":
+      return "hadir";
+    default:
+      return raw.trim().toLowerCase();
+  }
+}
 
 /**
  * Maps an internal `status` string to a human-readable label in Bahasa Indonesia.
  */
 function _statusLabel(status: string): string {
+  const normalized = _normalizeStatus(status);
   const map: Record<string, string> = {
     hadir: "✅ Hadir",
     sakit: "🤒 Sakit",
     izin: "📝 Izin",
     alfa: "❌ Alfa",
   };
-  return map[status] ?? status;
+  return map[normalized] ?? status;
 }
 
 /**

@@ -6,8 +6,9 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../guru_hafalan/domain/models/hafalan_santri_model.dart';
+import '../../../master_data/domain/models/santri_model.dart';
 import '../../domain/models/laporan_absensi_config.dart'; // for ReportRange
-import '../../domain/models/laporan_hafalan_config.dart';
+import '../../domain/models/laporan_hafalan_halaqoh_config.dart';
 
 class _Group {
   final DateTime tanggal;
@@ -25,9 +26,15 @@ class _Group {
   int get avg => ((nilaiKelancaran + nilaiTajwid) / 2).round();
 }
 
-/// PDF Builder for individual student Hafalan reports with unified minimalist, modern editorial layout.
-class HafalanPdfBuilder {
-  HafalanPdfBuilder._();
+/// PDF Builder for whole-halaqoh Hafalan reports with minimalist, modern editorial layout.
+///
+/// Features:
+/// - Global Halaqoh letterhead & info block only at the top of the report (using `my_halaqoh_logo_new.png`).
+/// - Compact, clean per-santri header (Name & NIS only, zero redundant bloat).
+/// - Dynamic stats cards with dedicated palette (Purple for Average Score, preventing confusion with Jayyid).
+/// - Direct "Ziyadah" & "Muraja'ah" badges in detail tables and legend.
+class HafalanHalaqohPdfBuilder {
+  HafalanHalaqohPdfBuilder._();
 
   static PdfColor _pc(Color c) => PdfColor.fromInt(c.toARGB32());
 
@@ -114,9 +121,11 @@ class HafalanPdfBuilder {
 
   static final _fmtDate = DateFormat('dd/MM/yy');
 
+  /// Builds a combined, minimalist PDF for all santri in [santriList].
   static Future<Uint8List> build(
-    LaporanHafalanConfig config,
-    List<HafalanSantriModel> allRecords,
+    LaporanHafalanHalaqohConfig config,
+    List<SantriModel> santriList,
+    Map<String, List<HafalanSantriModel>> recordsBySantriId,
   ) async {
     final regular = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Poppins/Poppins-Regular.ttf'),
@@ -135,19 +144,6 @@ class HafalanPdfBuilder {
 
     final sD = _mid(config.startDate);
     final eD = _mid(config.endDate);
-    final filtered = allRecords.where((r) {
-      final d = _mid(r.tanggalSetoran);
-      return d.compareTo(sD) >= 0 && d.compareTo(eD) <= 0;
-    }).toList();
-
-    final groups = _group(filtered);
-    final ziyadah = groups.where((g) => g.jenis.toLowerCase() == 'ziyadah').toList();
-    final murajaah = groups.where((g) => g.jenis.toLowerCase() == 'murajaah').toList();
-    final allAvg = groups.isEmpty
-        ? 0
-        : groups.map((g) => g.avg).reduce((a, b) => a + b) ~/ groups.length;
-
-    final total = groups.length;
 
     final fmtFull = DateFormat('dd MMMM yyyy', t.$meta.locale.languageCode);
     final fmtMon = DateFormat('MMMM yyyy', t.$meta.locale.languageCode);
@@ -157,37 +153,82 @@ class HafalanPdfBuilder {
     final printedOn = fmtFull.format(DateTime.now());
 
     final doc = pw.Document(
-      title: '${t.laporanConfig.memorizationReport} – ${config.santriName}',
+      title:
+          '${t.laporanConfig.pdf.titleHafalanHalaqohRecap} – ${config.halaqohName}',
       author: 'MyHalaqoh',
     );
+
+    // Build document content list
+    final contentWidgets = <pw.Widget>[];
+
+    // 1. Global Document Header (Page 1 top)
+    contentWidgets.add(_buildGlobalHeader(logo, bold, semiBold, regular, period, printedOn));
+    contentWidgets.add(pw.SizedBox(height: 12));
+
+    // 2. Global Halaqoh Information Card (Page 1 only)
+    contentWidgets.add(_buildHalaqohInfoCard(config, santriList.length, bold, semiBold, regular));
+    contentWidgets.add(pw.SizedBox(height: 16));
+
+    // 3. Render each Santri
+    for (int i = 0; i < santriList.length; i++) {
+      final santri = santriList[i];
+
+      // Page break for subsequent students so each student starts on fresh page
+      if (i > 0) {
+        contentWidgets.add(pw.NewPage());
+      }
+
+      final allRecords = recordsBySantriId[santri.id] ?? [];
+      final filtered = allRecords.where((r) {
+        final d = _mid(r.tanggalSetoran);
+        return d.compareTo(sD) >= 0 && d.compareTo(eD) <= 0;
+      }).toList();
+
+      final groups = _group(filtered);
+      final ziyadah = groups.where((g) => g.jenis.toLowerCase() == 'ziyadah').toList();
+      final murajaah = groups.where((g) => g.jenis.toLowerCase() == 'murajaah').toList();
+      final allAvg = groups.isEmpty
+          ? 0
+          : groups.map((g) => g.avg).reduce((a, b) => a + b) ~/ groups.length;
+
+      final total = groups.length;
+
+      // Compact Student Header (Name & NIS only, no sequence number)
+      contentWidgets.add(_buildCompactStudentHeader(santri, bold, semiBold, regular));
+      contentWidgets.add(pw.SizedBox(height: 10));
+
+      // Summary Stats (Active dynamic counters per santri)
+      contentWidgets.add(_buildSummaryStats(
+        ziyadah.length,
+        murajaah.length,
+        allAvg,
+        total,
+        bold,
+        semiBold,
+        regular,
+      ));
+      contentWidgets.add(pw.SizedBox(height: 12));
+
+      // Section Title: Rincian Setoran
+      contentWidgets.add(_buildSectionTitle(t.laporanConfig.pdf.setoranDetailTitle, bold));
+      contentWidgets.add(pw.SizedBox(height: 6));
+
+      // Detail Table
+      contentWidgets.add(_buildDetailTable(groups, semiBold, regular));
+      contentWidgets.add(pw.SizedBox(height: 10));
+
+      // Legend
+      contentWidgets.add(_buildLegend(regular, semiBold));
+      contentWidgets.add(pw.SizedBox(height: 16));
+    }
 
     doc.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.symmetric(horizontal: 36, vertical: 32),
         theme: pw.ThemeData.withFont(base: regular, bold: bold),
-        build: (ctx) => [
-          _buildHeader(logo, bold, semiBold, regular, period, printedOn),
-          pw.SizedBox(height: 12),
-          _buildStudentInfoCard(config, bold, semiBold, regular),
-          pw.SizedBox(height: 14),
-          _buildSummaryStats(
-            ziyadah.length,
-            murajaah.length,
-            allAvg,
-            total,
-            bold,
-            semiBold,
-            regular,
-          ),
-          pw.SizedBox(height: 14),
-          _buildSectionTitle(t.laporanConfig.pdf.setoranDetailTitle, bold),
-          pw.SizedBox(height: 6),
-          _buildDetailTable(groups, semiBold, regular),
-          pw.SizedBox(height: 10),
-          _buildLegend(regular, semiBold),
-        ],
-        footer: (ctx) => _buildFooter(config.santriName, regular, semiBold, ctx),
+        build: (ctx) => contentWidgets,
+        footer: (ctx) => _buildFooter(config.halaqohName, regular, semiBold, ctx),
       ),
     );
 
@@ -196,7 +237,7 @@ class HafalanPdfBuilder {
 
   // ── Global Header (Minimalist & Modern Letterhead) ─────────────────────────
 
-  static pw.Widget _buildHeader(
+  static pw.Widget _buildGlobalHeader(
     pw.MemoryImage logo,
     pw.Font bold,
     pw.Font semiBold,
@@ -238,7 +279,7 @@ class HafalanPdfBuilder {
                 ),
                 pw.SizedBox(height: 1),
                 pw.Text(
-                  t.laporanConfig.pdf.titleMemorization,
+                  t.laporanConfig.pdf.titleHafalanHalaqohRecap,
                   style: pw.TextStyle(
                     font: semiBold,
                     fontSize: 9,
@@ -284,10 +325,11 @@ class HafalanPdfBuilder {
     );
   }
 
-  // ── Student Information Card (Horizontal 4-Column Strip) ───────────────────
+  // ── Global Halaqoh Information Card (Page 1 Only) ─────────────────────────
 
-  static pw.Widget _buildStudentInfoCard(
-    LaporanHafalanConfig config,
+  static pw.Widget _buildHalaqohInfoCard(
+    LaporanHafalanHalaqohConfig config,
+    int totalSantri,
     pw.Font bold,
     pw.Font semiBold,
     pw.Font regular,
@@ -303,20 +345,6 @@ class HafalanPdfBuilder {
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           _infoField(
-            label: t.laporanConfig.pdf.studentName,
-            value: config.santriName,
-            bold: semiBold,
-            regular: regular,
-          ),
-          _infoDivider(),
-          _infoField(
-            label: t.laporanConfig.pdf.nis,
-            value: config.santriNis,
-            bold: semiBold,
-            regular: regular,
-          ),
-          _infoDivider(),
-          _infoField(
             label: t.laporanConfig.pdf.halaqoh,
             value: config.halaqohName,
             bold: semiBold,
@@ -326,6 +354,20 @@ class HafalanPdfBuilder {
           _infoField(
             label: t.laporanConfig.pdf.pembimbing,
             value: config.guruNama,
+            bold: semiBold,
+            regular: regular,
+          ),
+          _infoDivider(),
+          _infoField(
+            label: 'Kelas',
+            value: config.kelas,
+            bold: semiBold,
+            regular: regular,
+          ),
+          _infoDivider(),
+          _infoField(
+            label: 'Total Santri',
+            value: '$totalSantri Santri',
             bold: semiBold,
             regular: regular,
           ),
@@ -370,6 +412,74 @@ class HafalanPdfBuilder {
               font: bold,
               fontSize: 8.5,
               color: _textPri,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Compact Student Header (Nama & NIS Saja) ───────────────────────────────
+
+  static pw.Widget _buildCompactStudentHeader(
+    SantriModel santri,
+    pw.Font bold,
+    pw.Font semiBold,
+    pw.Font regular,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: pw.BoxDecoration(
+        color: _surface,
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+        border: pw.Border.all(color: _border, width: 0.5),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        children: [
+          // Nama Santri with left accent bar
+          pw.Expanded(
+            child: pw.Row(
+              children: [
+                pw.Container(
+                  width: 3,
+                  height: 12,
+                  decoration: pw.BoxDecoration(
+                    color: _primary,
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(1.5),
+                    ),
+                  ),
+                ),
+                pw.SizedBox(width: 6),
+                pw.Text(
+                  santri.nama,
+                  style: pw.TextStyle(
+                    font: bold,
+                    fontSize: 10.5,
+                    color: _textPri,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // NIS Santri
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: pw.BoxDecoration(
+              color: _white,
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
+              border: pw.Border.all(color: _border, width: 0.5),
+            ),
+            child: pw.Text(
+              'NIS: ${santri.nis}',
+              style: pw.TextStyle(
+                font: semiBold,
+                fontSize: 7.5,
+                color: _textSec,
+              ),
             ),
           ),
         ],
@@ -676,7 +786,7 @@ class HafalanPdfBuilder {
   // ── Footer ────────────────────────────────────────────────────────────────
 
   static pw.Widget _buildFooter(
-    String santriName,
+    String halaqohName,
     pw.Font regular,
     pw.Font semiBold,
     pw.Context ctx,
@@ -692,7 +802,7 @@ class HafalanPdfBuilder {
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(
-            'MyHalaqoh • $santriName',
+            'MyHalaqoh • $halaqohName',
             style: pw.TextStyle(
               font: regular,
               fontSize: 6.5,

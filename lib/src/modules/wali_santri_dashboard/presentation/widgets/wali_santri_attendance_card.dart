@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
+import 'package:my_halaqoh/src/modules/guru_laporan/domain/helpers/schedule_helper.dart';
 
 /// Modern & Clean Attendance Card for Wali Santri Dashboard.
-/// Features a circular attendance rate overview and sleek soft-tinted status breakdown.
+/// Displays "{hadir} dari total {totalMonth} sesi hadir" and sleek soft-tinted status breakdown.
 class WaliSantriAttendanceCard extends StatelessWidget {
   final String nis;
   final List<AbsensiModel> allRecords;
@@ -66,6 +66,9 @@ class WaliSantriAttendanceCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final endOfMonth = DateTime(now.year, now.month + 1, 0);
+
     final stats = _computeMonthlyAttendanceStats(
       allRecords,
       nis,
@@ -82,32 +85,11 @@ class WaliSantriAttendanceCard extends StatelessWidget {
     final int totalAbsen = sakit + izin + alfa;
     final int totalRecordedSessions = totalHadir + totalAbsen;
 
-    final double rate = totalRecordedSessions > 0
-        ? (totalHadir / totalRecordedSessions).clamp(0.0, 1.0)
-        : 0.0;
-    final int percentInt = (rate * 100).round();
-
-    Color rateColor;
-    String statusLabel;
-    IconData statusIcon;
-
-    if (totalRecordedSessions == 0) {
-      rateColor = colors.textSecondary;
-      statusLabel = 'Belum Ada Sesi';
-      statusIcon = Icons.hourglass_empty_rounded;
-    } else if (rate >= 0.90) {
-      rateColor = colors.primary;
-      statusLabel = 'Kehadiran Sangat Baik';
-      statusIcon = Icons.check_circle_rounded;
-    } else if (rate >= 0.75) {
-      rateColor = colors.yellow;
-      statusLabel = 'Kehadiran Cukup Baik';
-      statusIcon = Icons.info_outline_rounded;
-    } else {
-      rateColor = colors.red;
-      statusLabel = 'Perlu Perhatian';
-      statusIcon = Icons.warning_amber_rounded;
-    }
+    final int totalScheduledMonth = ScheduleHelper.totalScheduledSessions(
+      startOfMonth,
+      endOfMonth,
+      programType,
+    );
 
     return Container(
       width: double.infinity,
@@ -171,8 +153,9 @@ class WaliSantriAttendanceCard extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
 
-          // ── Hero Summary Section (Circular Rate + Status) ──────────────────
+          // ── Hero Summary Section (Clear Session Count Banner) ─────────────
           Container(
+            width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
             decoration: BoxDecoration(
               color: colors.background,
@@ -183,84 +166,89 @@ class WaliSantriAttendanceCard extends StatelessWidget {
               ),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Circular Progress Indicator
-                CircularPercentIndicator(
-                  radius: 32.w,
-                  lineWidth: 5.5.w,
-                  percent: rate,
-                  animation: true,
-                  animationDuration: 1000,
-                  circularStrokeCap: CircularStrokeCap.round,
-                  progressColor: rateColor,
-                  backgroundColor: rateColor.withValues(alpha: 0.15),
-                  center: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '$percentInt',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w800,
-                            color: colors.textPrimary,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                        TextSpan(
-                          text: '%',
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w600,
-                            color: colors.textSecondary,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ],
-                    ),
+                // Icon Badge
+                Container(
+                  width: 44.w,
+                  height: 44.w,
+                  decoration: BoxDecoration(
+                    color: (totalHadir == 0 && totalRecordedSessions == 0
+                            ? colors.textSecondary
+                            : colors.primary)
+                        .withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(
+                    totalHadir == 0 && totalRecordedSessions == 0
+                        ? Icons.hourglass_empty_rounded
+                        : Icons.event_available_rounded,
+                    size: 22.sp,
+                    color: totalHadir == 0 && totalRecordedSessions == 0
+                        ? colors.textSecondary
+                        : colors.primary,
                   ),
                 ),
-                SizedBox(width: 14.w),
+                SizedBox(width: 12.w),
 
-                // Description & Performance Tag
+                // Text Description
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            statusIcon,
-                            size: 15.sp,
-                            color: rateColor,
-                          ),
-                          SizedBox(width: 6.w),
-                          Flexible(
-                            child: Text(
-                              statusLabel,
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '$totalHadir',
                               style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w700,
-                                color: rateColor,
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w800,
+                                color: colors.primary,
                                 fontFamily: 'Poppins',
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
+                            TextSpan(
+                              text: ' dari total ',
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: colors.textSecondary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text: '$totalScheduledMonth',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colors.textPrimary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' sesi hadir',
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                                color: colors.textPrimary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 2.h),
                       Text(
                         totalRecordedSessions == 0
-                            ? 'Belum ada sesi tercatat bulan ini'
-                            : 'Total $totalHadir dari $totalRecordedSessions sesi terlaksana',
+                            ? 'Belum ada sesi absensi yang terlaksana bulan ini'
+                            : '$totalRecordedSessions sesi telah dilaksanakan sejauh ini',
                         style: TextStyle(
-                          fontSize: 11.5.sp,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w400,
                           color: colors.textSecondary,
                           fontFamily: 'Poppins',
-                          height: 1.2,
                         ),
                       ),
                     ],

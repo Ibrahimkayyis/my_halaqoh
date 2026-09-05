@@ -686,6 +686,8 @@ class _TranslationsHafalanId extends TranslationsHafalanEn {
 	@override String targetLabel({required Object target}) => 'Target: ${target}';
 	@override String get successSave => 'Hafalan berhasil disimpan!';
 	@override String nisLabel({required Object nis}) => 'NIS: ${nis}';
+	@override String get unduhLaporanHalaqoh => 'Unduh Laporan';
+	@override String get buatLaporanHafalan => 'Buat Laporan Hafalan';
 }
 
 // Path: inputHafalanForm
@@ -1138,9 +1140,11 @@ class _TranslationsLaporanConfigId extends TranslationsLaporanConfigEn {
 	@override String get titleAbsensi => 'Unduh Laporan Absensi';
 	@override String get titleHafalan => 'Unduh Laporan Hafalan';
 	@override String get titleHalaqoh => 'Rekap Absensi Halaqoh';
+	@override String get titleHafalanHalaqoh => 'Rekap Hafalan Halaqoh';
 	@override String get subtitleAbsensi => 'Pilih periode & konfigurasi laporan PDF santri.';
 	@override String get subtitleHafalan => 'Pilih periode & konfigurasi laporan PDF santri.';
 	@override String get subtitleHalaqoh => 'Pilih periode untuk mengunduh rekapitulasi satu halaqoh penuh.';
+	@override String get subtitleHafalanHalaqoh => 'Pilih periode untuk mengunduh rekapitulasi hafalan satu halaqoh penuh.';
 	@override String get timeRange => 'Rentang Waktu';
 	@override String get weekly => 'Mingguan';
 	@override String get monthly => 'Bulanan';
@@ -1166,6 +1170,7 @@ class _TranslationsLaporanConfigId extends TranslationsLaporanConfigEn {
 	@override String get attendanceReport => 'Laporan Absensi';
 	@override String get recapAttendance => 'Rekap Absensi';
 	@override String get memorizationReport => 'Laporan Hafalan';
+	@override String get recapHafalan => 'Rekap Hafalan';
 	@override String get btnPreview => 'Pratinjau';
 	@override String get btnShare => 'Bagikan';
 	@override String get btnCreateNewReport => 'Buat laporan baru';
@@ -1336,6 +1341,8 @@ class _TranslationsLaporanConfigPdfId extends TranslationsLaporanConfigPdfEn {
 	@override String get titleAttendance => 'Laporan Kehadiran Santri';
 	@override String get titleHalaqohRecap => 'Laporan Rekapitulasi Absensi Halaqoh';
 	@override String get titleMemorization => 'Laporan Capaian Hafalan Santri';
+	@override String get titleHafalanHalaqohRecap => 'Laporan Capaian Hafalan Halaqoh';
+	@override String get noSetoranInPeriod => 'Belum ada catatan setoran pada periode ini';
 	@override String printedAt({required Object date}) => 'Dicetak: ${date}';
 	@override String get studentInfo => 'Informasi Santri';
 	@override String get halaqohInfo => 'Informasi Halaqoh';
@@ -1811,6 +1818,8 @@ extension on TranslationsId {
 			case 'hafalan.targetLabel': return ({required Object target}) => 'Target: ${target}';
 			case 'hafalan.successSave': return 'Hafalan berhasil disimpan!';
 			case 'hafalan.nisLabel': return ({required Object nis}) => 'NIS: ${nis}';
+			case 'hafalan.unduhLaporanHalaqoh': return 'Unduh Laporan';
+			case 'hafalan.buatLaporanHafalan': return 'Buat Laporan Hafalan';
 			case 'inputHafalanForm.nama': return ({required Object name}) => 'Nama: ${name}';
 			case 'inputHafalanForm.ziyadah': return 'ZIYADAH';
 			case 'inputHafalanForm.murajaah': return 'MURAJAAH';
@@ -2091,9 +2100,11 @@ extension on TranslationsId {
 			case 'laporanConfig.titleAbsensi': return 'Unduh Laporan Absensi';
 			case 'laporanConfig.titleHafalan': return 'Unduh Laporan Hafalan';
 			case 'laporanConfig.titleHalaqoh': return 'Rekap Absensi Halaqoh';
+			case 'laporanConfig.titleHafalanHalaqoh': return 'Rekap Hafalan Halaqoh';
 			case 'laporanConfig.subtitleAbsensi': return 'Pilih periode & konfigurasi laporan PDF santri.';
 			case 'laporanConfig.subtitleHafalan': return 'Pilih periode & konfigurasi laporan PDF santri.';
 			case 'laporanConfig.subtitleHalaqoh': return 'Pilih periode untuk mengunduh rekapitulasi satu halaqoh penuh.';
+			case 'laporanConfig.subtitleHafalanHalaqoh': return 'Pilih periode untuk mengunduh rekapitulasi hafalan satu halaqoh penuh.';
 			case 'laporanConfig.timeRange': return 'Rentang Waktu';
 			case 'laporanConfig.weekly': return 'Mingguan';
 			case 'laporanConfig.monthly': return 'Bulanan';
@@ -2119,6 +2130,7 @@ extension on TranslationsId {
 			case 'laporanConfig.attendanceReport': return 'Laporan Absensi';
 			case 'laporanConfig.recapAttendance': return 'Rekap Absensi';
 			case 'laporanConfig.memorizationReport': return 'Laporan Hafalan';
+			case 'laporanConfig.recapHafalan': return 'Rekap Hafalan';
 			case 'laporanConfig.btnPreview': return 'Pratinjau';
 			case 'laporanConfig.btnShare': return 'Bagikan';
 			case 'laporanConfig.btnCreateNewReport': return 'Buat laporan baru';
@@ -2140,6 +2152,8 @@ extension on TranslationsId {
 			case 'laporanConfig.pdf.titleAttendance': return 'Laporan Kehadiran Santri';
 			case 'laporanConfig.pdf.titleHalaqohRecap': return 'Laporan Rekapitulasi Absensi Halaqoh';
 			case 'laporanConfig.pdf.titleMemorization': return 'Laporan Capaian Hafalan Santri';
+			case 'laporanConfig.pdf.titleHafalanHalaqohRecap': return 'Laporan Capaian Hafalan Halaqoh';
+			case 'laporanConfig.pdf.noSetoranInPeriod': return 'Belum ada catatan setoran pada periode ini';
 			case 'laporanConfig.pdf.printedAt': return ({required Object date}) => 'Dicetak: ${date}';
 			case 'laporanConfig.pdf.studentInfo': return 'Informasi Santri';
 			case 'laporanConfig.pdf.halaqohInfo': return 'Informasi Halaqoh';
