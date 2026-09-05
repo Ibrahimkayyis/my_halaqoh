@@ -2041,6 +2041,18 @@ class TranslationsWaliSantriDashboardEn {
 
 	/// en: 'Class $kelas | $halaqoh'
 	String halaqohInfo({required Object kelas, required Object halaqoh}) => 'Class ${kelas} | ${halaqoh}';
+
+	/// en: ' of total '
+	String get dariTotal => ' of total ';
+
+	/// en: ' sessions attended'
+	String get sesiHadir => ' sessions attended';
+
+	/// en: 'No attendance sessions held this month'
+	String get belumAdaSesiBulanIni => 'No attendance sessions held this month';
+
+	/// en: '$count sessions have been held so far'
+	String sesiDilaksanakan({required Object count}) => '${count} sessions have been held so far';
 }
 
 // Path: waliSantriNav
@@ -3617,6 +3629,10 @@ extension on Translations {
 			case 'waliSantriDashboard.juzList': return ({required Object juz}) => 'Juz: ${juz}';
 			case 'waliSantriDashboard.extraJuzTarget': return ({required Object count}) => 'Extra : ${count} Juz';
 			case 'waliSantriDashboard.halaqohInfo': return ({required Object kelas, required Object halaqoh}) => 'Class ${kelas} | ${halaqoh}';
+			case 'waliSantriDashboard.dariTotal': return ' of total ';
+			case 'waliSantriDashboard.sesiHadir': return ' sessions attended';
+			case 'waliSantriDashboard.belumAdaSesiBulanIni': return 'No attendance sessions held this month';
+			case 'waliSantriDashboard.sesiDilaksanakan': return ({required Object count}) => '${count} sessions have been held so far';
 			case 'waliSantriNav.home': return 'Home';
 			case 'waliSantriNav.hafalan': return 'Hafalan';
 			case 'waliSantriNav.absensi': return 'Attendance';

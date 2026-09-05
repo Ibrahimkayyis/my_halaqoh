@@ -964,6 +964,10 @@ class _TranslationsWaliSantriDashboardId extends TranslationsWaliSantriDashboard
 	@override String juzList({required Object juz}) => 'Juz: ${juz}';
 	@override String extraJuzTarget({required Object count}) => 'Tambahan : ${count} Juz';
 	@override String halaqohInfo({required Object kelas, required Object halaqoh}) => 'Kelas ${kelas} | ${halaqoh}';
+	@override String get dariTotal => ' dari total ';
+	@override String get sesiHadir => ' sesi hadir';
+	@override String get belumAdaSesiBulanIni => 'Belum ada sesi absensi yang terlaksana bulan ini';
+	@override String sesiDilaksanakan({required Object count}) => '${count} sesi telah dilaksanakan sejauh ini';
 }
 
 // Path: waliSantriNav
@@ -2002,6 +2006,10 @@ extension on TranslationsId {
 			case 'waliSantriDashboard.juzList': return ({required Object juz}) => 'Juz: ${juz}';
 			case 'waliSantriDashboard.extraJuzTarget': return ({required Object count}) => 'Tambahan : ${count} Juz';
 			case 'waliSantriDashboard.halaqohInfo': return ({required Object kelas, required Object halaqoh}) => 'Kelas ${kelas} | ${halaqoh}';
+			case 'waliSantriDashboard.dariTotal': return ' dari total ';
+			case 'waliSantriDashboard.sesiHadir': return ' sesi hadir';
+			case 'waliSantriDashboard.belumAdaSesiBulanIni': return 'Belum ada sesi absensi yang terlaksana bulan ini';
+			case 'waliSantriDashboard.sesiDilaksanakan': return ({required Object count}) => '${count} sesi telah dilaksanakan sejauh ini';
 			case 'waliSantriNav.home': return 'Home';
 			case 'waliSantriNav.hafalan': return 'Hafalan';
 			case 'waliSantriNav.absensi': return 'Absensi';

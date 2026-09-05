@@ -621,10 +621,14 @@ class AbsensiPdfBuilder {
         overallStatus = t.laporanConfig.pdf.permit;
         overallColor = _blue;
         overallBg = _blueBg;
-      } else {
+      } else if (codes.any((c) => c == t.laporanConfig.pdf.presentCode)) {
         overallStatus = t.laporanConfig.pdf.present;
-        overallColor = _yellow;
-        overallBg = _yellowBg;
+        overallColor = _green;
+        overallBg = _greenBg;
+      } else {
+        overallStatus = '-';
+        overallColor = _textSec;
+        overallBg = _surface;
       }
 
       return pw.TableRow(

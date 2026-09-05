@@ -210,7 +210,7 @@ class WaliSantriAttendanceCard extends StatelessWidget {
                               ),
                             ),
                             TextSpan(
-                              text: ' dari total ',
+                              text: t.waliSantriDashboard.dariTotal,
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w500,
@@ -228,7 +228,7 @@ class WaliSantriAttendanceCard extends StatelessWidget {
                               ),
                             ),
                             TextSpan(
-                              text: ' sesi hadir',
+                              text: t.waliSantriDashboard.sesiHadir,
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w600,
@@ -242,8 +242,10 @@ class WaliSantriAttendanceCard extends StatelessWidget {
                       SizedBox(height: 2.h),
                       Text(
                         totalRecordedSessions == 0
-                            ? 'Belum ada sesi absensi yang terlaksana bulan ini'
-                            : '$totalRecordedSessions sesi telah dilaksanakan sejauh ini',
+                            ? t.waliSantriDashboard.belumAdaSesiBulanIni
+                            : t.waliSantriDashboard.sesiDilaksanakan(
+                                count: '$totalRecordedSessions',
+                              ),
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w400,

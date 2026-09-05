@@ -631,7 +631,11 @@
     "extraMemorization": "Extra Memorization",
     "juzList": "Juz: $juz",
     "extraJuzTarget": "Extra : $count Juz",
-    "halaqohInfo": "Class $kelas | $halaqoh"
+    "halaqohInfo": "Class $kelas | $halaqoh",
+    "dariTotal": " of total ",
+    "sesiHadir": " sessions attended",
+    "belumAdaSesiBulanIni": "No attendance sessions held this month",
+    "sesiDilaksanakan": "$count sessions have been held so far"
   },
   "waliSantriNav": {
     "home": "Home",

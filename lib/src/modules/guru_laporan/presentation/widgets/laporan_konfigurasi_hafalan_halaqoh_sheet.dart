@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -585,7 +586,7 @@ class _LaporanKonfigurasiHafalanHalaqohSheetState
   // ── Success state ─────────────────────────────────────────────────────────
   Widget _buildSuccessState(
     BuildContext context,
-    List<int> pdfBytes,
+    Uint8List pdfBytes,
     AppColorSet colors,
   ) {
     return Column(
@@ -696,7 +697,7 @@ class _LaporanKonfigurasiHafalanHalaqohSheetState
                 colors: colors,
                 onTap: () => context
                     .read<LaporanHafalanHalaqohCubit>()
-                    .previewPdf(pdfBytes as dynamic, _filename),
+                    .previewPdf(pdfBytes, _filename),
               ),
             ),
             SizedBox(width: 10.w),
@@ -708,7 +709,7 @@ class _LaporanKonfigurasiHafalanHalaqohSheetState
                 colors: colors,
                 onTap: () => context
                     .read<LaporanHafalanHalaqohCubit>()
-                    .sharePdf(pdfBytes as dynamic, _filename),
+                    .sharePdf(pdfBytes, _filename),
               ),
             ),
           ],
