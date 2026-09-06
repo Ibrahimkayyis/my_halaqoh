@@ -1,0 +1,33 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Profile pictures — semua user yang login bisa baca & upload
+    match /profile_pictures/{fileName} {
+      // Semua role (Admin, Guru, Wali Santri) perlu bisa melihat foto profil
+      allow read: if request.auth != null;
+
+      // Upload hanya untuk user yang login, tipe image, maks 5MB
+      allow write: if request.auth != null
+                   && request.resource.size <= 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+
+      // Hapus foto hanya untuk user yang login
+      allow delete: if request.auth != null;
+    }
+
+    // Feedback attachments — screenshots submitted by users
+    match /feedback_attachments/{feedbackId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size <= 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null;
+    }
+
+    // Tolak semua akses ke path lain secara default
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

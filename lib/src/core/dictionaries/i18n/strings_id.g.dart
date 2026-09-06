@@ -80,6 +80,7 @@ class TranslationsId implements Translations {
 	@override late final _TranslationsKelasProgramId kelasProgram = _TranslationsKelasProgramId._(_root);
 	@override late final _TranslationsSuperAdminId superAdmin = _TranslationsSuperAdminId._(_root);
 	@override late final _TranslationsActivityLogId activityLog = _TranslationsActivityLogId._(_root);
+	@override late final _TranslationsFeedbackId feedback = _TranslationsFeedbackId._(_root);
 }
 
 // Path: app
@@ -637,15 +638,13 @@ class _TranslationsDetailAbsensiHariIniId implements TranslationsDetailAbsensiHa
 	// Translations
 	@override String get title => 'Detail Absensi Hari Ini';
 	@override String get hadir => 'Hadir';
-	@override String get hadirBarcode => 'Hadir (Scan Barcode)';
-	@override String get hadirManual => 'Hadir (Tanpa Kartu)';
-	@override String get terlambat => 'Hadir (Terlambat)';
 	@override String get sakit => 'Sakit';
 	@override String get izin => 'Izin';
 	@override String get alfa => 'Alfa';
 	@override String get belumAbsen => 'Belum Absen';
 	@override String get belumDiabsen => 'Belum absen';
 	@override String get daftarKehadiranSantri => 'Daftar Kehadiran Santri';
+	@override String get hadirSemua => 'Hadir Semua';
 	@override String get saveSuccess => 'Absensi berhasil disimpan!';
 	@override String get saveFailed => 'Gagal menyimpan absensi';
 	@override String get warningBelumTitle => 'Ada Santri Belum Diabsen';
@@ -686,6 +685,8 @@ class _TranslationsHafalanId implements TranslationsHafalanEn {
 	@override String targetLabel({required Object target}) => 'Target: ${target}';
 	@override String get successSave => 'Hafalan berhasil disimpan!';
 	@override String nisLabel({required Object nis}) => 'NIS: ${nis}';
+	@override String get unduhLaporanHalaqoh => 'Unduh Laporan';
+	@override String get buatLaporanHafalan => 'Buat Laporan Hafalan';
 }
 
 // Path: inputHafalanForm
@@ -849,7 +850,12 @@ class _TranslationsGuruProfileId implements TranslationsGuruProfileEn {
 	@override String get ubahPassword => 'Ubah Password';
 	@override String get pengaturan => 'Pengaturan';
 	@override String get tentangAplikasi => 'Tentang Aplikasi';
+	@override String get kebijakanPrivasi => 'Kebijakan Privasi';
+	@override String get kirimMasukan => 'Kirim Masukan';
 	@override String get keluar => 'Keluar';
+	@override String get hapusAkun => 'Hapus Akun';
+	@override String get deleteAccountSuccess => 'Akun Anda berhasil dihapus.';
+	@override String deleteAccountFailed({required Object error}) => 'Gagal menghapus akun: ${error}';
 	@override String get guruHalaqoh => 'Guru Halaqoh';
 	@override String appVersion({required Object version}) => 'MyHalaqoh App v${version}';
 	@override String get loading => 'Memuat...';
@@ -962,6 +968,10 @@ class _TranslationsWaliSantriDashboardId implements TranslationsWaliSantriDashbo
 	@override String juzList({required Object juz}) => 'Juz: ${juz}';
 	@override String extraJuzTarget({required Object count}) => 'Tambahan : ${count} Juz';
 	@override String halaqohInfo({required Object kelas, required Object halaqoh}) => 'Kelas ${kelas} | ${halaqoh}';
+	@override String get dariTotal => ' dari total ';
+	@override String get sesiHadir => ' sesi hadir';
+	@override String get belumAdaSesiBulanIni => 'Belum ada sesi absensi yang terlaksana bulan ini';
+	@override String sesiDilaksanakan({required Object count}) => '${count} sesi telah dilaksanakan sejauh ini';
 }
 
 // Path: waliSantriNav
@@ -1018,6 +1028,10 @@ class _TranslationsDialogsId implements TranslationsDialogsEn {
 	@override String get logoutTitle => 'Keluar Akun?';
 	@override String get logoutMessage => 'Apakah Anda yakin ingin keluar dari akun ini? Anda harus masuk kembali untuk menggunakan aplikasi.';
 	@override String get keluar => 'Keluar';
+	@override String get deleteAccountTitle => 'Hapus Akun Anda?';
+	@override String get deleteAccountMessage => 'Tindakan ini akan menghapus akun login dan profil Anda secara permanen dari server. Anda tidak akan dapat masuk kembali ke aplikasi MyHalaqoh.\n\nApakah Anda yakin ingin menghapus akun?';
+	@override String get deleteAccountWarning => 'Aksi ini permanen dan tidak dapat dibatalkan.';
+	@override String get deleteAccountConfirm => 'Hapus Akun';
 }
 
 // Path: masterDataSettings
@@ -1064,11 +1078,14 @@ class _TranslationsTentangAplikasiScreenId implements TranslationsTentangAplikas
 	@override String get infoPlatform => 'Platform';
 	@override String get infoLembaga => 'Lembaga';
 	@override String get infoPlatformValue => 'Android';
+	@override String get kebijakanPrivasi => 'Kebijakan Privasi';
+	@override String get bukaKebijakanPrivasi => 'Baca Kebijakan Privasi';
 	@override String get sectionKontak => 'Kontak & Dukungan';
 	@override String get kontakDeskripsi => 'Jika Anda memerlukan bantuan teknis atau memiliki pertanyaan seputar aplikasi, silakan hubungi administrator melalui WhatsApp.';
 	@override String get kontakButton => 'Hubungi Admin via WhatsApp';
+	@override String get kirimMasukan => 'Kirim Masukan & Lapor Kendala';
 	@override String get footer => 'Dibuat dengan ❤️ untuk kemajuan pendidikan pesantren';
-	@override String get copyright => '© 2026 MyHalaqoh. All rights reserved.';
+	@override String get copyright => '© 2026 MyHalaqoh. Seluruh hak cipta dilindungi undang-undang.';
 }
 
 // Path: general
@@ -1138,9 +1155,11 @@ class _TranslationsLaporanConfigId implements TranslationsLaporanConfigEn {
 	@override String get titleAbsensi => 'Unduh Laporan Absensi';
 	@override String get titleHafalan => 'Unduh Laporan Hafalan';
 	@override String get titleHalaqoh => 'Rekap Absensi Halaqoh';
+	@override String get titleHafalanHalaqoh => 'Rekap Hafalan Halaqoh';
 	@override String get subtitleAbsensi => 'Pilih periode & konfigurasi laporan PDF santri.';
 	@override String get subtitleHafalan => 'Pilih periode & konfigurasi laporan PDF santri.';
 	@override String get subtitleHalaqoh => 'Pilih periode untuk mengunduh rekapitulasi satu halaqoh penuh.';
+	@override String get subtitleHafalanHalaqoh => 'Pilih periode untuk mengunduh rekapitulasi hafalan satu halaqoh penuh.';
 	@override String get timeRange => 'Rentang Waktu';
 	@override String get weekly => 'Mingguan';
 	@override String get monthly => 'Bulanan';
@@ -1166,6 +1185,7 @@ class _TranslationsLaporanConfigId implements TranslationsLaporanConfigEn {
 	@override String get attendanceReport => 'Laporan Absensi';
 	@override String get recapAttendance => 'Rekap Absensi';
 	@override String get memorizationReport => 'Laporan Hafalan';
+	@override String get recapHafalan => 'Rekap Hafalan';
 	@override String get btnPreview => 'Pratinjau';
 	@override String get btnShare => 'Bagikan';
 	@override String get btnCreateNewReport => 'Buat laporan baru';
@@ -1269,6 +1289,41 @@ class _TranslationsActivityLogId implements TranslationsActivityLogEn {
 	@override String get resetFilter => 'Reset Filter';
 }
 
+// Path: feedback
+class _TranslationsFeedbackId implements TranslationsFeedbackEn {
+	_TranslationsFeedbackId._(this._root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Kirim Masukan';
+	@override String get subtitle => 'Bantu kami mengembangkan MyHalaqoh dengan memberikan masukan atau melaporkan kendala.';
+	@override String get kategori => 'Kategori';
+	@override String get bug => 'Bug / Error';
+	@override String get saran => 'Saran';
+	@override String get pertanyaan => 'Pertanyaan';
+	@override String get judulLabel => 'Judul';
+	@override String get judulHint => 'Contoh: Tombol simpan tidak merespons';
+	@override String get deskripsiLabel => 'Deskripsi';
+	@override String get deskripsiHint => 'Jelaskan apa yang terjadi, apa yang diharapkan, atau ide Anda...';
+	@override String get lampiran => 'Lampiran (Opsional)';
+	@override String get lampiranDesc => 'Lampirkan hingga 3 screenshot untuk memperjelas laporan.';
+	@override String get tambahFoto => 'Tambah Foto';
+	@override String get maxFoto => 'Maksimal 3 screenshot';
+	@override String get hapusFoto => 'Hapus foto';
+	@override String get deviceInfoNotice => 'Informasi perangkat (model, OS, versi aplikasi) akan disertakan otomatis untuk mempermudah perbaikan.';
+	@override String get kirimButton => 'Kirim Masukan';
+	@override String get submitting => 'Mengirim...';
+	@override String uploadingImages({required Object current, required Object total}) => 'Mengunggah screenshot ${current} dari ${total}...';
+	@override String get successTitle => 'Masukan Terkirim!';
+	@override String get successMessage => 'Terima kasih atas kontribusi Anda. Laporan akan segera kami review dan tindaklanjuti.';
+	@override String get kembali => 'Selesai';
+	@override String get validasiKategori => 'Silakan pilih salah satu kategori';
+	@override String get validasiJudul => 'Judul tidak boleh kosong (min. 5 karakter)';
+	@override String get validasiDeskripsi => 'Deskripsi tidak boleh kosong (min. 10 karakter)';
+	@override String errorSubmit({required Object error}) => 'Gagal mengirim masukan: ${error}';
+}
+
 // Path: absensi.barcodeScanner
 class _TranslationsAbsensiBarcodeScannerId implements TranslationsAbsensiBarcodeScannerEn {
 	_TranslationsAbsensiBarcodeScannerId._(this._root);
@@ -1297,6 +1352,7 @@ class _TranslationsAbsensiMulaiAbsensiId implements TranslationsAbsensiMulaiAbse
 	@override String get siang => 'Siang';
 	@override String get soreAshar => 'Sore/Ashar';
 	@override String get maghrib => 'Maghrib';
+	@override String get manualAttendance => 'Absensi Manual';
 	@override String get markAllPresent => 'Tandai Semua Hadir';
 }
 
@@ -1335,6 +1391,8 @@ class _TranslationsLaporanConfigPdfId implements TranslationsLaporanConfigPdfEn 
 	@override String get titleAttendance => 'Laporan Kehadiran Santri';
 	@override String get titleHalaqohRecap => 'Laporan Rekapitulasi Absensi Halaqoh';
 	@override String get titleMemorization => 'Laporan Capaian Hafalan Santri';
+	@override String get titleHafalanHalaqohRecap => 'Laporan Capaian Hafalan Halaqoh';
+	@override String get noSetoranInPeriod => 'Belum ada catatan setoran pada periode ini';
 	@override String printedAt({required Object date}) => 'Dicetak: ${date}';
 	@override String get studentInfo => 'Informasi Santri';
 	@override String get halaqohInfo => 'Informasi Halaqoh';
@@ -1694,6 +1752,7 @@ extension on TranslationsId {
 			case 'absensi.mulaiAbsensi.siang': return 'Siang';
 			case 'absensi.mulaiAbsensi.soreAshar': return 'Sore/Ashar';
 			case 'absensi.mulaiAbsensi.maghrib': return 'Maghrib';
+			case 'absensi.mulaiAbsensi.manualAttendance': return 'Absensi Manual';
 			case 'absensi.mulaiAbsensi.markAllPresent': return 'Tandai Semua Hadir';
 			case 'riwayatAbsensi.title': return 'Riwayat Absensi';
 			case 'riwayatAbsensi.ringkasanKehadiran': return 'Ringkasan Kehadiran';
@@ -1771,15 +1830,13 @@ extension on TranslationsId {
 			case 'absensiHalaqoh.swipeHint': return 'Geser baris tanggal ke kiri/kanan untuk melihat data per hari';
 			case 'detailAbsensiHariIni.title': return 'Detail Absensi Hari Ini';
 			case 'detailAbsensiHariIni.hadir': return 'Hadir';
-			case 'detailAbsensiHariIni.hadirBarcode': return 'Hadir (Scan Barcode)';
-			case 'detailAbsensiHariIni.hadirManual': return 'Hadir (Tanpa Kartu)';
-			case 'detailAbsensiHariIni.terlambat': return 'Hadir (Terlambat)';
 			case 'detailAbsensiHariIni.sakit': return 'Sakit';
 			case 'detailAbsensiHariIni.izin': return 'Izin';
 			case 'detailAbsensiHariIni.alfa': return 'Alfa';
 			case 'detailAbsensiHariIni.belumAbsen': return 'Belum Absen';
 			case 'detailAbsensiHariIni.belumDiabsen': return 'Belum absen';
 			case 'detailAbsensiHariIni.daftarKehadiranSantri': return 'Daftar Kehadiran Santri';
+			case 'detailAbsensiHariIni.hadirSemua': return 'Hadir Semua';
 			case 'detailAbsensiHariIni.saveSuccess': return 'Absensi berhasil disimpan!';
 			case 'detailAbsensiHariIni.saveFailed': return 'Gagal menyimpan absensi';
 			case 'detailAbsensiHariIni.warningBelumTitle': return 'Ada Santri Belum Diabsen';
@@ -1811,6 +1868,8 @@ extension on TranslationsId {
 			case 'hafalan.targetLabel': return ({required Object target}) => 'Target: ${target}';
 			case 'hafalan.successSave': return 'Hafalan berhasil disimpan!';
 			case 'hafalan.nisLabel': return ({required Object nis}) => 'NIS: ${nis}';
+			case 'hafalan.unduhLaporanHalaqoh': return 'Unduh Laporan';
+			case 'hafalan.buatLaporanHafalan': return 'Buat Laporan Hafalan';
 			case 'inputHafalanForm.nama': return ({required Object name}) => 'Nama: ${name}';
 			case 'inputHafalanForm.ziyadah': return 'ZIYADAH';
 			case 'inputHafalanForm.murajaah': return 'MURAJAAH';
@@ -1918,7 +1977,12 @@ extension on TranslationsId {
 			case 'guruProfile.ubahPassword': return 'Ubah Password';
 			case 'guruProfile.pengaturan': return 'Pengaturan';
 			case 'guruProfile.tentangAplikasi': return 'Tentang Aplikasi';
+			case 'guruProfile.kebijakanPrivasi': return 'Kebijakan Privasi';
+			case 'guruProfile.kirimMasukan': return 'Kirim Masukan';
 			case 'guruProfile.keluar': return 'Keluar';
+			case 'guruProfile.hapusAkun': return 'Hapus Akun';
+			case 'guruProfile.deleteAccountSuccess': return 'Akun Anda berhasil dihapus.';
+			case 'guruProfile.deleteAccountFailed': return ({required Object error}) => 'Gagal menghapus akun: ${error}';
 			case 'guruProfile.guruHalaqoh': return 'Guru Halaqoh';
 			case 'guruProfile.appVersion': return ({required Object version}) => 'MyHalaqoh App v${version}';
 			case 'guruProfile.loading': return 'Memuat...';
@@ -1993,6 +2057,10 @@ extension on TranslationsId {
 			case 'waliSantriDashboard.juzList': return ({required Object juz}) => 'Juz: ${juz}';
 			case 'waliSantriDashboard.extraJuzTarget': return ({required Object count}) => 'Tambahan : ${count} Juz';
 			case 'waliSantriDashboard.halaqohInfo': return ({required Object kelas, required Object halaqoh}) => 'Kelas ${kelas} | ${halaqoh}';
+			case 'waliSantriDashboard.dariTotal': return ' dari total ';
+			case 'waliSantriDashboard.sesiHadir': return ' sesi hadir';
+			case 'waliSantriDashboard.belumAdaSesiBulanIni': return 'Belum ada sesi absensi yang terlaksana bulan ini';
+			case 'waliSantriDashboard.sesiDilaksanakan': return ({required Object count}) => '${count} sesi telah dilaksanakan sejauh ini';
 			case 'waliSantriNav.home': return 'Home';
 			case 'waliSantriNav.hafalan': return 'Hafalan';
 			case 'waliSantriNav.absensi': return 'Absensi';
@@ -2022,6 +2090,10 @@ extension on TranslationsId {
 			case 'dialogs.logoutTitle': return 'Keluar Akun?';
 			case 'dialogs.logoutMessage': return 'Apakah Anda yakin ingin keluar dari akun ini? Anda harus masuk kembali untuk menggunakan aplikasi.';
 			case 'dialogs.keluar': return 'Keluar';
+			case 'dialogs.deleteAccountTitle': return 'Hapus Akun Anda?';
+			case 'dialogs.deleteAccountMessage': return 'Tindakan ini akan menghapus akun login dan profil Anda secara permanen dari server. Anda tidak akan dapat masuk kembali ke aplikasi MyHalaqoh.\n\nApakah Anda yakin ingin menghapus akun?';
+			case 'dialogs.deleteAccountWarning': return 'Aksi ini permanen dan tidak dapat dibatalkan.';
+			case 'dialogs.deleteAccountConfirm': return 'Hapus Akun';
 			case 'masterDataSettings.title': return 'Pengaturan';
 			case 'masterDataSettings.tentangAplikasi': return 'Tentang Aplikasi';
 			case 'masterDataSettings.keluar': return 'Keluar';
@@ -2050,11 +2122,14 @@ extension on TranslationsId {
 			case 'tentangAplikasiScreen.infoPlatform': return 'Platform';
 			case 'tentangAplikasiScreen.infoLembaga': return 'Lembaga';
 			case 'tentangAplikasiScreen.infoPlatformValue': return 'Android';
+			case 'tentangAplikasiScreen.kebijakanPrivasi': return 'Kebijakan Privasi';
+			case 'tentangAplikasiScreen.bukaKebijakanPrivasi': return 'Baca Kebijakan Privasi';
 			case 'tentangAplikasiScreen.sectionKontak': return 'Kontak & Dukungan';
 			case 'tentangAplikasiScreen.kontakDeskripsi': return 'Jika Anda memerlukan bantuan teknis atau memiliki pertanyaan seputar aplikasi, silakan hubungi administrator melalui WhatsApp.';
 			case 'tentangAplikasiScreen.kontakButton': return 'Hubungi Admin via WhatsApp';
+			case 'tentangAplikasiScreen.kirimMasukan': return 'Kirim Masukan & Lapor Kendala';
 			case 'tentangAplikasiScreen.footer': return 'Dibuat dengan ❤️ untuk kemajuan pendidikan pesantren';
-			case 'tentangAplikasiScreen.copyright': return '© 2026 MyHalaqoh. All rights reserved.';
+			case 'tentangAplikasiScreen.copyright': return '© 2026 MyHalaqoh. Seluruh hak cipta dilindungi undang-undang.';
 			case 'general.warning': return 'Peringatan';
 			case 'general.close': return 'Tutup';
 			case 'general.saving': return 'Menyimpan...';
@@ -2091,9 +2166,11 @@ extension on TranslationsId {
 			case 'laporanConfig.titleAbsensi': return 'Unduh Laporan Absensi';
 			case 'laporanConfig.titleHafalan': return 'Unduh Laporan Hafalan';
 			case 'laporanConfig.titleHalaqoh': return 'Rekap Absensi Halaqoh';
+			case 'laporanConfig.titleHafalanHalaqoh': return 'Rekap Hafalan Halaqoh';
 			case 'laporanConfig.subtitleAbsensi': return 'Pilih periode & konfigurasi laporan PDF santri.';
 			case 'laporanConfig.subtitleHafalan': return 'Pilih periode & konfigurasi laporan PDF santri.';
 			case 'laporanConfig.subtitleHalaqoh': return 'Pilih periode untuk mengunduh rekapitulasi satu halaqoh penuh.';
+			case 'laporanConfig.subtitleHafalanHalaqoh': return 'Pilih periode untuk mengunduh rekapitulasi hafalan satu halaqoh penuh.';
 			case 'laporanConfig.timeRange': return 'Rentang Waktu';
 			case 'laporanConfig.weekly': return 'Mingguan';
 			case 'laporanConfig.monthly': return 'Bulanan';
@@ -2119,6 +2196,7 @@ extension on TranslationsId {
 			case 'laporanConfig.attendanceReport': return 'Laporan Absensi';
 			case 'laporanConfig.recapAttendance': return 'Rekap Absensi';
 			case 'laporanConfig.memorizationReport': return 'Laporan Hafalan';
+			case 'laporanConfig.recapHafalan': return 'Rekap Hafalan';
 			case 'laporanConfig.btnPreview': return 'Pratinjau';
 			case 'laporanConfig.btnShare': return 'Bagikan';
 			case 'laporanConfig.btnCreateNewReport': return 'Buat laporan baru';
@@ -2140,6 +2218,8 @@ extension on TranslationsId {
 			case 'laporanConfig.pdf.titleAttendance': return 'Laporan Kehadiran Santri';
 			case 'laporanConfig.pdf.titleHalaqohRecap': return 'Laporan Rekapitulasi Absensi Halaqoh';
 			case 'laporanConfig.pdf.titleMemorization': return 'Laporan Capaian Hafalan Santri';
+			case 'laporanConfig.pdf.titleHafalanHalaqohRecap': return 'Laporan Capaian Hafalan Halaqoh';
+			case 'laporanConfig.pdf.noSetoranInPeriod': return 'Belum ada catatan setoran pada periode ini';
 			case 'laporanConfig.pdf.printedAt': return ({required Object date}) => 'Dicetak: ${date}';
 			case 'laporanConfig.pdf.studentInfo': return 'Informasi Santri';
 			case 'laporanConfig.pdf.halaqohInfo': return 'Informasi Halaqoh';
@@ -2263,6 +2343,32 @@ extension on TranslationsId {
 			case 'activityLog.allActions': return 'Semua Aksi';
 			case 'activityLog.empty': return 'Belum ada log aktivitas';
 			case 'activityLog.resetFilter': return 'Reset Filter';
+			case 'feedback.title': return 'Kirim Masukan';
+			case 'feedback.subtitle': return 'Bantu kami mengembangkan MyHalaqoh dengan memberikan masukan atau melaporkan kendala.';
+			case 'feedback.kategori': return 'Kategori';
+			case 'feedback.bug': return 'Bug / Error';
+			case 'feedback.saran': return 'Saran';
+			case 'feedback.pertanyaan': return 'Pertanyaan';
+			case 'feedback.judulLabel': return 'Judul';
+			case 'feedback.judulHint': return 'Contoh: Tombol simpan tidak merespons';
+			case 'feedback.deskripsiLabel': return 'Deskripsi';
+			case 'feedback.deskripsiHint': return 'Jelaskan apa yang terjadi, apa yang diharapkan, atau ide Anda...';
+			case 'feedback.lampiran': return 'Lampiran (Opsional)';
+			case 'feedback.lampiranDesc': return 'Lampirkan hingga 3 screenshot untuk memperjelas laporan.';
+			case 'feedback.tambahFoto': return 'Tambah Foto';
+			case 'feedback.maxFoto': return 'Maksimal 3 screenshot';
+			case 'feedback.hapusFoto': return 'Hapus foto';
+			case 'feedback.deviceInfoNotice': return 'Informasi perangkat (model, OS, versi aplikasi) akan disertakan otomatis untuk mempermudah perbaikan.';
+			case 'feedback.kirimButton': return 'Kirim Masukan';
+			case 'feedback.submitting': return 'Mengirim...';
+			case 'feedback.uploadingImages': return ({required Object current, required Object total}) => 'Mengunggah screenshot ${current} dari ${total}...';
+			case 'feedback.successTitle': return 'Masukan Terkirim!';
+			case 'feedback.successMessage': return 'Terima kasih atas kontribusi Anda. Laporan akan segera kami review dan tindaklanjuti.';
+			case 'feedback.kembali': return 'Selesai';
+			case 'feedback.validasiKategori': return 'Silakan pilih salah satu kategori';
+			case 'feedback.validasiJudul': return 'Judul tidak boleh kosong (min. 5 karakter)';
+			case 'feedback.validasiDeskripsi': return 'Deskripsi tidak boleh kosong (min. 10 karakter)';
+			case 'feedback.errorSubmit': return ({required Object error}) => 'Gagal mengirim masukan: ${error}';
 			default: return null;
 		}
 	}

@@ -82,6 +82,7 @@ class TranslationsId extends Translations {
 	@override late final _TranslationsKelasProgramId kelasProgram = _TranslationsKelasProgramId._(_root);
 	@override late final _TranslationsSuperAdminId superAdmin = _TranslationsSuperAdminId._(_root);
 	@override late final _TranslationsActivityLogId activityLog = _TranslationsActivityLogId._(_root);
+	@override late final _TranslationsFeedbackId feedback = _TranslationsFeedbackId._(_root);
 }
 
 // Path: app
@@ -852,6 +853,7 @@ class _TranslationsGuruProfileId extends TranslationsGuruProfileEn {
 	@override String get pengaturan => 'Pengaturan';
 	@override String get tentangAplikasi => 'Tentang Aplikasi';
 	@override String get kebijakanPrivasi => 'Kebijakan Privasi';
+	@override String get kirimMasukan => 'Kirim Masukan';
 	@override String get keluar => 'Keluar';
 	@override String get hapusAkun => 'Hapus Akun';
 	@override String get deleteAccountSuccess => 'Akun Anda berhasil dihapus.';
@@ -1083,6 +1085,7 @@ class _TranslationsTentangAplikasiScreenId extends TranslationsTentangAplikasiSc
 	@override String get sectionKontak => 'Kontak & Dukungan';
 	@override String get kontakDeskripsi => 'Jika Anda memerlukan bantuan teknis atau memiliki pertanyaan seputar aplikasi, silakan hubungi administrator melalui WhatsApp.';
 	@override String get kontakButton => 'Hubungi Admin via WhatsApp';
+	@override String get kirimMasukan => 'Kirim Masukan & Lapor Kendala';
 	@override String get footer => 'Dibuat dengan ❤️ untuk kemajuan pendidikan pesantren';
 	@override String get copyright => '© 2026 MyHalaqoh. Seluruh hak cipta dilindungi undang-undang.';
 }
@@ -1286,6 +1289,41 @@ class _TranslationsActivityLogId extends TranslationsActivityLogEn {
 	@override String get allActions => 'Semua Aksi';
 	@override String get empty => 'Belum ada log aktivitas';
 	@override String get resetFilter => 'Reset Filter';
+}
+
+// Path: feedback
+class _TranslationsFeedbackId extends TranslationsFeedbackEn {
+	_TranslationsFeedbackId._(TranslationsId root) : this._root = root, super.internal(root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Kirim Masukan';
+	@override String get subtitle => 'Bantu kami mengembangkan MyHalaqoh dengan memberikan masukan atau melaporkan kendala.';
+	@override String get kategori => 'Kategori';
+	@override String get bug => 'Bug';
+	@override String get saran => 'Saran';
+	@override String get pertanyaan => 'Pertanyaan';
+	@override String get judulLabel => 'Judul';
+	@override String get judulHint => 'Misal: Tombol tidak merespons';
+	@override String get deskripsiLabel => 'Deskripsi';
+	@override String get deskripsiHint => 'Jelaskan apa yang terjadi, apa yang diharapkan, atau ide Anda...';
+	@override String get lampiran => 'Lampiran (Opsional)';
+	@override String get lampiranDesc => 'Lampirkan hingga 3 screenshot untuk memperjelas laporan.';
+	@override String get tambahFoto => 'Tambah Foto';
+	@override String get maxFoto => 'Maksimal 3 screenshot';
+	@override String get hapusFoto => 'Hapus foto';
+	@override String get deviceInfoNotice => 'Informasi perangkat (model, OS, versi aplikasi) akan disertakan otomatis untuk mempermudah perbaikan.';
+	@override String get kirimButton => 'Kirim Masukan';
+	@override String get submitting => 'Mengirim...';
+	@override String uploadingImages({required Object current, required Object total}) => 'Mengunggah screenshot ${current} dari ${total}...';
+	@override String get successTitle => 'Masukan Terkirim!';
+	@override String get successMessage => 'Terima kasih atas kontribusi Anda. Laporan akan segera kami review dan tindaklanjuti.';
+	@override String get kembali => 'Selesai';
+	@override String get validasiKategori => 'Silakan pilih salah satu kategori';
+	@override String get validasiJudul => 'Judul tidak boleh kosong (min. 5 karakter)';
+	@override String get validasiDeskripsi => 'Deskripsi tidak boleh kosong (min. 10 karakter)';
+	@override String errorSubmit({required Object error}) => 'Gagal mengirim masukan: ${error}';
 }
 
 // Path: absensi.barcodeScanner
@@ -1942,6 +1980,7 @@ extension on TranslationsId {
 			case 'guruProfile.pengaturan': return 'Pengaturan';
 			case 'guruProfile.tentangAplikasi': return 'Tentang Aplikasi';
 			case 'guruProfile.kebijakanPrivasi': return 'Kebijakan Privasi';
+			case 'guruProfile.kirimMasukan': return 'Kirim Masukan';
 			case 'guruProfile.keluar': return 'Keluar';
 			case 'guruProfile.hapusAkun': return 'Hapus Akun';
 			case 'guruProfile.deleteAccountSuccess': return 'Akun Anda berhasil dihapus.';
@@ -2090,6 +2129,7 @@ extension on TranslationsId {
 			case 'tentangAplikasiScreen.sectionKontak': return 'Kontak & Dukungan';
 			case 'tentangAplikasiScreen.kontakDeskripsi': return 'Jika Anda memerlukan bantuan teknis atau memiliki pertanyaan seputar aplikasi, silakan hubungi administrator melalui WhatsApp.';
 			case 'tentangAplikasiScreen.kontakButton': return 'Hubungi Admin via WhatsApp';
+			case 'tentangAplikasiScreen.kirimMasukan': return 'Kirim Masukan & Lapor Kendala';
 			case 'tentangAplikasiScreen.footer': return 'Dibuat dengan ❤️ untuk kemajuan pendidikan pesantren';
 			case 'tentangAplikasiScreen.copyright': return '© 2026 MyHalaqoh. Seluruh hak cipta dilindungi undang-undang.';
 			case 'general.warning': return 'Peringatan';
@@ -2305,6 +2345,32 @@ extension on TranslationsId {
 			case 'activityLog.allActions': return 'Semua Aksi';
 			case 'activityLog.empty': return 'Belum ada log aktivitas';
 			case 'activityLog.resetFilter': return 'Reset Filter';
+			case 'feedback.title': return 'Kirim Masukan';
+			case 'feedback.subtitle': return 'Bantu kami mengembangkan MyHalaqoh dengan memberikan masukan atau melaporkan kendala.';
+			case 'feedback.kategori': return 'Kategori';
+			case 'feedback.bug': return 'Bug';
+			case 'feedback.saran': return 'Saran';
+			case 'feedback.pertanyaan': return 'Pertanyaan';
+			case 'feedback.judulLabel': return 'Judul';
+			case 'feedback.judulHint': return 'Misal: Tombol tidak merespons';
+			case 'feedback.deskripsiLabel': return 'Deskripsi';
+			case 'feedback.deskripsiHint': return 'Jelaskan apa yang terjadi, apa yang diharapkan, atau ide Anda...';
+			case 'feedback.lampiran': return 'Lampiran (Opsional)';
+			case 'feedback.lampiranDesc': return 'Lampirkan hingga 3 screenshot untuk memperjelas laporan.';
+			case 'feedback.tambahFoto': return 'Tambah Foto';
+			case 'feedback.maxFoto': return 'Maksimal 3 screenshot';
+			case 'feedback.hapusFoto': return 'Hapus foto';
+			case 'feedback.deviceInfoNotice': return 'Informasi perangkat (model, OS, versi aplikasi) akan disertakan otomatis untuk mempermudah perbaikan.';
+			case 'feedback.kirimButton': return 'Kirim Masukan';
+			case 'feedback.submitting': return 'Mengirim...';
+			case 'feedback.uploadingImages': return ({required Object current, required Object total}) => 'Mengunggah screenshot ${current} dari ${total}...';
+			case 'feedback.successTitle': return 'Masukan Terkirim!';
+			case 'feedback.successMessage': return 'Terima kasih atas kontribusi Anda. Laporan akan segera kami review dan tindaklanjuti.';
+			case 'feedback.kembali': return 'Selesai';
+			case 'feedback.validasiKategori': return 'Silakan pilih salah satu kategori';
+			case 'feedback.validasiJudul': return 'Judul tidak boleh kosong (min. 5 karakter)';
+			case 'feedback.validasiDeskripsi': return 'Deskripsi tidak boleh kosong (min. 10 karakter)';
+			case 'feedback.errorSubmit': return ({required Object error}) => 'Gagal mengirim masukan: ${error}';
 			default: return null;
 		}
 	}

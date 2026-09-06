@@ -83,6 +83,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsKelasProgramEn kelasProgram = TranslationsKelasProgramEn._(_root);
 	late final TranslationsSuperAdminEn superAdmin = TranslationsSuperAdminEn._(_root);
 	late final TranslationsActivityLogEn activityLog = TranslationsActivityLogEn._(_root);
+	late final TranslationsFeedbackEn feedback = TranslationsFeedbackEn._(_root);
 }
 
 // Path: app
@@ -1314,15 +1315,6 @@ class TranslationsDetailAbsensiHariIniEn {
 	/// en: 'Present'
 	String get hadir => 'Present';
 
-	/// en: 'Present (Barcode Scan)'
-	String get hadirBarcode => 'Present (Barcode Scan)';
-
-	/// en: 'Present (No Card)'
-	String get hadirManual => 'Present (No Card)';
-
-	/// en: 'Present (Late)'
-	String get terlambat => 'Present (Late)';
-
 	/// en: 'Sick'
 	String get sakit => 'Sick';
 
@@ -1340,6 +1332,9 @@ class TranslationsDetailAbsensiHariIniEn {
 
 	/// en: 'Student Attendance List'
 	String get daftarKehadiranSantri => 'Student Attendance List';
+
+	/// en: 'All Present'
+	String get hadirSemua => 'All Present';
 
 	/// en: 'Attendance successfully saved!'
 	String get saveSuccess => 'Attendance successfully saved!';
@@ -1419,6 +1414,12 @@ class TranslationsHafalanEn {
 
 	/// en: 'NIS: $nis'
 	String nisLabel({required Object nis}) => 'NIS: ${nis}';
+
+	/// en: 'Download Report'
+	String get unduhLaporanHalaqoh => 'Download Report';
+
+	/// en: 'Create Memorization Report'
+	String get buatLaporanHafalan => 'Create Memorization Report';
 }
 
 // Path: inputHafalanForm
@@ -1784,8 +1785,23 @@ class TranslationsGuruProfileEn {
 	/// en: 'About App'
 	String get tentangAplikasi => 'About App';
 
+	/// en: 'Privacy Policy'
+	String get kebijakanPrivasi => 'Privacy Policy';
+
+	/// en: 'Send Feedback'
+	String get kirimMasukan => 'Send Feedback';
+
 	/// en: 'Logout'
 	String get keluar => 'Logout';
+
+	/// en: 'Delete Account'
+	String get hapusAkun => 'Delete Account';
+
+	/// en: 'Your account has been successfully deleted.'
+	String get deleteAccountSuccess => 'Your account has been successfully deleted.';
+
+	/// en: 'Failed to delete account: $error'
+	String deleteAccountFailed({required Object error}) => 'Failed to delete account: ${error}';
 
 	/// en: 'Halaqoh Teacher'
 	String get guruHalaqoh => 'Halaqoh Teacher';
@@ -2041,6 +2057,18 @@ class TranslationsWaliSantriDashboardEn {
 
 	/// en: 'Class $kelas | $halaqoh'
 	String halaqohInfo({required Object kelas, required Object halaqoh}) => 'Class ${kelas} | ${halaqoh}';
+
+	/// en: ' of total '
+	String get dariTotal => ' of total ';
+
+	/// en: ' sessions attended'
+	String get sesiHadir => ' sessions attended';
+
+	/// en: 'No attendance sessions held this month'
+	String get belumAdaSesiBulanIni => 'No attendance sessions held this month';
+
+	/// en: '$count sessions have been held so far'
+	String sesiDilaksanakan({required Object count}) => '${count} sessions have been held so far';
 }
 
 // Path: waliSantriNav
@@ -2155,6 +2183,18 @@ class TranslationsDialogsEn {
 
 	/// en: 'Log Out'
 	String get keluar => 'Log Out';
+
+	/// en: 'Delete Your Account?'
+	String get deleteAccountTitle => 'Delete Your Account?';
+
+	/// en: 'This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh. Are you sure you want to delete your account?'
+	String get deleteAccountMessage => 'This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh.\n\nAre you sure you want to delete your account?';
+
+	/// en: 'This action is permanent and cannot be undone.'
+	String get deleteAccountWarning => 'This action is permanent and cannot be undone.';
+
+	/// en: 'Delete Account'
+	String get deleteAccountConfirm => 'Delete Account';
 }
 
 // Path: masterDataSettings
@@ -2258,6 +2298,12 @@ class TranslationsTentangAplikasiScreenEn {
 	/// en: 'Android'
 	String get infoPlatformValue => 'Android';
 
+	/// en: 'Privacy Policy'
+	String get kebijakanPrivasi => 'Privacy Policy';
+
+	/// en: 'Read Privacy Policy'
+	String get bukaKebijakanPrivasi => 'Read Privacy Policy';
+
 	/// en: 'Contact & Support'
 	String get sectionKontak => 'Contact & Support';
 
@@ -2266,6 +2312,9 @@ class TranslationsTentangAplikasiScreenEn {
 
 	/// en: 'Contact Admin via WhatsApp'
 	String get kontakButton => 'Contact Admin via WhatsApp';
+
+	/// en: 'Send Feedback & Report Issues'
+	String get kirimMasukan => 'Send Feedback & Report Issues';
 
 	/// en: 'Made with ❤️ for the advancement of Islamic boarding school education'
 	String get footer => 'Made with ❤️ for the advancement of Islamic boarding school education';
@@ -2362,6 +2411,9 @@ class TranslationsLaporanConfigEn {
 	/// en: 'Halaqoh Attendance Recap'
 	String get titleHalaqoh => 'Halaqoh Attendance Recap';
 
+	/// en: 'Halaqoh Memorization Recap'
+	String get titleHafalanHalaqoh => 'Halaqoh Memorization Recap';
+
 	/// en: 'Select period & configurations for student's PDF report.'
 	String get subtitleAbsensi => 'Select period & configurations for student\'s PDF report.';
 
@@ -2370,6 +2422,9 @@ class TranslationsLaporanConfigEn {
 
 	/// en: 'Select period to download full halaqoh recap.'
 	String get subtitleHalaqoh => 'Select period to download full halaqoh recap.';
+
+	/// en: 'Select period to download full halaqoh memorization recap.'
+	String get subtitleHafalanHalaqoh => 'Select period to download full halaqoh memorization recap.';
 
 	/// en: 'Time Range'
 	String get timeRange => 'Time Range';
@@ -2445,6 +2500,9 @@ class TranslationsLaporanConfigEn {
 
 	/// en: 'Memorization Report'
 	String get memorizationReport => 'Memorization Report';
+
+	/// en: 'Memorization Recap'
+	String get recapHafalan => 'Memorization Recap';
 
 	/// en: 'Preview'
 	String get btnPreview => 'Preview';
@@ -2695,6 +2753,93 @@ class TranslationsActivityLogEn {
 	String get resetFilter => 'Reset Filter';
 }
 
+// Path: feedback
+class TranslationsFeedbackEn {
+	TranslationsFeedbackEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Send Feedback'
+	String get title => 'Send Feedback';
+
+	/// en: 'Help us improve MyHalaqoh by sharing suggestions or reporting bugs.'
+	String get subtitle => 'Help us improve MyHalaqoh by sharing suggestions or reporting bugs.';
+
+	/// en: 'Category'
+	String get kategori => 'Category';
+
+	/// en: 'Bug / Error'
+	String get bug => 'Bug / Error';
+
+	/// en: 'Suggestion'
+	String get saran => 'Suggestion';
+
+	/// en: 'Question'
+	String get pertanyaan => 'Question';
+
+	/// en: 'Title'
+	String get judulLabel => 'Title';
+
+	/// en: 'e.g., Save button not responding'
+	String get judulHint => 'e.g., Save button not responding';
+
+	/// en: 'Description'
+	String get deskripsiLabel => 'Description';
+
+	/// en: 'Describe what happened, what you expected, or your idea...'
+	String get deskripsiHint => 'Describe what happened, what you expected, or your idea...';
+
+	/// en: 'Attachments (Optional)'
+	String get lampiran => 'Attachments (Optional)';
+
+	/// en: 'Attach up to 3 screenshots to help us understand.'
+	String get lampiranDesc => 'Attach up to 3 screenshots to help us understand.';
+
+	/// en: 'Add Photo'
+	String get tambahFoto => 'Add Photo';
+
+	/// en: 'Maximum 3 screenshots allowed'
+	String get maxFoto => 'Maximum 3 screenshots allowed';
+
+	/// en: 'Remove photo'
+	String get hapusFoto => 'Remove photo';
+
+	/// en: 'Device information (model, OS, app version) will be automatically included to assist troubleshooting.'
+	String get deviceInfoNotice => 'Device information (model, OS, app version) will be automatically included to assist troubleshooting.';
+
+	/// en: 'Submit Feedback'
+	String get kirimButton => 'Submit Feedback';
+
+	/// en: 'Submitting...'
+	String get submitting => 'Submitting...';
+
+	/// en: 'Uploading screenshot $current of $total...'
+	String uploadingImages({required Object current, required Object total}) => 'Uploading screenshot ${current} of ${total}...';
+
+	/// en: 'Feedback Submitted!'
+	String get successTitle => 'Feedback Submitted!';
+
+	/// en: 'Thank you for helping us improve MyHalaqoh. Our team will review your report.'
+	String get successMessage => 'Thank you for helping us improve MyHalaqoh. Our team will review your report.';
+
+	/// en: 'Done'
+	String get kembali => 'Done';
+
+	/// en: 'Please select a category'
+	String get validasiKategori => 'Please select a category';
+
+	/// en: 'Title cannot be empty (min. 5 characters)'
+	String get validasiJudul => 'Title cannot be empty (min. 5 characters)';
+
+	/// en: 'Description cannot be empty (min. 10 characters)'
+	String get validasiDeskripsi => 'Description cannot be empty (min. 10 characters)';
+
+	/// en: 'Failed to submit feedback: $error'
+	String errorSubmit({required Object error}) => 'Failed to submit feedback: ${error}';
+}
+
 // Path: absensi.barcodeScanner
 class TranslationsAbsensiBarcodeScannerEn {
 	TranslationsAbsensiBarcodeScannerEn._(this._root);
@@ -2747,6 +2892,9 @@ class TranslationsAbsensiMulaiAbsensiEn {
 
 	/// en: 'Maghrib'
 	String get maghrib => 'Maghrib';
+
+	/// en: 'Manual Attendance'
+	String get manualAttendance => 'Manual Attendance';
 
 	/// en: 'Mark All Present'
 	String get markAllPresent => 'Mark All Present';
@@ -2825,6 +2973,12 @@ class TranslationsLaporanConfigPdfEn {
 
 	/// en: 'Student Memorization Progress Report'
 	String get titleMemorization => 'Student Memorization Progress Report';
+
+	/// en: 'Halaqoh Memorization Progress Report'
+	String get titleHafalanHalaqohRecap => 'Halaqoh Memorization Progress Report';
+
+	/// en: 'No memorization records in this period'
+	String get noSetoranInPeriod => 'No memorization records in this period';
 
 	/// en: 'Printed on: $date'
 	String printedAt({required Object date}) => 'Printed on: ${date}';
@@ -3299,6 +3453,7 @@ extension on Translations {
 			case 'absensi.mulaiAbsensi.siang': return 'Noon';
 			case 'absensi.mulaiAbsensi.soreAshar': return 'Afternoon/Ashar';
 			case 'absensi.mulaiAbsensi.maghrib': return 'Maghrib';
+			case 'absensi.mulaiAbsensi.manualAttendance': return 'Manual Attendance';
 			case 'absensi.mulaiAbsensi.markAllPresent': return 'Mark All Present';
 			case 'riwayatAbsensi.title': return 'Attendance History';
 			case 'riwayatAbsensi.ringkasanKehadiran': return 'Attendance Summary';
@@ -3376,15 +3531,13 @@ extension on Translations {
 			case 'absensiHalaqoh.swipeHint': return 'Swipe date row left/right to view daily data';
 			case 'detailAbsensiHariIni.title': return 'Today\'s Attendance Detail';
 			case 'detailAbsensiHariIni.hadir': return 'Present';
-			case 'detailAbsensiHariIni.hadirBarcode': return 'Present (Barcode Scan)';
-			case 'detailAbsensiHariIni.hadirManual': return 'Present (No Card)';
-			case 'detailAbsensiHariIni.terlambat': return 'Present (Late)';
 			case 'detailAbsensiHariIni.sakit': return 'Sick';
 			case 'detailAbsensiHariIni.izin': return 'Excused';
 			case 'detailAbsensiHariIni.alfa': return 'Absent';
 			case 'detailAbsensiHariIni.belumAbsen': return 'Not Yet';
 			case 'detailAbsensiHariIni.belumDiabsen': return 'Not Recorded';
 			case 'detailAbsensiHariIni.daftarKehadiranSantri': return 'Student Attendance List';
+			case 'detailAbsensiHariIni.hadirSemua': return 'All Present';
 			case 'detailAbsensiHariIni.saveSuccess': return 'Attendance successfully saved!';
 			case 'detailAbsensiHariIni.saveFailed': return 'Failed to save attendance';
 			case 'detailAbsensiHariIni.warningBelumTitle': return 'Some Students Not Recorded';
@@ -3416,6 +3569,8 @@ extension on Translations {
 			case 'hafalan.targetLabel': return ({required Object target}) => 'Target: ${target}';
 			case 'hafalan.successSave': return 'Memorization successfully saved!';
 			case 'hafalan.nisLabel': return ({required Object nis}) => 'NIS: ${nis}';
+			case 'hafalan.unduhLaporanHalaqoh': return 'Download Report';
+			case 'hafalan.buatLaporanHafalan': return 'Create Memorization Report';
 			case 'inputHafalanForm.nama': return ({required Object name}) => 'Name: ${name}';
 			case 'inputHafalanForm.ziyadah': return 'ZIYADAH';
 			case 'inputHafalanForm.murajaah': return 'MURAJAAH';
@@ -3523,7 +3678,12 @@ extension on Translations {
 			case 'guruProfile.ubahPassword': return 'Change Password';
 			case 'guruProfile.pengaturan': return 'Settings';
 			case 'guruProfile.tentangAplikasi': return 'About App';
+			case 'guruProfile.kebijakanPrivasi': return 'Privacy Policy';
+			case 'guruProfile.kirimMasukan': return 'Send Feedback';
 			case 'guruProfile.keluar': return 'Logout';
+			case 'guruProfile.hapusAkun': return 'Delete Account';
+			case 'guruProfile.deleteAccountSuccess': return 'Your account has been successfully deleted.';
+			case 'guruProfile.deleteAccountFailed': return ({required Object error}) => 'Failed to delete account: ${error}';
 			case 'guruProfile.guruHalaqoh': return 'Halaqoh Teacher';
 			case 'guruProfile.appVersion': return ({required Object version}) => 'MyHalaqoh App v${version}';
 			case 'guruProfile.loading': return 'Loading...';
@@ -3598,6 +3758,10 @@ extension on Translations {
 			case 'waliSantriDashboard.juzList': return ({required Object juz}) => 'Juz: ${juz}';
 			case 'waliSantriDashboard.extraJuzTarget': return ({required Object count}) => 'Extra : ${count} Juz';
 			case 'waliSantriDashboard.halaqohInfo': return ({required Object kelas, required Object halaqoh}) => 'Class ${kelas} | ${halaqoh}';
+			case 'waliSantriDashboard.dariTotal': return ' of total ';
+			case 'waliSantriDashboard.sesiHadir': return ' sessions attended';
+			case 'waliSantriDashboard.belumAdaSesiBulanIni': return 'No attendance sessions held this month';
+			case 'waliSantriDashboard.sesiDilaksanakan': return ({required Object count}) => '${count} sessions have been held so far';
 			case 'waliSantriNav.home': return 'Home';
 			case 'waliSantriNav.hafalan': return 'Hafalan';
 			case 'waliSantriNav.absensi': return 'Attendance';
@@ -3627,6 +3791,10 @@ extension on Translations {
 			case 'dialogs.logoutTitle': return 'Log Out?';
 			case 'dialogs.logoutMessage': return 'Are you sure you want to log out from this account? You will need to log in again to use the app.';
 			case 'dialogs.keluar': return 'Log Out';
+			case 'dialogs.deleteAccountTitle': return 'Delete Your Account?';
+			case 'dialogs.deleteAccountMessage': return 'This action will permanently delete your login account and profile from the server. You will no longer be able to log in to MyHalaqoh.\n\nAre you sure you want to delete your account?';
+			case 'dialogs.deleteAccountWarning': return 'This action is permanent and cannot be undone.';
+			case 'dialogs.deleteAccountConfirm': return 'Delete Account';
 			case 'masterDataSettings.title': return 'Settings';
 			case 'masterDataSettings.tentangAplikasi': return 'About App';
 			case 'masterDataSettings.keluar': return 'Log Out';
@@ -3655,9 +3823,12 @@ extension on Translations {
 			case 'tentangAplikasiScreen.infoPlatform': return 'Platform';
 			case 'tentangAplikasiScreen.infoLembaga': return 'Institution';
 			case 'tentangAplikasiScreen.infoPlatformValue': return 'Android';
+			case 'tentangAplikasiScreen.kebijakanPrivasi': return 'Privacy Policy';
+			case 'tentangAplikasiScreen.bukaKebijakanPrivasi': return 'Read Privacy Policy';
 			case 'tentangAplikasiScreen.sectionKontak': return 'Contact & Support';
 			case 'tentangAplikasiScreen.kontakDeskripsi': return 'If you need technical assistance or have questions about the app, please contact the administrator via WhatsApp.';
 			case 'tentangAplikasiScreen.kontakButton': return 'Contact Admin via WhatsApp';
+			case 'tentangAplikasiScreen.kirimMasukan': return 'Send Feedback & Report Issues';
 			case 'tentangAplikasiScreen.footer': return 'Made with ❤️ for the advancement of Islamic boarding school education';
 			case 'tentangAplikasiScreen.copyright': return '© 2026 MyHalaqoh. All rights reserved.';
 			case 'general.warning': return 'Warning';
@@ -3696,9 +3867,11 @@ extension on Translations {
 			case 'laporanConfig.titleAbsensi': return 'Download Attendance Report';
 			case 'laporanConfig.titleHafalan': return 'Download Memorization Report';
 			case 'laporanConfig.titleHalaqoh': return 'Halaqoh Attendance Recap';
+			case 'laporanConfig.titleHafalanHalaqoh': return 'Halaqoh Memorization Recap';
 			case 'laporanConfig.subtitleAbsensi': return 'Select period & configurations for student\'s PDF report.';
 			case 'laporanConfig.subtitleHafalan': return 'Select period & configurations for student\'s PDF report.';
 			case 'laporanConfig.subtitleHalaqoh': return 'Select period to download full halaqoh recap.';
+			case 'laporanConfig.subtitleHafalanHalaqoh': return 'Select period to download full halaqoh memorization recap.';
 			case 'laporanConfig.timeRange': return 'Time Range';
 			case 'laporanConfig.weekly': return 'Weekly';
 			case 'laporanConfig.monthly': return 'Monthly';
@@ -3724,6 +3897,7 @@ extension on Translations {
 			case 'laporanConfig.attendanceReport': return 'Attendance Report';
 			case 'laporanConfig.recapAttendance': return 'Attendance Recap';
 			case 'laporanConfig.memorizationReport': return 'Memorization Report';
+			case 'laporanConfig.recapHafalan': return 'Memorization Recap';
 			case 'laporanConfig.btnPreview': return 'Preview';
 			case 'laporanConfig.btnShare': return 'Share';
 			case 'laporanConfig.btnCreateNewReport': return 'Create new report';
@@ -3745,6 +3919,8 @@ extension on Translations {
 			case 'laporanConfig.pdf.titleAttendance': return 'Student Attendance Report';
 			case 'laporanConfig.pdf.titleHalaqohRecap': return 'Halaqoh Attendance Recap Report';
 			case 'laporanConfig.pdf.titleMemorization': return 'Student Memorization Progress Report';
+			case 'laporanConfig.pdf.titleHafalanHalaqohRecap': return 'Halaqoh Memorization Progress Report';
+			case 'laporanConfig.pdf.noSetoranInPeriod': return 'No memorization records in this period';
 			case 'laporanConfig.pdf.printedAt': return ({required Object date}) => 'Printed on: ${date}';
 			case 'laporanConfig.pdf.studentInfo': return 'Student Information';
 			case 'laporanConfig.pdf.halaqohInfo': return 'Halaqoh Information';
@@ -3868,6 +4044,32 @@ extension on Translations {
 			case 'activityLog.allActions': return 'All Actions';
 			case 'activityLog.empty': return 'No activity logs yet';
 			case 'activityLog.resetFilter': return 'Reset Filter';
+			case 'feedback.title': return 'Send Feedback';
+			case 'feedback.subtitle': return 'Help us improve MyHalaqoh by sharing suggestions or reporting bugs.';
+			case 'feedback.kategori': return 'Category';
+			case 'feedback.bug': return 'Bug / Error';
+			case 'feedback.saran': return 'Suggestion';
+			case 'feedback.pertanyaan': return 'Question';
+			case 'feedback.judulLabel': return 'Title';
+			case 'feedback.judulHint': return 'e.g., Save button not responding';
+			case 'feedback.deskripsiLabel': return 'Description';
+			case 'feedback.deskripsiHint': return 'Describe what happened, what you expected, or your idea...';
+			case 'feedback.lampiran': return 'Attachments (Optional)';
+			case 'feedback.lampiranDesc': return 'Attach up to 3 screenshots to help us understand.';
+			case 'feedback.tambahFoto': return 'Add Photo';
+			case 'feedback.maxFoto': return 'Maximum 3 screenshots allowed';
+			case 'feedback.hapusFoto': return 'Remove photo';
+			case 'feedback.deviceInfoNotice': return 'Device information (model, OS, app version) will be automatically included to assist troubleshooting.';
+			case 'feedback.kirimButton': return 'Submit Feedback';
+			case 'feedback.submitting': return 'Submitting...';
+			case 'feedback.uploadingImages': return ({required Object current, required Object total}) => 'Uploading screenshot ${current} of ${total}...';
+			case 'feedback.successTitle': return 'Feedback Submitted!';
+			case 'feedback.successMessage': return 'Thank you for helping us improve MyHalaqoh. Our team will review your report.';
+			case 'feedback.kembali': return 'Done';
+			case 'feedback.validasiKategori': return 'Please select a category';
+			case 'feedback.validasiJudul': return 'Title cannot be empty (min. 5 characters)';
+			case 'feedback.validasiDeskripsi': return 'Description cannot be empty (min. 10 characters)';
+			case 'feedback.errorSubmit': return ({required Object error}) => 'Failed to submit feedback: ${error}';
 			default: return null;
 		}
 	}
