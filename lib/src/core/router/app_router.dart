@@ -60,6 +60,8 @@ import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/screens/
 import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/screens/form_pendaftaran_sertifikasi_screen.dart';
 // Notifications
 import 'package:my_halaqoh/src/modules/notifications/presentation/screens/notification_list_screen.dart';
+// Feedback
+import 'package:my_halaqoh/src/modules/feedback/presentation/screens/feedback_screen.dart';
 
 part 'app_router.gr.dart';
 
@@ -394,6 +396,10 @@ class AppRouter extends RootStackRouter {
     // ── Shared routes (all authenticated roles) ────────────────────
     AutoRoute(
       page: TentangAplikasiRoute.page,
+      guards: [AuthGuard(_authCubit)],
+    ),
+    AutoRoute(
+      page: FeedbackRoute.page,
       guards: [AuthGuard(_authCubit)],
     ),
   ];

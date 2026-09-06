@@ -363,6 +363,11 @@ class _GuruProfileScreenState extends State<GuruProfileScreen> {
                           onTap: () => context.router.push(const TentangAplikasiRoute()),
                         ),
                         _MenuItemData(
+                          icon: Icons.rate_review_outlined,
+                          label: t.guruProfile.kirimMasukan,
+                          onTap: () => context.router.push(const FeedbackRoute()),
+                        ),
+                        _MenuItemData(
                           icon: Icons.privacy_tip_outlined,
                           label: t.guruProfile.kebijakanPrivasi,
                           onTap: () => _openPrivacyPolicy(context),

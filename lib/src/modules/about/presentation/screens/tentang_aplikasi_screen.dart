@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/assets.gen.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/constants/legal_constants.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -298,6 +299,38 @@ class TentangAplikasiScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
                               elevation: 0,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10.h),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () =>
+                                context.router.push(const FeedbackRoute()),
+                            icon: Icon(
+                              Icons.rate_review_outlined,
+                              color: colors.primary,
+                              size: 20.sp,
+                            ),
+                            label: Text(
+                              s.kirimMasukan,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                                color: colors.primary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: colors.primary,
+                                width: 1.5,
+                              ),
+                              padding: EdgeInsets.symmetric(vertical: 14.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
                             ),
                           ),
                         ),

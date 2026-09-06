@@ -12,6 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_halaqoh/src/core/theme/data/theme_repository.dart';
@@ -157,6 +158,17 @@ import 'package:my_halaqoh/src/modules/super_admin/domain/repositories/activity_
 import 'package:my_halaqoh/src/modules/super_admin/presentation/cubits/impersonation/impersonation_cubit.dart';
 import 'package:my_halaqoh/src/modules/super_admin/presentation/cubits/activity_log/activity_log_cubit.dart';
 
+// Feedback — Data Layer
+import 'package:my_halaqoh/src/modules/feedback/data/datasources/remote/source/abstract/feedback_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/feedback/data/datasources/remote/source/implementation/feedback_remote_datasource_impl.dart';
+import 'package:my_halaqoh/src/modules/feedback/data/repositories_impl/feedback_repository_impl.dart';
+
+// Feedback — Domain Layer
+import 'package:my_halaqoh/src/modules/feedback/domain/repositories/feedback_repository.dart';
+
+// Feedback — Presentation Layer
+import 'package:my_halaqoh/src/modules/feedback/presentation/cubits/feedback_cubit.dart';
+
 final sl = GetIt.instance;
 
 /// Call this in main.dart before runApp()
@@ -196,6 +208,9 @@ Future<void> initDependencies() async {
   );
   sl.registerLazySingleton<FirebaseMessaging>(
     () => FirebaseMessaging.instance,
+  );
+  sl.registerLazySingleton<FirebaseStorage>(
+    () => FirebaseStorage.instance,
   );
 
   // ── Auth ──────────────────────────────────────────────────────────────────
@@ -429,5 +444,19 @@ Future<void> initDependencies() async {
   // ── Super Admin — ActivityLogCubit (Factory — scoped to screen) ───────────
   sl.registerFactory<ActivityLogCubit>(
     () => ActivityLogCubit(sl()),
+  );
+
+  // ── Feedback & Bug Reports ────────────────────────────────────────────────
+  sl.registerLazySingleton<FeedbackRemoteDataSource>(
+    () => FeedbackRemoteDataSourceImpl(
+      sl<FirebaseFirestore>(),
+      sl<FirebaseStorage>(),
+    ),
+  );
+  sl.registerLazySingleton<FeedbackRepository>(
+    () => FeedbackRepositoryImpl(sl()),
+  );
+  sl.registerFactory<FeedbackCubit>(
+    () => FeedbackCubit(sl(), sl<AuthCubit>()),
   );
 }

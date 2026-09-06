@@ -12,5 +12,8 @@ class LegalConstants {
   /// Default public URL for MyHalaqoh Account Deletion Request
   static const String accountDeletionUrl =
       'https://my-halaqoh.web.app/account-deletion';
+
+  /// Developer contact email for receiving feedback and bug reports
+  static const String developerFeedbackEmail = 'myhalaqoh.luqim@gmail.com';
 }
 

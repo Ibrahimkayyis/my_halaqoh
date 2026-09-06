@@ -83,6 +83,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsKelasProgramEn kelasProgram = TranslationsKelasProgramEn.internal(_root);
 	late final TranslationsSuperAdminEn superAdmin = TranslationsSuperAdminEn.internal(_root);
 	late final TranslationsActivityLogEn activityLog = TranslationsActivityLogEn.internal(_root);
+	late final TranslationsFeedbackEn feedback = TranslationsFeedbackEn.internal(_root);
 }
 
 // Path: app
@@ -1787,6 +1788,9 @@ class TranslationsGuruProfileEn {
 	/// en: 'Privacy Policy'
 	String get kebijakanPrivasi => 'Privacy Policy';
 
+	/// en: 'Send Feedback'
+	String get kirimMasukan => 'Send Feedback';
+
 	/// en: 'Logout'
 	String get keluar => 'Logout';
 
@@ -2309,6 +2313,9 @@ class TranslationsTentangAplikasiScreenEn {
 	/// en: 'Contact Admin via WhatsApp'
 	String get kontakButton => 'Contact Admin via WhatsApp';
 
+	/// en: 'Send Feedback & Report Issues'
+	String get kirimMasukan => 'Send Feedback & Report Issues';
+
 	/// en: 'Made with ❤️ for the advancement of Islamic boarding school education'
 	String get footer => 'Made with ❤️ for the advancement of Islamic boarding school education';
 
@@ -2744,6 +2751,93 @@ class TranslationsActivityLogEn {
 
 	/// en: 'Reset Filter'
 	String get resetFilter => 'Reset Filter';
+}
+
+// Path: feedback
+class TranslationsFeedbackEn {
+	TranslationsFeedbackEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Send Feedback'
+	String get title => 'Send Feedback';
+
+	/// en: 'Help us improve MyHalaqoh by sharing suggestions or reporting bugs.'
+	String get subtitle => 'Help us improve MyHalaqoh by sharing suggestions or reporting bugs.';
+
+	/// en: 'Category'
+	String get kategori => 'Category';
+
+	/// en: 'Bug'
+	String get bug => 'Bug';
+
+	/// en: 'Suggestion'
+	String get saran => 'Suggestion';
+
+	/// en: 'Question'
+	String get pertanyaan => 'Question';
+
+	/// en: 'Title'
+	String get judulLabel => 'Title';
+
+	/// en: 'e.g., Button not responding'
+	String get judulHint => 'e.g., Button not responding';
+
+	/// en: 'Description'
+	String get deskripsiLabel => 'Description';
+
+	/// en: 'Describe what happened, what you expected, or your idea...'
+	String get deskripsiHint => 'Describe what happened, what you expected, or your idea...';
+
+	/// en: 'Attachments (Optional)'
+	String get lampiran => 'Attachments (Optional)';
+
+	/// en: 'Attach up to 3 screenshots to help us understand.'
+	String get lampiranDesc => 'Attach up to 3 screenshots to help us understand.';
+
+	/// en: 'Add Photo'
+	String get tambahFoto => 'Add Photo';
+
+	/// en: 'Maximum 3 screenshots allowed'
+	String get maxFoto => 'Maximum 3 screenshots allowed';
+
+	/// en: 'Remove photo'
+	String get hapusFoto => 'Remove photo';
+
+	/// en: 'Device information (model, OS, app version) will be automatically included to assist troubleshooting.'
+	String get deviceInfoNotice => 'Device information (model, OS, app version) will be automatically included to assist troubleshooting.';
+
+	/// en: 'Submit Feedback'
+	String get kirimButton => 'Submit Feedback';
+
+	/// en: 'Submitting...'
+	String get submitting => 'Submitting...';
+
+	/// en: 'Uploading screenshot $current of $total...'
+	String uploadingImages({required Object current, required Object total}) => 'Uploading screenshot ${current} of ${total}...';
+
+	/// en: 'Feedback Submitted!'
+	String get successTitle => 'Feedback Submitted!';
+
+	/// en: 'Thank you for helping us improve MyHalaqoh. Our team will review your report.'
+	String get successMessage => 'Thank you for helping us improve MyHalaqoh. Our team will review your report.';
+
+	/// en: 'Done'
+	String get kembali => 'Done';
+
+	/// en: 'Please select a category'
+	String get validasiKategori => 'Please select a category';
+
+	/// en: 'Title cannot be empty (min. 5 characters)'
+	String get validasiJudul => 'Title cannot be empty (min. 5 characters)';
+
+	/// en: 'Description cannot be empty (min. 10 characters)'
+	String get validasiDeskripsi => 'Description cannot be empty (min. 10 characters)';
+
+	/// en: 'Failed to submit feedback: $error'
+	String errorSubmit({required Object error}) => 'Failed to submit feedback: ${error}';
 }
 
 // Path: absensi.barcodeScanner
@@ -3585,6 +3679,7 @@ extension on Translations {
 			case 'guruProfile.pengaturan': return 'Settings';
 			case 'guruProfile.tentangAplikasi': return 'About App';
 			case 'guruProfile.kebijakanPrivasi': return 'Privacy Policy';
+			case 'guruProfile.kirimMasukan': return 'Send Feedback';
 			case 'guruProfile.keluar': return 'Logout';
 			case 'guruProfile.hapusAkun': return 'Delete Account';
 			case 'guruProfile.deleteAccountSuccess': return 'Your account has been successfully deleted.';
@@ -3733,6 +3828,7 @@ extension on Translations {
 			case 'tentangAplikasiScreen.sectionKontak': return 'Contact & Support';
 			case 'tentangAplikasiScreen.kontakDeskripsi': return 'If you need technical assistance or have questions about the app, please contact the administrator via WhatsApp.';
 			case 'tentangAplikasiScreen.kontakButton': return 'Contact Admin via WhatsApp';
+			case 'tentangAplikasiScreen.kirimMasukan': return 'Send Feedback & Report Issues';
 			case 'tentangAplikasiScreen.footer': return 'Made with ❤️ for the advancement of Islamic boarding school education';
 			case 'tentangAplikasiScreen.copyright': return '© 2026 MyHalaqoh. All rights reserved.';
 			case 'general.warning': return 'Warning';
@@ -3948,6 +4044,32 @@ extension on Translations {
 			case 'activityLog.allActions': return 'All Actions';
 			case 'activityLog.empty': return 'No activity logs yet';
 			case 'activityLog.resetFilter': return 'Reset Filter';
+			case 'feedback.title': return 'Send Feedback';
+			case 'feedback.subtitle': return 'Help us improve MyHalaqoh by sharing suggestions or reporting bugs.';
+			case 'feedback.kategori': return 'Category';
+			case 'feedback.bug': return 'Bug';
+			case 'feedback.saran': return 'Suggestion';
+			case 'feedback.pertanyaan': return 'Question';
+			case 'feedback.judulLabel': return 'Title';
+			case 'feedback.judulHint': return 'e.g., Button not responding';
+			case 'feedback.deskripsiLabel': return 'Description';
+			case 'feedback.deskripsiHint': return 'Describe what happened, what you expected, or your idea...';
+			case 'feedback.lampiran': return 'Attachments (Optional)';
+			case 'feedback.lampiranDesc': return 'Attach up to 3 screenshots to help us understand.';
+			case 'feedback.tambahFoto': return 'Add Photo';
+			case 'feedback.maxFoto': return 'Maximum 3 screenshots allowed';
+			case 'feedback.hapusFoto': return 'Remove photo';
+			case 'feedback.deviceInfoNotice': return 'Device information (model, OS, app version) will be automatically included to assist troubleshooting.';
+			case 'feedback.kirimButton': return 'Submit Feedback';
+			case 'feedback.submitting': return 'Submitting...';
+			case 'feedback.uploadingImages': return ({required Object current, required Object total}) => 'Uploading screenshot ${current} of ${total}...';
+			case 'feedback.successTitle': return 'Feedback Submitted!';
+			case 'feedback.successMessage': return 'Thank you for helping us improve MyHalaqoh. Our team will review your report.';
+			case 'feedback.kembali': return 'Done';
+			case 'feedback.validasiKategori': return 'Please select a category';
+			case 'feedback.validasiJudul': return 'Title cannot be empty (min. 5 characters)';
+			case 'feedback.validasiDeskripsi': return 'Description cannot be empty (min. 10 characters)';
+			case 'feedback.errorSubmit': return ({required Object error}) => 'Failed to submit feedback: ${error}';
 			default: return null;
 		}
 	}

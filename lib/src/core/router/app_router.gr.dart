@@ -474,6 +474,22 @@ class EditProfileRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [FeedbackScreen]
+class FeedbackRoute extends PageRouteInfo<void> {
+  const FeedbackRoute({List<PageRouteInfo>? children})
+    : super(FeedbackRoute.name, initialChildren: children);
+
+  static const String name = 'FeedbackRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const FeedbackScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [FormPendaftaranSertifikasiScreen]
 class FormPendaftaranSertifikasiRoute
     extends PageRouteInfo<FormPendaftaranSertifikasiRouteArgs> {
