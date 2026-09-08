@@ -315,9 +315,14 @@ class _MyAppState extends State<MyApp> {
             unauthenticated: () => true,
             orElse: () => false,
           );
-          // Only react when crossing the authenticated ↔ unauthenticated boundary.
+          final isTerminated = current.maybeWhen(
+            terminatedByOtherDevice: (_) => true,
+            orElse: () => false,
+          );
+          // Only react when crossing the authenticated ↔ unauthenticated boundary or terminated.
           return (!wasAuthenticated && isAuthenticated) ||
-              (!wasUnauthenticated && isUnauthenticated);
+              (!wasUnauthenticated && isUnauthenticated) ||
+              isTerminated;
         },
         // ── Native Splash Routing ────────────────────────────────────────────
         // Listens to AuthCubit state changes. When auth resolves (either
@@ -351,6 +356,10 @@ class _MyAppState extends State<MyApp> {
             },
             unauthenticated: () {
               _appRouter.replace(const LoginRoute());
+              FlutterNativeSplash.remove();
+            },
+            terminatedByOtherDevice: (_) {
+              _appRouter.replaceAll([const LoginRoute()]);
               FlutterNativeSplash.remove();
             },
             orElse: () {

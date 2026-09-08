@@ -87,12 +87,12 @@ export const sendSertifikasiNotification = onDocumentWritten(
     const tanggalStr = tanggalUjian ? _formatDate(tanggalUjian.toDate()) : "";
 
     // ── Fetch FCM tokens for Guru, Santri/Wali, and Penguji ────────────────
-    const [guruToken, waliToken, pengujiToken] = await Promise.all([
-      guruId ? _resolveFcmTokenByCollectionAndDocId(db, "guru", guruId) : Promise.resolve(null),
-      santriId ? _resolveFcmTokenByCollectionAndDocId(db, "santri", santriId) : Promise.resolve(null),
+    const [guruTokens, waliTokens, pengujiTokens] = await Promise.all([
+      guruId ? _resolveFcmTokensByCollectionAndDocId(db, "guru", guruId) : Promise.resolve([]),
+      santriId ? _resolveFcmTokensByCollectionAndDocId(db, "santri", santriId) : Promise.resolve([]),
       pengujiId && pengujiId !== guruId
-        ? _resolveFcmTokenByCollectionAndDocId(db, "guru", pengujiId)
-        : Promise.resolve(null),
+        ? _resolveFcmTokensByCollectionAndDocId(db, "guru", pengujiId)
+        : Promise.resolve([]),
     ]);
 
     // ── Build Messages based on status transition ───────────────────────────
@@ -110,121 +110,94 @@ export const sendSertifikasiNotification = onDocumentWritten(
       const timeInfo = tanggalStr ? `${tanggalStr}${sesiUjian ? ` (${sesiUjian})` : ""}` : sesiUjian;
 
       // 1. Message to Guru Pengampu
-      if (guruToken) {
-        messages.push(
-          _createMessage(
-            guruToken,
-            title,
-            `Ujian sertifikasi Juz ${juz} untuk ${santriNama} dijadwalkan pada ${timeInfo}. Penguji: ${pengujiNama || "Ustadz Penguji"}.`,
-            baseData
-          )
-        );
-      }
+      _pushMessages(
+        messages,
+        guruTokens,
+        title,
+        `Ujian sertifikasi Juz ${juz} untuk ${santriNama} dijadwalkan pada ${timeInfo}. Penguji: ${pengujiNama || "Ustadz Penguji"}.`,
+        baseData
+      );
 
       // 2. Message to Wali Santri
-      if (waliToken) {
-        messages.push(
-          _createMessage(
-            waliToken,
-            title,
-            `Ujian sertifikasi hafalan Juz ${juz} untuk ananda ${santriNama} dijadwalkan pada ${timeInfo}.`,
-            baseData
-          )
-        );
-      }
+      _pushMessages(
+        messages,
+        waliTokens,
+        title,
+        `Ujian sertifikasi hafalan Juz ${juz} untuk ananda ${santriNama} dijadwalkan pada ${timeInfo}.`,
+        baseData
+      );
 
       // 3. Message to Penguji (if different from guru)
-      if (pengujiToken) {
-        messages.push(
-          _createMessage(
-            pengujiToken,
-            title,
-            `Anda ditugaskan sebagai penguji Ujian Sertifikasi Juz ${juz} untuk ${santriNama} pada ${timeInfo}.`,
-            baseData
-          )
-        );
-      }
+      _pushMessages(
+        messages,
+        pengujiTokens,
+        title,
+        `Anda ditugaskan sebagai penguji Ujian Sertifikasi Juz ${juz} untuk ${santriNama} pada ${timeInfo}.`,
+        baseData
+      );
     } else if (afterStatus === "rejected") {
       const title = `❌ Pengajuan Sertifikasi Juz ${juz} Ditolak`;
 
       // 1. Message to Guru Pengampu
-      if (guruToken) {
-        messages.push(
-          _createMessage(
-            guruToken,
-            title,
-            `Pengajuan sertifikasi Juz ${juz} untuk ${santriNama} ditolak. Alasan: ${alasanPenolakan || "-"}`,
-            baseData
-          )
-        );
-      }
+      _pushMessages(
+        messages,
+        guruTokens,
+        title,
+        `Pengajuan sertifikasi Juz ${juz} untuk ${santriNama} ditolak. Alasan: ${alasanPenolakan || "-"}`,
+        baseData
+      );
 
       // 2. Message to Wali Santri
-      if (waliToken) {
-        messages.push(
-          _createMessage(
-            waliToken,
-            title,
-            `Pengajuan ujian sertifikasi Juz ${juz} untuk ananda ${santriNama} belum dapat disetujui. Alasan: ${alasanPenolakan || "-"}`,
-            baseData
-          )
-        );
-      }
+      _pushMessages(
+        messages,
+        waliTokens,
+        title,
+        `Pengajuan ujian sertifikasi Juz ${juz} untuk ananda ${santriNama} belum dapat disetujui. Alasan: ${alasanPenolakan || "-"}`,
+        baseData
+      );
     } else if (afterStatus === "passed") {
       const title = `🎉 Selamat! Lulus Sertifikasi Juz ${juz}`;
       const scoreStr = nilai !== null ? ` (Nilai: ${nilai})` : "";
       const predikatStr = predikat ? ` dengan predikat ${predikat}` : "";
 
       // 1. Message to Guru Pengampu
-      if (guruToken) {
-        messages.push(
-          _createMessage(
-            guruToken,
-            title,
-            `${santriNama} dinyatakan LULUS Ujian Sertifikasi Juz ${juz}${predikatStr}${scoreStr}.`,
-            baseData
-          )
-        );
-      }
+      _pushMessages(
+        messages,
+        guruTokens,
+        title,
+        `${santriNama} dinyatakan LULUS Ujian Sertifikasi Juz ${juz}${predikatStr}${scoreStr}.`,
+        baseData
+      );
 
       // 2. Message to Wali Santri
-      if (waliToken) {
-        messages.push(
-          _createMessage(
-            waliToken,
-            title,
-            `Alhamdulillah! Ananda ${santriNama} dinyatakan LULUS Sertifikasi Hafalan Juz ${juz}${predikatStr}${scoreStr}.`,
-            baseData
-          )
-        );
-      }
+      _pushMessages(
+        messages,
+        waliTokens,
+        title,
+        `Alhamdulillah! Ananda ${santriNama} dinyatakan LULUS Sertifikasi Hafalan Juz ${juz}${predikatStr}${scoreStr}.`,
+        baseData
+      );
     } else if (afterStatus === "failed") {
       const title = `📋 Hasil Sertifikasi Juz ${juz}`;
       const scoreStr = nilai !== null ? ` (Nilai: ${nilai})` : "";
 
       // 1. Message to Guru Pengampu
-      if (guruToken) {
-        messages.push(
-          _createMessage(
-            guruToken,
-            title,
-            `${santriNama} perlu mengulang Ujian Sertifikasi Juz ${juz}${scoreStr}. Silakan bimbing kembali.`,
-            baseData
-          )
-        );
-      }
+      _pushMessages(
+        messages,
+        guruTokens,
+        title,
+        `${santriNama} perlu mengulang Ujian Sertifikasi Juz ${juz}${scoreStr}. Silakan bimbing kembali.`,
+        baseData
+      );
 
       // 2. Message to Wali Santri
-      if (waliToken) {
-        messages.push(
-          _createMessage(
-            waliToken,
-            title,
-            `Ananda ${santriNama} perlu mengulang ujian sertifikasi Juz ${juz}${scoreStr}. Tetap semangat menghafal!`,
-            baseData
-          )
-        );
-      }
+      _pushMessages(
+        messages,
+        waliTokens,
+        title,
+        `Ananda ${santriNama} perlu mengulang ujian sertifikasi Juz ${juz}${scoreStr}. Tetap semangat menghafal!`,
+        baseData
+      );
     }
 
     // ── Dispatch notifications via FCM ──────────────────────────────────────
@@ -273,28 +246,77 @@ export const sendSertifikasiNotification = onDocumentWritten(
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
- * Resolves an FCM token by looking up the document in `collectionName` (guru or santri)
- * to get `authUid`, then looking up `/users/{authUid}` to read `fcmToken`.
+ * Resolves all active FCM tokens by looking up the document in `collectionName` (guru or santri)
+ * to get `authUid`, then resolving all active device tokens from `/users/{authUid}/devices`
+ * with fallback to `/users/{authUid}.fcmToken`.
  */
-async function _resolveFcmTokenByCollectionAndDocId(
+async function _resolveFcmTokensByCollectionAndDocId(
   db: FirebaseFirestore.Firestore,
   collectionName: "guru" | "santri",
   docId: string
-): Promise<string | null> {
+): Promise<string[]> {
   try {
     const docSnap = await db.collection(collectionName).doc(docId).get();
-    if (!docSnap.exists) return null;
+    if (!docSnap.exists) return [];
 
     const authUid = docSnap.data()?.authUid;
-    if (!authUid) return null;
+    if (!authUid) return [];
 
-    const userSnap = await db.collection("users").doc(authUid).get();
-    if (!userSnap.exists) return null;
+    const tokens = new Set<string>();
 
-    return userSnap.data()?.fcmToken ?? null;
+    // 1. Check devices subcollection for active devices
+    try {
+      const devicesSnap = await db
+        .collection("users")
+        .doc(authUid)
+        .collection("devices")
+        .get();
+
+      for (const doc of devicesSnap.docs) {
+        const data = doc.data();
+        if (data.isTerminated === true) continue;
+        if (data.fcmToken && typeof data.fcmToken === "string" && data.fcmToken.trim().length > 0) {
+          tokens.add(data.fcmToken.trim());
+        }
+      }
+    } catch (err) {
+      console.warn(`_resolveFcmTokensByCollectionAndDocId: devices error for ${authUid}:`, err);
+    }
+
+    // 2. Fallback to /users/{authUid}.fcmToken
+    if (tokens.size === 0) {
+      try {
+        const userSnap = await db.collection("users").doc(authUid).get();
+        if (userSnap.exists) {
+          const rootToken = userSnap.data()?.fcmToken;
+          if (rootToken && typeof rootToken === "string" && rootToken.trim().length > 0) {
+            tokens.add(rootToken.trim());
+          }
+        }
+      } catch (err) {
+        console.warn(`_resolveFcmTokensByCollectionAndDocId: user doc error for ${authUid}:`, err);
+      }
+    }
+
+    return Array.from(tokens);
   } catch (err) {
-    console.warn(`_resolveFcmTokenByCollectionAndDocId error for ${collectionName}/${docId}:`, err);
-    return null;
+    console.warn(`_resolveFcmTokensByCollectionAndDocId error for ${collectionName}/${docId}:`, err);
+    return [];
+  }
+}
+
+/**
+ * Pushes messages for an array of FCM tokens.
+ */
+function _pushMessages(
+  targetMessages: admin.messaging.TokenMessage[],
+  tokens: string[],
+  title: string,
+  body: string,
+  data: Record<string, string>
+) {
+  for (const token of tokens) {
+    targetMessages.push(_createMessage(token, title, body, data));
   }
 }
 

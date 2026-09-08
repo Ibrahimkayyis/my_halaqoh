@@ -70,16 +70,16 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       final identifierRegex = RegExp(r'^[a-zA-Z0-9]+$');
       if (!identifierRegex.hasMatch(username)) {
-        usernameErr = 'NIP/NIS hanya boleh berisi huruf dan angka.';
+        usernameErr = t.auth.validationAlphanumeric;
       } else if (username.length < 3 || username.length > 30) {
-        usernameErr = 'NIP/NIS harus antara 3 sampai 30 karakter.';
+        usernameErr = t.auth.validationLength;
       }
     }
 
     if (password.isEmpty) {
       passwordErr = t.auth.validationEmpty;
     } else if (password.length < 6) {
-      passwordErr = 'Password minimal 6 karakter.';
+      passwordErr = t.auth.validationPasswordMin;
     }
 
     if (usernameErr != null || passwordErr != null) {
@@ -119,6 +119,56 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  void _showTerminatedDialog(BuildContext context, String deviceName) {
+    final colors = AppColors.of(context);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          backgroundColor: colors.surface,
+          title: Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: colors.red, size: 28.sp),
+              SizedBox(width: 8.w),
+              Text(
+                t.auth.sessionTerminatedTitle,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16.sp,
+                  color: colors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            t.auth.sessionTerminatedMessage(deviceName: deviceName),
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 13.sp,
+              color: colors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          actions: [
+            PrimaryButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.read<AuthCubit>().reset();
+              },
+              label: t.auth.sessionTerminatedButton,
+              height: 40.h,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
@@ -134,6 +184,10 @@ class _LoginScreenState extends State<LoginScreen> {
               ScaffoldMessenger.of(context).clearSnackBars();
               _showServerAuthError(message);
               context.read<AuthCubit>().reset();
+            },
+            terminatedByOtherDevice: (deviceName) {
+              ScaffoldMessenger.of(context).clearSnackBars();
+              _showTerminatedDialog(context, deviceName);
             },
             authenticated: (user) {
               final String programStr =

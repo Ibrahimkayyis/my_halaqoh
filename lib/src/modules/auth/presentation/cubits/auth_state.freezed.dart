@@ -55,7 +55,7 @@ extension AuthStatePatterns on AuthState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Authenticated value)?  authenticated,TResult Function( _Unauthenticated value)?  unauthenticated,TResult Function( _Error value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Authenticated value)?  authenticated,TResult Function( _Unauthenticated value)?  unauthenticated,TResult Function( _Error value)?  error,TResult Function( _TerminatedByOtherDevice value)?  terminatedByOtherDevice,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -63,7 +63,8 @@ return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _Authenticated() when authenticated != null:
 return authenticated(_that);case _Unauthenticated() when unauthenticated != null:
 return unauthenticated(_that);case _Error() when error != null:
-return error(_that);case _:
+return error(_that);case _TerminatedByOtherDevice() when terminatedByOtherDevice != null:
+return terminatedByOtherDevice(_that);case _:
   return orElse();
 
 }
@@ -81,7 +82,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Authenticated value)  authenticated,required TResult Function( _Unauthenticated value)  unauthenticated,required TResult Function( _Error value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Authenticated value)  authenticated,required TResult Function( _Unauthenticated value)  unauthenticated,required TResult Function( _Error value)  error,required TResult Function( _TerminatedByOtherDevice value)  terminatedByOtherDevice,}){
 final _that = this;
 switch (_that) {
 case _Initial():
@@ -89,7 +90,8 @@ return initial(_that);case _Loading():
 return loading(_that);case _Authenticated():
 return authenticated(_that);case _Unauthenticated():
 return unauthenticated(_that);case _Error():
-return error(_that);case _:
+return error(_that);case _TerminatedByOtherDevice():
+return terminatedByOtherDevice(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -106,7 +108,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Authenticated value)?  authenticated,TResult? Function( _Unauthenticated value)?  unauthenticated,TResult? Function( _Error value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Authenticated value)?  authenticated,TResult? Function( _Unauthenticated value)?  unauthenticated,TResult? Function( _Error value)?  error,TResult? Function( _TerminatedByOtherDevice value)?  terminatedByOtherDevice,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -114,7 +116,8 @@ return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _Authenticated() when authenticated != null:
 return authenticated(_that);case _Unauthenticated() when unauthenticated != null:
 return unauthenticated(_that);case _Error() when error != null:
-return error(_that);case _:
+return error(_that);case _TerminatedByOtherDevice() when terminatedByOtherDevice != null:
+return terminatedByOtherDevice(_that);case _:
   return null;
 
 }
@@ -131,14 +134,15 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( UserModel user)?  authenticated,TResult Function()?  unauthenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( UserModel user)?  authenticated,TResult Function()?  unauthenticated,TResult Function( String message)?  error,TResult Function( String deviceName)?  terminatedByOtherDevice,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Authenticated() when authenticated != null:
 return authenticated(_that.user);case _Unauthenticated() when unauthenticated != null:
 return unauthenticated();case _Error() when error != null:
-return error(_that.message);case _:
+return error(_that.message);case _TerminatedByOtherDevice() when terminatedByOtherDevice != null:
+return terminatedByOtherDevice(_that.deviceName);case _:
   return orElse();
 
 }
@@ -156,14 +160,15 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( UserModel user)  authenticated,required TResult Function()  unauthenticated,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( UserModel user)  authenticated,required TResult Function()  unauthenticated,required TResult Function( String message)  error,required TResult Function( String deviceName)  terminatedByOtherDevice,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Authenticated():
 return authenticated(_that.user);case _Unauthenticated():
 return unauthenticated();case _Error():
-return error(_that.message);case _:
+return error(_that.message);case _TerminatedByOtherDevice():
+return terminatedByOtherDevice(_that.deviceName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -180,14 +185,15 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( UserModel user)?  authenticated,TResult? Function()?  unauthenticated,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( UserModel user)?  authenticated,TResult? Function()?  unauthenticated,TResult? Function( String message)?  error,TResult? Function( String deviceName)?  terminatedByOtherDevice,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Authenticated() when authenticated != null:
 return authenticated(_that.user);case _Unauthenticated() when unauthenticated != null:
 return unauthenticated();case _Error() when error != null:
-return error(_that.message);case _:
+return error(_that.message);case _TerminatedByOtherDevice() when terminatedByOtherDevice != null:
+return terminatedByOtherDevice(_that.deviceName);case _:
   return null;
 
 }
@@ -425,6 +431,72 @@ class __$ErrorCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
   return _then(_Error(
 null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _TerminatedByOtherDevice implements AuthState {
+  const _TerminatedByOtherDevice({required this.deviceName});
+  
+
+ final  String deviceName;
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$TerminatedByOtherDeviceCopyWith<_TerminatedByOtherDevice> get copyWith => __$TerminatedByOtherDeviceCopyWithImpl<_TerminatedByOtherDevice>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TerminatedByOtherDevice&&(identical(other.deviceName, deviceName) || other.deviceName == deviceName));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,deviceName);
+
+@override
+String toString() {
+  return 'AuthState.terminatedByOtherDevice(deviceName: $deviceName)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$TerminatedByOtherDeviceCopyWith<$Res> implements $AuthStateCopyWith<$Res> {
+  factory _$TerminatedByOtherDeviceCopyWith(_TerminatedByOtherDevice value, $Res Function(_TerminatedByOtherDevice) _then) = __$TerminatedByOtherDeviceCopyWithImpl;
+@useResult
+$Res call({
+ String deviceName
+});
+
+
+
+
+}
+/// @nodoc
+class __$TerminatedByOtherDeviceCopyWithImpl<$Res>
+    implements _$TerminatedByOtherDeviceCopyWith<$Res> {
+  __$TerminatedByOtherDeviceCopyWithImpl(this._self, this._then);
+
+  final _TerminatedByOtherDevice _self;
+  final $Res Function(_TerminatedByOtherDevice) _then;
+
+/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? deviceName = null,}) {
+  return _then(_TerminatedByOtherDevice(
+deviceName: null == deviceName ? _self.deviceName : deviceName // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

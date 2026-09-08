@@ -66,13 +66,16 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId || isAdminOrSuperAdmin();
       allow write: if isAdminOrSuperAdmin();
-      // Allow authenticated user to update their own FCM token fields only
+      // Allow authenticated user to update their own FCM token and active session fields
       allow update: if request.auth != null
         && request.auth.uid == userId
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['fcmToken', 'fcmTokenUpdatedAt']);
-      // Allow unauthenticated list with limit 1 — used by the login pre-check
-      allow list: if request.auth == null && request.query.limit == 1;
+             .hasOnly(['fcmToken', 'fcmTokenUpdatedAt', 'activeSessionId', 'activeDeviceId', 'activeDeviceName', 'lastLoginAt']);
+
+      // Subcollection for multi-device management
+      match /devices/{deviceId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId || isAdminOrSuperAdmin();
+      }
     }
 
     // Absensi: allow authenticated Gurus to write attendance

@@ -162,6 +162,42 @@ class TranslationsAuthEn {
 
 	/// en: 'Invalid credentials. Use admin/admin, NIP (13 digits), or NIS (12 digits).'
 	String get validationInvalid => 'Invalid credentials. Use admin/admin, NIP (13 digits), or NIS (12 digits).';
+
+	/// en: 'NIP/NIS can only contain letters and numbers.'
+	String get validationAlphanumeric => 'NIP/NIS can only contain letters and numbers.';
+
+	/// en: 'NIP/NIS must be between 3 and 30 characters.'
+	String get validationLength => 'NIP/NIS must be between 3 and 30 characters.';
+
+	/// en: 'Password must be at least 6 characters.'
+	String get validationPasswordMin => 'Password must be at least 6 characters.';
+
+	/// en: 'Invalid NIP/NIS or password'
+	String get errorInvalidCredentials => 'Invalid NIP/NIS or password';
+
+	/// en: 'Invalid NIP/NIS format.'
+	String get errorInvalidEmail => 'Invalid NIP/NIS format.';
+
+	/// en: 'No internet connection.'
+	String get errorNetwork => 'No internet connection.';
+
+	/// en: 'Too many attempts. Please wait a moment.'
+	String get errorTooManyRequests => 'Too many attempts. Please wait a moment.';
+
+	/// en: 'This user account has been disabled.'
+	String get errorUserDisabled => 'This user account has been disabled.';
+
+	/// en: 'Authentication error: $message'
+	String errorGeneric({required Object message}) => 'Authentication error: ${message}';
+
+	/// en: 'Session Expired'
+	String get sessionTerminatedTitle => 'Session Expired';
+
+	/// en: 'Your session has ended because this account has logged in on another device ($deviceName). Please log in again if this was you.'
+	String sessionTerminatedMessage({required Object deviceName}) => 'Your session has ended because this account has logged in on another device (${deviceName}). Please log in again if this was you.';
+
+	/// en: 'Understood'
+	String get sessionTerminatedButton => 'Understood';
 }
 
 // Path: dashboard
@@ -3185,6 +3221,18 @@ extension on Translations {
 			case 'auth.loginButton': return 'LOGIN';
 			case 'auth.validationEmpty': return 'NIP/NIS and Password cannot be empty';
 			case 'auth.validationInvalid': return 'Invalid credentials. Use admin/admin, NIP (13 digits), or NIS (12 digits).';
+			case 'auth.validationAlphanumeric': return 'NIP/NIS can only contain letters and numbers.';
+			case 'auth.validationLength': return 'NIP/NIS must be between 3 and 30 characters.';
+			case 'auth.validationPasswordMin': return 'Password must be at least 6 characters.';
+			case 'auth.errorInvalidCredentials': return 'Invalid NIP/NIS or password';
+			case 'auth.errorInvalidEmail': return 'Invalid NIP/NIS format.';
+			case 'auth.errorNetwork': return 'No internet connection.';
+			case 'auth.errorTooManyRequests': return 'Too many attempts. Please wait a moment.';
+			case 'auth.errorUserDisabled': return 'This user account has been disabled.';
+			case 'auth.errorGeneric': return ({required Object message}) => 'Authentication error: ${message}';
+			case 'auth.sessionTerminatedTitle': return 'Session Expired';
+			case 'auth.sessionTerminatedMessage': return ({required Object deviceName}) => 'Your session has ended because this account has logged in on another device (${deviceName}). Please log in again if this was you.';
+			case 'auth.sessionTerminatedButton': return 'Understood';
 			case 'dashboard.greeting': return 'Welcome,';
 			case 'dashboard.admin': return 'Admin';
 			case 'dashboard.totalSantri': return 'Total Students';

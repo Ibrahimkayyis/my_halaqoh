@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:my_halaqoh/src/modules/auth/domain/models/device_session_model.dart';
 import 'package:my_halaqoh/src/modules/auth/domain/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -17,5 +18,30 @@ abstract class AuthRepository {
 
   /// Expose the raw auth state stream
   Stream<User?> get authStateChanges;
+
+  /// Registers or updates a device session for [uid] with role-based limits.
+  Future<Either<String, void>> registerSession({
+    required String uid,
+    required String role,
+    required DeviceSessionModel session,
+  });
+
+  /// Unregisters the current device session upon logout.
+  Future<Either<String, void>> unregisterSession({
+    required String uid,
+    required String deviceId,
+  });
+
+  /// Streams the current device's session status from Firestore.
+  Stream<DeviceSessionModel?> watchDeviceSession({
+    required String uid,
+    required String deviceId,
+  });
+
+  /// Updates heartbeat/last active timestamp for this device session.
+  Future<void> updateDeviceHeartbeat({
+    required String uid,
+    required String deviceId,
+  });
 }
 

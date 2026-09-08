@@ -1299,11 +1299,11 @@ class _TranslationsFeedbackId implements TranslationsFeedbackEn {
 	@override String get title => 'Kirim Masukan';
 	@override String get subtitle => 'Bantu kami mengembangkan MyHalaqoh dengan memberikan masukan atau melaporkan kendala.';
 	@override String get kategori => 'Kategori';
-	@override String get bug => 'Bug / Error';
+	@override String get bug => 'Bug';
 	@override String get saran => 'Saran';
 	@override String get pertanyaan => 'Pertanyaan';
 	@override String get judulLabel => 'Judul';
-	@override String get judulHint => 'Contoh: Tombol simpan tidak merespons';
+	@override String get judulHint => 'Misal: Tombol tidak merespons';
 	@override String get deskripsiLabel => 'Deskripsi';
 	@override String get deskripsiHint => 'Jelaskan apa yang terjadi, apa yang diharapkan, atau ide Anda...';
 	@override String get lampiran => 'Lampiran (Opsional)';
@@ -2346,11 +2346,11 @@ extension on TranslationsId {
 			case 'feedback.title': return 'Kirim Masukan';
 			case 'feedback.subtitle': return 'Bantu kami mengembangkan MyHalaqoh dengan memberikan masukan atau melaporkan kendala.';
 			case 'feedback.kategori': return 'Kategori';
-			case 'feedback.bug': return 'Bug / Error';
+			case 'feedback.bug': return 'Bug';
 			case 'feedback.saran': return 'Saran';
 			case 'feedback.pertanyaan': return 'Pertanyaan';
 			case 'feedback.judulLabel': return 'Judul';
-			case 'feedback.judulHint': return 'Contoh: Tombol simpan tidak merespons';
+			case 'feedback.judulHint': return 'Misal: Tombol tidak merespons';
 			case 'feedback.deskripsiLabel': return 'Deskripsi';
 			case 'feedback.deskripsiHint': return 'Jelaskan apa yang terjadi, apa yang diharapkan, atau ide Anda...';
 			case 'feedback.lampiran': return 'Lampiran (Opsional)';

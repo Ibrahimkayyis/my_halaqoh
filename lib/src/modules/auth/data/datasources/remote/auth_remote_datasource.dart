@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
+import 'package:my_halaqoh/src/modules/auth/data/datasources/remote/mapper/device_session_mapper.dart';
+import 'package:my_halaqoh/src/modules/auth/domain/models/device_session_model.dart';
 import 'package:my_halaqoh/src/modules/auth/domain/models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
@@ -22,6 +24,31 @@ abstract class AuthRemoteDataSource {
 
   /// Gets a stream of the authentication state natively.
   Stream<User?> get authStateChanges;
+
+  /// Registers or updates a device session, enforcing role-based device limits.
+  Future<void> registerSession({
+    required String uid,
+    required String role,
+    required DeviceSessionModel session,
+  });
+
+  /// Unregisters this device session upon logout.
+  Future<void> unregisterSession({
+    required String uid,
+    required String deviceId,
+  });
+
+  /// Watches this specific device's session document in Firestore.
+  Stream<DeviceSessionModel?> watchDeviceSession({
+    required String uid,
+    required String deviceId,
+  });
+
+  /// Updates heartbeat timestamp for this device.
+  Future<void> updateDeviceHeartbeat({
+    required String uid,
+    required String deviceId,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -45,35 +72,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final normalizedIdentifier = identifier.trim();
     final email = '$normalizedIdentifier@myhalaqoh.app';
 
-    // Pre-check: verifikasi identifier di Firestore SEBELUM memanggil
-    // Firebase Auth untuk memberikan pesan error yang lebih spesifik.
-    //
-    // PENTING: Hanya throw user-not-found jika query BERHASIL dan
-    // memang tidak ada dokumen. Jika query gagal karena alasan apapun
-    // (network, permission-denied, dll) → fallthrough ke Firebase Auth.
-    try {
-      final userQuery = await _firestore
-          .collection('users')
-          .where('identifier', isEqualTo: normalizedIdentifier)
-          .limit(1)
-          .get();
-
-      if (userQuery.docs.isEmpty) {
-        // Identifier tidak terdaftar di Firestore
-        throw FirebaseAuthException(
-          code: 'user-not-found',
-          message: 'No user found for identifier: $normalizedIdentifier',
-        );
-      }
-    } on FirebaseAuthException {
-      // Re-throw user-not-found yang kita buat sendiri
-      rethrow;
-    } catch (_) {
-      // Query Firestore gagal (network error, permission-denied, dll)
-      // → abaikan dan lanjutkan ke Firebase Auth
-    }
-
-    // Lanjut ke Firebase Auth
+    // Autentikasi langsung ke Firebase Auth tanpa pre-check query unauthenticated
     final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -174,5 +173,152 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final data = docSnap.data()!;
     data['uid'] = currentUser.uid;
     return UserModel.fromJson(data);
+  }
+
+  static int _maxDevicesForRole(String role) {
+    switch (role) {
+      case 'guru':
+        return 1;
+      case 'admin':
+        return 2;
+      case 'santri':
+        return 3;
+      default:
+        return 2;
+    }
+  }
+
+  @override
+  Future<void> registerSession({
+    required String uid,
+    required String role,
+    required DeviceSessionModel session,
+  }) async {
+    final userRef = _firestore.collection('users').doc(uid);
+    final devicesRef = userRef.collection('devices');
+
+    final maxAllowed = _maxDevicesForRole(role);
+
+    // 1. Fetch current devices for this user
+    final querySnapshot = await devicesRef.get();
+    final docs = querySnapshot.docs;
+
+    // 2. Identify other registered devices
+    final otherDevices = docs.where((doc) => doc.id != session.deviceId).toList();
+
+    // Sort other devices by lastActiveAt ascending (oldest first)
+    otherDevices.sort((a, b) {
+      final aTime = (a.data()['lastActiveAt'] as Timestamp?)?.millisecondsSinceEpoch ?? 0;
+      final bTime = (b.data()['lastActiveAt'] as Timestamp?)?.millisecondsSinceEpoch ?? 0;
+      return aTime.compareTo(bTime);
+    });
+
+    // 3. If otherDevices.length + 1 > maxAllowed, terminate excess oldest
+    final allowedOthers = maxAllowed - 1;
+    if (otherDevices.length > allowedOthers) {
+      final excessCount = otherDevices.length - allowedOthers;
+      final toEvict = otherDevices.take(excessCount);
+      for (final doc in toEvict) {
+        await doc.reference.update({
+          'isTerminated': true,
+          'terminatedBy': session.deviceName,
+          'lastActiveAt': FieldValue.serverTimestamp(),
+        });
+      }
+    }
+
+    // 4. Save/update current device document
+    await devicesRef.doc(session.deviceId).set(
+      DeviceSessionMapper.toFirestore(session),
+      SetOptions(merge: true),
+    );
+
+    // 5. Update user root document for backward compatibility
+    final Map<String, dynamic> userUpdates = {
+      'lastLoginAt': FieldValue.serverTimestamp(),
+      'activeSessionId': session.sessionId,
+      'activeDeviceId': session.deviceId,
+      'activeDeviceName': session.deviceName,
+    };
+    if (session.fcmToken != null && session.fcmToken!.isNotEmpty) {
+      userUpdates['fcmToken'] = session.fcmToken;
+      userUpdates['fcmTokenUpdatedAt'] = FieldValue.serverTimestamp();
+    }
+    await userRef.update(userUpdates);
+  }
+
+  @override
+  Future<void> unregisterSession({
+    required String uid,
+    required String deviceId,
+  }) async {
+    final userRef = _firestore.collection('users').doc(uid);
+    final devicesRef = userRef.collection('devices');
+
+    // Delete this device document
+    try {
+      await devicesRef.doc(deviceId).delete();
+    } catch (_) {}
+
+    // Check remaining devices
+    try {
+      final remaining = await devicesRef.get();
+      if (remaining.docs.isEmpty) {
+        await userRef.update({
+          'fcmToken': null,
+          'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+          'activeSessionId': null,
+          'activeDeviceId': null,
+        });
+      } else {
+        remaining.docs.sort((a, b) {
+          final aTime = (a.data()['lastActiveAt'] as Timestamp?)?.millisecondsSinceEpoch ?? 0;
+          final bTime = (b.data()['lastActiveAt'] as Timestamp?)?.millisecondsSinceEpoch ?? 0;
+          return bTime.compareTo(aTime);
+        });
+        final latestWithToken = remaining.docs.where(
+          (d) => (d.data()['fcmToken'] as String?)?.isNotEmpty == true,
+        );
+        if (latestWithToken.isNotEmpty) {
+          final token = latestWithToken.first.data()['fcmToken'] as String;
+          await userRef.update({
+            'fcmToken': token,
+            'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  @override
+  Stream<DeviceSessionModel?> watchDeviceSession({
+    required String uid,
+    required String deviceId,
+  }) {
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('devices')
+        .doc(deviceId)
+        .snapshots()
+        .map((docSnap) {
+      if (!docSnap.exists) return null;
+      return DeviceSessionMapper.fromFirestore(docSnap);
+    });
+  }
+
+  @override
+  Future<void> updateDeviceHeartbeat({
+    required String uid,
+    required String deviceId,
+  }) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('devices')
+          .doc(deviceId)
+          .update({'lastActiveAt': FieldValue.serverTimestamp()});
+    } catch (_) {}
   }
 }

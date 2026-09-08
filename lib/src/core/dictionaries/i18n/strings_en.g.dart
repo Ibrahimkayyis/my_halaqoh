@@ -2770,8 +2770,8 @@ class TranslationsFeedbackEn {
 	/// en: 'Category'
 	String get kategori => 'Category';
 
-	/// en: 'Bug / Error'
-	String get bug => 'Bug / Error';
+	/// en: 'Bug'
+	String get bug => 'Bug';
 
 	/// en: 'Suggestion'
 	String get saran => 'Suggestion';
@@ -2782,8 +2782,8 @@ class TranslationsFeedbackEn {
 	/// en: 'Title'
 	String get judulLabel => 'Title';
 
-	/// en: 'e.g., Save button not responding'
-	String get judulHint => 'e.g., Save button not responding';
+	/// en: 'e.g., Button not responding'
+	String get judulHint => 'e.g., Button not responding';
 
 	/// en: 'Description'
 	String get deskripsiLabel => 'Description';
@@ -4047,11 +4047,11 @@ extension on Translations {
 			case 'feedback.title': return 'Send Feedback';
 			case 'feedback.subtitle': return 'Help us improve MyHalaqoh by sharing suggestions or reporting bugs.';
 			case 'feedback.kategori': return 'Category';
-			case 'feedback.bug': return 'Bug / Error';
+			case 'feedback.bug': return 'Bug';
 			case 'feedback.saran': return 'Suggestion';
 			case 'feedback.pertanyaan': return 'Question';
 			case 'feedback.judulLabel': return 'Title';
-			case 'feedback.judulHint': return 'e.g., Save button not responding';
+			case 'feedback.judulHint': return 'e.g., Button not responding';
 			case 'feedback.deskripsiLabel': return 'Description';
 			case 'feedback.deskripsiHint': return 'Describe what happened, what you expected, or your idea...';
 			case 'feedback.lampiran': return 'Attachments (Optional)';

@@ -11,4 +11,6 @@ abstract class AuthState with _$AuthState {
   const factory AuthState.authenticated(UserModel user) = _Authenticated;
   const factory AuthState.unauthenticated() = _Unauthenticated;
   const factory AuthState.error(String message) = _Error;
+  /// Session terminated because another device logged in
+  const factory AuthState.terminatedByOtherDevice({required String deviceName}) = _TerminatedByOtherDevice;
 }

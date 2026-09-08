@@ -19,11 +19,11 @@ abstract class NotificationRemoteDataSource {
   /// Hanya dipanggil setelah dipastikan permission sudah [AuthorizationStatus.authorized].
   Future<String?> getTokenOnly();
 
-  /// Writes [token] to `/users/{uid}` as `fcmToken`.
-  Future<void> saveToken(String uid, String token);
+  /// Writes [token] to `/users/{uid}` as `fcmToken` and optionally to `/users/{uid}/devices/{deviceId}`.
+  Future<void> saveToken(String uid, String token, [String? deviceId]);
 
-  /// Sets `fcmToken` to null in `/users/{uid}`.
-  Future<void> clearToken(String uid);
+  /// Sets `fcmToken` to null in `/users/{uid}` and removes `/users/{uid}/devices/{deviceId}`.
+  Future<void> clearToken(String uid, [String? deviceId]);
 
   /// Stream that emits whenever FCM issues a new device token.
   Stream<String> get onTokenRefresh;

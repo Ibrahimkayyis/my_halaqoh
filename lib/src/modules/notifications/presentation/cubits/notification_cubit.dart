@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:my_halaqoh/src/core/services/device_service.dart';
 
 import '../../domain/repositories/notification_repository.dart';
 import 'notification_state.dart';
@@ -20,11 +21,13 @@ import 'notification_state.dart';
 class NotificationCubit extends Cubit<NotificationState> {
   final NotificationRepository _repository;
   final SharedPreferences _prefs;
+  final DeviceService _deviceService;
   final _log = Logger();
 
   StreamSubscription<String>? _tokenRefreshSub;
 
-  NotificationCubit(this._repository, this._prefs) : super(const NotificationState.initial());
+  NotificationCubit(this._repository, this._prefs, this._deviceService)
+      : super(const NotificationState.initial());
 
   String _prefsKey(String uid) => 'notification_enabled_$uid';
 
@@ -47,7 +50,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     if (!localEnabled) {
       _log.i('NotificationCubit.initialize: notifications disabled by user preference.');
       // Make sure token is cleared from Firestore
-      await _repository.clearToken(uid);
+      await _repository.clearToken(uid, _deviceService.getDeviceId());
       emit(const NotificationState.notificationDisabled());
       return;
     }
@@ -58,7 +61,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     if (status == AuthorizationStatus.denied) {
       _log.w('NotificationCubit.initialize: OS permission is denied.');
       // Make sure token is cleared from Firestore
-      await _repository.clearToken(uid);
+      await _repository.clearToken(uid, _deviceService.getDeviceId());
       emit(const NotificationState.notificationDisabled());
       return;
     }
@@ -130,7 +133,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     _tokenRefreshSub?.cancel();
     _tokenRefreshSub = null;
 
-    final result = await _repository.clearToken(uid);
+    final result = await _repository.clearToken(uid, _deviceService.getDeviceId());
     result.fold(
       (error) {
         _log.e('NotificationCubit.disableNotification failed: $error');
@@ -144,7 +147,7 @@ class NotificationCubit extends Cubit<NotificationState> {
   }
 
   Future<void> _saveTokenAndSubscribe(String uid, String token) async {
-    final saveResult = await _repository.saveToken(uid, token);
+    final saveResult = await _repository.saveToken(uid, token, _deviceService.getDeviceId());
     saveResult.fold(
       (error) {
         _log.e('NotificationCubit: saveToken failed — $error');
@@ -161,7 +164,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     _tokenRefreshSub = _repository.onTokenRefresh.listen(
       (newToken) async {
         _log.i('NotificationCubit: FCM token rotated — persisting new token.');
-        final result = await _repository.saveToken(uid, newToken);
+        final result = await _repository.saveToken(uid, newToken, _deviceService.getDeviceId());
         result.fold(
           (error) => _log.e('NotificationCubit: failed to persist rotated token — $error'),
           (_) => _log.i('NotificationCubit: rotated token saved.'),
@@ -177,7 +180,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     _tokenRefreshSub?.cancel();
     _tokenRefreshSub = null;
 
-    final result = await _repository.clearToken(uid);
+    final result = await _repository.clearToken(uid, _deviceService.getDeviceId());
     result.fold(
       (error) => _log.e('NotificationCubit.clearToken failed: $error'),
       (_) {

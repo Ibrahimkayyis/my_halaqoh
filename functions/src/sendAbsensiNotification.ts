@@ -130,68 +130,62 @@ export const sendAbsensiNotification = onDocumentWritten(
             return;
           }
 
-          // Step 2: Fetch /users/{authUid} to get fcmToken
-          const userSnap = await db.collection("users").doc(authUid).get();
-          if (!userSnap.exists) {
-            console.warn(
-              `sendAbsensiNotification: users/${authUid} not found.`
-            );
-            return;
-          }
-
-          const fcmToken: string | undefined = userSnap.data()?.fcmToken;
-          if (!fcmToken) {
+          // Step 2: Fetch all FCM tokens for authUid (multi-device support)
+          const fcmTokens = await _resolveUserFcmTokens(db, authUid);
+          if (fcmTokens.length === 0) {
             console.info(
-              `sendAbsensiNotification: users/${authUid} has no fcmToken — notification permission likely denied by parent.`
+              `sendAbsensiNotification: users/${authUid} has no active FCM tokens — notification permission likely denied or no registered devices.`
             );
             return;
           }
 
-          // Step 3: Build the FCM message
+          // Step 3: Build FCM messages for each active device
           const statusLabel = _statusLabel(record.status);
           const notifTitle = `📋 Absensi ${sesiLabel} — ${record.nama}`;
           const notifBody = `${tanggalStr} · ${halaqohNama} · Status: ${statusLabel}`;
 
-          messages.push({
-            token: fcmToken,
-            notification: {
-              title: notifTitle,
-              body: notifBody,
-            },
-            // Structured data payload for the Flutter app to handle taps
-            data: {
-              type: "absensi",
-              santriId: record.santriId,
-              santriNama: record.nama,
-              santriNis: record.nis,
-              halaqohId: halaqohId,
-              halaqohNama: halaqohNama,
-              tanggal: tanggal.toDate().toISOString(),
-              sesi: sesi,
-              status: _normalizeStatus(record.status),
-            },
-            android: {
-              priority: "high",
+          for (const fcmToken of fcmTokens) {
+            messages.push({
+              token: fcmToken,
               notification: {
-                channelId: "my_halaqoh_absensi",
-                sound: "default",
-                // Color must be in #RRGGBB hex format
-                color: "#2E7D32",
+                title: notifTitle,
+                body: notifBody,
               },
-            },
-            apns: {
-              payload: {
-                aps: {
+              // Structured data payload for the Flutter app to handle taps
+              data: {
+                type: "absensi",
+                santriId: record.santriId,
+                santriNama: record.nama,
+                santriNis: record.nis,
+                halaqohId: halaqohId,
+                halaqohNama: halaqohNama,
+                tanggal: tanggal.toDate().toISOString(),
+                sesi: sesi,
+                status: _normalizeStatus(record.status),
+              },
+              android: {
+                priority: "high",
+                notification: {
+                  channelId: "my_halaqoh_absensi",
                   sound: "default",
-                  badge: 1,
-                  contentAvailable: true,
+                  // Color must be in #RRGGBB hex format
+                  color: "#2E7D32",
                 },
               },
-              headers: {
-                "apns-priority": "10",
+              apns: {
+                payload: {
+                  aps: {
+                    sound: "default",
+                    badge: 1,
+                    contentAvailable: true,
+                  },
+                },
+                headers: {
+                  "apns-priority": "10",
+                },
               },
-            },
-          });
+            });
+          }
         } catch (e) {
           // Non-fatal: log and continue with other records
           console.error(
@@ -317,4 +311,50 @@ function _formatDate(date: Date): string {
     month: "long",
     year: "numeric",
   });
+}
+
+/**
+ * Resolves all active FCM tokens for a user.
+ * Queries /users/{authUid}/devices for active, non-terminated devices,
+ * with fallback to /users/{authUid}.fcmToken.
+ */
+async function _resolveUserFcmTokens(
+  db: FirebaseFirestore.Firestore,
+  authUid: string
+): Promise<string[]> {
+  const tokens = new Set<string>();
+
+  try {
+    const devicesSnap = await db
+      .collection("users")
+      .doc(authUid)
+      .collection("devices")
+      .get();
+
+    for (const doc of devicesSnap.docs) {
+      const data = doc.data();
+      if (data.isTerminated === true) continue;
+      if (data.fcmToken && typeof data.fcmToken === "string" && data.fcmToken.trim().length > 0) {
+        tokens.add(data.fcmToken.trim());
+      }
+    }
+  } catch (err) {
+    console.warn(`_resolveUserFcmTokens: error reading devices for ${authUid}:`, err);
+  }
+
+  if (tokens.size === 0) {
+    try {
+      const userSnap = await db.collection("users").doc(authUid).get();
+      if (userSnap.exists) {
+        const rootToken = userSnap.data()?.fcmToken;
+        if (rootToken && typeof rootToken === "string" && rootToken.trim().length > 0) {
+          tokens.add(rootToken.trim());
+        }
+      }
+    } catch (err) {
+      console.warn(`_resolveUserFcmTokens: error reading user doc for ${authUid}:`, err);
+    }
+  }
+
+  return Array.from(tokens);
 }

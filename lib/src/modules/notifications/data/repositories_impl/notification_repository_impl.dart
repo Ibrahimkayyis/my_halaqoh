@@ -48,9 +48,9 @@ class NotificationRepositoryImpl implements NotificationRepository {
   }
 
   @override
-  Future<Either<String, void>> saveToken(String uid, String token) async {
+  Future<Either<String, void>> saveToken(String uid, String token, [String? deviceId]) async {
     try {
-      await _remote.saveToken(uid, token);
+      await _remote.saveToken(uid, token, deviceId);
       return const Right(null);
     } catch (e) {
       _log.e('NotificationRepository.saveToken failed for uid=$uid: $e');
@@ -59,9 +59,9 @@ class NotificationRepositoryImpl implements NotificationRepository {
   }
 
   @override
-  Future<Either<String, void>> clearToken(String uid) async {
+  Future<Either<String, void>> clearToken(String uid, [String? deviceId]) async {
     try {
-      await _remote.clearToken(uid);
+      await _remote.clearToken(uid, deviceId);
       return const Right(null);
     } catch (e) {
       _log.e('NotificationRepository.clearToken failed for uid=$uid: $e');
