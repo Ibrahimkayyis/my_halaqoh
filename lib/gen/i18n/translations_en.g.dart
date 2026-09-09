@@ -84,6 +84,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	late final TranslationsSuperAdminEn superAdmin = TranslationsSuperAdminEn.internal(_root);
 	late final TranslationsActivityLogEn activityLog = TranslationsActivityLogEn.internal(_root);
 	late final TranslationsFeedbackEn feedback = TranslationsFeedbackEn.internal(_root);
+	late final TranslationsSnackBarEn snackBar = TranslationsSnackBarEn.internal(_root);
 }
 
 // Path: app
@@ -2876,6 +2877,30 @@ class TranslationsFeedbackEn {
 	String errorSubmit({required Object error}) => 'Failed to submit feedback: ${error}';
 }
 
+// Path: snackBar
+class TranslationsSnackBarEn {
+	TranslationsSnackBarEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Success'
+	String get successTitle => 'Success';
+
+	/// en: 'Error'
+	String get errorTitle => 'Error';
+
+	/// en: 'Warning'
+	String get warningTitle => 'Warning';
+
+	/// en: 'Information'
+	String get infoTitle => 'Information';
+
+	/// en: 'Dismiss'
+	String get dismiss => 'Dismiss';
+}
+
 // Path: absensi.barcodeScanner
 class TranslationsAbsensiBarcodeScannerEn {
 	TranslationsAbsensiBarcodeScannerEn.internal(this._root);
@@ -4118,6 +4143,11 @@ extension on Translations {
 			case 'feedback.validasiJudul': return 'Title cannot be empty (min. 5 characters)';
 			case 'feedback.validasiDeskripsi': return 'Description cannot be empty (min. 10 characters)';
 			case 'feedback.errorSubmit': return ({required Object error}) => 'Failed to submit feedback: ${error}';
+			case 'snackBar.successTitle': return 'Success';
+			case 'snackBar.errorTitle': return 'Error';
+			case 'snackBar.warningTitle': return 'Warning';
+			case 'snackBar.infoTitle': return 'Information';
+			case 'snackBar.dismiss': return 'Dismiss';
 			default: return null;
 		}
 	}

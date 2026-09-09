@@ -7,6 +7,9 @@ export 'dialog/confirm_delete_dialog.dart';
 export 'dialog/confirm_logout_dialog.dart';
 export 'dialog/confirm_delete_account_dialog.dart';
 
+// Feedback & SnackBar
+export 'snack_bar/app_snack_bar.dart';
+
 // Buttons
 export 'button/primary_button.dart';
 export 'button/outlined_button.dart';

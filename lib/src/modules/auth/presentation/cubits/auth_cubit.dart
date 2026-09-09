@@ -80,29 +80,36 @@ class AuthCubit extends Cubit<AuthState> {
       platform: platform,
     );
 
-    await _repository.registerSession(
-      uid: userMeta.uid,
-      role: userMeta.role,
-      session: session,
-    );
+    try {
+      await _repository.registerSession(
+        uid: userMeta.uid,
+        role: userMeta.role,
+        session: session,
+      );
+    } catch (_) {}
 
     // Start listening for session termination or displacement
     _sessionSubscription?.cancel();
     _sessionSubscription = _repository
         .watchDeviceSession(uid: userMeta.uid, deviceId: deviceId)
-        .listen((remoteSession) async {
-      if (remoteSession == null) {
-        // Document deleted by eviction
-        await _handleSessionTerminated('Perangkat Lain');
-      } else if (remoteSession.isTerminated) {
-        // Terminated by eviction with specific device name
-        await _handleSessionTerminated(remoteSession.terminatedBy ?? 'Perangkat Lain');
-      } else if (remoteSession.sessionId.isNotEmpty &&
-          remoteSession.sessionId != _currentSessionId) {
-        // Session ID displaced
-        await _handleSessionTerminated(remoteSession.deviceName);
-      }
-    });
+        .listen(
+      (remoteSession) async {
+        if (remoteSession == null) return;
+
+        if (remoteSession.isTerminated) {
+          // Terminated by eviction with specific device name
+          await _handleSessionTerminated(
+              remoteSession.terminatedBy ?? 'Perangkat Lain');
+        } else if (remoteSession.sessionId.isNotEmpty &&
+            remoteSession.sessionId != _currentSessionId) {
+          // Session ID displaced
+          await _handleSessionTerminated(remoteSession.deviceName);
+        }
+      },
+      onError: (_) {
+        // Silently ignore stream errors so debug mode does not pause on transient network issues
+      },
+    );
   }
 
   Future<void> _handleSessionTerminated(String deviceName) async {

@@ -83,6 +83,7 @@ class TranslationsId extends Translations {
 	@override late final _TranslationsSuperAdminId superAdmin = _TranslationsSuperAdminId._(_root);
 	@override late final _TranslationsActivityLogId activityLog = _TranslationsActivityLogId._(_root);
 	@override late final _TranslationsFeedbackId feedback = _TranslationsFeedbackId._(_root);
+	@override late final _TranslationsSnackBarId snackBar = _TranslationsSnackBarId._(_root);
 }
 
 // Path: app
@@ -1338,6 +1339,20 @@ class _TranslationsFeedbackId extends TranslationsFeedbackEn {
 	@override String errorSubmit({required Object error}) => 'Gagal mengirim masukan: ${error}';
 }
 
+// Path: snackBar
+class _TranslationsSnackBarId extends TranslationsSnackBarEn {
+	_TranslationsSnackBarId._(TranslationsId root) : this._root = root, super.internal(root);
+
+	final TranslationsId _root; // ignore: unused_field
+
+	// Translations
+	@override String get successTitle => 'Berhasil';
+	@override String get errorTitle => 'Terjadi Kesalahan';
+	@override String get warningTitle => 'Perhatian';
+	@override String get infoTitle => 'Informasi';
+	@override String get dismiss => 'Tutup';
+}
+
 // Path: absensi.barcodeScanner
 class _TranslationsAbsensiBarcodeScannerId extends TranslationsAbsensiBarcodeScannerEn {
 	_TranslationsAbsensiBarcodeScannerId._(TranslationsId root) : this._root = root, super.internal(root);
@@ -2395,6 +2410,11 @@ extension on TranslationsId {
 			case 'feedback.validasiJudul': return 'Judul tidak boleh kosong (min. 5 karakter)';
 			case 'feedback.validasiDeskripsi': return 'Deskripsi tidak boleh kosong (min. 10 karakter)';
 			case 'feedback.errorSubmit': return ({required Object error}) => 'Gagal mengirim masukan: ${error}';
+			case 'snackBar.successTitle': return 'Berhasil';
+			case 'snackBar.errorTitle': return 'Terjadi Kesalahan';
+			case 'snackBar.warningTitle': return 'Perhatian';
+			case 'snackBar.infoTitle': return 'Informasi';
+			case 'snackBar.dismiss': return 'Tutup';
 			default: return null;
 		}
 	}

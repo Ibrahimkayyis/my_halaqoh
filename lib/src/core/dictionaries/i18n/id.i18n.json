@@ -968,5 +968,12 @@
     "validasiJudul": "Judul tidak boleh kosong (min. 5 karakter)",
     "validasiDeskripsi": "Deskripsi tidak boleh kosong (min. 10 karakter)",
     "errorSubmit": "Gagal mengirim masukan: $error"
+  },
+  "snackBar": {
+    "successTitle": "Berhasil",
+    "errorTitle": "Terjadi Kesalahan",
+    "warningTitle": "Perhatian",
+    "infoTitle": "Informasi",
+    "dismiss": "Tutup"
   }
 }

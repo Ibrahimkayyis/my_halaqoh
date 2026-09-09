@@ -966,5 +966,12 @@
     "validasiJudul": "Title cannot be empty (min. 5 characters)",
     "validasiDeskripsi": "Description cannot be empty (min. 10 characters)",
     "errorSubmit": "Failed to submit feedback: $error"
+  },
+  "snackBar": {
+    "successTitle": "Success",
+    "errorTitle": "Error",
+    "warningTitle": "Warning",
+    "infoTitle": "Information",
+    "dismiss": "Dismiss"
   }
 }

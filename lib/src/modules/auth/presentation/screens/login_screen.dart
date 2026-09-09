@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/assets.gen.dart';
 import 'package:my_halaqoh/gen/colors.gen.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
-import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
@@ -190,29 +189,12 @@ class _LoginScreenState extends State<LoginScreen> {
               _showTerminatedDialog(context, deviceName);
             },
             authenticated: (user) {
-              final String programStr =
-                  (user.programType == 'T') ? 'takhassus' : 'reguler';
-
-              // Restart Firestore streams
+              // Restart Firestore streams for the newly authenticated user.
               context.read<GuruCubit>().watchAll();
               context.read<SantriCubit>().watchAll();
               context.read<HalaqohCubit>().watchAll();
               context.read<TargetHafalanCubit>().watchAll();
-
-              // Redirect based on role
-              if (user.role == 'admin') {
-                context.router.replace(const DashboardWrapperRoute());
-              } else if (user.role == 'guru') {
-                context.router.replace(
-                  GuruDashboardWrapperRoute(programType: programStr),
-                );
-              } else if (user.role == 'santri') {
-                context.router.replace(
-                  WaliSantriDashboardWrapperRoute(programType: programStr),
-                );
-              } else if (user.role == 'super_admin') {
-                context.router.replace(const SuperAdminPickerRoute());
-              }
+              // Note: Route redirection is handled centrally by AuthCubit listener in main.dart
             },
             orElse: () {},
           );

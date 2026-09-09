@@ -72,10 +72,29 @@ MyHalaqoh employs an offline-first architecture — teachers can record attendan
 ---
 
 ## Screenshots
- 
-![Screenshot 1](docs/screenshot_1.png)
- 
-![Screenshot 2](docs/screenshot_2.png)
+
+<div align="center">
+
+### 1. Authentication & Guru Dashboard
+*Login screen and teacher dashboard featuring daily attendance stats, memorization achievement circular indicators, and recent setoran list.*
+
+<img src="assets/images/mockup_1_login_dashboard.png" alt="Authentication & Guru Dashboard" width="750">
+
+<br/><br/>
+
+### 2. Barcode Scanner & Attendance Recording
+*Real-time camera barcode scanner for rapid check-ins alongside comprehensive session attendance management (Pagi / Malam) with batch actions.*
+
+<img src="assets/images/mockup_2_scanner_attendance_detail.png" alt="Barcode Scanner & Attendance Details" width="750">
+
+<br/><br/>
+
+### 3. Wali Santri Dashboard & Progress Monitoring
+*Parent/Guardian portal providing transparent visibility over student memorization target milestones and monthly attendance breakdown.*
+
+<img src="assets/images/mockup_3_wali_santri_dashboard.png" alt="Wali Santri Dashboard & Progress Monitoring" width="750">
+
+</div>
  
 ---
 

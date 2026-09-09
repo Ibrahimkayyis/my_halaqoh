@@ -309,26 +309,15 @@ class _DetailAbsensiHariIniScreenState extends State<DetailAbsensiHariIniScreen>
 
     if (mounted) {
       if (success) {
-        final colors = AppColors.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              t.detailAbsensiHariIni.saveSuccess,
-              style: const TextStyle(fontFamily: 'Poppins'),
-            ),
-            backgroundColor: colors.primary,
-          ),
+        AppSnackBar.showSuccess(
+          context,
+          message: t.detailAbsensiHariIni.saveSuccess,
         );
         context.router.maybePop();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              t.detailAbsensiHariIni.saveFailed,
-              style: const TextStyle(fontFamily: 'Poppins'),
-            ),
-            backgroundColor: Colors.red,
-          ),
+        AppSnackBar.showError(
+          context,
+          message: t.detailAbsensiHariIni.saveFailed,
         );
       }
     }
