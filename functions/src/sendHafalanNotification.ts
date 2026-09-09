@@ -99,31 +99,11 @@ export const sendHafalanNotification = onDocumentWritten(
       return;
     }
 
-    // ── Step 2: Fetch /users/{authUid} to get fcmToken ─────────────────────
-    let fcmToken: string | undefined;
-    try {
-      const userSnap = await db.collection("users").doc(authUid).get();
-      if (!userSnap.exists) {
-        console.warn(
-          `sendHafalanNotification: users/${authUid} not found.`
-        );
-        await afterSnap.ref.update({
-          notifiedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-        return;
-      }
-      fcmToken = userSnap.data()?.fcmToken;
-    } catch (e) {
-      console.error(
-        `sendHafalanNotification: failed to fetch user (${authUid}):`,
-        e
-      );
-      return;
-    }
-
-    if (!fcmToken) {
+    // ── Step 2: Fetch all FCM tokens for authUid (multi-device support) ────
+    const fcmTokens = await _resolveUserFcmTokens(db, authUid);
+    if (fcmTokens.length === 0) {
       console.info(
-        `sendHafalanNotification: users/${authUid} has no fcmToken — notification permission likely denied by parent.`
+        `sendHafalanNotification: users/${authUid} has no active FCM tokens — notification permission likely denied or no active devices.`
       );
       // Mark notified to prevent retries; no notification can be sent without a token
       await afterSnap.ref.update({
@@ -136,8 +116,8 @@ export const sendHafalanNotification = onDocumentWritten(
     const notifTitle = `📖 Hafalan ${jenis} — ${surahName}`;
     const notifBody = `${tanggalStr} · Ayat ${ayatMulai}–${ayatSelesai} · Juz ${juz}`;
 
-    const message: admin.messaging.TokenMessage = {
-      token: fcmToken,
+    const messages: admin.messaging.TokenMessage[] = fcmTokens.map((token) => ({
+      token: token,
       notification: {
         title: notifTitle,
         body: notifBody,
@@ -174,23 +154,23 @@ export const sendHafalanNotification = onDocumentWritten(
           "apns-priority": "10",
         },
       },
-    };
+    }));
 
     try {
-      const batchResponse = await messaging.sendEach([message]);
+      const batchResponse = await messaging.sendEach(messages);
 
       const successCount = batchResponse.successCount;
       const failureCount = batchResponse.failureCount;
 
       console.log(
-        `sendHafalanNotification: docId=${event.params.docId} — sent ${successCount}/1 notification successfully. Failures: ${failureCount}.`
+        `sendHafalanNotification: docId=${event.params.docId} — sent ${successCount}/${messages.length} notifications successfully. Failures: ${failureCount}.`
       );
 
       // Log failure detail for debugging (e.g., stale/invalid tokens)
       batchResponse.responses.forEach((resp, idx) => {
         if (!resp.success) {
           const errorCode = resp.error?.code ?? "unknown";
-          const token = message.token;
+          const token = messages[idx].token;
           console.warn(
             `sendHafalanNotification: failed for token ${token?.substring(0, 20)}... — error: ${errorCode}`
           );
@@ -237,4 +217,50 @@ function _formatDate(date: Date): string {
     month: "long",
     year: "numeric",
   });
+}
+
+/**
+ * Resolves all active FCM tokens for a user.
+ * Queries /users/{authUid}/devices for active, non-terminated devices,
+ * with fallback to /users/{authUid}.fcmToken.
+ */
+async function _resolveUserFcmTokens(
+  db: FirebaseFirestore.Firestore,
+  authUid: string
+): Promise<string[]> {
+  const tokens = new Set<string>();
+
+  try {
+    const devicesSnap = await db
+      .collection("users")
+      .doc(authUid)
+      .collection("devices")
+      .get();
+
+    for (const doc of devicesSnap.docs) {
+      const data = doc.data();
+      if (data.isTerminated === true) continue;
+      if (data.fcmToken && typeof data.fcmToken === "string" && data.fcmToken.trim().length > 0) {
+        tokens.add(data.fcmToken.trim());
+      }
+    }
+  } catch (err) {
+    console.warn(`_resolveUserFcmTokens: error reading devices for ${authUid}:`, err);
+  }
+
+  if (tokens.size === 0) {
+    try {
+      const userSnap = await db.collection("users").doc(authUid).get();
+      if (userSnap.exists) {
+        const rootToken = userSnap.data()?.fcmToken;
+        if (rootToken && typeof rootToken === "string" && rootToken.trim().length > 0) {
+          tokens.add(rootToken.trim());
+        }
+      }
+    } catch (err) {
+      console.warn(`_resolveUserFcmTokens: error reading user doc for ${authUid}:`, err);
+    }
+  }
+
+  return Array.from(tokens);
 }

@@ -293,7 +293,6 @@ class _ProgressHafalanPerJuzScreenState
                                   // Capture context-dependent values BEFORE any async gap
                                   final messenger =
                                       ScaffoldMessenger.of(context);
-                                  final appColors = AppColors.of(context);
 
                                   // Jika ada target resmi yang belum selesai,
                                   // tampilkan dialog konfirmasi terlebih dahulu
@@ -382,23 +381,21 @@ class _ProgressHafalanPerJuzScreenState
                                   );
 
                                   setSheetState(() {});
+                                  if (!mounted) return;
 
-                                  messenger.showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        success
-                                            ? t.progressHafalanPerJuz.successAddTarget(juz: juzModel.number)
-                                            : t.progressHafalanPerJuz.failedSaveTarget,
-                                        style: const TextStyle(
-                                          fontFamily: 'Poppins',
-                                        ),
-                                      ),
-                                      backgroundColor: success
-                                          ? appColors.primary
-                                          : appColors.error,
-                                      duration: const Duration(seconds: 2),
-                                    ),
-                                  );
+                                  if (success) {
+                                    AppSnackBar.showSuccess(
+                                      context,
+                                      messenger: messenger,
+                                      message: t.progressHafalanPerJuz.successAddTarget(juz: juzModel.number),
+                                    );
+                                  } else {
+                                    AppSnackBar.showError(
+                                      context,
+                                      messenger: messenger,
+                                      message: t.progressHafalanPerJuz.failedSaveTarget,
+                                    );
+                                  }
                                 },
                                 child: Container(
                                   width: 34.w,

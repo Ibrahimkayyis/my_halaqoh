@@ -961,25 +961,24 @@ class _RiwayatHafalanSantriScreenState
                           });
 
                           final messenger = ScaffoldMessenger.of(context);
-                          final appColors = AppColors.of(context);
                           final cubit = context.read<RiwayatHafalanCubit>();
 
                           final success = await cubit.deleteSubmissionGroup(group.records);
 
                           if (mounted) {
-                            messenger.showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  success
-                                      ? t.riwayatHafalanSantri.deleteSuccess
-                                      : t.riwayatHafalanSantri.deleteFailed,
-                                  style: const TextStyle(fontFamily: 'Poppins'),
-                                ),
-                                backgroundColor: success
-                                    ? appColors.primary
-                                    : appColors.error,
-                              ),
-                            );
+                            if (success) {
+                              AppSnackBar.showSuccess(
+                                context,
+                                messenger: messenger,
+                                message: t.riwayatHafalanSantri.deleteSuccess,
+                              );
+                            } else {
+                              AppSnackBar.showError(
+                                context,
+                                messenger: messenger,
+                                message: t.riwayatHafalanSantri.deleteFailed,
+                              );
+                            }
                           }
                         }
                       },

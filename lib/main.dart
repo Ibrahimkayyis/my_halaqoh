@@ -254,11 +254,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _appRouter = AppRouter(sl<AuthCubit>());
+  late final _appRouter = AppRouter(sl<AuthCubit>());
+  late final _routerConfig = _appRouter.config();
 
   @override
   void initState() {
     super.initState();
+    sl<AuthCubit>().checkAuthStatus();
     pendingNotificationRoute.addListener(_onPendingRouteChanged);
   }
 
@@ -282,8 +284,8 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider.value(value: sl<ThemeCubit>()),
         BlocProvider.value(value: sl<LocaleCubit>()),
-        // Auth Cubit — checkAuthStatus() kicks off the stream that drives routing
-        BlocProvider.value(value: sl<AuthCubit>()..checkAuthStatus()),
+        // Auth Cubit — checkAuthStatus() initiated in initState()
+        BlocProvider.value(value: sl<AuthCubit>()),
         // Master Data Cubits
         BlocProvider(create: (_) => sl<GuruCubit>()..watchAll()),
         BlocProvider(create: (_) => sl<SantriCubit>()..watchAll()),
@@ -315,9 +317,14 @@ class _MyAppState extends State<MyApp> {
             unauthenticated: () => true,
             orElse: () => false,
           );
-          // Only react when crossing the authenticated ↔ unauthenticated boundary.
+          final isTerminated = current.maybeWhen(
+            terminatedByOtherDevice: (_) => true,
+            orElse: () => false,
+          );
+          // Only react when crossing the authenticated ↔ unauthenticated boundary or terminated.
           return (!wasAuthenticated && isAuthenticated) ||
-              (!wasUnauthenticated && isUnauthenticated);
+              (!wasUnauthenticated && isUnauthenticated) ||
+              isTerminated;
         },
         // ── Native Splash Routing ────────────────────────────────────────────
         // Listens to AuthCubit state changes. When auth resolves (either
@@ -350,7 +357,14 @@ class _MyAppState extends State<MyApp> {
               FlutterNativeSplash.remove();
             },
             unauthenticated: () {
-              _appRouter.replace(const LoginRoute());
+              if (_appRouter.stack.isNotEmpty &&
+                  _appRouter.current.name != LoginRoute.name) {
+                _appRouter.replaceAll([const LoginRoute()]);
+              }
+              FlutterNativeSplash.remove();
+            },
+            terminatedByOtherDevice: (_) {
+              _appRouter.replaceAll([const LoginRoute()]);
               FlutterNativeSplash.remove();
             },
             orElse: () {
@@ -373,7 +387,7 @@ class _MyAppState extends State<MyApp> {
                     );
                     return MaterialApp.router(
                       debugShowCheckedModeBanner: false,
-                      routerConfig: _appRouter.config(),
+                      routerConfig: _routerConfig,
                       locale: locale,
                       supportedLocales: AppLocaleUtils.supportedLocales,
                       localizationsDelegates:

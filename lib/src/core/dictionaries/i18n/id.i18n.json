@@ -20,7 +20,19 @@
     "forgotPassword": "Lupa Password?",
     "loginButton": "MASUK",
     "validationEmpty": "NIP/NIS dan Password tidak boleh kosong",
-    "validationInvalid": "Username atau password tidak valid. Gunakan admin/admin, NIP (13 digit), atau NIS (12 digit)."
+    "validationInvalid": "Username atau password tidak valid. Gunakan admin/admin, NIP (13 digit), atau NIS (12 digit).",
+    "validationAlphanumeric": "NIP/NIS hanya boleh berisi huruf dan angka.",
+    "validationLength": "NIP/NIS harus antara 3 sampai 30 karakter.",
+    "validationPasswordMin": "Password minimal 6 karakter.",
+    "errorInvalidCredentials": "NIP/NIS atau password salah",
+    "errorInvalidEmail": "Format NIP/NIS tidak valid.",
+    "errorNetwork": "Tidak ada koneksi internet.",
+    "errorTooManyRequests": "Terlalu banyak percobaan. Harap tunggu sesaat.",
+    "errorUserDisabled": "Akun pengguna ini telah dinonaktifkan.",
+    "errorGeneric": "Error autentikasi: $message",
+    "sessionTerminatedTitle": "Sesi Berakhir",
+    "sessionTerminatedMessage": "Sesi Anda telah berakhir karena akun ini telah login di perangkat lain ($deviceName). Silakan login kembali jika ini adalah Anda.",
+    "sessionTerminatedButton": "Mengerti"
   },
   "dashboard": {
     "greeting": "Selamat Datang,",
@@ -956,5 +968,12 @@
     "validasiJudul": "Judul tidak boleh kosong (min. 5 karakter)",
     "validasiDeskripsi": "Deskripsi tidak boleh kosong (min. 10 karakter)",
     "errorSubmit": "Gagal mengirim masukan: $error"
+  },
+  "snackBar": {
+    "successTitle": "Berhasil",
+    "errorTitle": "Terjadi Kesalahan",
+    "warningTitle": "Perhatian",
+    "infoTitle": "Informasi",
+    "dismiss": "Tutup"
   }
 }

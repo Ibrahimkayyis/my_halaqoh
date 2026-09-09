@@ -23,13 +23,11 @@ abstract class NotificationRepository {
   /// Hanya panggil setelah dipastikan permission sudah authorized.
   Future<String?> getTokenOnly();
 
-  /// Persists [token] to Firestore at `/users/{uid}` under the `fcmToken`
-  /// and `fcmTokenUpdatedAt` fields.
-  Future<Either<String, void>> saveToken(String uid, String token);
+  /// Persists [token] to Firestore at `/users/{uid}` and `/users/{uid}/devices/{deviceId}`.
+  Future<Either<String, void>> saveToken(String uid, String token, [String? deviceId]);
 
-  /// Clears the FCM token from Firestore (sets `fcmToken` to null).
-  /// Call this on user logout so stale tokens are not stored.
-  Future<Either<String, void>> clearToken(String uid);
+  /// Clears the FCM token for this device.
+  Future<Either<String, void>> clearToken(String uid, [String? deviceId]);
 
   /// Emits a new token string whenever FCM refreshes the device token.
   /// Subscribers should immediately call [saveToken] with the new value.

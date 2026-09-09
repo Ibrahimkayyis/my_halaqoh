@@ -444,12 +444,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
       listener: (context, state) {
         state.maybeWhen(
           error: (msg) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(msg, style: const TextStyle(fontFamily: 'Poppins')),
-                backgroundColor: colors.red,
-              ),
-            );
+            AppSnackBar.showError(context, message: msg);
           },
           success: () {
             Navigator.of(context).pop({'success': true});
@@ -749,14 +744,9 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     onPressed: () async {
                       // ── Validation ──────────────────────────────────────────
                       if (_selectedSurahs.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              t.inputHafalanForm.errPilihMinimalSatuSurah,
-                              style: const TextStyle(fontFamily: 'Poppins'),
-                            ),
-                            backgroundColor: colors.red,
-                          ),
+                        AppSnackBar.showError(
+                          context,
+                          message: t.inputHafalanForm.errPilihMinimalSatuSurah,
                         );
                         return;
                       }

@@ -26,6 +26,7 @@ import 'package:my_halaqoh/src/modules/auth/domain/repositories/auth_repository.
 import 'package:my_halaqoh/src/modules/auth/data/repositories_impl/auth_repository_impl.dart';
 import 'package:my_halaqoh/src/modules/auth/presentation/cubits/auth_cubit.dart';
 import 'package:my_halaqoh/src/core/services/storage_service.dart';
+import 'package:my_halaqoh/src/core/services/device_service.dart';
 import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_cubit.dart';
 
@@ -187,6 +188,7 @@ Future<void> initDependencies() async {
 
   // Core Services
   sl.registerLazySingleton<StorageService>(() => StorageService());
+  sl.registerLazySingleton<DeviceService>(() => DeviceService(sl<SharedPreferences>()));
 
   // ActivityLogService — must be registered BEFORE any repository that uses it
   sl.registerLazySingleton<ActivityLogService>(
@@ -225,7 +227,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(sl()),
   );
-  sl.registerSingleton<AuthCubit>(AuthCubit(sl()));
+  sl.registerSingleton<AuthCubit>(AuthCubit(sl(), sl<DeviceService>()));
 
   // ── Master Data — Local DataSource ────────────────────────────────────────
   sl.registerSingleton<MasterDataLocalDataSource>(
@@ -396,7 +398,7 @@ Future<void> initDependencies() async {
   // Registered as Singleton (not Factory) so the onTokenRefresh stream
   // subscription persists for the entire app session without being torn down
   // on screen disposal.
-  sl.registerSingleton<NotificationCubit>(NotificationCubit(sl(), sl()));
+  sl.registerSingleton<NotificationCubit>(NotificationCubit(sl(), sl(), sl<DeviceService>()));
 
   // Wali Santri In-App Notification Service
   sl.registerLazySingleton<WaliSantriNotificationService>(

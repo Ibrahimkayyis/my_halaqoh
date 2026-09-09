@@ -20,7 +20,19 @@
     "forgotPassword": "Forgot Password?",
     "loginButton": "LOGIN",
     "validationEmpty": "NIP/NIS and Password cannot be empty",
-    "validationInvalid": "Invalid credentials. Use admin/admin, NIP (13 digits), or NIS (12 digits)."
+    "validationInvalid": "Invalid credentials. Use admin/admin, NIP (13 digits), or NIS (12 digits).",
+    "validationAlphanumeric": "NIP/NIS can only contain letters and numbers.",
+    "validationLength": "NIP/NIS must be between 3 and 30 characters.",
+    "validationPasswordMin": "Password must be at least 6 characters.",
+    "errorInvalidCredentials": "Invalid NIP/NIS or password",
+    "errorInvalidEmail": "Invalid NIP/NIS format.",
+    "errorNetwork": "No internet connection.",
+    "errorTooManyRequests": "Too many attempts. Please wait a moment.",
+    "errorUserDisabled": "This user account has been disabled.",
+    "errorGeneric": "Authentication error: $message",
+    "sessionTerminatedTitle": "Session Expired",
+    "sessionTerminatedMessage": "Your session has ended because this account has logged in on another device ($deviceName). Please log in again if this was you.",
+    "sessionTerminatedButton": "Understood"
   },
   "dashboard": {
     "greeting": "Welcome,",
@@ -954,5 +966,12 @@
     "validasiJudul": "Title cannot be empty (min. 5 characters)",
     "validasiDeskripsi": "Description cannot be empty (min. 10 characters)",
     "errorSubmit": "Failed to submit feedback: $error"
+  },
+  "snackBar": {
+    "successTitle": "Success",
+    "errorTitle": "Error",
+    "warningTitle": "Warning",
+    "infoTitle": "Information",
+    "dismiss": "Dismiss"
   }
 }

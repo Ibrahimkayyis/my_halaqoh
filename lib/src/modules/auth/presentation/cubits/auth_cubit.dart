@@ -4,16 +4,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/services/activity_log_service.dart';
+import 'package:my_halaqoh/src/core/services/device_service.dart';
+import 'package:my_halaqoh/src/modules/auth/domain/models/device_session_model.dart';
+import 'package:my_halaqoh/src/modules/auth/domain/models/user_model.dart';
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_cubit.dart';
 import 'package:my_halaqoh/src/modules/auth/domain/repositories/auth_repository.dart';
+import 'package:my_halaqoh/src/modules/notifications/domain/repositories/notification_repository.dart';
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_cubit.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _repository;
+  final DeviceService _deviceService;
   StreamSubscription? _authSubscription;
+  StreamSubscription<DeviceSessionModel?>? _sessionSubscription;
+  String? _currentSessionId;
 
-  AuthCubit(this._repository) : super(const AuthState.initial());
+  AuthCubit(this._repository, this._deviceService) : super(const AuthState.initial());
 
   /// Checks if the user is already logged in or not.
   /// Automatically listens to Firebase Auth changes.
@@ -32,7 +39,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> _fetchUserMeta() async {
     final result = await _repository.getCurrentUserMeta();
-    result.fold((failure) async {
+    await result.fold((failure) async {
       // Sign out dari Firebase Auth terlebih dahulu
       await _repository.signOut();
 
@@ -46,7 +53,86 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthState.error(failure));
       emit(const AuthState.unauthenticated());
-    }, (userMeta) => emit(AuthState.authenticated(userMeta)));
+    }, (userMeta) async {
+      await _establishDeviceSession(userMeta);
+      emit(AuthState.authenticated(userMeta));
+    });
+  }
+
+  Future<void> _establishDeviceSession(UserModel userMeta) async {
+    final deviceId = _deviceService.getDeviceId();
+    final deviceName = await _deviceService.getDeviceName();
+    final platform = _deviceService.getPlatform();
+
+    _currentSessionId = '${deviceId}_${DateTime.now().millisecondsSinceEpoch}';
+
+    String? fcmToken;
+    try {
+      fcmToken = await sl<NotificationRepository>().getTokenOnly();
+    } catch (_) {}
+
+    final session = DeviceSessionModel(
+      deviceId: deviceId,
+      deviceName: deviceName,
+      sessionId: _currentSessionId!,
+      fcmToken: fcmToken,
+      lastActiveAt: DateTime.now(),
+      platform: platform,
+    );
+
+    try {
+      await _repository.registerSession(
+        uid: userMeta.uid,
+        role: userMeta.role,
+        session: session,
+      );
+    } catch (_) {}
+
+    // Start listening for session termination or displacement
+    _sessionSubscription?.cancel();
+    _sessionSubscription = _repository
+        .watchDeviceSession(uid: userMeta.uid, deviceId: deviceId)
+        .listen(
+      (remoteSession) async {
+        if (remoteSession == null) return;
+
+        if (remoteSession.isTerminated) {
+          // Terminated by eviction with specific device name
+          await _handleSessionTerminated(
+              remoteSession.terminatedBy ?? 'Perangkat Lain');
+        } else if (remoteSession.sessionId.isNotEmpty &&
+            remoteSession.sessionId != _currentSessionId) {
+          // Session ID displaced
+          await _handleSessionTerminated(remoteSession.deviceName);
+        }
+      },
+      onError: (_) {
+        // Silently ignore stream errors so debug mode does not pause on transient network issues
+      },
+    );
+  }
+
+  Future<void> _handleSessionTerminated(String deviceName) async {
+    _sessionSubscription?.cancel();
+    _sessionSubscription = null;
+    _currentSessionId = null;
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      try {
+        await sl<NotificationCubit>().clearToken(uid);
+      } catch (_) {}
+    }
+
+    await _repository.signOut();
+    unawaited(sl<NotificationBadgeCubit>().stop());
+    sl<ActivityLogService>().clearCache();
+
+    try {
+      await Hive.deleteFromDisk();
+    } catch (_) {}
+
+    emit(AuthState.terminatedByOtherDevice(deviceName: deviceName));
   }
 
   Future<void> login(String identifier, String password) async {
@@ -76,13 +162,18 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> logout() async {
     emit(const AuthState.loading());
 
-    // Clear FCM token BEFORE signing out so the server does not retain a
-    // stale token for a logged-out user. The NotificationCubit is a Singleton
-    // registered in GetIt, so it is safe to resolve directly here.
+    _sessionSubscription?.cancel();
+    _sessionSubscription = null;
+
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    final deviceId = _deviceService.getDeviceId();
+
     if (uid != null) {
+      await _repository.unregisterSession(uid: uid, deviceId: deviceId);
       await sl<NotificationCubit>().clearToken(uid);
     }
+
+    _currentSessionId = null;
 
     await _repository.signOut();
 
@@ -93,6 +184,11 @@ class AuthCubit extends Cubit<AuthState> {
     // account logging in on this device never reuses stale role/displayName
     // metadata (rule §13.5.4).
     sl<ActivityLogService>().clearCache();
+
+    // Clean up Hive cache on logout so shared devices don't retain data
+    try {
+      await Hive.deleteFromDisk();
+    } catch (_) {}
 
     emit(const AuthState.unauthenticated());
   }
@@ -116,6 +212,7 @@ class AuthCubit extends Cubit<AuthState> {
       (_) async {
         if (uid != null) {
           try {
+            await _repository.unregisterSession(uid: uid, deviceId: _deviceService.getDeviceId());
             await sl<NotificationCubit>().clearToken(uid);
           } catch (_) {}
         }
@@ -141,6 +238,7 @@ class AuthCubit extends Cubit<AuthState> {
   @override
   Future<void> close() {
     _authSubscription?.cancel();
+    _sessionSubscription?.cancel();
     return super.close();
   }
 }

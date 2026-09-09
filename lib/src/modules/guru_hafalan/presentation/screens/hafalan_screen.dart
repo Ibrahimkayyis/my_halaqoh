@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
+import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
@@ -355,15 +356,9 @@ class _HafalanScreenState extends State<HafalanScreen> {
                         if (result != null &&
                             result is Map<String, dynamic>) {
                           if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  t.hafalan.successSave,
-                                  style:
-                                      const TextStyle(fontFamily: 'Poppins'),
-                                ),
-                                backgroundColor: colors.primary,
-                              ),
+                            AppSnackBar.showSuccess(
+                              context,
+                              message: t.hafalan.successSave,
                             );
                           }
                         }

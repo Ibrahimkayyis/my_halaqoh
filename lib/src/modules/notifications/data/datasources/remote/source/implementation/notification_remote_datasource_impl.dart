@@ -78,21 +78,70 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   // ── Firestore Token Persistence ───────────────────────────────────────────
 
   @override
-  Future<void> saveToken(String uid, String token) async {
-    await _firestore.collection('users').doc(uid).update({
+  Future<void> saveToken(String uid, String token, [String? deviceId]) async {
+    final userRef = _firestore.collection('users').doc(uid);
+
+    final updates = <String, dynamic>{
       'fcmToken': token,
       'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
-    });
-    _log.i('NotificationRemoteDataSource: FCM token saved for uid=$uid');
+    };
+    await userRef.update(updates);
+
+    if (deviceId != null && deviceId.isNotEmpty) {
+      try {
+        await userRef.collection('devices').doc(deviceId).set({
+          'fcmToken': token,
+          'lastActiveAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      } catch (_) {}
+    }
+
+    _log.i('NotificationRemoteDataSource: FCM token saved for uid=$uid, deviceId=$deviceId');
   }
 
   @override
-  Future<void> clearToken(String uid) async {
-    await _firestore.collection('users').doc(uid).update({
-      'fcmToken': null,
-      'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
-    });
-    _log.i('NotificationRemoteDataSource: FCM token cleared for uid=$uid');
+  Future<void> clearToken(String uid, [String? deviceId]) async {
+    final userRef = _firestore.collection('users').doc(uid);
+
+    if (deviceId != null && deviceId.isNotEmpty) {
+      try {
+        await userRef.collection('devices').doc(deviceId).delete();
+      } catch (_) {}
+    }
+
+    try {
+      final remaining = await userRef.collection('devices').get();
+      if (remaining.docs.isEmpty) {
+        await userRef.update({
+          'fcmToken': null,
+          'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+        });
+      } else {
+        remaining.docs.sort((a, b) {
+          final aTime = (a.data()['lastActiveAt'] as Timestamp?)?.millisecondsSinceEpoch ?? 0;
+          final bTime = (b.data()['lastActiveAt'] as Timestamp?)?.millisecondsSinceEpoch ?? 0;
+          return bTime.compareTo(aTime);
+        });
+        final latestWithToken = remaining.docs.where(
+          (d) => (d.data()['fcmToken'] as String?)?.isNotEmpty == true,
+        );
+        if (latestWithToken.isNotEmpty) {
+          final activeToken = latestWithToken.first.data()['fcmToken'] as String;
+          await userRef.update({
+            'fcmToken': activeToken,
+            'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+    } catch (_) {
+      // Fallback
+      await userRef.update({
+        'fcmToken': null,
+        'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+      });
+    }
+
+    _log.i('NotificationRemoteDataSource: FCM token cleared for uid=$uid, deviceId=$deviceId');
   }
 
   // ── Token Refresh Stream ──────────────────────────────────────────────────

@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/modules/auth/data/datasources/remote/auth_remote_datasource.dart';
+import 'package:my_halaqoh/src/modules/auth/domain/models/device_session_model.dart';
 import 'package:my_halaqoh/src/modules/auth/domain/models/user_model.dart';
 import 'package:my_halaqoh/src/modules/auth/domain/repositories/auth_repository.dart';
 
@@ -63,30 +65,82 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<String, void>> registerSession({
+    required String uid,
+    required String role,
+    required DeviceSessionModel session,
+  }) async {
+    try {
+      await _remoteDataSource.registerSession(
+        uid: uid,
+        role: role,
+        session: session,
+      );
+      return const Right(null);
+    } catch (e) {
+      return Left('Gagal mendaftarkan sesi perangkat: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<Either<String, void>> unregisterSession({
+    required String uid,
+    required String deviceId,
+  }) async {
+    try {
+      await _remoteDataSource.unregisterSession(
+        uid: uid,
+        deviceId: deviceId,
+      );
+      return const Right(null);
+    } catch (e) {
+      return Left('Gagal menghapus sesi perangkat: ${e.toString()}');
+    }
+  }
+
+  @override
+  Stream<DeviceSessionModel?> watchDeviceSession({
+    required String uid,
+    required String deviceId,
+  }) {
+    return _remoteDataSource.watchDeviceSession(
+      uid: uid,
+      deviceId: deviceId,
+    );
+  }
+
+  @override
+  Future<void> updateDeviceHeartbeat({
+    required String uid,
+    required String deviceId,
+  }) {
+    return _remoteDataSource.updateDeviceHeartbeat(
+      uid: uid,
+      deviceId: deviceId,
+    );
+  }
+
 
   String _mapFirebaseAuthError(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
-        // Thrown by our Firestore pre-check in AuthRemoteDataSourceImpl.signIn
-        // when no document matches the given NIP/NIS identifier.
-        return 'Akun dengan NIP/NIS tersebut tidak ditemukan.';
       case 'wrong-password':
       case 'invalid-credential':
-        // 'wrong-password' — classic Firebase Auth error for incorrect password.
-        // 'invalid-credential' — Firebase Auth v10+ consolidated code; since our
-        //   pre-check already confirmed the identifier exists, this can only mean
-        //   the password is wrong.
-        return 'Password yang Anda masukkan salah.';
+        // Standardized anti-enumeration error message:
+        // Returns the same message whether the identifier does not exist
+        // or the password was incorrect.
+        return t.auth.errorInvalidCredentials;
       case 'invalid-email':
-        return 'Format NIP/NIS tidak valid.';
+        return t.auth.errorInvalidEmail;
       case 'network-request-failed':
-        return 'Tidak ada koneksi internet.';
+        return t.auth.errorNetwork;
       case 'too-many-requests':
-        return 'Terlalu banyak percobaan. Harap tunggu sesaat.';
+        return t.auth.errorTooManyRequests;
       case 'user-disabled':
-        return 'Akun pengguna ini telah dinonaktifkan.';
+        return t.auth.errorUserDisabled;
       default:
-        return 'Error autentikasi: ${e.message}';
+        return t.auth.errorGeneric(message: e.message ?? '');
     }
   }
 }
