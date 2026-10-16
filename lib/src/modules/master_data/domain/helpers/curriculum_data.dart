@@ -149,16 +149,6 @@ class CurriculumData {
     program: 'Reguler',
     semester1: SemesterTarget(
       uts: PeriodeTarget(
-        tipe: TipeHafalan.idadTahsin,
-        deskripsi: "I'dad Tahsin",
-      ),
-      uas: PeriodeTarget(
-        tipe: TipeHafalan.idadTahsin,
-        deskripsi: "I'dad Tahsin",
-      ),
-    ),
-    semester2: SemesterTarget(
-      uts: PeriodeTarget(
         tipe: TipeHafalan.ziyadah,
         juzList: [30],
         deskripsi: "An-Naba' – Al-A'la",
@@ -171,6 +161,20 @@ class CurriculumData {
         fraksi: '½ Juz',
       ),
     ),
+    semester2: SemesterTarget(
+      uts: PeriodeTarget(
+        tipe: TipeHafalan.ziyadah,
+        juzList: [29],
+        deskripsi: 'Al-Mulk – Nuh',
+        fraksi: '½ Juz',
+      ),
+      uas: PeriodeTarget(
+        tipe: TipeHafalan.ziyadah,
+        juzList: [29],
+        deskripsi: 'Al-Jin – Al-Mursalat',
+        fraksi: '½ Juz',
+      ),
+    ),
   );
 
   static const _regulerKelas8 = KelasKurikulum(
@@ -179,29 +183,29 @@ class CurriculumData {
     semester1: SemesterTarget(
       uts: PeriodeTarget(
         tipe: TipeHafalan.ziyadah,
-        juzList: [29],
-        deskripsi: 'Al-Mulk – Al-Muddatstsir 47',
-        fraksi: '¾ Juz',
+        juzList: [28],
+        deskripsi: 'Al-Mujadilah – Ash-Shaff 5',
+        fraksi: '½ Juz',
       ),
       uas: PeriodeTarget(
         tipe: TipeHafalan.ziyadah,
-        juzList: [29, 28],
-        deskripsi: 'Al-Muddatstsir 48 – Al-Mursalat + Al-Mujadilah – Ash-Shaff 5',
-        fraksi: '¾ Juz',
+        juzList: [28],
+        deskripsi: 'Ash-Shaff 6 – At-Tahrim',
+        fraksi: '½ Juz',
       ),
     ),
     semester2: SemesterTarget(
       uts: PeriodeTarget(
         tipe: TipeHafalan.ziyadah,
-        juzList: [28, 1],
-        deskripsi: 'Ash-Shaff 6 – At-Tahrim + Al-Baqarah 1-37',
-        fraksi: '¾ Juz',
+        juzList: [1],
+        deskripsi: 'Al-Baqarah 1-76',
+        fraksi: '½ Juz',
       ),
       uas: PeriodeTarget(
         tipe: TipeHafalan.ziyadah,
         juzList: [1],
-        deskripsi: 'Al-Baqarah 38-141',
-        fraksi: '¾ Juz',
+        deskripsi: 'Al-Baqarah 77-141',
+        fraksi: '½ Juz',
       ),
     ),
   );
@@ -242,16 +246,6 @@ class CurriculumData {
     program: 'Reguler',
     semester1: SemesterTarget(
       uts: PeriodeTarget(
-        tipe: TipeHafalan.idadTahsin,
-        deskripsi: "I'dad Tahsin",
-      ),
-      uas: PeriodeTarget(
-        tipe: TipeHafalan.idadTahsin,
-        deskripsi: "I'dad Tahsin",
-      ),
-    ),
-    semester2: SemesterTarget(
-      uts: PeriodeTarget(
         tipe: TipeHafalan.ziyadah,
         juzList: [30],
         deskripsi: "An-Naba' – Al-A'la",
@@ -264,6 +258,20 @@ class CurriculumData {
         fraksi: '½ Juz',
       ),
     ),
+    semester2: SemesterTarget(
+      uts: PeriodeTarget(
+        tipe: TipeHafalan.ziyadah,
+        juzList: [29],
+        deskripsi: 'Al-Mulk – Nuh',
+        fraksi: '½ Juz',
+      ),
+      uas: PeriodeTarget(
+        tipe: TipeHafalan.ziyadah,
+        juzList: [29],
+        deskripsi: 'Al-Jin – Al-Mursalat',
+        fraksi: '½ Juz',
+      ),
+    ),
   );
 
   static const _regulerKelas11 = KelasKurikulum(
@@ -272,29 +280,29 @@ class CurriculumData {
     semester1: SemesterTarget(
       uts: PeriodeTarget(
         tipe: TipeHafalan.ziyadah,
-        juzList: [29],
-        deskripsi: 'Al-Mulk – Al-Muddatstsir 47',
-        fraksi: '¾ Juz',
+        juzList: [28],
+        deskripsi: 'Al-Mujadilah – Ash-Shaff 5',
+        fraksi: '½ Juz',
       ),
       uas: PeriodeTarget(
         tipe: TipeHafalan.ziyadah,
-        juzList: [29, 28],
-        deskripsi: 'Al-Muddatstsir 48 – Al-Mursalat + Al-Mujadilah – Ash-Shaff 5',
-        fraksi: '¾ Juz',
+        juzList: [28],
+        deskripsi: 'Ash-Shaff 6 – At-Tahrim',
+        fraksi: '½ Juz',
       ),
     ),
     semester2: SemesterTarget(
       uts: PeriodeTarget(
         tipe: TipeHafalan.ziyadah,
-        juzList: [28, 1],
-        deskripsi: 'Ash-Shaff 6 – At-Tahrim + Al-Baqarah 1-37',
-        fraksi: '¾ Juz',
+        juzList: [1],
+        deskripsi: 'Al-Baqarah 1-76',
+        fraksi: '½ Juz',
       ),
       uas: PeriodeTarget(
         tipe: TipeHafalan.ziyadah,
         juzList: [1],
-        deskripsi: 'Al-Baqarah 38-141',
-        fraksi: '¾ Juz',
+        deskripsi: 'Al-Baqarah 77-141',
+        fraksi: '½ Juz',
       ),
     ),
   );

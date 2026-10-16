@@ -98,15 +98,28 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
       orElse: () {},
     );
 
-    // Look up sertifikasi data for this santri
+    // Look up sertifikasi data for this santri (deduplicate by juz so multiple records don't produce duplicate badges)
     final sertifikasiState = context.watch<SertifikasiCubit>().state;
-    final List<SertifikasiModel> passedCerts = [];
+    final Map<int, SertifikasiModel> passedCertsByJuz = {};
     sertifikasiState.maybeWhen(
       loaded: (list) {
-        passedCerts.addAll(list.where((s) => s.status == 'passed'));
+        for (final s in list.where((s) => s.status == 'passed')) {
+          final existing = passedCertsByJuz[s.juz];
+          if (existing == null) {
+            passedCertsByJuz[s.juz] = s;
+          } else {
+            // Keep the newer certification or the one with higher score
+            final isNewer = s.updatedAt.isAfter(existing.updatedAt);
+            final hasHigherScore = (s.nilai ?? 0) > (existing.nilai ?? 0);
+            if (isNewer || hasHigherScore) {
+              passedCertsByJuz[s.juz] = s;
+            }
+          }
+        }
       },
       orElse: () {},
     );
+    final List<SertifikasiModel> passedCerts = passedCertsByJuz.values.toList();
 
     // Trigger lazy watch if cubits were created before santri was loaded
     if (santri != null) {

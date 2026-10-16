@@ -35,4 +35,20 @@ class InputHafalanCubit extends Cubit<InputHafalanState> {
     
     emit(const InputHafalanState.success());
   }
+
+  Future<void> updateSubmissionGroup({
+    required List<HafalanSantriModel> oldRecords,
+    required List<HafalanSantriModel> newRecords,
+  }) async {
+    if (newRecords.isEmpty) return;
+    emit(const InputHafalanState.loading());
+    final result = await _repository.updateSubmissionGroup(
+      oldRecords: oldRecords,
+      newRecords: newRecords,
+    );
+    result.fold(
+      (error) => emit(InputHafalanState.error(error)),
+      (_) => emit(const InputHafalanState.success()),
+    );
+  }
 }

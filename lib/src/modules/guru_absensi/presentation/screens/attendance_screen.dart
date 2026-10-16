@@ -125,7 +125,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         loading: () => isSantriLoading = true,
         loaded: (sList) {
           mySantriList = sList
-              .where((s) => myHalaqoh!.santriIds.contains(s.id))
+              .where((s) =>
+                  !s.isAlumni &&
+                  (myHalaqoh!.santriIds.contains(s.id) ||
+                      s.halaqohId == myHalaqoh!.id))
               .toList();
         },
         orElse: () {},

@@ -112,5 +112,11 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow read, update, delete: if isAdminOrSuperAdmin();
     }
+
+    // ── Public Metadata (e.g. Landing Page Stats) ─────────────────────────
+    match /public_metadata/{docId} {
+      allow read: if true;
+      allow write: if isAdminOrSuperAdmin();
+    }
   }
 }

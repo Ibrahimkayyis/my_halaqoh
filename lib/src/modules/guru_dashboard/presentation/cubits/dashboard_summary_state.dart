@@ -32,6 +32,12 @@ abstract class DashboardSummaryState with _$DashboardSummaryState {
     // ── Latest Setoran list ──
     /// 3 most recent setoran entries
     required List<LatestSetoranItem> latestSetoran,
+
+    // ── Active session ──
+    /// Active session key: 'shubuh' | 'dhuha' | 'siang' | 'ashar' | 'maghrib'.
+    /// Derived from the latest Firestore attendance record today; falls back to
+    /// a prayer-time estimation when no session has been recorded yet.
+    @Default('shubuh') String activeSesi,
   }) = _Loaded;
   const factory DashboardSummaryState.error(String message) = _Error;
 }

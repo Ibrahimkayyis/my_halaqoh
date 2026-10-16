@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/data/datasources/remote/mapper/sertifikasi_mapper.dart';
 import '../../domain/models/wali_santri_notification_item.dart';
 
 /// Real-time service for streaming Wali Santri in-app notifications
@@ -177,7 +176,10 @@ class WaliSantriNotificationService {
           },
         );
 
-        // ── 3. Sertifikasi Tahfidz query stream ─────────────────────────────
+        // ── 3. Sertifikasi Tahfidz — multi-stage lifecycle stream ──────────
+        // Generates distinct notification events for each lifecycle transition
+        // (pending -> scheduled/rejected -> passed/failed) so every status
+        // change produces a brand-new unread notification with a unique ID.
         sertifikasiSub = _firestore
             .collection('sertifikasi_tahfidz')
             .where('santriId', isEqualTo: santriId)
@@ -199,57 +201,94 @@ class WaliSantriNotificationService {
               final tanggalUjianTs = data['tanggalUjian'] as Timestamp?;
               final updatedAtTs = data['updatedAt'] as Timestamp?;
               final createdAtTs = data['createdAt'] as Timestamp?;
+              final completedAtTs = data['completedAt'] as Timestamp?;
 
-              final date = updatedAtTs?.toDate() ?? createdAtTs?.toDate() ?? DateTime.now();
+              final createdAt = createdAtTs?.toDate() ?? DateTime.now();
+              final updatedAt = updatedAtTs?.toDate() ?? createdAt;
+              final completedAt = completedAtTs?.toDate() ?? updatedAt;
               final tanggalUjianStr = tanggalUjianTs != null
                   ? DateFormat('d MMM yyyy', 'id_ID').format(tanggalUjianTs.toDate())
                   : '';
 
-              String title = 'Sertifikasi Tahfidz';
-              String message = '';
-
-              switch (status) {
-                case 'scheduled':
-                  title = 'Ujian Sertifikasi Juz $juz Dijadwalkan';
-                  message =
-                      'Ujian hafalan Juz $juz dijadwalkan pada $tanggalUjianStr${sesiUjian.isNotEmpty ? ' ($sesiUjian)' : ''}. Penguji: ${pengujiNama.isNotEmpty ? pengujiNama : 'Ustadz Penguji'}.';
-                  break;
-                case 'passed':
-                  title = 'Alhamdulillah! Lulus Sertifikasi Juz $juz';
-                  message =
-                      'Ananda $santriNama dinyatakan LULUS Sertifikasi Juz $juz${predikat.isNotEmpty ? ' dengan predikat $predikat' : ''}${nilai != null ? ' (Nilai: $nilai)' : ''}.';
-                  break;
-                case 'failed':
-                  title = 'Hasil Sertifikasi Juz $juz';
-                  message =
-                      'Ananda $santriNama perlu mengulang ujian sertifikasi Juz $juz${nilai != null ? ' (Nilai: $nilai)' : ''}. Tetap semangat menghafal!';
-                  break;
-                case 'rejected':
-                  title = 'Pengajuan Sertifikasi Juz $juz Ditolak';
-                  message =
-                      'Pengajuan ujian sertifikasi Juz $juz untuk ananda $santriNama ditolak: ${alasanPenolakan.isNotEmpty ? alasanPenolakan : '-'}';
-                  break;
-                case 'pending':
-                  title = 'Pengajuan Sertifikasi Juz $juz';
-                  message =
-                      'Pengajuan ujian sertifikasi Juz $juz untuk ananda $santriNama sedang menunggu persetujuan Waka Tahfidz.';
-                  break;
-                default:
-                  continue;
-              }
-
+              // Stage 1: Submission / Pending Notification
               items.add(
                 WaliSantriNotificationItem(
-                  id: 'sertifikasi_${doc.id}',
-                  title: title,
-                  message: message,
+                  id: 'sertifikasi_${doc.id}_pending',
+                  title: 'Pengajuan Sertifikasi Juz $juz',
+                  message:
+                      'Pengajuan ujian sertifikasi Juz $juz untuk ananda $santriNama sedang menunggu persetujuan Waka Tahfidz.',
                   category: 'sertifikasi',
-                  timestamp: date,
+                  timestamp: createdAt,
                   entityType: 'sertifikasi',
                   entityId: doc.id,
-                  metadata: {'sertifikasiModel': SertifikasiMapper.fromFirestore(doc)},
                 ),
               );
+
+              // Stage 2: Scheduled Notification
+              if (status == 'scheduled' || status == 'passed' || status == 'failed') {
+                items.add(
+                  WaliSantriNotificationItem(
+                    id: 'sertifikasi_${doc.id}_scheduled',
+                    title: 'Ujian Sertifikasi Juz $juz Dijadwalkan',
+                    message:
+                        'Ujian hafalan Juz $juz dijadwalkan pada $tanggalUjianStr${sesiUjian.isNotEmpty ? ' ($sesiUjian)' : ''}. Penguji: ${pengujiNama.isNotEmpty ? pengujiNama : 'Ustadz Penguji'}.',
+                    category: 'sertifikasi',
+                    timestamp: status == 'scheduled'
+                        ? updatedAt
+                        : (tanggalUjianTs?.toDate() ?? updatedAt),
+                    entityType: 'sertifikasi',
+                    entityId: doc.id,
+                  ),
+                );
+              }
+
+              // Stage 2 Alt: Rejected Notification
+              if (status == 'rejected') {
+                items.add(
+                  WaliSantriNotificationItem(
+                    id: 'sertifikasi_${doc.id}_rejected',
+                    title: 'Pengajuan Sertifikasi Juz $juz Ditolak',
+                    message:
+                        'Pengajuan ujian sertifikasi Juz $juz untuk ananda $santriNama ditolak: ${alasanPenolakan.isNotEmpty ? alasanPenolakan : '-'}',
+                    category: 'sertifikasi',
+                    timestamp: updatedAt,
+                    entityType: 'sertifikasi',
+                    entityId: doc.id,
+                  ),
+                );
+              }
+
+              // Stage 3: Passed Notification
+              if (status == 'passed') {
+                items.add(
+                  WaliSantriNotificationItem(
+                    id: 'sertifikasi_${doc.id}_passed',
+                    title: 'Alhamdulillah! Lulus Sertifikasi Juz $juz',
+                    message:
+                        'Ananda $santriNama dinyatakan LULUS Sertifikasi Juz $juz${predikat.isNotEmpty ? ' dengan predikat $predikat' : ''}${nilai != null ? ' (Nilai: $nilai)' : ''}.',
+                    category: 'sertifikasi',
+                    timestamp: completedAt,
+                    entityType: 'sertifikasi',
+                    entityId: doc.id,
+                  ),
+                );
+              }
+
+              // Stage 3 Alt: Failed / Repeat Notification
+              if (status == 'failed') {
+                items.add(
+                  WaliSantriNotificationItem(
+                    id: 'sertifikasi_${doc.id}_failed',
+                    title: 'Hasil Sertifikasi Juz $juz',
+                    message:
+                        'Ananda $santriNama perlu mengulang ujian sertifikasi Juz $juz${nilai != null ? ' (Nilai: $nilai)' : ''}. Tetap semangat menghafal!',
+                    category: 'sertifikasi',
+                    timestamp: completedAt,
+                    entityType: 'sertifikasi',
+                    entityId: doc.id,
+                  ),
+                );
+              }
             }
             sertifikasiItems = items;
             emitMerged();
@@ -301,6 +340,10 @@ class WaliSantriNotificationService {
 
     controller = StreamController<List<WaliSantriNotificationItem>>.broadcast(
       onListen: () {
+        // ── Sertifikasi Tahfidz — multi-stage lifecycle stream ───────────────
+        // Generates distinct notification events for each lifecycle transition
+        // (pending -> scheduled/rejected -> passed/failed) so every status
+        // change produces a brand-new unread notification for the Guru.
         sertifikasiSub = _firestore
             .collection('sertifikasi_tahfidz')
             .where('guruId', isEqualTo: guruId)
@@ -322,57 +365,94 @@ class WaliSantriNotificationService {
               final tanggalUjianTs = data['tanggalUjian'] as Timestamp?;
               final updatedAtTs = data['updatedAt'] as Timestamp?;
               final createdAtTs = data['createdAt'] as Timestamp?;
+              final completedAtTs = data['completedAt'] as Timestamp?;
 
-              final date = updatedAtTs?.toDate() ?? createdAtTs?.toDate() ?? DateTime.now();
+              final createdAt = createdAtTs?.toDate() ?? DateTime.now();
+              final updatedAt = updatedAtTs?.toDate() ?? createdAt;
+              final completedAt = completedAtTs?.toDate() ?? updatedAt;
               final tanggalUjianStr = tanggalUjianTs != null
                   ? DateFormat('d MMM yyyy', 'id_ID').format(tanggalUjianTs.toDate())
                   : '';
 
-              String title = 'Sertifikasi Tahfidz';
-              String message = '';
-
-              switch (status) {
-                case 'scheduled':
-                  title = 'Ujian Sertifikasi Juz $juz Dijadwalkan';
-                  message =
-                      'Ujian sertifikasi Juz $juz untuk $santriNama dijadwalkan pada $tanggalUjianStr${sesiUjian.isNotEmpty ? ' ($sesiUjian)' : ''}. Penguji: ${pengujiNama.isNotEmpty ? pengujiNama : 'Ustadz Penguji'}.';
-                  break;
-                case 'passed':
-                  title = 'Santri Lulus Sertifikasi Juz $juz';
-                  message =
-                      '$santriNama dinyatakan LULUS Ujian Sertifikasi Juz $juz${predikat.isNotEmpty ? ' dengan predikat $predikat' : ''}${nilai != null ? ' (Nilai: $nilai)' : ''}.';
-                  break;
-                case 'failed':
-                  title = 'Santri Perlu Mengulang Sertifikasi Juz $juz';
-                  message =
-                      '$santriNama perlu mengulang Ujian Sertifikasi Juz $juz${nilai != null ? ' (Nilai: $nilai)' : ''}. Silakan bimbing kembali.';
-                  break;
-                case 'rejected':
-                  title = 'Pengajuan Sertifikasi Juz $juz Ditolak';
-                  message =
-                      'Pengajuan sertifikasi Juz $juz untuk $santriNama ditolak: ${alasanPenolakan.isNotEmpty ? alasanPenolakan : '-'}';
-                  break;
-                case 'pending':
-                  title = 'Pengajuan Sertifikasi Terkirim';
-                  message =
-                      'Pengajuan sertifikasi Juz $juz untuk $santriNama sedang menunggu persetujuan Waka Tahfidz.';
-                  break;
-                default:
-                  continue;
-              }
-
+              // Stage 1: Submission / Pending Notification (Confirmation for teacher)
               items.add(
                 WaliSantriNotificationItem(
-                  id: 'sertifikasi_${doc.id}',
-                  title: title,
-                  message: message,
+                  id: 'sertifikasi_${doc.id}_pending',
+                  title: 'Pengajuan Sertifikasi Terkirim',
+                  message:
+                      'Pengajuan sertifikasi Juz $juz untuk $santriNama sedang menunggu persetujuan Waka Tahfidz.',
                   category: 'sertifikasi',
-                  timestamp: date,
+                  timestamp: createdAt,
                   entityType: 'sertifikasi',
                   entityId: doc.id,
-                  metadata: {'sertifikasiModel': SertifikasiMapper.fromFirestore(doc)},
                 ),
               );
+
+              // Stage 2: Scheduled Notification
+              if (status == 'scheduled' || status == 'passed' || status == 'failed') {
+                items.add(
+                  WaliSantriNotificationItem(
+                    id: 'sertifikasi_${doc.id}_scheduled',
+                    title: 'Ujian Sertifikasi Juz $juz Dijadwalkan',
+                    message:
+                        'Ujian sertifikasi Juz $juz untuk $santriNama dijadwalkan pada $tanggalUjianStr${sesiUjian.isNotEmpty ? ' ($sesiUjian)' : ''}. Penguji: ${pengujiNama.isNotEmpty ? pengujiNama : 'Ustadz Penguji'}.',
+                    category: 'sertifikasi',
+                    timestamp: status == 'scheduled'
+                        ? updatedAt
+                        : (tanggalUjianTs?.toDate() ?? updatedAt),
+                    entityType: 'sertifikasi',
+                    entityId: doc.id,
+                  ),
+                );
+              }
+
+              // Stage 2 Alt: Rejected Notification
+              if (status == 'rejected') {
+                items.add(
+                  WaliSantriNotificationItem(
+                    id: 'sertifikasi_${doc.id}_rejected',
+                    title: 'Pengajuan Sertifikasi Juz $juz Ditolak',
+                    message:
+                        'Pengajuan sertifikasi Juz $juz untuk $santriNama ditolak: ${alasanPenolakan.isNotEmpty ? alasanPenolakan : '-'}',
+                    category: 'sertifikasi',
+                    timestamp: updatedAt,
+                    entityType: 'sertifikasi',
+                    entityId: doc.id,
+                  ),
+                );
+              }
+
+              // Stage 3: Passed Notification
+              if (status == 'passed') {
+                items.add(
+                  WaliSantriNotificationItem(
+                    id: 'sertifikasi_${doc.id}_passed',
+                    title: 'Santri Lulus Sertifikasi Juz $juz',
+                    message:
+                        '$santriNama dinyatakan LULUS Ujian Sertifikasi Juz $juz${predikat.isNotEmpty ? ' dengan predikat $predikat' : ''}${nilai != null ? ' (Nilai: $nilai)' : ''}.',
+                    category: 'sertifikasi',
+                    timestamp: completedAt,
+                    entityType: 'sertifikasi',
+                    entityId: doc.id,
+                  ),
+                );
+              }
+
+              // Stage 3 Alt: Failed / Repeat Notification
+              if (status == 'failed') {
+                items.add(
+                  WaliSantriNotificationItem(
+                    id: 'sertifikasi_${doc.id}_failed',
+                    title: 'Santri Perlu Mengulang Sertifikasi Juz $juz',
+                    message:
+                        '$santriNama perlu mengulang Ujian Sertifikasi Juz $juz${nilai != null ? ' (Nilai: $nilai)' : ''}. Silakan bimbing kembali.',
+                    category: 'sertifikasi',
+                    timestamp: completedAt,
+                    entityType: 'sertifikasi',
+                    entityId: doc.id,
+                  ),
+                );
+              }
             }
             sertifikasiItems = items;
             emitMerged();

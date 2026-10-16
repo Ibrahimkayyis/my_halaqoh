@@ -9,6 +9,7 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/domain/models/hafalan_santri_model.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/cubits/riwayat_hafalan_cubit.dart';
+import 'package:my_halaqoh/src/core/router/app_router.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Re-use the same grouping logic as RiwayatHafalanSantriScreen
@@ -548,18 +549,19 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
         children: [
           // Header row
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: colors.border, width: 1)),
             ),
             child: Row(
               children: [
-                _headerCell(t.mutabaahSantri.hari, 50.w, colors),
-                _headerCell(t.mutabaahSantri.tgl, 50.w, colors),
+                _headerCell(t.mutabaahSantri.hari, 44.w, colors),
+                _headerCell(t.mutabaahSantri.tgl, 46.w, colors),
                 Expanded(child: _headerCell(t.mutabaahSantri.surat, null, colors)),
-                _headerCell(t.mutabaahSantri.ayat, 55.w, colors),
-                _headerCell(t.mutabaahSantri.nilai, 45.w, colors,
+                _headerCell(t.mutabaahSantri.ayat, 48.w, colors),
+                _headerCell(t.mutabaahSantri.nilai, 38.w, colors,
                     align: TextAlign.center),
+                SizedBox(width: 24.w),
               ],
             ),
           ),
@@ -590,7 +592,7 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
                         }
                       : null,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                     decoration: BoxDecoration(
                       color: isExpanded
                           ? colors.primary.withValues(alpha: 0.03)
@@ -607,11 +609,11 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
                     child: Row(
                       children: [
                         SizedBox(
-                          width: 50.w,
+                          width: 44.w,
                           child: Text(
                             _getDayName(group.tanggalSetoran),
                             style: TextStyle(
-                              fontSize: 13.sp,
+                              fontSize: 12.5.sp,
                               fontWeight: FontWeight.w700,
                               color: colors.textPrimary,
                               fontFamily: 'Poppins',
@@ -619,11 +621,11 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
                           ),
                         ),
                         SizedBox(
-                          width: 50.w,
+                          width: 46.w,
                           child: Text(
                             dateStr,
                             style: TextStyle(
-                              fontSize: 12.sp,
+                              fontSize: 11.5.sp,
                               color: colors.textSecondary,
                               fontFamily: 'Poppins',
                             ),
@@ -636,7 +638,7 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
                                 child: Text(
                                   group.surahDisplay,
                                   style: TextStyle(
-                                    fontSize: 13.sp,
+                                    fontSize: 12.5.sp,
                                     fontWeight: FontWeight.w500,
                                     color: colors.textPrimary,
                                     fontFamily: 'Poppins',
@@ -661,22 +663,22 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
                           ),
                         ),
                         SizedBox(
-                          width: 55.w,
+                          width: 48.w,
                           child: Text(
                             group.ayatDisplay,
                             style: TextStyle(
-                              fontSize: 12.sp,
+                              fontSize: 11.5.sp,
                               color: colors.textSecondary,
                               fontFamily: 'Poppins',
                             ),
                           ),
                         ),
                         SizedBox(
-                          width: 45.w,
+                          width: 38.w,
                           child: Center(
                             child: Container(
-                              width: 36.w,
-                              height: 36.w,
+                              width: 32.w,
+                              height: 32.w,
                               decoration: BoxDecoration(
                                 color: _scoreColor(group.avgScore)
                                     .withValues(alpha: 0.15),
@@ -686,13 +688,131 @@ class _MutabaahSantriScreenState extends State<MutabaahSantriScreen> {
                               child: Text(
                                 '${group.avgScore}',
                                 style: TextStyle(
-                                  fontSize: 12.sp,
+                                  fontSize: 11.5.sp,
                                   fontWeight: FontWeight.w700,
                                   color: _scoreTextColor(group.avgScore),
                                   fontFamily: 'Poppins',
                                 ),
                               ),
                             ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 24.w,
+                          child: PopupMenuButton<String>(
+                            icon: Icon(
+                              Icons.more_vert,
+                              size: 18.sp,
+                              color: colors.textSecondary,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            color: colors.surface,
+                            elevation: 3,
+                            onSelected: (value) async {
+                              if (value == 'edit') {
+                                final first = group.records.first;
+                                context.pushRoute(
+                                  InputHafalanRoute(
+                                    santriId: widget.santriId,
+                                    name: widget.name,
+                                    nis: widget.nis,
+                                    halaqohId: first.halaqohId,
+                                    guruId: first.guruId,
+                                    editRecords: group.records,
+                                  ),
+                                );
+                              } else if (value == 'delete') {
+                                final formattedDate =
+                                    '${_getDayName(group.tanggalSetoran)}, ${DateFormat('d MMMM yyyy', 'id').format(group.tanggalSetoran)}';
+                                final confirmed =
+                                    await ConfirmDeleteDialog.show(
+                                  context,
+                                  title: t.mutabaahSantri.hapusSetoranTitle,
+                                  message:
+                                      t.mutabaahSantri.hapusSetoranMessage(
+                                    surah: group.surahDisplay,
+                                    tanggal: formattedDate,
+                                  ),
+                                );
+                                if (confirmed && mounted) {
+                                  final messenger =
+                                      ScaffoldMessenger.of(context);
+                                  final cubit =
+                                      context.read<RiwayatHafalanCubit>();
+                                  final success = await cubit
+                                      .deleteSubmissionGroup(group.records);
+                                  if (mounted) {
+                                    if (success) {
+                                      AppSnackBar.showSuccess(
+                                        context,
+                                        messenger: messenger,
+                                        message:
+                                            t.mutabaahSantri.deleteSuccess,
+                                      );
+                                    } else {
+                                      AppSnackBar.showError(
+                                        context,
+                                        messenger: messenger,
+                                        message:
+                                            t.mutabaahSantri.deleteFailed,
+                                      );
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'edit',
+                                height: 40.h,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.edit_outlined,
+                                      size: 18.sp,
+                                      color: colors.textPrimary,
+                                    ),
+                                    SizedBox(width: 10.w),
+                                    Text(
+                                      t.mutabaahSantri.ubahSetoran,
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: colors.textPrimary,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                height: 40.h,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.delete_outline,
+                                      size: 18.sp,
+                                      color: colors.red,
+                                    ),
+                                    SizedBox(width: 10.w),
+                                    Text(
+                                      t.mutabaahSantri.hapusSetoran,
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: colors.red,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],

@@ -55,6 +55,7 @@ class _WaliSantriRiwayatAbsensiScreenState
   ];
 
   late AbsensiCubit _absensiCubit;
+  late final ScrollController _dayListScrollCtrl;
   String? _watchedHalaqohId;
 
   List<String> get _sessionKeys {
@@ -75,12 +76,39 @@ class _WaliSantriRiwayatAbsensiScreenState
   void initState() {
     super.initState();
     _absensiCubit = sl<AbsensiCubit>();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+    _dayListScrollCtrl = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+      _scrollToAppropriateDay();
+    });
+  }
+
+  void _scrollToAppropriateDay() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_dayListScrollCtrl.hasClients) return;
+      final now = DateTime.now();
+      if (_currentMonth == now.month && _currentYear == now.year) {
+        final cardWidth = (widget.programType == 'takhassus' ? 80.w : 72.w) + 10.w;
+        final targetOffset = ((now.day - 1) * cardWidth) - 24.w;
+        final maxOffset = _dayListScrollCtrl.position.maxScrollExtent;
+        final clampedOffset = targetOffset.clamp(0.0, maxOffset);
+        if (_dayListScrollCtrl.offset != clampedOffset) {
+          _dayListScrollCtrl.animateTo(
+            clampedOffset,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      } else {
+        _dayListScrollCtrl.jumpTo(0.0);
+      }
+    });
   }
 
   @override
   void dispose() {
     _absensiCubit.close();
+    _dayListScrollCtrl.dispose();
     super.dispose();
   }
 
@@ -186,6 +214,7 @@ class _WaliSantriRiwayatAbsensiScreenState
         _currentYear--;
       }
     });
+    _scrollToAppropriateDay();
   }
 
   void _nextMonth() {
@@ -196,6 +225,7 @@ class _WaliSantriRiwayatAbsensiScreenState
         _currentYear++;
       }
     });
+    _scrollToAppropriateDay();
   }
 
   String _getDayName(int day) {
@@ -286,7 +316,11 @@ class _WaliSantriRiwayatAbsensiScreenState
                           subtitle: myHalaqoh != null
                               ? t.riwayatAbsensi.halaqohKelas(
                                   halaqoh: myHalaqoh!.nama,
-                                  kelas: myHalaqoh!.kelas,
+                                  kelas: (mySantri != null && mySantri!.kelas.isNotEmpty)
+                                      ? mySantri!.kelas
+                                      : (myHalaqoh!.kelas.contains(',')
+                                          ? myHalaqoh!.kelas.split(',').first.trim()
+                                          : myHalaqoh!.kelas),
                                 )
                               : t.riwayatAbsensi.belumTerdaftarHalaqoh,
                           profilePictureUrl: mySantri?.profilePicture,
@@ -316,6 +350,7 @@ class _WaliSantriRiwayatAbsensiScreenState
                                 _currentMonth = month;
                                 _currentYear = year;
                               });
+                              _scrollToAppropriateDay();
                             },
                           ),
                         ],
@@ -334,6 +369,7 @@ class _WaliSantriRiwayatAbsensiScreenState
                     SizedBox(
                       height: widget.programType == 'takhassus' ? 315.h : 180.h,
                       child: ListView.builder(
+                        controller: _dayListScrollCtrl,
                         scrollDirection: Axis.horizontal,
                         padding: EdgeInsets.symmetric(horizontal: 24.w),
                         itemCount: allDays.length,

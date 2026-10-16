@@ -42,6 +42,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
   List<String> get _dayNames => t.calendar.daysAbbrSundayFirst;
 
   late AbsensiCubit _absensiCubit;
+  late final ScrollController _dayListScrollCtrl;
 
   // Resolved from the Halaqoh's program field in _loadData(). Defaults to
   // 'reguler' until the Halaqoh is loaded.
@@ -65,7 +66,33 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
   void initState() {
     super.initState();
     _absensiCubit = sl<AbsensiCubit>();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+    _dayListScrollCtrl = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+      _scrollToAppropriateDay();
+    });
+  }
+
+  void _scrollToAppropriateDay() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_dayListScrollCtrl.hasClients) return;
+      final now = DateTime.now();
+      if (_currentMonth == now.month && _currentYear == now.year) {
+        final cardWidth = (_effectiveProgramType == 'takhassus' ? 80.w : 72.w) + 10.w;
+        final targetOffset = ((now.day - 1) * cardWidth) - 24.w;
+        final maxOffset = _dayListScrollCtrl.position.maxScrollExtent;
+        final clampedOffset = targetOffset.clamp(0.0, maxOffset);
+        if (_dayListScrollCtrl.offset != clampedOffset) {
+          _dayListScrollCtrl.animateTo(
+            clampedOffset,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      } else {
+        _dayListScrollCtrl.jumpTo(0.0);
+      }
+    });
   }
 
   void _loadData() {
@@ -95,6 +122,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
   @override
   void dispose() {
     _absensiCubit.close();
+    _dayListScrollCtrl.dispose();
     super.dispose();
   }
 
@@ -179,6 +207,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
         _currentYear--;
       }
     });
+    _scrollToAppropriateDay();
   }
 
   void _nextMonth() {
@@ -189,6 +218,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
         _currentYear++;
       }
     });
+    _scrollToAppropriateDay();
   }
 
   String _getDayName(int day) {
@@ -302,6 +332,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                               _currentMonth = month;
                               _currentYear = year;
                             });
+                            _scrollToAppropriateDay();
                           },
                         ),
                       ],
@@ -324,7 +355,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                     child: Builder(
                       builder: (context) {
                         final totalDays = DateUtils.getDaysInMonth(
-                          _currentYear,
+                           _currentYear,
                           _currentMonth,
                         );
                         final daysList = List.generate(
@@ -333,6 +364,7 @@ class _RiwayatAbsensiScreenState extends State<RiwayatAbsensiScreen> {
                         );
 
                         return ListView.builder(
+                          controller: _dayListScrollCtrl,
                           scrollDirection: Axis.horizontal,
                           padding: EdgeInsets.symmetric(horizontal: 24.w),
                           itemCount: daysList.length,

@@ -382,44 +382,85 @@ class GuruDashboardHeader extends StatelessWidget {
                         ],
                       ),
 
-                      // Bottom Halaqoh Pill Capsule (if halaqoh assigned)
+                      // Bottom Halaqoh Info Bar (2 Baris Terpisah)
                       if (halaqohName.isNotEmpty) ...[
                         SizedBox(height: 14.h),
                         Container(
+                          width: double.infinity,
                           padding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 5.h,
+                            horizontal: 14.w,
+                            vertical: 9.h,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(20.r),
+                            borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.25),
+                              color: Colors.white.withValues(alpha: 0.22),
                               width: 0.8,
                             ),
                           ),
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                Icons.people_outline_rounded,
-                                size: 14.sp,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 6.w),
-                              Text(
-                                '$halaqohName  •  $santriCount Santri',
-                                style: textTheme.bodySmall?.copyWith(
-                                      fontSize: 11.5.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white,
-                                    ) ??
-                                    TextStyle(
-                                      fontSize: 11.5.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white,
-                                      fontFamily: 'Poppins',
+                              // Baris 1: Nama Halaqoh
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.auto_stories_outlined,
+                                    size: 14.sp,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Expanded(
+                                    child: Text(
+                                      halaqohName,
+                                      style: textTheme.bodySmall?.copyWith(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                            height: 1.25,
+                                          ) ??
+                                          TextStyle(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                            fontFamily: 'Poppins',
+                                            height: 1.25,
+                                          ),
                                     ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 5.h),
+                              // Baris 2: Jumlah Total Santri
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.people_outline_rounded,
+                                    size: 14.sp,
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Text(
+                                    '$santriCount Santri',
+                                    style: textTheme.labelSmall?.copyWith(
+                                          fontSize: 11.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white
+                                              .withValues(alpha: 0.88),
+                                          letterSpacing: 0.2,
+                                        ) ??
+                                        TextStyle(
+                                          fontSize: 11.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white
+                                              .withValues(alpha: 0.88),
+                                          fontFamily: 'Poppins',
+                                          letterSpacing: 0.2,
+                                        ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

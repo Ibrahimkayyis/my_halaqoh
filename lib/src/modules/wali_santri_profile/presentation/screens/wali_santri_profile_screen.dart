@@ -21,6 +21,7 @@ import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.da
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_cubit.dart';
+import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_state.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/cubits/wali_santri_profile_cubit.dart';
 import 'package:my_halaqoh/src/modules/wali_santri_profile/presentation/cubits/wali_santri_profile_state.dart';
 
@@ -269,6 +270,7 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
 
     final authState = context.watch<AuthCubit>().state;
     final halaqohState = context.watch<HalaqohCubit>().state;
+    final santriState = context.watch<SantriCubit>().state;
 
     String santriName = '';
     String nis = '';
@@ -313,12 +315,36 @@ class _WaliSantriProfileScreenState extends State<WaliSantriProfileScreen> {
             updateSuccess: (s) => santri = s,
             orElse: () {},
           );
+          if (santri == null) {
+            santriState.maybeWhen(
+              loaded: (list) {
+                try {
+                  santri = list.firstWhere((s) => s.id == linkedDocId);
+                } catch (_) {
+                  try {
+                    santri = list.firstWhere((s) => s.nis == nis);
+                  } catch (_) {}
+                }
+              },
+              orElse: () {},
+            );
+          }
 
           final displayName = santri?.nama ?? (santriName.isNotEmpty ? santriName : t.guruProfile.loading);
           final displayNis = santri?.nis ?? nis;
-          final classBadge = myHalaqoh != null
-              ? '${t.progressHafalanPerJuz.kelasLabel(kelas: myHalaqoh!.kelas)} | ${myHalaqoh!.program == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler}'
-              : (santri != null ? '${t.progressHafalanPerJuz.kelasLabel(kelas: santri!.kelas)} | ${santri!.program == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler}' : '');
+          final effectiveKelas = (santri != null && santri!.kelas.isNotEmpty)
+              ? santri!.kelas
+              : (myHalaqoh != null
+                  ? (myHalaqoh!.kelas.contains(',')
+                      ? myHalaqoh!.kelas.split(',').first.trim()
+                      : myHalaqoh!.kelas)
+                  : '');
+          final effectiveProgram = (santri != null && santri!.program.isNotEmpty)
+              ? santri!.program
+              : (myHalaqoh?.program ?? 'R');
+          final classBadge = effectiveKelas.isNotEmpty
+              ? '${t.progressHafalanPerJuz.kelasLabel(kelas: effectiveKelas)} | ${effectiveProgram == 'T' ? t.myHalaqohScreen.programTakhassus : t.myHalaqohScreen.programReguler}'
+              : '';
 
           return Scaffold(
             backgroundColor: colors.background,

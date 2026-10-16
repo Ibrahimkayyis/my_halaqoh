@@ -194,9 +194,9 @@ class TargetKelasCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.h),
-          _buildPeriodeRow(colors, t.targetHafalan.periodeUTS, target.uts),
+          _buildPeriodeRow(colors, '${t.targetHafalan.periodeUTS} $semesterNum', target.uts),
           SizedBox(height: 6.h),
-          _buildPeriodeRow(colors, t.targetHafalan.periodeUAS, target.uas),
+          _buildPeriodeRow(colors, '${t.targetHafalan.periodeUAS} $semesterNum', target.uas),
         ],
       ),
     );
@@ -210,9 +210,8 @@ class TargetKelasCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 32.w,
           margin: EdgeInsets.only(top: 2.h),
-          padding: EdgeInsets.symmetric(vertical: 2.h),
+          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
           decoration: BoxDecoration(
             color: colors.background,
             borderRadius: BorderRadius.circular(4.r),

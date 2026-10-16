@@ -135,7 +135,6 @@ class _RiwayatHafalanSantriScreenState
 
   List<String> get _dayNames => t.mutabaahSantri.dayNames;
 
-  int? _activeDeleteIndex;
   int? _expandedIndex;
 
   List<String> get _filterOptions => [
@@ -454,10 +453,64 @@ class _RiwayatHafalanSantriScreenState
                                   ),
                                 ),
                               )
-                            else
-                              ...groups.asMap().entries.map(
-                                (e) => _buildGroupCard(e.value, e.key, colors),
-                              ),
+                            else ...[
+                              ...groups
+                                  .take(5)
+                                  .toList()
+                                  .asMap()
+                                  .entries
+                                  .map(
+                                    (e) => _buildGroupCard(
+                                        e.value, e.key, colors),
+                                  ),
+                              if (groups.length > 5) ...[
+                                SizedBox(height: 10.h),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 44.h,
+                                  child: OutlinedButton.icon(
+                                    onPressed: () {
+                                      context.pushRoute(
+                                        MutabaahSantriRoute(
+                                          santriId: widget.santriId,
+                                          name: widget.name,
+                                          nis: widget.nis,
+                                        ),
+                                      );
+                                    },
+                                    icon: Icon(
+                                      Icons.menu_book_outlined,
+                                      size: 16.sp,
+                                      color: colors.primary,
+                                    ),
+                                    label: Text(
+                                      t.riwayatHafalanSantri.lihatSemuaSetoran(
+                                        count: groups.length,
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: colors.primary,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(
+                                        color: colors.primary
+                                            .withValues(alpha: 0.3),
+                                        width: 1.2,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(8.r),
+                                      ),
+                                      backgroundColor: colors.primary
+                                          .withValues(alpha: 0.04),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                             SizedBox(height: 80.h),
                           ],
                         ),
@@ -730,7 +783,6 @@ class _RiwayatHafalanSantriScreenState
     final dayName = _getDayName(group.tanggalSetoran);
     final formattedDate = '$dayName, ${group.tanggalSetoran.day} ${monthAbbr[group.tanggalSetoran.month - 1]}';
     final isZiyadah = group.jenis == 'Ziyadah';
-    final isShowingDelete = _activeDeleteIndex == index;
     final isExpanded = _expandedIndex == index;
     final hasMultiple = group.records.length > 1;
 
@@ -742,11 +794,6 @@ class _RiwayatHafalanSantriScreenState
               });
             }
           : null,
-      onLongPress: () {
-        setState(() {
-          _activeDeleteIndex = isShowingDelete ? null : index;
-        });
-      },
       child: AnimatedSize(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
@@ -762,10 +809,8 @@ class _RiwayatHafalanSantriScreenState
             border: Border.all(
               color: isDark
                   ? colors.border
-                  : (isShowingDelete
-                      ? colors.error.withValues(alpha: 0.5)
-                      : colors.border.withValues(alpha: 0.6)),
-              width: isShowingDelete ? 1.2 : 0.8,
+                  : colors.border.withValues(alpha: 0.6),
+              width: 0.8,
             ),
             boxShadow: isDark
                 ? []
@@ -790,7 +835,10 @@ class _RiwayatHafalanSantriScreenState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Row 1: Type label (Hafalan Baru / Muraja'ah) + Multiple surah chip + Date
-                        Row(
+                        Wrap(
+                          spacing: 6.w,
+                          runSpacing: 4.h,
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Container(
                               padding: EdgeInsets.symmetric(
@@ -818,8 +866,7 @@ class _RiwayatHafalanSantriScreenState
                                     ),
                               ),
                             ),
-                            if (hasMultiple) ...[
-                              SizedBox(width: 6.w),
+                            if (hasMultiple)
                               Container(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 6.w,
@@ -844,8 +891,6 @@ class _RiwayatHafalanSantriScreenState
                                       ),
                                 ),
                               ),
-                            ],
-                            SizedBox(width: 8.w),
                             Text(
                               formattedDate,
                               style: textTheme.labelSmall?.copyWith(
@@ -948,22 +993,50 @@ class _RiwayatHafalanSantriScreenState
                       ),
                     ),
                   ],
+                  SizedBox(width: 4.w),
 
-                  // Delete button (on long-press)
-                  if (isShowingDelete) ...[
-                    SizedBox(width: 8.w),
-                    GestureDetector(
-                      onTap: () async {
-                        final confirmed = await ConfirmDeleteDialog.show(context);
+                  // ── Action Menu (Ubah & Hapus) ──
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert,
+                      size: 20.sp,
+                      color: colors.textSecondary,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    color: colors.surface,
+                    elevation: 3,
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        final first = group.records.first;
+                        context.pushRoute(
+                          InputHafalanRoute(
+                            santriId: widget.santriId,
+                            name: widget.name,
+                            nis: widget.nis,
+                            halaqohId: first.halaqohId,
+                            guruId: first.guruId,
+                            editRecords: group.records,
+                          ),
+                        );
+                      } else if (value == 'delete') {
+                        final confirmed = await ConfirmDeleteDialog.show(
+                          context,
+                          title: t.riwayatHafalanSantri.hapusSetoranTitle,
+                          message: t.riwayatHafalanSantri.hapusSetoranMessage(
+                            surah: group.surahDisplay,
+                            tanggal: formattedDate,
+                          ),
+                        );
                         if (confirmed && mounted) {
-                          setState(() {
-                            _activeDeleteIndex = null;
-                          });
-
                           final messenger = ScaffoldMessenger.of(context);
                           final cubit = context.read<RiwayatHafalanCubit>();
 
-                          final success = await cubit.deleteSubmissionGroup(group.records);
+                          final success =
+                              await cubit.deleteSubmissionGroup(group.records);
 
                           if (mounted) {
                             if (success) {
@@ -981,21 +1054,57 @@ class _RiwayatHafalanSantriScreenState
                             }
                           }
                         }
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(6.w),
-                        decoration: BoxDecoration(
-                          color: colors.error.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.delete_outline,
-                          size: 18.sp,
-                          color: colors.error,
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        height: 40.h,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.edit_outlined,
+                              size: 18.sp,
+                              color: colors.textPrimary,
+                            ),
+                            SizedBox(width: 10.w),
+                            Text(
+                              t.riwayatHafalanSantri.ubahSetoran,
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: colors.textPrimary,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                      PopupMenuItem(
+                        value: 'delete',
+                        height: 40.h,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline,
+                              size: 18.sp,
+                              color: colors.red,
+                            ),
+                            SizedBox(width: 10.w),
+                            Text(
+                              t.riwayatHafalanSantri.hapusSetoran,
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: colors.red,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
 

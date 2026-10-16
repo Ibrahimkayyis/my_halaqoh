@@ -319,7 +319,11 @@ class _WaliSantriRiwayatHafalanScreenState
                             subtitle: myHalaqoh != null
                                 ? t.riwayatHafalanSantri.halaqohKelas(
                                     halaqoh: myHalaqoh!.nama,
-                                    kelas: myHalaqoh!.kelas,
+                                    kelas: (mySantri != null && mySantri!.kelas.isNotEmpty)
+                                        ? mySantri!.kelas
+                                        : (myHalaqoh!.kelas.contains(',')
+                                            ? myHalaqoh!.kelas.split(',').first.trim()
+                                            : myHalaqoh!.kelas),
                                   )
                                 : t.waliSantriDashboard.notRegisteredHalaqoh,
                             profilePictureUrl: mySantri?.profilePicture,
@@ -760,7 +764,10 @@ class _WaliSantriRiwayatHafalanScreenState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Row 1: Type label (Hafalan Baru / Muraja'ah) + Multiple surah chip + Date
-                        Row(
+                        Wrap(
+                          spacing: 6.w,
+                          runSpacing: 4.h,
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Container(
                               padding: EdgeInsets.symmetric(
@@ -788,8 +795,7 @@ class _WaliSantriRiwayatHafalanScreenState
                                     ),
                               ),
                             ),
-                            if (hasMultiple) ...[
-                              SizedBox(width: 6.w),
+                            if (hasMultiple)
                               Container(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 6.w,
@@ -814,8 +820,6 @@ class _WaliSantriRiwayatHafalanScreenState
                                       ),
                                 ),
                               ),
-                            ],
-                            SizedBox(width: 8.w),
                             Text(
                               formattedDate,
                               style: textTheme.labelSmall?.copyWith(

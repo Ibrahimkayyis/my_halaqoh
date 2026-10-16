@@ -17,7 +17,7 @@ class HalaqohRepositoryImpl implements HalaqohRepository {
   @override
   Stream<List<HalaqohModel>> watchAll() {
     return _remote.watchAll().map((list) {
-      _local.cacheHalaqoh(list);
+      unawaited(_local.cacheHalaqoh(list));
       return list;
     });
   }

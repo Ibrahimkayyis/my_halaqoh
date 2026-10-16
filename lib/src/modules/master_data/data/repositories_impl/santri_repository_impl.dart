@@ -29,7 +29,7 @@ class SantriRepositoryImpl implements SantriRepository {
   @override
   Stream<List<SantriModel>> watchAll() {
     return _remote.watchAll().map((list) {
-      _local.cacheSantri(list);
+      unawaited(_local.cacheSantri(list));
       return list;
     });
   }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_halaqoh/src/core/helpers/prayer_time_helper.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/models/absensi_model.dart';
 import 'package:my_halaqoh/src/modules/guru_absensi/domain/repositories/absensi_repository.dart';
 import 'package:my_halaqoh/src/modules/guru_dashboard/domain/models/latest_setoran_item.dart';
@@ -27,6 +28,8 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
   List<AbsensiModel> _latestAbsensiList = [];
   List<String> _santriIds = [];
   Map<String, String> _santriNameMap = {};
+  String _programType = 'reguler'; // 'reguler' | 'takhassus'
+  Timer? _sessionCheckTimer;
 
   DashboardSummaryCubit(this._absensiRepo, this._hafalanRepo)
       : super(const DashboardSummaryState.initial());
@@ -36,15 +39,23 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
   /// [halaqohId] — Firestore ID of the halaqoh.
   /// [santriIds] — List of santri IDs in this halaqoh.
   /// [santriNameMap] — Map of santriId → display name.
+  /// [programType] — Program type: `'reguler'` or `'takhassus'`. Used to
+  ///   determine session boundaries when estimating the active session via
+  ///   prayer times (fallback when no attendance exists yet today).
   void loadDashboardData({
     required String halaqohId,
     required List<String> santriIds,
     required Map<String, String> santriNameMap,
+    String programType = 'reguler',
   }) {
     emit(const DashboardSummaryState.loading());
 
     _santriIds = santriIds;
     _santriNameMap = santriNameMap;
+    _programType = programType;
+
+    // Start periodic timer to check for session time transitions
+    _startSessionCheckTimer();
 
     // ── Stream 1: Absensi (Firestore) ──
     // Reactive updates when attendance is recorded
@@ -60,7 +71,7 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
     // Background stream to sync remote attendance updates to local Hive cache
     _absensiRemoteSub?.cancel();
     _absensiRemoteSub = _absensiRepo.watchByHalaqohFromRemote(halaqohId).listen(
-      (_) {},
+      (_) => _computeAndEmit(),
       onError: (e) {}, // Silently fail/ignore in background
     );
 
@@ -77,40 +88,95 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
     // Background stream to sync remote hafalan updates to local Hive cache
     _hafalanRemoteSub?.cancel();
     _hafalanRemoteSub = _hafalanRepo.watchByHalaqohFromRemote(halaqohId).listen(
-      (_) {},
+      (_) => _computeAndEmit(),
       onError: (e) {}, // Silently fail/ignore in background
     );
+
+    // Trigger initial compute immediately with any available local data
+    _computeAndEmit();
   }
 
-  /// Core computation — called when either stream fires.
+  /// Explicitly recompute and emit dashboard summary metrics.
+  /// Called when returning to the dashboard tab from attendance or hafalan tabs.
+  void refresh() {
+    _computeAndEmit();
+  }
+
+  /// Starts a periodic timer to detect when the clock advances past a session boundary
+  /// (e.g. at 08:00 WIB, 10:00 WIB, Ashar, Maghrib), triggering auto-reset to the new session.
+  void _startSessionCheckTimer() {
+    _sessionCheckTimer?.cancel();
+    _sessionCheckTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      final currentSesi = PrayerTimeHelper.getCurrentSession(
+        programType: _programType,
+        now: DateTime.now(),
+      );
+      final currentEmittedSesi = state.maybeWhen(
+        loaded: (
+          attendedCount,
+          totalSantriCount,
+          attendancePercent,
+          setoranCount,
+          setoranPercent,
+          latestSetoran,
+          activeSesi,
+        ) => activeSesi,
+        orElse: () => null,
+      );
+      if (currentSesi != currentEmittedSesi) {
+        _computeAndEmit();
+      }
+    });
+  }
+
+  /// Core computation — called when either stream fires or session timer ticks.
   void _computeAndEmit() {
     final now = DateTime.now();
     final totalSantri = _santriIds.length;
 
-    // ── 1. Attendance — latest session today ──
-    final todayAbsensi = _latestAbsensiList.where((a) =>
-      a.tanggal.year == now.year &&
-      a.tanggal.month == now.month &&
-      a.tanggal.day == now.day
-    ).toList();
+    // ── 1. Attendance — for the currently active session ──
+    // The active session is strictly determined by the clock and prayer schedule
+    final activeSesi = PrayerTimeHelper.getCurrentSession(
+      programType: _programType,
+      now: now,
+    );
+
+    final todayAbsensi = _latestAbsensiList.where((a) {
+      final t = a.tanggal.toLocal();
+      return t.year == now.year &&
+             t.month == now.month &&
+             t.day == now.day;
+    }).toList();
 
     int attendedCount = 0;
     double attendancePercent = 0.0;
 
-    if (todayAbsensi.isNotEmpty) {
-      // Sort by createdAt descending to find the latest session
-      todayAbsensi.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      final latestSession = todayAbsensi.first;
+    // Look for attendance specifically recorded for THIS active session today
+    AbsensiModel? activeSessionRecord;
+    for (final a in todayAbsensi) {
+      if (a.sesi == activeSesi) {
+        activeSessionRecord = a;
+        break;
+      }
+    }
 
-      // Count 'hadir' in this session
-      attendedCount = latestSession.records
-          .where((r) => r.status == 'hadir')
+    if (activeSessionRecord != null) {
+      attendedCount = activeSessionRecord.records
+          .where((r) =>
+              r.status == 'hadir' ||
+              r.status.startsWith('hadir') ||
+              r.status == 'terlambat')
           .length;
 
-      final sessionTotal = latestSession.records.length;
+      final sessionTotal = activeSessionRecord.records.length;
       attendancePercent = sessionTotal > 0
           ? attendedCount / sessionTotal
           : 0.0;
+    } else {
+      // The current active session has not been recorded yet today
+      // -> Resets automatically to 0!
+      attendedCount = 0;
+      attendancePercent = 0.0;
     }
 
     // ── 2. Setoran — distinct santri with any hafalan today ──
@@ -155,6 +221,7 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
       setoranCount: setoranCount,
       setoranPercent: setoranPercent,
       latestSetoran: latestSetoran,
+      activeSesi: activeSesi,
     ));
   }
 
@@ -199,6 +266,7 @@ class DashboardSummaryCubit extends Cubit<DashboardSummaryState> {
 
   @override
   Future<void> close() {
+    _sessionCheckTimer?.cancel();
     _absensiSub?.cancel();
     _absensiRemoteSub?.cancel();
     _hafalanSub?.cancel();

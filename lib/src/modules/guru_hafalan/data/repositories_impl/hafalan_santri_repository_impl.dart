@@ -172,4 +172,43 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
       return Left('Gagal menghapus data hafalan secara lokal: $e');
     }
   }
+
+  @override
+  Future<Either<String, void>> updateSubmissionGroup({
+    required List<HafalanSantriModel> oldRecords,
+    required List<HafalanSantriModel> newRecords,
+  }) async {
+    try {
+      // 1. Delete all old records
+      for (final old in oldRecords) {
+        await _local.delete(old.id);
+        try {
+          await _remote.delete(old.id);
+        } catch (e) {
+          _log.w('Failed to delete old remote record during update: $e');
+        }
+      }
+
+      // 2. Add all new records
+      for (final newRec in newRecords) {
+        await addHafalan(newRec);
+      }
+
+      final entityId = newRecords.isNotEmpty
+          ? newRecords.first.id
+          : (oldRecords.isNotEmpty ? oldRecords.first.id : '');
+      unawaited(_activityLog.log(
+        action: 'update',
+        module: 'hafalan',
+        entityId: entityId,
+        description:
+            'Memperbarui data setoran hafalan (${newRecords.length} surat)',
+      ));
+
+      return const Right(null);
+    } catch (e, st) {
+      _log.e('Failed to update submission group', error: e, stackTrace: st);
+      return Left('Gagal memperbarui data setoran hafalan: $e');
+    }
+  }
 }

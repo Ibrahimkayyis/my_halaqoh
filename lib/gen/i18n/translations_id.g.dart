@@ -279,8 +279,8 @@ class _TranslationsTargetHafalanId extends TranslationsTargetHafalanEn {
 	@override String get belumDitetapkan => 'Belum ditetapkan';
 	@override String get semester1 => 'Semester 1';
 	@override String get semester2 => 'Semester 2';
-	@override String get periodeUTS => 'UTS';
-	@override String get periodeUAS => 'UAS';
+	@override String get periodeUTS => 'PTS';
+	@override String get periodeUAS => 'PAS';
 	@override String get tipeIdadTahsin => 'I\'dad Tahsin';
 	@override String get tipeDauroh => 'Dauroh';
 	@override String get tipeMurajaah => 'Muraja\'ah';
@@ -433,6 +433,16 @@ class _TranslationsGuruDashboardId extends TranslationsGuruDashboardEn {
 	@override String get subtitle => 'Awali Halaqoh Dengan Doa Bersama Agar Selalu Diberkahi';
 	@override String get capaianHariIni => 'Capaian hari ini';
 	@override String get kehadiranHariIni => 'Kehadiran Hari ini';
+	@override String kehadiranSesi({required Object sesi}) => 'Kehadiran Sesi ${sesi}';
+	@override String get kehadiranOverline => 'KEHADIRAN';
+	@override String get setoranOverline => 'SETORAN';
+	@override String sesiTitle({required Object sesi}) => 'Sesi ${sesi}';
+	@override String get setoranHafalanTitle => 'Hafalan Santri';
+	@override String get sesiShubuh => 'Shubuh';
+	@override String get sesiDhuha => 'Dhuha';
+	@override String get sesiSiang => 'Siang';
+	@override String get sesiAshar => 'Ashar';
+	@override String get sesiMaghrib => 'Maghrib';
 	@override String get setoranHafalan => 'Setoran Hafalan';
 	@override String santriCount({required Object current, required Object total}) => '${current}/${total} Santri';
 	@override String get menuUtama => 'Menu Utama';
@@ -472,6 +482,8 @@ class _TranslationsMyHalaqohScreenId extends TranslationsMyHalaqohScreenEn {
 	@override String kelas({required Object kelas}) => 'Kelas ${kelas}';
 	@override String program({required Object program}) => 'Program: ${program}';
 	@override String target({required Object count, required Object range}) => 'Target: ${count} Juz (${range})';
+	@override String get targetMixed => 'Target: Sesuai Kelas Santri';
+	@override String get kelasCampuran => 'Campuran';
 	@override String total({required Object count}) => 'Total: ${count} Santri';
 	@override String get pengampu => 'Ustadz Kayyis';
 	@override String progressText({required Object completed, required Object target}) => '${completed} Juz terselesaikan dari ${target} Juz';
@@ -740,6 +752,13 @@ class _TranslationsInputHafalanFormId extends TranslationsInputHafalanFormEn {
 	@override String get errWajibDiisi1Sampai100 => 'Wajib diisi antara 1 sampai 100';
 	@override String juzNumbers({required Object juz}) => 'Juz ${juz}';
 	@override String get semuaAyat => 'Semua Ayat';
+	@override String get editTitle => 'Edit Setoran Hafalan';
+	@override String get editSubtitle => 'Perbarui data setoran hafalan santri';
+	@override String get simpanPerubahan => 'SIMPAN PERUBAHAN';
+	@override String get simpanPerubahanTitle => 'Simpan Perubahan?';
+	@override String get simpanPerubahanMessage => 'Perubahan data setoran hafalan akan disimpan.';
+	@override String get updateSuccess => 'Data setoran berhasil diperbarui!';
+	@override String get updateFailed => 'Gagal memperbarui data setoran.';
 }
 
 // Path: riwayatHafalanSantri
@@ -773,6 +792,11 @@ class _TranslationsRiwayatHafalanSantriId extends TranslationsRiwayatHafalanSant
 	@override String nisLabel({required Object nis}) => 'NIS: ${nis}';
 	@override String get deleteSuccess => 'Data hafalan berhasil dihapus!';
 	@override String get deleteFailed => 'Gagal menghapus data hafalan.';
+	@override String get ubahSetoran => 'Ubah Setoran';
+	@override String get hapusSetoran => 'Hapus Setoran';
+	@override String get hapusSetoranTitle => 'Hapus Setoran?';
+	@override String hapusSetoranMessage({required Object surah, required Object tanggal}) => 'Data setoran ${surah} pada ${tanggal} akan dihapus permanen.';
+	@override String lihatSemuaSetoran({required Object count}) => 'Lihat Semua Setoran di Mutaba\'ah (${count})';
 }
 
 // Path: progressHafalanPerJuz
@@ -852,6 +876,12 @@ class _TranslationsMutabaahSantriId extends TranslationsMutabaahSantriEn {
 	@override String get belumAdaHafalanBaru => 'Belum ada hafalan baru';
 	@override String get belumAdaMurajaah => 'Belum ada muraja\'ah';
 	@override String suratCount({required Object count}) => '${count} surat';
+	@override String get ubahSetoran => 'Ubah Setoran';
+	@override String get hapusSetoran => 'Hapus Setoran';
+	@override String get hapusSetoranTitle => 'Hapus Setoran?';
+	@override String hapusSetoranMessage({required Object surah, required Object tanggal}) => 'Data setoran ${surah} pada ${tanggal} akan dihapus permanen.';
+	@override String get deleteSuccess => 'Data hafalan berhasil dihapus!';
+	@override String get deleteFailed => 'Gagal menghapus data hafalan.';
 }
 
 // Path: guruProfile
@@ -1619,8 +1649,8 @@ extension on TranslationsId {
 			case 'targetHafalan.belumDitetapkan': return 'Belum ditetapkan';
 			case 'targetHafalan.semester1': return 'Semester 1';
 			case 'targetHafalan.semester2': return 'Semester 2';
-			case 'targetHafalan.periodeUTS': return 'UTS';
-			case 'targetHafalan.periodeUAS': return 'UAS';
+			case 'targetHafalan.periodeUTS': return 'PTS';
+			case 'targetHafalan.periodeUAS': return 'PAS';
 			case 'targetHafalan.tipeIdadTahsin': return 'I\'dad Tahsin';
 			case 'targetHafalan.tipeDauroh': return 'Dauroh';
 			case 'targetHafalan.tipeMurajaah': return 'Muraja\'ah';
@@ -1719,6 +1749,16 @@ extension on TranslationsId {
 			case 'guruDashboard.subtitle': return 'Awali Halaqoh Dengan Doa Bersama Agar Selalu Diberkahi';
 			case 'guruDashboard.capaianHariIni': return 'Capaian hari ini';
 			case 'guruDashboard.kehadiranHariIni': return 'Kehadiran Hari ini';
+			case 'guruDashboard.kehadiranSesi': return ({required Object sesi}) => 'Kehadiran Sesi ${sesi}';
+			case 'guruDashboard.kehadiranOverline': return 'KEHADIRAN';
+			case 'guruDashboard.setoranOverline': return 'SETORAN';
+			case 'guruDashboard.sesiTitle': return ({required Object sesi}) => 'Sesi ${sesi}';
+			case 'guruDashboard.setoranHafalanTitle': return 'Hafalan Santri';
+			case 'guruDashboard.sesiShubuh': return 'Shubuh';
+			case 'guruDashboard.sesiDhuha': return 'Dhuha';
+			case 'guruDashboard.sesiSiang': return 'Siang';
+			case 'guruDashboard.sesiAshar': return 'Ashar';
+			case 'guruDashboard.sesiMaghrib': return 'Maghrib';
 			case 'guruDashboard.setoranHafalan': return 'Setoran Hafalan';
 			case 'guruDashboard.santriCount': return ({required Object current, required Object total}) => '${current}/${total} Santri';
 			case 'guruDashboard.menuUtama': return 'Menu Utama';
@@ -1740,6 +1780,8 @@ extension on TranslationsId {
 			case 'myHalaqohScreen.kelas': return ({required Object kelas}) => 'Kelas ${kelas}';
 			case 'myHalaqohScreen.program': return ({required Object program}) => 'Program: ${program}';
 			case 'myHalaqohScreen.target': return ({required Object count, required Object range}) => 'Target: ${count} Juz (${range})';
+			case 'myHalaqohScreen.targetMixed': return 'Target: Sesuai Kelas Santri';
+			case 'myHalaqohScreen.kelasCampuran': return 'Campuran';
 			case 'myHalaqohScreen.total': return ({required Object count}) => 'Total: ${count} Santri';
 			case 'myHalaqohScreen.pengampu': return 'Ustadz Kayyis';
 			case 'myHalaqohScreen.progressText': return ({required Object completed, required Object target}) => '${completed} Juz terselesaikan dari ${target} Juz';
@@ -1940,6 +1982,13 @@ extension on TranslationsId {
 			case 'inputHafalanForm.errWajibDiisi1Sampai100': return 'Wajib diisi antara 1 sampai 100';
 			case 'inputHafalanForm.juzNumbers': return ({required Object juz}) => 'Juz ${juz}';
 			case 'inputHafalanForm.semuaAyat': return 'Semua Ayat';
+			case 'inputHafalanForm.editTitle': return 'Edit Setoran Hafalan';
+			case 'inputHafalanForm.editSubtitle': return 'Perbarui data setoran hafalan santri';
+			case 'inputHafalanForm.simpanPerubahan': return 'SIMPAN PERUBAHAN';
+			case 'inputHafalanForm.simpanPerubahanTitle': return 'Simpan Perubahan?';
+			case 'inputHafalanForm.simpanPerubahanMessage': return 'Perubahan data setoran hafalan akan disimpan.';
+			case 'inputHafalanForm.updateSuccess': return 'Data setoran berhasil diperbarui!';
+			case 'inputHafalanForm.updateFailed': return 'Gagal memperbarui data setoran.';
 			case 'riwayatHafalanSantri.title': return 'Riwayat Hafalan';
 			case 'riwayatHafalanSantri.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Kelas ${kelas}';
 			case 'riwayatHafalanSantri.totalHafalanBaru': return 'Total Hafalan Baru';
@@ -1964,6 +2013,11 @@ extension on TranslationsId {
 			case 'riwayatHafalanSantri.nisLabel': return ({required Object nis}) => 'NIS: ${nis}';
 			case 'riwayatHafalanSantri.deleteSuccess': return 'Data hafalan berhasil dihapus!';
 			case 'riwayatHafalanSantri.deleteFailed': return 'Gagal menghapus data hafalan.';
+			case 'riwayatHafalanSantri.ubahSetoran': return 'Ubah Setoran';
+			case 'riwayatHafalanSantri.hapusSetoran': return 'Hapus Setoran';
+			case 'riwayatHafalanSantri.hapusSetoranTitle': return 'Hapus Setoran?';
+			case 'riwayatHafalanSantri.hapusSetoranMessage': return ({required Object surah, required Object tanggal}) => 'Data setoran ${surah} pada ${tanggal} akan dihapus permanen.';
+			case 'riwayatHafalanSantri.lihatSemuaSetoran': return ({required Object count}) => 'Lihat Semua Setoran di Mutaba\'ah (${count})';
 			case 'progressHafalanPerJuz.title': return 'Progress Hafalan';
 			case 'progressHafalanPerJuz.targetHafalan': return 'Target Hafalan';
 			case 'progressHafalanPerJuz.pilihJuz': return 'Pilih Juz untuk melihat detail progress per surat';
@@ -2014,6 +2068,12 @@ extension on TranslationsId {
 			case 'mutabaahSantri.belumAdaHafalanBaru': return 'Belum ada hafalan baru';
 			case 'mutabaahSantri.belumAdaMurajaah': return 'Belum ada muraja\'ah';
 			case 'mutabaahSantri.suratCount': return ({required Object count}) => '${count} surat';
+			case 'mutabaahSantri.ubahSetoran': return 'Ubah Setoran';
+			case 'mutabaahSantri.hapusSetoran': return 'Hapus Setoran';
+			case 'mutabaahSantri.hapusSetoranTitle': return 'Hapus Setoran?';
+			case 'mutabaahSantri.hapusSetoranMessage': return ({required Object surah, required Object tanggal}) => 'Data setoran ${surah} pada ${tanggal} akan dihapus permanen.';
+			case 'mutabaahSantri.deleteSuccess': return 'Data hafalan berhasil dihapus!';
+			case 'mutabaahSantri.deleteFailed': return 'Gagal menghapus data hafalan.';
 			case 'guruProfile.editProfile': return 'Edit Profile';
 			case 'guruProfile.ubahPassword': return 'Ubah Password';
 			case 'guruProfile.pengaturan': return 'Pengaturan';

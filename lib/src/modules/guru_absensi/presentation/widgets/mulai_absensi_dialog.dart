@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
+import 'package:my_halaqoh/src/core/helpers/prayer_time_helper.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
 
@@ -27,7 +28,16 @@ class MulaiAbsensiDialog extends StatefulWidget {
 
 class _MulaiAbsensiDialogState extends State<MulaiAbsensiDialog> {
   final DateTime _selectedDate = DateTime.now();
-  String _selectedSesi = 'shubuh';
+  late String _selectedSesi;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedSesi = PrayerTimeHelper.getCurrentSession(
+      programType: widget.programType,
+      now: DateTime.now(),
+    );
+  }
 
 
 

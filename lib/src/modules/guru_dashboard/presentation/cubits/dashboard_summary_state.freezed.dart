@@ -128,12 +128,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( int attendedCount,  int totalSantriCount,  double attendancePercent,  int setoranCount,  double setoranPercent,  List<LatestSetoranItem> latestSetoran)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( int attendedCount,  int totalSantriCount,  double attendancePercent,  int setoranCount,  double setoranPercent,  List<LatestSetoranItem> latestSetoran,  String activeSesi)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.attendedCount,_that.totalSantriCount,_that.attendancePercent,_that.setoranCount,_that.setoranPercent,_that.latestSetoran);case _Error() when error != null:
+return loaded(_that.attendedCount,_that.totalSantriCount,_that.attendancePercent,_that.setoranCount,_that.setoranPercent,_that.latestSetoran,_that.activeSesi);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -152,12 +152,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( int attendedCount,  int totalSantriCount,  double attendancePercent,  int setoranCount,  double setoranPercent,  List<LatestSetoranItem> latestSetoran)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( int attendedCount,  int totalSantriCount,  double attendancePercent,  int setoranCount,  double setoranPercent,  List<LatestSetoranItem> latestSetoran,  String activeSesi)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Loaded():
-return loaded(_that.attendedCount,_that.totalSantriCount,_that.attendancePercent,_that.setoranCount,_that.setoranPercent,_that.latestSetoran);case _Error():
+return loaded(_that.attendedCount,_that.totalSantriCount,_that.attendancePercent,_that.setoranCount,_that.setoranPercent,_that.latestSetoran,_that.activeSesi);case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -175,12 +175,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( int attendedCount,  int totalSantriCount,  double attendancePercent,  int setoranCount,  double setoranPercent,  List<LatestSetoranItem> latestSetoran)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( int attendedCount,  int totalSantriCount,  double attendancePercent,  int setoranCount,  double setoranPercent,  List<LatestSetoranItem> latestSetoran,  String activeSesi)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.attendedCount,_that.totalSantriCount,_that.attendancePercent,_that.setoranCount,_that.setoranPercent,_that.latestSetoran);case _Error() when error != null:
+return loaded(_that.attendedCount,_that.totalSantriCount,_that.attendancePercent,_that.setoranCount,_that.setoranPercent,_that.latestSetoran,_that.activeSesi);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -257,7 +257,7 @@ String toString() {
 
 
 class _Loaded implements DashboardSummaryState {
-  const _Loaded({required this.attendedCount, required this.totalSantriCount, required this.attendancePercent, required this.setoranCount, required this.setoranPercent, required final  List<LatestSetoranItem> latestSetoran}): _latestSetoran = latestSetoran;
+  const _Loaded({required this.attendedCount, required this.totalSantriCount, required this.attendancePercent, required this.setoranCount, required this.setoranPercent, required final  List<LatestSetoranItem> latestSetoran, this.activeSesi = 'shubuh'}): _latestSetoran = latestSetoran;
   
 
 // ── Attendance (latest session) ──
@@ -283,6 +283,11 @@ class _Loaded implements DashboardSummaryState {
   return EqualUnmodifiableListView(_latestSetoran);
 }
 
+// ── Active session ──
+/// Active session key: 'shubuh' | 'dhuha' | 'siang' | 'ashar' | 'maghrib'.
+/// Derived from the latest Firestore attendance record today; falls back to
+/// a prayer-time estimation when no session has been recorded yet.
+@JsonKey() final  String activeSesi;
 
 /// Create a copy of DashboardSummaryState
 /// with the given fields replaced by the non-null parameter values.
@@ -294,16 +299,16 @@ _$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.attendedCount, attendedCount) || other.attendedCount == attendedCount)&&(identical(other.totalSantriCount, totalSantriCount) || other.totalSantriCount == totalSantriCount)&&(identical(other.attendancePercent, attendancePercent) || other.attendancePercent == attendancePercent)&&(identical(other.setoranCount, setoranCount) || other.setoranCount == setoranCount)&&(identical(other.setoranPercent, setoranPercent) || other.setoranPercent == setoranPercent)&&const DeepCollectionEquality().equals(other._latestSetoran, _latestSetoran));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.attendedCount, attendedCount) || other.attendedCount == attendedCount)&&(identical(other.totalSantriCount, totalSantriCount) || other.totalSantriCount == totalSantriCount)&&(identical(other.attendancePercent, attendancePercent) || other.attendancePercent == attendancePercent)&&(identical(other.setoranCount, setoranCount) || other.setoranCount == setoranCount)&&(identical(other.setoranPercent, setoranPercent) || other.setoranPercent == setoranPercent)&&const DeepCollectionEquality().equals(other._latestSetoran, _latestSetoran)&&(identical(other.activeSesi, activeSesi) || other.activeSesi == activeSesi));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,attendedCount,totalSantriCount,attendancePercent,setoranCount,setoranPercent,const DeepCollectionEquality().hash(_latestSetoran));
+int get hashCode => Object.hash(runtimeType,attendedCount,totalSantriCount,attendancePercent,setoranCount,setoranPercent,const DeepCollectionEquality().hash(_latestSetoran),activeSesi);
 
 @override
 String toString() {
-  return 'DashboardSummaryState.loaded(attendedCount: $attendedCount, totalSantriCount: $totalSantriCount, attendancePercent: $attendancePercent, setoranCount: $setoranCount, setoranPercent: $setoranPercent, latestSetoran: $latestSetoran)';
+  return 'DashboardSummaryState.loaded(attendedCount: $attendedCount, totalSantriCount: $totalSantriCount, attendancePercent: $attendancePercent, setoranCount: $setoranCount, setoranPercent: $setoranPercent, latestSetoran: $latestSetoran, activeSesi: $activeSesi)';
 }
 
 
@@ -314,7 +319,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $DashboardSummaryStateCop
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- int attendedCount, int totalSantriCount, double attendancePercent, int setoranCount, double setoranPercent, List<LatestSetoranItem> latestSetoran
+ int attendedCount, int totalSantriCount, double attendancePercent, int setoranCount, double setoranPercent, List<LatestSetoranItem> latestSetoran, String activeSesi
 });
 
 
@@ -331,7 +336,7 @@ class __$LoadedCopyWithImpl<$Res>
 
 /// Create a copy of DashboardSummaryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? attendedCount = null,Object? totalSantriCount = null,Object? attendancePercent = null,Object? setoranCount = null,Object? setoranPercent = null,Object? latestSetoran = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? attendedCount = null,Object? totalSantriCount = null,Object? attendancePercent = null,Object? setoranCount = null,Object? setoranPercent = null,Object? latestSetoran = null,Object? activeSesi = null,}) {
   return _then(_Loaded(
 attendedCount: null == attendedCount ? _self.attendedCount : attendedCount // ignore: cast_nullable_to_non_nullable
 as int,totalSantriCount: null == totalSantriCount ? _self.totalSantriCount : totalSantriCount // ignore: cast_nullable_to_non_nullable
@@ -339,7 +344,8 @@ as int,attendancePercent: null == attendancePercent ? _self.attendancePercent : 
 as double,setoranCount: null == setoranCount ? _self.setoranCount : setoranCount // ignore: cast_nullable_to_non_nullable
 as int,setoranPercent: null == setoranPercent ? _self.setoranPercent : setoranPercent // ignore: cast_nullable_to_non_nullable
 as double,latestSetoran: null == latestSetoran ? _self._latestSetoran : latestSetoran // ignore: cast_nullable_to_non_nullable
-as List<LatestSetoranItem>,
+as List<LatestSetoranItem>,activeSesi: null == activeSesi ? _self.activeSesi : activeSesi // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

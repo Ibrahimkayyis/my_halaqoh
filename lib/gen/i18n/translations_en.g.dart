@@ -527,11 +527,11 @@ class TranslationsTargetHafalanEn {
 	/// en: 'Semester 2'
 	String get semester2 => 'Semester 2';
 
-	/// en: 'Midterm'
-	String get periodeUTS => 'Midterm';
+	/// en: 'PTS'
+	String get periodeUTS => 'PTS';
 
-	/// en: 'Finals'
-	String get periodeUAS => 'Finals';
+	/// en: 'PAS'
+	String get periodeUAS => 'PAS';
 
 	/// en: 'I'dad Tahsin'
 	String get tipeIdadTahsin => 'I\'dad Tahsin';
@@ -881,6 +881,36 @@ class TranslationsGuruDashboardEn {
 	/// en: 'Attendance Today'
 	String get kehadiranHariIni => 'Attendance Today';
 
+	/// en: '$sesi Session Attendance'
+	String kehadiranSesi({required Object sesi}) => '${sesi} Session Attendance';
+
+	/// en: 'ATTENDANCE'
+	String get kehadiranOverline => 'ATTENDANCE';
+
+	/// en: 'SUBMISSION'
+	String get setoranOverline => 'SUBMISSION';
+
+	/// en: '$sesi Session'
+	String sesiTitle({required Object sesi}) => '${sesi} Session';
+
+	/// en: 'Student Memorization'
+	String get setoranHafalanTitle => 'Student Memorization';
+
+	/// en: 'Shubuh'
+	String get sesiShubuh => 'Shubuh';
+
+	/// en: 'Dhuha'
+	String get sesiDhuha => 'Dhuha';
+
+	/// en: 'Siang'
+	String get sesiSiang => 'Siang';
+
+	/// en: 'Ashar'
+	String get sesiAshar => 'Ashar';
+
+	/// en: 'Maghrib'
+	String get sesiMaghrib => 'Maghrib';
+
 	/// en: 'Hafalan Submission'
 	String get setoranHafalan => 'Hafalan Submission';
 
@@ -961,6 +991,12 @@ class TranslationsMyHalaqohScreenEn {
 
 	/// en: 'Target: $count Juz ($range)'
 	String target({required Object count, required Object range}) => 'Target: ${count} Juz (${range})';
+
+	/// en: 'Target: Per Student's Grade'
+	String get targetMixed => 'Target: Per Student\'s Grade';
+
+	/// en: 'Mixed'
+	String get kelasCampuran => 'Mixed';
 
 	/// en: 'Total: $count Students'
 	String total({required Object count}) => 'Total: ${count} Students';
@@ -1553,6 +1589,27 @@ class TranslationsInputHafalanFormEn {
 
 	/// en: 'All Verses'
 	String get semuaAyat => 'All Verses';
+
+	/// en: 'Edit Memorization Submission'
+	String get editTitle => 'Edit Memorization Submission';
+
+	/// en: 'Update student memorization data'
+	String get editSubtitle => 'Update student memorization data';
+
+	/// en: 'SAVE CHANGES'
+	String get simpanPerubahan => 'SAVE CHANGES';
+
+	/// en: 'Save Changes?'
+	String get simpanPerubahanTitle => 'Save Changes?';
+
+	/// en: 'Changes to memorization submission will be saved.'
+	String get simpanPerubahanMessage => 'Changes to memorization submission will be saved.';
+
+	/// en: 'Memorization submission successfully updated!'
+	String get updateSuccess => 'Memorization submission successfully updated!';
+
+	/// en: 'Failed to update memorization submission.'
+	String get updateFailed => 'Failed to update memorization submission.';
 }
 
 // Path: riwayatHafalanSantri
@@ -1634,6 +1691,21 @@ class TranslationsRiwayatHafalanSantriEn {
 
 	/// en: 'Failed to delete memorization data.'
 	String get deleteFailed => 'Failed to delete memorization data.';
+
+	/// en: 'Edit Submission'
+	String get ubahSetoran => 'Edit Submission';
+
+	/// en: 'Delete Submission'
+	String get hapusSetoran => 'Delete Submission';
+
+	/// en: 'Delete Submission?'
+	String get hapusSetoranTitle => 'Delete Submission?';
+
+	/// en: 'Memorization submission for $surah on $tanggal will be permanently deleted.'
+	String hapusSetoranMessage({required Object surah, required Object tanggal}) => 'Memorization submission for ${surah} on ${tanggal} will be permanently deleted.';
+
+	/// en: 'View All Submissions in Mutaba'ah ($count)'
+	String lihatSemuaSetoran({required Object count}) => 'View All Submissions in Mutaba\'ah (${count})';
 }
 
 // Path: progressHafalanPerJuz
@@ -1800,6 +1872,24 @@ class TranslationsMutabaahSantriEn {
 
 	/// en: '$count surahs'
 	String suratCount({required Object count}) => '${count} surahs';
+
+	/// en: 'Edit Submission'
+	String get ubahSetoran => 'Edit Submission';
+
+	/// en: 'Delete Submission'
+	String get hapusSetoran => 'Delete Submission';
+
+	/// en: 'Delete Submission?'
+	String get hapusSetoranTitle => 'Delete Submission?';
+
+	/// en: 'Memorization submission for $surah on $tanggal will be permanently deleted.'
+	String hapusSetoranMessage({required Object surah, required Object tanggal}) => 'Memorization submission for ${surah} on ${tanggal} will be permanently deleted.';
+
+	/// en: 'Memorization data successfully deleted!'
+	String get deleteSuccess => 'Memorization data successfully deleted!';
+
+	/// en: 'Failed to delete memorization data.'
+	String get deleteFailed => 'Failed to delete memorization data.';
 }
 
 // Path: guruProfile
@@ -3352,8 +3442,8 @@ extension on Translations {
 			case 'targetHafalan.belumDitetapkan': return 'Not Set';
 			case 'targetHafalan.semester1': return 'Semester 1';
 			case 'targetHafalan.semester2': return 'Semester 2';
-			case 'targetHafalan.periodeUTS': return 'Midterm';
-			case 'targetHafalan.periodeUAS': return 'Finals';
+			case 'targetHafalan.periodeUTS': return 'PTS';
+			case 'targetHafalan.periodeUAS': return 'PAS';
 			case 'targetHafalan.tipeIdadTahsin': return 'I\'dad Tahsin';
 			case 'targetHafalan.tipeDauroh': return 'Dauroh';
 			case 'targetHafalan.tipeMurajaah': return 'Review (Muraja\'ah)';
@@ -3452,6 +3542,16 @@ extension on Translations {
 			case 'guruDashboard.subtitle': return 'Begin Halaqoh With Prayers Together To Always Be Blessed';
 			case 'guruDashboard.capaianHariIni': return 'Today\'s Achievement';
 			case 'guruDashboard.kehadiranHariIni': return 'Attendance Today';
+			case 'guruDashboard.kehadiranSesi': return ({required Object sesi}) => '${sesi} Session Attendance';
+			case 'guruDashboard.kehadiranOverline': return 'ATTENDANCE';
+			case 'guruDashboard.setoranOverline': return 'SUBMISSION';
+			case 'guruDashboard.sesiTitle': return ({required Object sesi}) => '${sesi} Session';
+			case 'guruDashboard.setoranHafalanTitle': return 'Student Memorization';
+			case 'guruDashboard.sesiShubuh': return 'Shubuh';
+			case 'guruDashboard.sesiDhuha': return 'Dhuha';
+			case 'guruDashboard.sesiSiang': return 'Siang';
+			case 'guruDashboard.sesiAshar': return 'Ashar';
+			case 'guruDashboard.sesiMaghrib': return 'Maghrib';
 			case 'guruDashboard.setoranHafalan': return 'Hafalan Submission';
 			case 'guruDashboard.santriCount': return ({required Object current, required Object total}) => '${current}/${total} Students';
 			case 'guruDashboard.menuUtama': return 'Main Menu';
@@ -3473,6 +3573,8 @@ extension on Translations {
 			case 'myHalaqohScreen.kelas': return ({required Object kelas}) => 'Grade ${kelas}';
 			case 'myHalaqohScreen.program': return ({required Object program}) => 'Program: ${program}';
 			case 'myHalaqohScreen.target': return ({required Object count, required Object range}) => 'Target: ${count} Juz (${range})';
+			case 'myHalaqohScreen.targetMixed': return 'Target: Per Student\'s Grade';
+			case 'myHalaqohScreen.kelasCampuran': return 'Mixed';
 			case 'myHalaqohScreen.total': return ({required Object count}) => 'Total: ${count} Students';
 			case 'myHalaqohScreen.pengampu': return 'Ustadz Kayyis';
 			case 'myHalaqohScreen.progressText': return ({required Object completed, required Object target}) => '${completed} Juz completed of ${target} Juz';
@@ -3673,6 +3775,13 @@ extension on Translations {
 			case 'inputHafalanForm.errWajibDiisi1Sampai100': return 'Required between 1 and 100';
 			case 'inputHafalanForm.juzNumbers': return ({required Object juz}) => 'Juz ${juz}';
 			case 'inputHafalanForm.semuaAyat': return 'All Verses';
+			case 'inputHafalanForm.editTitle': return 'Edit Memorization Submission';
+			case 'inputHafalanForm.editSubtitle': return 'Update student memorization data';
+			case 'inputHafalanForm.simpanPerubahan': return 'SAVE CHANGES';
+			case 'inputHafalanForm.simpanPerubahanTitle': return 'Save Changes?';
+			case 'inputHafalanForm.simpanPerubahanMessage': return 'Changes to memorization submission will be saved.';
+			case 'inputHafalanForm.updateSuccess': return 'Memorization submission successfully updated!';
+			case 'inputHafalanForm.updateFailed': return 'Failed to update memorization submission.';
 			case 'riwayatHafalanSantri.title': return 'Memorization History';
 			case 'riwayatHafalanSantri.halaqohKelas': return ({required Object halaqoh, required Object kelas}) => 'Halaqoh ${halaqoh} - Class ${kelas}';
 			case 'riwayatHafalanSantri.totalHafalanBaru': return 'Total New Memorization';
@@ -3697,6 +3806,11 @@ extension on Translations {
 			case 'riwayatHafalanSantri.nisLabel': return ({required Object nis}) => 'NIS: ${nis}';
 			case 'riwayatHafalanSantri.deleteSuccess': return 'Memorization data successfully deleted!';
 			case 'riwayatHafalanSantri.deleteFailed': return 'Failed to delete memorization data.';
+			case 'riwayatHafalanSantri.ubahSetoran': return 'Edit Submission';
+			case 'riwayatHafalanSantri.hapusSetoran': return 'Delete Submission';
+			case 'riwayatHafalanSantri.hapusSetoranTitle': return 'Delete Submission?';
+			case 'riwayatHafalanSantri.hapusSetoranMessage': return ({required Object surah, required Object tanggal}) => 'Memorization submission for ${surah} on ${tanggal} will be permanently deleted.';
+			case 'riwayatHafalanSantri.lihatSemuaSetoran': return ({required Object count}) => 'View All Submissions in Mutaba\'ah (${count})';
 			case 'progressHafalanPerJuz.title': return 'Memorization Progress';
 			case 'progressHafalanPerJuz.targetHafalan': return 'Memorization Target';
 			case 'progressHafalanPerJuz.pilihJuz': return 'Select Juz to view detailed progress per surah';
@@ -3747,6 +3861,12 @@ extension on Translations {
 			case 'mutabaahSantri.belumAdaHafalanBaru': return 'No new memorization yet';
 			case 'mutabaahSantri.belumAdaMurajaah': return 'No review yet';
 			case 'mutabaahSantri.suratCount': return ({required Object count}) => '${count} surahs';
+			case 'mutabaahSantri.ubahSetoran': return 'Edit Submission';
+			case 'mutabaahSantri.hapusSetoran': return 'Delete Submission';
+			case 'mutabaahSantri.hapusSetoranTitle': return 'Delete Submission?';
+			case 'mutabaahSantri.hapusSetoranMessage': return ({required Object surah, required Object tanggal}) => 'Memorization submission for ${surah} on ${tanggal} will be permanently deleted.';
+			case 'mutabaahSantri.deleteSuccess': return 'Memorization data successfully deleted!';
+			case 'mutabaahSantri.deleteFailed': return 'Failed to delete memorization data.';
 			case 'guruProfile.editProfile': return 'Edit Profile';
 			case 'guruProfile.ubahPassword': return 'Change Password';
 			case 'guruProfile.pengaturan': return 'Settings';

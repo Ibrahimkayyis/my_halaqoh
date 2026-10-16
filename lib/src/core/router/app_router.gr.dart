@@ -659,6 +659,7 @@ class InputHafalanRoute extends PageRouteInfo<InputHafalanRouteArgs> {
     required String nis,
     required String halaqohId,
     required String guruId,
+    List<HafalanSantriModel>? editRecords,
     List<PageRouteInfo>? children,
   }) : super(
          InputHafalanRoute.name,
@@ -669,6 +670,7 @@ class InputHafalanRoute extends PageRouteInfo<InputHafalanRouteArgs> {
            nis: nis,
            halaqohId: halaqohId,
            guruId: guruId,
+           editRecords: editRecords,
          ),
          initialChildren: children,
        );
@@ -687,6 +689,7 @@ class InputHafalanRoute extends PageRouteInfo<InputHafalanRouteArgs> {
           nis: args.nis,
           halaqohId: args.halaqohId,
           guruId: args.guruId,
+          editRecords: args.editRecords,
         ),
       );
     },
@@ -701,6 +704,7 @@ class InputHafalanRouteArgs {
     required this.nis,
     required this.halaqohId,
     required this.guruId,
+    this.editRecords,
   });
 
   final Key? key;
@@ -715,9 +719,11 @@ class InputHafalanRouteArgs {
 
   final String guruId;
 
+  final List<HafalanSantriModel>? editRecords;
+
   @override
   String toString() {
-    return 'InputHafalanRouteArgs{key: $key, santriId: $santriId, name: $name, nis: $nis, halaqohId: $halaqohId, guruId: $guruId}';
+    return 'InputHafalanRouteArgs{key: $key, santriId: $santriId, name: $name, nis: $nis, halaqohId: $halaqohId, guruId: $guruId, editRecords: $editRecords}';
   }
 
   @override
@@ -729,7 +735,8 @@ class InputHafalanRouteArgs {
         name == other.name &&
         nis == other.nis &&
         halaqohId == other.halaqohId &&
-        guruId == other.guruId;
+        guruId == other.guruId &&
+        const ListEquality().equals(editRecords, other.editRecords);
   }
 
   @override
@@ -739,7 +746,8 @@ class InputHafalanRouteArgs {
       name.hashCode ^
       nis.hashCode ^
       halaqohId.hashCode ^
-      guruId.hashCode;
+      guruId.hashCode ^
+      const ListEquality().hash(editRecords);
 }
 
 /// generated route for

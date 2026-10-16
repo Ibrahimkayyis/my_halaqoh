@@ -22,12 +22,26 @@ class _SelectedSurah {
   bool semuaAyat = false;
   final TextEditingController ayatAwalController;
   final TextEditingController ayatAkhirController;
+  final FocusNode ayatAwalFocus;
+  final FocusNode ayatAkhirFocus;
 
-  _SelectedSurah({required this.surah, VoidCallback? onChanged})
-    : ayatAwalController = TextEditingController(text: '1'),
-      ayatAkhirController = TextEditingController(
-        text: surah.ayatCount.toString(),
-      ) {
+  _SelectedSurah({
+    required this.surah,
+    int? initialAyatAwal,
+    int? initialAyatAkhir,
+    VoidCallback? onChanged,
+  })  : ayatAwalController = TextEditingController(
+          text: (initialAyatAwal ?? 1).toString(),
+        ),
+        ayatAkhirController = TextEditingController(
+          text: (initialAyatAkhir ?? surah.ayatCount).toString(),
+        ),
+        ayatAwalFocus = FocusNode(),
+        ayatAkhirFocus = FocusNode() {
+    if ((initialAyatAwal == null || initialAyatAwal == 1) &&
+        (initialAyatAkhir == null || initialAyatAkhir == surah.ayatCount)) {
+      semuaAyat = true;
+    }
     if (onChanged != null) {
       ayatAwalController.addListener(onChanged);
       ayatAkhirController.addListener(onChanged);
@@ -37,6 +51,8 @@ class _SelectedSurah {
   void dispose() {
     ayatAwalController.dispose();
     ayatAkhirController.dispose();
+    ayatAwalFocus.dispose();
+    ayatAkhirFocus.dispose();
   }
 }
 
@@ -48,6 +64,7 @@ class InputHafalanScreen extends StatefulWidget implements AutoRouteWrapper {
   final String nis;
   final String halaqohId;
   final String guruId;
+  final List<HafalanSantriModel>? editRecords;
 
   const InputHafalanScreen({
     super.key,
@@ -56,6 +73,7 @@ class InputHafalanScreen extends StatefulWidget implements AutoRouteWrapper {
     required this.nis,
     required this.halaqohId,
     required this.guruId,
+    this.editRecords,
   });
 
   @override
@@ -75,7 +93,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
   // ── Tab controller (replaces _selectedTab string) ─────────────────────────
   late TabController _tabController;
 
-  final DateTime _tanggalSetoran = DateTime.now();
+  late DateTime _tanggalSetoran;
 
   final _juzController = TextEditingController();
   final _kelancaranController = TextEditingController();
@@ -89,11 +107,43 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
 
   late final List<SurahModel> _surahList;
 
+  bool get _isEditMode =>
+      widget.editRecords != null && widget.editRecords!.isNotEmpty;
+
   @override
   void initState() {
     super.initState();
     _surahList = QuranService.instance.getAllSurahs();
-    _tabController = TabController(length: 2, vsync: this);
+
+    if (_isEditMode) {
+      final first = widget.editRecords!.first;
+      _tanggalSetoran = first.tanggalSetoran;
+      final tabIndex = first.jenis == 'Murajaah' ? 1 : 0;
+      _tabController =
+          TabController(length: 2, vsync: this, initialIndex: tabIndex);
+      _kelancaranController.text = first.nilaiKelancaran.toString();
+      _tajwidController.text = first.nilaiTajwid.toString();
+
+      for (final rec in widget.editRecords!) {
+        final surah = _surahList.firstWhere(
+          (s) => s.id == rec.surahId,
+          orElse: () =>
+              QuranService.instance.getSurahById(rec.surahId) ??
+              _surahList.first,
+        );
+        final sel = _SelectedSurah(
+          surah: surah,
+          initialAyatAwal: rec.ayatMulai,
+          initialAyatAkhir: rec.ayatSelesai,
+          onChanged: _updateJuzDisplay,
+        );
+        _selectedSurahs.add(sel);
+      }
+      _updateJuzDisplay();
+    } else {
+      _tanggalSetoran = DateTime.now();
+      _tabController = TabController(length: 2, vsync: this);
+    }
 
     // Clear inline errors and update rubric indicators as the teacher types
     _kelancaranController.addListener(() {
@@ -447,7 +497,15 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
             AppSnackBar.showError(context, message: msg);
           },
           success: () {
+            final messenger = ScaffoldMessenger.of(context);
             Navigator.of(context).pop({'success': true});
+            AppSnackBar.showSuccess(
+              context,
+              messenger: messenger,
+              message: _isEditMode
+                  ? t.inputHafalanForm.updateSuccess
+                  : t.hafalan.successSave,
+            );
           },
           orElse: () {},
         );
@@ -456,6 +514,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
         return Stack(
           children: [
             Scaffold(
+              resizeToAvoidBottomInset: true,
               backgroundColor: colors.background,
               appBar: AppBar(
                 backgroundColor: colors.background,
@@ -465,7 +524,9 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 title: Text(
-                  t.inputHafalanForm.title,
+                  _isEditMode
+                      ? t.inputHafalanForm.editTitle
+                      : t.inputHafalanForm.title,
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
@@ -534,7 +595,43 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
 
                   // ── Tanggal Setoran Picker ──
                   GestureDetector(
-                    onTap: null, // Disabled: locked to current date
+                    onTap: () async {
+                      final now = DateTime.now();
+                      final initial = _tanggalSetoran.isAfter(now)
+                          ? now
+                          : _tanggalSetoran;
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: initial,
+                        firstDate: DateTime(now.year - 1, now.month, now.day),
+                        lastDate: now,
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: ColorScheme.light(
+                                primary: colors.primary,
+                                onPrimary: Colors.white,
+                                surface: colors.surface,
+                                onSurface: colors.textPrimary,
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          _tanggalSetoran = DateTime(
+                            picked.year,
+                            picked.month,
+                            picked.day,
+                            _tanggalSetoran.hour,
+                            _tanggalSetoran.minute,
+                            _tanggalSetoran.second,
+                          );
+                        });
+                      }
+                    },
                     child: Container(
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(
@@ -573,7 +670,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: colors.textSecondary,
+                                    color: colors.textPrimary,
                                     fontFamily: 'Poppins',
                                   ),
                                 ),
@@ -583,7 +680,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                           Icon(
                             Icons.calendar_month,
                             size: 22.sp,
-                            color: colors.textSecondary.withValues(alpha: 0.5),
+                            color: colors.primary,
                           ),
                         ],
                       ),
@@ -660,6 +757,7 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                     colors,
                     keyboardType: TextInputType.text, // Text because it can contain comma-separated values like "29, 30"
                     readOnly: true,
+                    helperText: 'Dihitung otomatis dari surat & rentang ayat',
                   ),
                   SizedBox(height: 24.h),
 
@@ -775,11 +873,25 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       }
 
                       // ── Confirmation & Save ──────────────────────────────────
-                      final confirmed = await ConfirmSaveDialog.show(context);
+                      final confirmed = await ConfirmSaveDialog.show(
+                        context,
+                        title: _isEditMode
+                            ? t.inputHafalanForm.simpanPerubahanTitle
+                            : null,
+                        message: _isEditMode
+                            ? t.inputHafalanForm.simpanPerubahanMessage
+                            : null,
+                        confirmLabel: _isEditMode
+                            ? t.inputHafalanForm.simpanPerubahan
+                            : null,
+                      );
                       if (confirmed && context.mounted) {
                         final models = _selectedSurahs.map((sel) {
                           final typeStr = _tabController.index == 0 ? 'Ziyadah' : 'Murajaah';
                           final ayatStart = int.tryParse(sel.ayatAwalController.text) ?? 1;
+                          final originalCreatedAt = _isEditMode
+                              ? widget.editRecords!.first.createdAt
+                              : DateTime.now();
                           return HafalanSantriModel(
                             id: DateTime.now().microsecondsSinceEpoch.toString() + sel.surah.id.toString(),
                             santriId: widget.santriId,
@@ -794,14 +906,23 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                             juz: int.tryParse(_juzController.text) ?? sel.surah.juzForAyat(ayatStart) ?? sel.surah.juzStart,
                             nilaiKelancaran: kelancaranVal!,
                             nilaiTajwid: tajwidVal!,
-                            createdAt: DateTime.now(),
+                            createdAt: originalCreatedAt,
                             isSynced: false,
                           );
                         }).toList();
-                        context.read<InputHafalanCubit>().submitMultipleHafalan(models);
+                        if (_isEditMode) {
+                          context.read<InputHafalanCubit>().updateSubmissionGroup(
+                                oldRecords: widget.editRecords!,
+                                newRecords: models,
+                              );
+                        } else {
+                          context.read<InputHafalanCubit>().submitMultipleHafalan(models);
+                        }
                       }
                     },
-                    label: t.inputHafalanForm.simpan,
+                    label: _isEditMode
+                        ? t.inputHafalanForm.simpanPerubahan
+                        : t.inputHafalanForm.simpan,
                     borderRadius: 8.r,
                   ),
                 ),
@@ -951,26 +1072,54 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       ),
                     ),
                     SizedBox(height: 4.h),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: colors.background,
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(color: colors.border, width: 1),
-                      ),
-                      child: TextField(
-                        controller: sel.ayatAwalController,
-                        readOnly: sel.semuaAyat,
-                        keyboardType: TextInputType.number,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontFamily: 'Poppins',
-                          color: colors.textPrimary,
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        if (sel.semuaAyat) {
+                          setState(() {
+                            sel.semuaAyat = false;
+                          });
+                        }
+                        sel.ayatAwalFocus.requestFocus();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colors.background,
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: colors.border, width: 1),
                         ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 10.h,
+                        child: TextField(
+                          controller: sel.ayatAwalController,
+                          focusNode: sel.ayatAwalFocus,
+                          keyboardType: TextInputType.number,
+                          onTap: () {
+                            if (sel.semuaAyat) {
+                              setState(() {
+                                sel.semuaAyat = false;
+                              });
+                            }
+                          },
+                          onChanged: (val) {
+                            final start = int.tryParse(val) ?? 1;
+                            final end = int.tryParse(sel.ayatAkhirController.text) ?? sel.surah.ayatCount;
+                            final isAll = (start == 1 && end == sel.surah.ayatCount);
+                            if (sel.semuaAyat != isAll) {
+                              setState(() {
+                                sel.semuaAyat = isAll;
+                              });
+                            }
+                          },
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontFamily: 'Poppins',
+                            color: colors.textPrimary,
+                          ),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 10.h,
+                            ),
                           ),
                         ),
                       ),
@@ -993,26 +1142,54 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
                       ),
                     ),
                     SizedBox(height: 4.h),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: colors.background,
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(color: colors.border, width: 1),
-                      ),
-                      child: TextField(
-                        controller: sel.ayatAkhirController,
-                        readOnly: sel.semuaAyat,
-                        keyboardType: TextInputType.number,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontFamily: 'Poppins',
-                          color: colors.textPrimary,
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        if (sel.semuaAyat) {
+                          setState(() {
+                            sel.semuaAyat = false;
+                          });
+                        }
+                        sel.ayatAkhirFocus.requestFocus();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colors.background,
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: colors.border, width: 1),
                         ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 10.h,
+                        child: TextField(
+                          controller: sel.ayatAkhirController,
+                          focusNode: sel.ayatAkhirFocus,
+                          keyboardType: TextInputType.number,
+                          onTap: () {
+                            if (sel.semuaAyat) {
+                              setState(() {
+                                sel.semuaAyat = false;
+                              });
+                            }
+                          },
+                          onChanged: (val) {
+                            final start = int.tryParse(sel.ayatAwalController.text) ?? 1;
+                            final end = int.tryParse(val) ?? sel.surah.ayatCount;
+                            final isAll = (start == 1 && end == sel.surah.ayatCount);
+                            if (sel.semuaAyat != isAll) {
+                              setState(() {
+                                sel.semuaAyat = isAll;
+                              });
+                            }
+                          },
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontFamily: 'Poppins',
+                            color: colors.textPrimary,
+                          ),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 10.h,
+                            ),
                           ),
                         ),
                       ),
@@ -1174,36 +1351,53 @@ class _InputHafalanScreenState extends State<InputHafalanScreen>
     AppColorSet colors, {
     TextInputType keyboardType = TextInputType.text,
     bool readOnly = false,
+    String? helperText,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: colors.border, width: 1),
-      ),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        readOnly: readOnly,
-        style: TextStyle(
-          fontSize: 14.sp,
-          fontFamily: 'Poppins',
-          color: readOnly ? colors.textSecondary : colors.textPrimary,
-        ),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-            fontSize: 14.sp,
-            fontFamily: 'Poppins',
-            color: colors.textSecondary.withValues(alpha: 0.5),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: colors.border, width: 1),
           ),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 14.h,
+          child: TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            readOnly: readOnly,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontFamily: 'Poppins',
+              color: readOnly ? colors.textSecondary : colors.textPrimary,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                fontSize: 14.sp,
+                fontFamily: 'Poppins',
+                color: colors.textSecondary.withValues(alpha: 0.5),
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 14.h,
+              ),
+            ),
           ),
         ),
-      ),
+        if (helperText != null) ...[
+          SizedBox(height: 4.h),
+          Text(
+            helperText,
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: colors.textSecondary.withValues(alpha: 0.7),
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
