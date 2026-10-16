@@ -46,4 +46,10 @@ abstract class HafalanSantriRepository {
 
   /// Delete a hafalan record.
   Future<Either<String, void>> deleteHafalan(String id);
+
+  /// Update a submission group by deleting [oldRecords] and saving [newRecords].
+  Future<Either<String, void>> updateSubmissionGroup({
+    required List<HafalanSantriModel> oldRecords,
+    required List<HafalanSantriModel> newRecords,
+  });
 }

@@ -18,7 +18,7 @@ class GuruRepositoryImpl implements GuruRepository {
   Stream<List<GuruModel>> watchAll() {
     return _remote.watchAll().map((list) {
       // Side-effect: update Hive cache on every Firestore change
-      _local.cacheGuru(list);
+      unawaited(_local.cacheGuru(list));
       return list;
     });
   }

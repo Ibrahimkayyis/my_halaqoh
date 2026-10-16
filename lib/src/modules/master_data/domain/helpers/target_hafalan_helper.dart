@@ -662,7 +662,7 @@ class TargetHafalanHelper {
 
     if (cleanProgram == 'Reguler') {
       if (cleanKelas == '7' || cleanKelas == '10') {
-        if (semester == 2) {
+        if (semester == 1) {
           if (isUts) {
             return [
               for (int s = 78; s <= 87; s++) _fullSurahRange(s),
@@ -672,40 +672,42 @@ class TargetHafalanHelper {
               for (int s = 88; s <= 114; s++) _fullSurahRange(s),
             ];
           }
+        } else if (semester == 2) {
+          if (isUts) {
+            return [
+              for (int s = 67; s <= 71; s++) _fullSurahRange(s),
+            ];
+          } else {
+            return [
+              for (int s = 72; s <= 77; s++) _fullSurahRange(s),
+            ];
+          }
         }
       } else if (cleanKelas == '8' || cleanKelas == '11') {
         if (semester == 1) {
           if (isUts) {
             final list = <TargetAyatRange>[];
-            for (int s = 67; s <= 73; s++) {
-              list.add(_fullSurahRange(s));
-            }
-            list.add(const TargetAyatRange(surahId: 74, ayatStart: 1, ayatEnd: 47));
-            return list;
-          } else {
-            final list = <TargetAyatRange>[];
-            list.add(const TargetAyatRange(surahId: 74, ayatStart: 48, ayatEnd: 56));
-            for (int s = 75; s <= 77; s++) {
-              list.add(_fullSurahRange(s));
-            }
             for (int s = 58; s <= 60; s++) {
               list.add(_fullSurahRange(s));
             }
             list.add(const TargetAyatRange(surahId: 61, ayatStart: 1, ayatEnd: 5));
             return list;
-          }
-        } else if (semester == 2) {
-          if (isUts) {
+          } else {
             final list = <TargetAyatRange>[];
             list.add(const TargetAyatRange(surahId: 61, ayatStart: 6, ayatEnd: 14));
             for (int s = 62; s <= 66; s++) {
               list.add(_fullSurahRange(s));
             }
-            list.add(const TargetAyatRange(surahId: 2, ayatStart: 1, ayatEnd: 37));
             return list;
+          }
+        } else if (semester == 2) {
+          if (isUts) {
+            return [
+              const TargetAyatRange(surahId: 2, ayatStart: 1, ayatEnd: 76),
+            ];
           } else {
             return [
-              const TargetAyatRange(surahId: 2, ayatStart: 38, ayatEnd: 141),
+              const TargetAyatRange(surahId: 2, ayatStart: 77, ayatEnd: 141),
             ];
           }
         }

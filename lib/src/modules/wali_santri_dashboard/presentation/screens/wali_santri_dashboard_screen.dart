@@ -130,6 +130,14 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
 
     final santriName = mySantri?.nama ?? authSantriName;
     final nis = mySantri?.nis ?? authNis;
+    final santriKelas = (mySantri != null && mySantri!.kelas.isNotEmpty)
+        ? mySantri!.kelas
+        : (myHalaqoh != null && myHalaqoh!.kelas.contains(',')
+            ? myHalaqoh!.kelas.split(',').first.trim()
+            : (myHalaqoh?.kelas ?? ''));
+    final santriProgram = (mySantri != null && mySantri!.program.isNotEmpty)
+        ? mySantri!.program
+        : (myHalaqoh?.program ?? '');
 
     // Look up the admin-defined target for this santri's kelas + program
     TargetHafalanModel? myTarget;
@@ -164,7 +172,7 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
                 santriName: santriName.isNotEmpty ? santriName : t.waliSantriDashboard.loading,
                 nis: nis,
                 halaqohInfo: myHalaqoh != null
-                    ? t.waliSantriDashboard.halaqohInfo(kelas: '${myHalaqoh!.kelas}${myHalaqoh!.program}', halaqoh: myHalaqoh!.nama)
+                    ? t.waliSantriDashboard.halaqohInfo(kelas: '$santriKelas$santriProgram', halaqoh: myHalaqoh!.nama)
                     : t.waliSantriDashboard.notRegisteredHalaqoh,
                 guruName: myHalaqoh?.guruNama,
                 profilePictureUrl: mySantri?.profilePicture,

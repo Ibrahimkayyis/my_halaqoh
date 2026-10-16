@@ -55,11 +55,17 @@ class AbsensiLocalDataSource {
 
   /// Stream yang mengembalikan daftar absensi untuk halaqoh tertentu.
   /// Emit data saat ini, lalu emit setiap kali ada perubahan di Hive box.
+  /// Terminates gracefully if the box is closed (e.g. on hot restart).
   Stream<List<AbsensiModel>> watchByHalaqoh(String halaqohId) async* {
     final box = await _openBox();
     yield _filterByHalaqoh(box, halaqohId);
-    await for (final _ in box.watch()) {
-      yield _filterByHalaqoh(box, halaqohId);
+    try {
+      await for (final _ in box.watch()) {
+        if (!box.isOpen) break;
+        yield _filterByHalaqoh(box, halaqohId);
+      }
+    } on HiveError catch (_) {
+      // Box was closed (e.g. hot restart) — end stream silently.
     }
   }
 

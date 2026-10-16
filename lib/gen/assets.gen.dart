@@ -39,6 +39,19 @@ class $AssetsImagesGen {
   AssetGenImage get logoLuqmanAlHakim =>
       const AssetGenImage('assets/images/logo luqman al hakim.png');
 
+  /// File path: assets/images/mockup_1_login_dashboard.png
+  AssetGenImage get mockup1LoginDashboard =>
+      const AssetGenImage('assets/images/mockup_1_login_dashboard.png');
+
+  /// File path: assets/images/mockup_2_scanner_attendance_detail.png
+  AssetGenImage get mockup2ScannerAttendanceDetail => const AssetGenImage(
+    'assets/images/mockup_2_scanner_attendance_detail.png',
+  );
+
+  /// File path: assets/images/mockup_3_wali_santri_dashboard.png
+  AssetGenImage get mockup3WaliSantriDashboard =>
+      const AssetGenImage('assets/images/mockup_3_wali_santri_dashboard.png');
+
   /// File path: assets/images/my_halaqoh_icon_padded.png
   AssetGenImage get myHalaqohIconPadded =>
       const AssetGenImage('assets/images/my_halaqoh_icon_padded.png');
@@ -60,6 +73,9 @@ class $AssetsImagesGen {
     mosqueSilhouettePng,
     mosqueSilhouetteSvg,
     logoLuqmanAlHakim,
+    mockup1LoginDashboard,
+    mockup2ScannerAttendanceDetail,
+    mockup3WaliSantriDashboard,
     myHalaqohIconPadded,
     myHalaqohLogo,
     myHalaqohLogoLauncher,

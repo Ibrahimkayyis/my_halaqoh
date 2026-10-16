@@ -37,6 +37,7 @@ class GuruDashboardWrapperScreen extends StatefulWidget {
 class _GuruDashboardWrapperScreenState
     extends State<GuruDashboardWrapperScreen> {
   final _pageController = PageController(initialPage: 0);
+  final ValueNotifier<int> _activeTabNotifier = ValueNotifier<int>(0);
   int _currentIndex = 0;
   bool _fcmTokenInitialized = false;
 
@@ -89,6 +90,7 @@ class _GuruDashboardWrapperScreenState
   @override
   void dispose() {
     _pageController.dispose();
+    _activeTabNotifier.dispose();
     super.dispose();
   }
 
@@ -96,6 +98,7 @@ class _GuruDashboardWrapperScreenState
     if (_currentIndex != index) {
       setState(() => _currentIndex = index);
     }
+    _activeTabNotifier.value = index;
     _pageController.jumpToPage(index);
   }
 
@@ -107,6 +110,7 @@ class _GuruDashboardWrapperScreenState
       GuruDashboardScreen(
         onNavigateToTab: _navigateToTab,
         programType: widget.programType,
+        activeTabNotifier: _activeTabNotifier,
       ),
       const MyHalaqohScreen(),
       const AttendanceScreen(),
@@ -177,6 +181,7 @@ class _GuruDashboardWrapperScreenState
           ),
           onTap: (index) {
             setState(() => _currentIndex = index);
+            _activeTabNotifier.value = index;
             _pageController.jumpToPage(index);
           },
         ),

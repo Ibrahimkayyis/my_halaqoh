@@ -3,9 +3,21 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 
 /// Green gradient card showing halaqoh info:
-/// class/program badges, halaqoh name, guru, target, total santri
+/// class/program badges, halaqoh name, guru, target, total santri.
+///
+/// Supports mixed-class halaqoh: when [isMixed] is true, all unique class
+/// badges are rendered side-by-side (inside a [Wrap]) followed by an amber
+/// "Campuran" indicator badge.
 class HalaqohInfoCard extends StatelessWidget {
-  final String kelas;
+  /// Unique class labels extracted from the santri list (e.g. ['8', '11']).
+  final List<String> classes;
+
+  /// True when the halaqoh contains santri from more than one class.
+  final bool isMixed;
+
+  /// Mixed badge label, e.g. "Campuran" / "Mixed".
+  final String? mixedLabel;
+
   final String program;
   final String halaqohName;
   final String pengampu;
@@ -14,12 +26,14 @@ class HalaqohInfoCard extends StatelessWidget {
 
   const HalaqohInfoCard({
     super.key,
-    required this.kelas,
+    required this.classes,
+    required this.isMixed,
     required this.program,
     required this.halaqohName,
     required this.pengampu,
     required this.target,
     required this.totalSantri,
+    this.mixedLabel,
   });
 
   @override
@@ -45,11 +59,21 @@ class HalaqohInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Badges row
-          Row(
+          // --- Class badges + separator + program ---
+          Wrap(
+            spacing: 6.w,
+            runSpacing: 6.h,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _buildBadge(kelas, colors, textTheme),
-              SizedBox(width: 8.w),
+              // One badge per unique class
+              for (final kelas in classes)
+                _buildBadge(kelas, colors, textTheme),
+
+              // "Campuran" amber badge shown only for mixed-class halaqoh
+              if (isMixed)
+                _buildMixedBadge(mixedLabel ?? 'Campuran', colors, textTheme),
+
+              // Separator dot
               Text(
                 '•',
                 style: TextStyle(
@@ -57,7 +81,8 @@ class HalaqohInfoCard extends StatelessWidget {
                   fontSize: 14.sp,
                 ),
               ),
-              SizedBox(width: 8.w),
+
+              // Program label
               Text(
                 program,
                 style: textTheme.bodySmall?.copyWith(
@@ -104,6 +129,7 @@ class HalaqohInfoCard extends StatelessWidget {
     );
   }
 
+  /// Standard white-tinted badge for a single class label.
   Widget _buildBadge(String text, AppColorSet colors, TextTheme textTheme) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
@@ -122,6 +148,35 @@ class HalaqohInfoCard extends StatelessWidget {
               fontSize: 11.sp,
               fontWeight: FontWeight.w600,
               color: colors.textOnButton,
+              fontFamily: 'Poppins',
+            ),
+      ),
+    );
+  }
+
+  /// Amber-tinted badge used exclusively for the "Campuran" indicator.
+  Widget _buildMixedBadge(
+    String text,
+    AppColorSet colors,
+    TextTheme textTheme,
+  ) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFBBF24).withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Text(
+        text,
+        style: textTheme.labelSmall?.copyWith(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFFFBBF24),
+            ) ??
+            TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFFFBBF24),
               fontFamily: 'Poppins',
             ),
       ),
@@ -162,3 +217,4 @@ class HalaqohInfoCard extends StatelessWidget {
     );
   }
 }
+

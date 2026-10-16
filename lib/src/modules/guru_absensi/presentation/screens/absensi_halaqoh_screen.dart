@@ -324,6 +324,8 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
                     child: _SyncedTable(
                       santriList: mySantriList,
                       daysInMonth: daysInMonth,
+                      currentMonth: _currentMonth,
+                      currentYear: _currentYear,
                       sessions: sessions,
                       sessionKeys: keys,
                       sessionCount: sessionCount,
@@ -600,6 +602,8 @@ class _AbsensiHalaqohScreenState extends State<AbsensiHalaqohScreen> {
 class _SyncedTable extends StatefulWidget {
   final List<SantriModel> santriList;
   final int daysInMonth;
+  final int currentMonth;
+  final int currentYear;
   final List<String> sessions;
   final List<String> sessionKeys;
   final int sessionCount;
@@ -616,6 +620,8 @@ class _SyncedTable extends StatefulWidget {
   const _SyncedTable({
     required this.santriList,
     required this.daysInMonth,
+    required this.currentMonth,
+    required this.currentYear,
     required this.sessions,
     required this.sessionKeys,
     required this.sessionCount,
@@ -648,6 +654,40 @@ class _SyncedTableState extends State<_SyncedTable> {
     _headerHorizCtrl.addListener(() {
       _horizOffset.value = _headerHorizCtrl.offset;
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToCurrentDayIfNeeded();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _SyncedTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentMonth != widget.currentMonth ||
+        oldWidget.currentYear != widget.currentYear) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToCurrentDayIfNeeded();
+      });
+    }
+  }
+
+  void _scrollToCurrentDayIfNeeded() {
+    if (!_headerHorizCtrl.hasClients) return;
+    final now = DateTime.now();
+    if (widget.currentMonth == now.month && widget.currentYear == now.year) {
+      final dayWidth = widget.colWidth * widget.sessionCount;
+      final targetOffset = (now.day - 1) * dayWidth;
+      final maxOffset = _headerHorizCtrl.position.maxScrollExtent;
+      final clamped = targetOffset.clamp(0.0, maxOffset);
+      if (_headerHorizCtrl.offset != clamped) {
+        _headerHorizCtrl.animateTo(
+          clamped,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    } else {
+      _headerHorizCtrl.jumpTo(0.0);
+    }
   }
 
   @override

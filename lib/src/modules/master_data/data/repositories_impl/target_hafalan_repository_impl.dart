@@ -17,7 +17,7 @@ class TargetHafalanRepositoryImpl implements TargetHafalanRepository {
   @override
   Stream<List<TargetHafalanModel>> watchAll() {
     return _remote.watchAll().map((list) {
-      _local.cacheTargetHafalan(list);
+      unawaited(_local.cacheTargetHafalan(list));
       return list;
     });
   }

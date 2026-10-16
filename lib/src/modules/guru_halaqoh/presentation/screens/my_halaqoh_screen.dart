@@ -92,17 +92,29 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
       );
     }
 
-    // Derive effective kelas/program from actual santri data.
-    final effectiveKelas = mySantriList.isNotEmpty
-        ? mySantriList.first.kelas
-        : (myHalaqoh?.kelas ?? '');
+    // Derive unique classes and detect mixed-class halaqoh from actual santri data.
+    // If no santri are loaded yet, fall back to parsing halaqoh.kelas.
+    final Set<String> uniqueClassSet = mySantriList.isNotEmpty
+        ? mySantriList.map((s) => s.kelas.trim()).where((k) => k.isNotEmpty).toSet()
+        : (myHalaqoh?.kelas ?? '')
+            .split(',')
+            .map((k) => k.trim())
+            .where((k) => k.isNotEmpty)
+            .toSet();
+    final List<String> uniqueClasses = uniqueClassSet.toList()..sort();
+    final bool isMixedClass = uniqueClasses.length > 1;
+
+    // For a homogeneous halaqoh, derive effectiveKelas/effectiveProgram
+    // to look up the single shared curriculum target.
+    final effectiveKelas = uniqueClasses.isNotEmpty ? uniqueClasses.first : '';
     final effectiveProgram = mySantriList.isNotEmpty
         ? mySantriList.first.program
         : (myHalaqoh?.program ?? 'R');
 
     // Look up the admin-defined target using effective kelas for the summary card.
+    // Only meaningful for homogeneous halaqoh; mixed halaqoh will show a generic label.
     TargetHafalanModel? myTarget;
-    if (myHalaqoh != null) {
+    if (myHalaqoh != null && !isMixedClass) {
       targetHafalanState.maybeWhen(
         loaded: (targets) {
           myTarget = TargetHafalanHelper.findTarget(
@@ -170,7 +182,13 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                       const ShimmerHalaqohInfoCard()
                     else if (myHalaqoh != null)
                       HalaqohInfoCard(
-                        kelas: t.myHalaqohScreen.kelas(kelas: effectiveKelas),
+                        classes: uniqueClasses.isNotEmpty
+                            ? uniqueClasses
+                                .map((k) => t.myHalaqohScreen.kelas(kelas: k))
+                                .toList()
+                            : [t.myHalaqohScreen.kelas(kelas: myHalaqoh!.kelas)],
+                        isMixed: isMixedClass,
+                        mixedLabel: t.myHalaqohScreen.kelasCampuran,
                         program: t.myHalaqohScreen.program(
                           program: effectiveProgram == 'T'
                               ? t.myHalaqohScreen.programTakhassus
@@ -180,25 +198,27 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                         pengampu: myHalaqoh!.guruNama.isNotEmpty
                             ? myHalaqoh!.guruNama
                             : t.myHalaqohScreen.pengampu,
-                        target: t.myHalaqohScreen.target(
-                          count: myTarget != null
-                              ? _formatJuz(
-                                  TargetHafalanHelper.getTargetJuzCountDouble(
-                                    myTarget!,
-                                    effectiveKelas,
-                                    effectiveProgram,
-                                  ),
-                                )
-                              : '0',
-                          range: myTarget != null
-                              ? TargetHafalanHelper.getActiveSemesterSummary(
-                                    myTarget!,
-                                    effectiveKelas,
-                                    effectiveProgram,
-                                  ) ??
-                                  '-'
-                              : '-',
-                        ),
+                        target: isMixedClass
+                            ? t.myHalaqohScreen.targetMixed
+                            : t.myHalaqohScreen.target(
+                                count: myTarget != null
+                                    ? _formatJuz(
+                                        TargetHafalanHelper.getTargetJuzCountDouble(
+                                          myTarget!,
+                                          effectiveKelas,
+                                          effectiveProgram,
+                                        ),
+                                      )
+                                    : '0',
+                                range: myTarget != null
+                                    ? TargetHafalanHelper.getActiveSemesterSummary(
+                                          myTarget!,
+                                          effectiveKelas,
+                                          effectiveProgram,
+                                        ) ??
+                                        '-'
+                                    : '-',
+                              ),
                         totalSantri: t.myHalaqohScreen.total(
                           count: mySantriList.length.toString(),
                         ),

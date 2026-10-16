@@ -6,6 +6,7 @@ import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 /// Clean circular progress metric card for "Capaian Hari Ini" section.
 /// Uses cohesive primary color branding with soft tinting for visual elegance.
 class CapaianCard extends StatelessWidget {
+  final String? overline;
   final String title;
   final IconData icon;
   final double percent;
@@ -14,6 +15,7 @@ class CapaianCard extends StatelessWidget {
 
   const CapaianCard({
     super.key,
+    this.overline,
     required this.title,
     required this.icon,
     required this.percent,
@@ -61,46 +63,95 @@ class CapaianCard extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title & Icon Header (soft wrapping without ellipsis cut)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(5.w),
-                        decoration: BoxDecoration(
-                          color: colors.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8.r),
+                  // Title & Icon Header (fixed height for guaranteed vertical symmetry)
+                  SizedBox(
+                    height: 32.h,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(5.w),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Icon(
+                            icon,
+                            size: 14.sp,
+                            color: colors.primary,
+                          ),
                         ),
-                        child: Icon(
-                          icon,
-                          size: 14.sp,
-                          color: colors.primary,
+                        SizedBox(width: 8.w),
+                        Flexible(
+                          child: overline != null
+                              ? Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      overline!,
+                                      style: textTheme.labelSmall?.copyWith(
+                                            fontSize: 9.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: colors.textSecondary,
+                                            letterSpacing: 0.5,
+                                          ) ??
+                                          TextStyle(
+                                            fontSize: 9.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: colors.textSecondary,
+                                            fontFamily: 'Poppins',
+                                            letterSpacing: 0.5,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 1.h),
+                                    Text(
+                                      title,
+                                      style: textTheme.titleSmall?.copyWith(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w700,
+                                            color: colors.textPrimary,
+                                            height: 1.15,
+                                          ) ??
+                                          TextStyle(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w700,
+                                            color: colors.textPrimary,
+                                            fontFamily: 'Poppins',
+                                            height: 1.15,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  title,
+                                  style: textTheme.titleSmall?.copyWith(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: colors.textPrimary,
+                                        height: 1.2,
+                                      ) ??
+                                      TextStyle(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: colors.textPrimary,
+                                        fontFamily: 'Poppins',
+                                        height: 1.2,
+                                      ),
+                                  maxLines: 2,
+                                  softWrap: true,
+                                  textAlign: TextAlign.start,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                         ),
-                      ),
-                      SizedBox(width: 6.w),
-                      Flexible(
-                        child: Text(
-                          title,
-                          style: textTheme.titleSmall?.copyWith(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: colors.textPrimary,
-                                height: 1.2,
-                              ) ??
-                              TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: colors.textPrimary,
-                                fontFamily: 'Poppins',
-                                height: 1.2,
-                              ),
-                          maxLines: 2,
-                          softWrap: true,
-                          textAlign: TextAlign.start,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   SizedBox(height: 14.h),
 

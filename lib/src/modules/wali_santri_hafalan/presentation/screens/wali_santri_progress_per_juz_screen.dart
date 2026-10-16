@@ -135,10 +135,18 @@ class _WaliSantriProgressPerJuzScreenState
       orElse: () {},
     );
 
+    final santriKelas = (santri != null && santri!.kelas.isNotEmpty)
+        ? santri!.kelas
+        : (myHalaqoh != null && myHalaqoh!.kelas.contains(',')
+            ? myHalaqoh!.kelas.split(',').first.trim()
+            : (myHalaqoh?.kelas ?? ''));
+
     final halaqohInfo = myHalaqoh != null
         ? t.riwayatHafalanSantri.halaqohKelas(
-            halaqoh: myHalaqoh!.nama, kelas: myHalaqoh!.kelas)
-        : (santri != null && santri!.kelas.isNotEmpty ? t.progressHafalanPerJuz.kelasLabel(kelas: santri!.kelas) : null);
+            halaqoh: myHalaqoh!.nama,
+            kelas: santriKelas.isNotEmpty ? santriKelas : myHalaqoh!.kelas,
+          )
+        : (santriKelas.isNotEmpty ? t.progressHafalanPerJuz.kelasLabel(kelas: santriKelas) : null);
 
     return BlocProvider.value(
       value: _progressCubit,

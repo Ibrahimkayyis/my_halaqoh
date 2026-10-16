@@ -290,8 +290,11 @@ class _GuruProfileScreenState extends State<GuruProfileScreen> {
       orElse: () {},
     );
 
-    final roleBadge = myHalaqoh != null
-        ? t.guruProfile.pengampu(halaqoh: myHalaqoh!.nama)
+    final cleanHalaqohName =
+        myHalaqoh?.nama.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    final roleBadge = cleanHalaqohName != null
+        ? t.guruProfile.pengampu(halaqoh: cleanHalaqohName)
         : t.guruProfile.guruHalaqoh;
 
     return BlocProvider.value(
@@ -326,6 +329,7 @@ class _GuruProfileScreenState extends State<GuruProfileScreen> {
                       name: guruName,
                       nip: guruNip,
                       role: roleBadge,
+                      halaqohName: cleanHalaqohName,
                       profilePictureUrl: profilePictureUrl,
                       linkedDocId: linkedDocId,
                     ),
@@ -517,6 +521,7 @@ class _GuruProfileScreenState extends State<GuruProfileScreen> {
     required String role,
     required String linkedDocId,
     String? profilePictureUrl,
+    String? halaqohName,
   }) {
     return Container(
       width: double.infinity,
@@ -639,23 +644,93 @@ class _GuruProfileScreenState extends State<GuruProfileScreen> {
           ],
           SizedBox(height: 10.h),
 
-          // Role / Pengampu Badge (Solid Primary with White Text)
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
-            decoration: BoxDecoration(
-              color: colors.primary,
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            child: Text(
-              role,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+          // Role / Pengampu Badge
+          if (halaqohName != null && halaqohName.isNotEmpty) ...[
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              constraints: BoxConstraints(maxWidth: 290.w),
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: 0.18),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.auto_stories_outlined,
+                        size: 13.sp,
+                        color: colors.primary,
+                      ),
+                      SizedBox(width: 5.w),
+                      Text(
+                        'PENGAMPU',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 10.5.sp,
+                          fontWeight: FontWeight.w600,
+                          color: colors.primary,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 3.h),
+                  Text(
+                    halaqohName,
+                    textAlign: TextAlign.center,
+                    maxLines: 3,
+                    softWrap: true,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary,
+                      height: 1.25,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
+          ] else ...[
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: 0.18),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.school_outlined,
+                    size: 14.sp,
+                    color: colors.primary,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    role,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: colors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           SizedBox(height: 16.h),
 
           // Quick Action: Edit Profile Button

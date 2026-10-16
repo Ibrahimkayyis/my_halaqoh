@@ -17,6 +17,7 @@ import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/screens/input_h
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/screens/riwayat_hafalan_santri_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/screens/progress_hafalan_per_juz_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/screens/progress_hafalan_per_surat_screen.dart';
+import 'package:my_halaqoh/src/modules/guru_hafalan/domain/models/hafalan_santri_model.dart';
 import 'package:my_halaqoh/src/modules/guru_hafalan/presentation/screens/mutabaah_santri_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_profile/presentation/screens/edit_profile_screen.dart';
 import 'package:my_halaqoh/src/modules/guru_profile/presentation/screens/ubah_password_screen.dart';

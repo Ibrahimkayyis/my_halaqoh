@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_halaqoh/gen/i18n/translations.g.dart';
 import 'package:my_halaqoh/src/core/router/app_router.dart';
 import 'package:my_halaqoh/src/core/helpers/active_session_helper.dart';
+import 'package:my_halaqoh/src/core/helpers/prayer_time_helper.dart';
 import 'package:my_halaqoh/src/core/service_locator/service_locator.dart';
 import 'package:my_halaqoh/src/core/theme/app_colors.dart';
 import 'package:my_halaqoh/src/core/widget/widgets.dart';
@@ -18,6 +19,7 @@ import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/widgets/guru_
 import 'package:my_halaqoh/src/modules/guru_dashboard/presentation/widgets/setoran_item.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/guru_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/domain/models/halaqoh_model.dart';
+import 'package:my_halaqoh/src/modules/master_data/domain/models/santri_model.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_cubit.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/guru_state.dart';
 import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/halaqoh_cubit.dart';
@@ -35,11 +37,13 @@ import 'package:my_halaqoh/src/modules/master_data/presentation/cubits/santri_st
 class GuruDashboardScreen extends StatefulWidget {
   final void Function(int index)? onNavigateToTab;
   final String programType;
+  final ValueNotifier<int>? activeTabNotifier;
 
   const GuruDashboardScreen({
     super.key,
     this.onNavigateToTab,
     this.programType = 'reguler',
+    this.activeTabNotifier,
   });
 
   @override
@@ -48,16 +52,24 @@ class GuruDashboardScreen extends StatefulWidget {
 
 class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
   late final DashboardSummaryCubit _dashboardCubit;
-  bool _initialized = false;
+  String? _lastInitKey;
 
   @override
   void initState() {
     super.initState();
     _dashboardCubit = sl<DashboardSummaryCubit>();
+    widget.activeTabNotifier?.addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    if (widget.activeTabNotifier?.value == 0) {
+      _dashboardCubit.refresh();
+    }
   }
 
   @override
   void dispose() {
+    widget.activeTabNotifier?.removeListener(_onTabChanged);
     _dashboardCubit.close();
     super.dispose();
   }
@@ -65,15 +77,19 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
   /// Initialize the dashboard cubit once the halaqoh + santri data is available.
   void _initDashboardIfReady({
     required HalaqohModel halaqoh,
+    required List<String> santriIds,
     required Map<String, String> santriNameMap,
+    required String programType,
   }) {
-    if (_initialized) return;
-    _initialized = true;
+    final key = '${halaqoh.id}_${santriIds.join(',')}_$programType';
+    if (_lastInitKey == key) return;
+    _lastInitKey = key;
 
     _dashboardCubit.loadDashboardData(
       halaqohId: halaqoh.id,
-      santriIds: halaqoh.santriIds,
+      santriIds: santriIds,
       santriNameMap: santriNameMap,
+      programType: programType,
     );
   }
 
@@ -88,6 +104,25 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
     ];
     return '${days[now.weekday - 1]}, ${now.day} ${months[now.month - 1]} ${now.year}';
+  }
+
+  /// Converts a session key ('shubuh'|'dhuha'|'siang'|'ashar'|'maghrib')
+  /// to its localized display label.
+  String _getSesiLabel(String sesi) {
+    switch (sesi) {
+      case 'shubuh':
+        return t.guruDashboard.sesiShubuh;
+      case 'dhuha':
+        return t.guruDashboard.sesiDhuha;
+      case 'siang':
+        return t.guruDashboard.sesiSiang;
+      case 'ashar':
+        return t.guruDashboard.sesiAshar;
+      case 'maghrib':
+        return t.guruDashboard.sesiMaghrib;
+      default:
+        return sesi;
+    }
   }
 
   @override
@@ -139,25 +174,44 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
       orElse: () {},
     );
 
-    final santriCount = myHalaqoh?.jumlahSantri ?? 0;
-    final halaqohName = myHalaqoh?.nama ?? '';
+    final effectiveProgramType =
+        myHalaqoh?.program == 'T' ? 'takhassus' : 'reguler';
 
-    // Build santri name map for the cubit
-    Map<String, String> santriNameMap = {};
-    santriState.maybeWhen(
-      loaded: (list) {
-        for (final s in list) {
-          santriNameMap[s.id] = s.nama;
-        }
-      },
-      orElse: () {},
+    final santriList = santriState.maybeWhen(
+      loaded: (list) => list,
+      orElse: () => <SantriModel>[],
     );
 
+    // Build santri name map for the cubit and collect student IDs for this halaqoh
+    Map<String, String> santriNameMap = {};
+    final halaqohSantriIds = <String>{};
+
+    for (final s in santriList) {
+      santriNameMap[s.id] = s.nama;
+      if (myHalaqoh != null &&
+          !s.isAlumni &&
+          (myHalaqoh!.santriIds.contains(s.id) || s.halaqohId == myHalaqoh!.id)) {
+        halaqohSantriIds.add(s.id);
+      }
+    }
+
+    // Fall back to halaqoh.santriIds if halaqohSantriIds is empty
+    if (halaqohSantriIds.isEmpty && myHalaqoh != null && myHalaqoh!.santriIds.isNotEmpty) {
+      halaqohSantriIds.addAll(myHalaqoh!.santriIds);
+    }
+
+    final santriCount = halaqohSantriIds.isNotEmpty
+        ? halaqohSantriIds.length
+        : (myHalaqoh?.jumlahSantri ?? 0);
+    final halaqohName = myHalaqoh?.nama ?? '';
+
     // Initialize dashboard data once halaqoh is available
-    if (myHalaqoh != null && santriNameMap.isNotEmpty) {
+    if (myHalaqoh != null) {
       _initDashboardIfReady(
         halaqoh: myHalaqoh!,
+        santriIds: halaqohSantriIds.toList(),
         santriNameMap: santriNameMap,
+        programType: effectiveProgramType,
       );
     }
 
@@ -222,11 +276,15 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
                         setoranCount,
                         setoranPercent,
                         latestSetoran,
+                        activeSesi,
                       ) {
                         return Row(
                           children: [
                             CapaianCard(
-                              title: t.guruDashboard.kehadiranHariIni,
+                              overline: t.guruDashboard.kehadiranOverline,
+                              title: t.guruDashboard.sesiTitle(
+                                sesi: _getSesiLabel(activeSesi),
+                              ),
                               icon: Icons.how_to_reg_rounded,
                               percent: attendancePercent,
                               bottomLabel:
@@ -235,7 +293,8 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
                             ),
                             SizedBox(width: 12.w),
                             CapaianCard(
-                              title: t.guruDashboard.setoranHafalan,
+                              overline: t.guruDashboard.setoranOverline,
+                              title: t.guruDashboard.setoranHafalanTitle,
                               icon: Icons.menu_book_rounded,
                               percent: setoranPercent,
                               bottomLabel:
@@ -246,10 +305,19 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
                         );
                       },
                       orElse: () {
+                        // Loading / initial state — estimate session from prayer times
+                        final fallbackSesi = _getSesiLabel(
+                          PrayerTimeHelper.getCurrentSession(
+                            programType: effectiveProgramType,
+                          ),
+                        );
                         return Row(
                           children: [
                             CapaianCard(
-                              title: t.guruDashboard.kehadiranHariIni,
+                              overline: t.guruDashboard.kehadiranOverline,
+                              title: t.guruDashboard.sesiTitle(
+                                sesi: fallbackSesi,
+                              ),
                               icon: Icons.how_to_reg_rounded,
                               percent: 0.0,
                               bottomLabel: '0 / $santriCount Santri Hadir',
@@ -257,7 +325,8 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
                             ),
                             SizedBox(width: 12.w),
                             CapaianCard(
-                              title: t.guruDashboard.setoranHafalan,
+                              overline: t.guruDashboard.setoranOverline,
+                              title: t.guruDashboard.setoranHafalanTitle,
                               icon: Icons.menu_book_rounded,
                               percent: 0.0,
                               bottomLabel: '0 / $santriCount Santri Setor',
@@ -297,6 +366,7 @@ class _GuruDashboardScreenState extends State<GuruDashboardScreen> {
                         setoranCount,
                         setoranPercent,
                         latestSetoran,
+                        _, // activeSesi not needed for setoran feed
                       ) {
                         if (latestSetoran.isEmpty) {
                           return _buildEmptySetoran(colors, textTheme, isDark);

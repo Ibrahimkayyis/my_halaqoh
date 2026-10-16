@@ -265,10 +265,21 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _onPendingRouteChanged() {
+    _processPendingRoute();
+  }
+
+  void _processPendingRoute() {
     final route = pendingNotificationRoute.value;
     if (route == 'sertifikasi') {
-      _appRouter.push(const DaftarSertifikasiRoute());
-      pendingNotificationRoute.value = null;
+      final authState = sl<AuthCubit>().state;
+      final isAuthenticated = authState.maybeWhen(
+        authenticated: (_) => true,
+        orElse: () => false,
+      );
+      if (isAuthenticated) {
+        _appRouter.push(const NotificationListRoute());
+        pendingNotificationRoute.value = null;
+      }
     }
   }
 
@@ -355,8 +366,16 @@ class _MyAppState extends State<MyApp> {
               }
               // Remove the native splash immediately after navigation is queued.
               FlutterNativeSplash.remove();
+
+              // If app was opened from terminated/cold start via notification tap,
+              // push the target route after the root dashboard route is mounted.
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _processPendingRoute();
+              });
             },
             unauthenticated: () {
+              pendingNotificationRoute.value = null;
+              pendingNotificationTab.value = null;
               if (_appRouter.stack.isNotEmpty &&
                   _appRouter.current.name != LoginRoute.name) {
                 _appRouter.replaceAll([const LoginRoute()]);
@@ -364,6 +383,8 @@ class _MyAppState extends State<MyApp> {
               FlutterNativeSplash.remove();
             },
             terminatedByOtherDevice: (_) {
+              pendingNotificationRoute.value = null;
+              pendingNotificationTab.value = null;
               _appRouter.replaceAll([const LoginRoute()]);
               FlutterNativeSplash.remove();
             },
