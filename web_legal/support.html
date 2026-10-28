@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusat Bantuan &amp; Dukungan — MyHalaqoh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #115D69;
+            --primary-dark: #0D4A54;
+            --primary-light: #1A7A8A;
+            --primary-bg: rgba(17, 93, 105, 0.06);
+            --bg-page: #F8FAFC;
+            --surface: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --border-light: #F3F4F6;
+            --success: #10B981;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 48px 24px 40px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(17, 93, 105, 0.15);
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-full);
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .header-meta {
+            margin-top: 16px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .container {
+            max-width: 860px;
+            margin: -24px auto 0;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            padding: 32px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px -2px rgba(17, 93, 105, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 22px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        p {
+            font-size: 14.5px;
+            color: #374151;
+            margin-bottom: 14px;
+        }
+
+        /* Contact Grid */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .contact-card {
+            background: var(--bg-page);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .contact-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(17, 93, 105, 0.08);
+        }
+
+        .contact-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .contact-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .contact-detail {
+            font-size: 13px;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        /* FAQ Section */
+        .faq-item {
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-q {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .faq-a {
+            font-size: 14px;
+            color: #4B5563;
+            margin-bottom: 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 8px;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .header {
+                padding: 36px 16px 32px;
+            }
+            .header h1 {
+                font-size: 26px;
+            }
+            .card {
+                padding: 24px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <span class="header-badge">Pusat Bantuan Resmi</span>
+        <h1>Bantuan &amp; Dukungan</h1>
+        <p>Layanan Informasi, Pertanyaan, dan Bantuan Teknis Aplikasi MyHalaqoh</p>
+        <div class="header-meta">
+            Pesantren Tahfidz Al-Qur'an (PPTQ) Luqman Al Hakim Surabaya
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- Informasi Utama & Kontak -->
+        <div class="card">
+            <h2>Saluran Kontak Resmi</h2>
+            <p>
+                Jika Anda mengalami kendala saat masuk akun, pencatatan setoran hafalan, presensi santri, atau membutuhkan bantuan teknis lainnya, silakan hubungi tim pengelola resmi kami:
+            </p>
+
+            <div class="contact-grid">
+                <a href="mailto:myhalaqoh.luqim@gmail.com" class="contact-card">
+                    <div class="contact-icon">📧</div>
+                    <div class="contact-title">Email Dukungan</div>
+                    <div class="contact-detail">myhalaqoh.luqim@gmail.com</div>
+                </a>
+
+                <a href="https://wa.me/6285850132215" target="_blank" class="contact-card">
+                    <div class="contact-icon">💬</div>
+                    <div class="contact-title">WhatsApp Admin</div>
+                    <div class="contact-detail">+62 858-5013-2215</div>
+                </a>
+
+                <div class="contact-card">
+                    <div class="contact-icon">🏫</div>
+                    <div class="contact-title">Alamat Pesantren</div>
+                    <div class="contact-detail">Jl. Kejawan Putih Tambak VI No.1, Surabaya, Jawa Timur 60112</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Pengguna -->
+        <div class="card">
+            <h2>Pertanyaan yang Sering Diajukan (FAQ)</h2>
+
+            <div class="faq-item">
+                <div class="faq-q">Bagaimana cara mendapatkan akun login Guru atau Wali Santri?</div>
+                <div class="faq-a">Akun resmi Guru (Ustadz) dan Wali Santri dibuat dan dikelola oleh Administrator Pesantren. NIP guru atau NIS santri digunakan sebagai identitas akun yang terdaftar pada sistem database pesantren.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Apakah presensi dapat dicatat tanpa menggunakan kamera scanner barcode?</div>
+                <div class="faq-a">Ya. Aplikasi menyediakan tombol checklist cepat manual pada daftar santri sehingga ustadz tetap dapat merekam kehadiran secara akurat meskipun barcode santri tertinggal atau kamera tidak digunakan.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Bagaimana orang tua (Wali Santri) dapat melihat progres capaian hafalan?</div>
+                <div class="faq-a">Masuk menggunakan akun Wali Santri yang telah terdaftar. Buka tab <strong>Progress</strong> atau <strong>Riwayat Hafalan</strong> untuk melihat visualisasi juz yang telah diselesaikan beserta persentase kelulusan surah.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Bagaimana cara mengajukan penghapusan akun atau koreksi data?</div>
+                <div class="faq-a">Pengguna dapat menghapus akun langsung dari aplikasi melalui menu <em>Profil &gt; Hapus Akun</em>, atau melalui formulir web resmi penghapusan akun pada portal kami.</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 PPTQ Luqman Al Hakim Surabaya. Hak Cipta Dilindungi.</p>
+            <p style="margin-top: 8px;">
+                <a href="/support-en">English Version</a> &bull;
+                <a href="/privacy-policy">Kebijakan Privasi</a> &bull;
+                <a href="/terms">Syarat &amp; Ketentuan</a> &bull;
+                <a href="/account-deletion">Hapus Akun</a> &bull;
+                <a href="/">Beranda</a>
+            </p>
+        </div>
+
+    </main>
+
+</body>
+</html>

@@ -53,6 +53,14 @@
     "trailingSlash": false,
     "rewrites": [
       {
+        "source": "/privacy-policy-en*",
+        "destination": "/privacy_policy_en.html"
+      },
+      {
+        "source": "/privacy-en*",
+        "destination": "/privacy_policy_en.html"
+      },
+      {
         "source": "/privacy-policy*",
         "destination": "/privacy_policy.html"
       },
@@ -61,12 +69,40 @@
         "destination": "/privacy_policy.html"
       },
       {
+        "source": "/account-deletion-en*",
+        "destination": "/account_deletion_en.html"
+      },
+      {
         "source": "/account-deletion*",
         "destination": "/account_deletion.html"
       },
       {
         "source": "/account_deletion*",
         "destination": "/account_deletion.html"
+      },
+      {
+        "source": "/support-en*",
+        "destination": "/support_en.html"
+      },
+      {
+        "source": "/support*",
+        "destination": "/support.html"
+      },
+      {
+        "source": "/terms-en*",
+        "destination": "/terms_conditions_en.html"
+      },
+      {
+        "source": "/terms-conditions-en*",
+        "destination": "/terms_conditions_en.html"
+      },
+      {
+        "source": "/terms*",
+        "destination": "/terms_conditions.html"
+      },
+      {
+        "source": "/terms-conditions*",
+        "destination": "/terms_conditions.html"
       }
     ]
   }

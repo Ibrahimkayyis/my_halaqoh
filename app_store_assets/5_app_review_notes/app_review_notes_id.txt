@@ -1,0 +1,54 @@
+================================================================================
+          PANDUAN INFORMASI REVIEW APLIKASI APPLE (BAHASA INDONESIA)
+================================================================================
+
+Dokumen ini berisi panduan lengkap untuk mengisi bagian "App Review Information"
+pada formulir App Store Connect saat mengajukan rilis versi iOS.
+
+================================================================================
+1. INFORMASI LOGIN (SIGN-IN INFORMATION)
+================================================================================
+Sign-in required: [X] Centang opsi "Yes"
+
+Akun Demo 1 (Peran Guru / Ustadz Pembimbing):
+• Username: guru.demo@luqmanalhakim.sch.id
+• Password: PasswordDemo123!
+
+Akun Demo 2 (Peran Wali Santri / Orang Tua):
+• Username: wali.demo@luqmanalhakim.sch.id
+• Password: PasswordDemo123!
+
+*PENTING*:
+Sebelum menekan tombol "Submit for Review" di App Store Connect, pastikan kedua
+akun demo di atas sudah dibuat di Firebase Authentication dan memiliki dokumen
+profil yang aktif di Cloud Firestore Production pesantren.
+
+================================================================================
+2. INFORMASI KONTAK (CONTACT INFORMATION)
+================================================================================
+Reviewer Apple akan menghubungi kontak ini jika terdapat kendala darurat:
+• First Name: Ibrahim
+• Last Name: Kayyis
+• Phone Number: +62 812-XXXX-XXXX (Isi nomor telepon aktif Anda beserta kode negara)
+• Email: myhalaqoh.luqim@gmail.com
+
+================================================================================
+3. CATATAN UNTUK REVIEWER (NOTES FOR REVIEWER)
+================================================================================
+Gunakan teks Bahasa Inggris yang tersedia di file:
+app_store_assets/5_app_review_notes/app_review_notes_en.txt
+
+Mengapa wajib Bahasa Inggris?
+Tim App Review Apple di Cupertino / regional Asia Pasifik menggunakan Bahasa Inggris
+sebagai bahasa operasional resmi. Memberikan petunjuk jelas dalam Bahasa Inggris
+menghindarkan penolakan (rejection) akibat reviewer tidak paham alur aplikasi.
+
+================================================================================
+4. LAMPIRAN UJI (ATTACHMENT)
+================================================================================
+Apple mewajibkan demonstrasi fungsional jika aplikasi meminta izin kamera:
+• File: app_store_assets/5_app_review_notes/dummy_santri_barcode.png
+• Unggah file gambar ini pada kolom Attachment di App Store Connect.
+• Gambar ini adalah contoh kartu barcode santri agar reviewer dapat menguji
+  fitur scanner kamera tanpa harus memiliki kartu santri fisik.
+================================================================================
