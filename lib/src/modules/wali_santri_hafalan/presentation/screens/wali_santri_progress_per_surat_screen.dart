@@ -74,6 +74,12 @@ class _WaliSantriProgressPerSuratScreenState
       _loadedLinkedDocId = linkedDocId;
       _progressCubit.watchProgress(linkedDocId);
       _extraTargetCubit.watchExtraJuz(linkedDocId);
+      final targetState = context.read<TargetHafalanCubit>().state;
+      targetState.maybeWhen(
+        loaded: (_) {},
+        loading: () {},
+        orElse: () => context.read<TargetHafalanCubit>().watchAll(),
+      );
     }
   }
 

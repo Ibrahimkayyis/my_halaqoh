@@ -15,11 +15,27 @@ class TargetHafalanRepositoryImpl implements TargetHafalanRepository {
   TargetHafalanRepositoryImpl(this._remote, this._local, this._activityLog);
 
   @override
-  Stream<List<TargetHafalanModel>> watchAll() {
-    return _remote.watchAll().map((list) {
-      unawaited(_local.cacheTargetHafalan(list));
-      return list;
-    });
+  Stream<List<TargetHafalanModel>> watchAll() async* {
+    // 1. Emit cached data immediately if available (offline-first initial seed)
+    final cached = _local.getAllTargetHafalan();
+    if (cached.isNotEmpty) {
+      yield cached;
+    }
+
+    // 2. Stream updates from remote, maintaining cache
+    try {
+      await for (final list in _remote.watchAll()) {
+        unawaited(_local.cacheTargetHafalan(list));
+        yield list;
+      }
+    } catch (e) {
+      final fallback = _local.getAllTargetHafalan();
+      if (fallback.isNotEmpty) {
+        yield fallback;
+      } else {
+        rethrow;
+      }
+    }
   }
 
   @override
@@ -43,6 +59,9 @@ class TargetHafalanRepositoryImpl implements TargetHafalanRepository {
       if (model == null) return const Left('Target hafalan tidak ditemukan');
       return Right(model);
     } catch (e) {
+      final cached = _local.getAllTargetHafalan();
+      final found = cached.where((t) => t.kelas == kelas && t.program == program).firstOrNull;
+      if (found != null) return Right(found);
       return Left('Gagal memuat target hafalan: $e');
     }
   }

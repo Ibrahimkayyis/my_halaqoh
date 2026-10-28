@@ -75,6 +75,12 @@ class _WaliSantriProgressPerJuzScreenState
       // linkedDocId == santriId for wali santri accounts
       _extraTargetCubit.watchExtraJuz(linkedDocId);
       _sertifikasiCubit.watchBySantriId(linkedDocId);
+      final targetState = context.read<TargetHafalanCubit>().state;
+      targetState.maybeWhen(
+        loaded: (_) {},
+        loading: () {},
+        orElse: () => context.read<TargetHafalanCubit>().watchAll(),
+      );
     }
   }
 

@@ -41,6 +41,12 @@ class ProgressHafalanPerJuzScreen extends StatefulWidget
 
   @override
   Widget wrappedRoute(BuildContext context) {
+    final targetState = context.read<TargetHafalanCubit>().state;
+    targetState.maybeWhen(
+      loaded: (_) {},
+      loading: () {},
+      orElse: () => context.read<TargetHafalanCubit>().watchAll(),
+    );
     return MultiBlocProvider(
       providers: [
         BlocProvider(

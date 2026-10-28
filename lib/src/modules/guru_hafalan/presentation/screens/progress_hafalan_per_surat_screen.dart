@@ -36,6 +36,12 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
 
   @override
   Widget wrappedRoute(BuildContext context) {
+    final targetState = context.read<TargetHafalanCubit>().state;
+    targetState.maybeWhen(
+      loaded: (_) {},
+      loading: () {},
+      orElse: () => context.read<TargetHafalanCubit>().watchAll(),
+    );
     return MultiBlocProvider(
       providers: [
         BlocProvider(

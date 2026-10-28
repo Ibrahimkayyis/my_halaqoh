@@ -345,6 +345,13 @@ class _MyAppState extends State<MyApp> {
         listener: (context, state) {
           state.maybeWhen(
             authenticated: (user) {
+              // Ensure master data Firestore streams are running with valid authentication credentials
+              context.read<GuruCubit>().watchAll();
+              context.read<SantriCubit>().watchAll();
+              context.read<HalaqohCubit>().watchAll();
+              context.read<TargetHafalanCubit>().watchAll();
+              context.read<KelasCubit>().watchAll();
+              context.read<ProgramCubit>().watchAll();
               final programStr =
                   (user.programType == 'T') ? 'takhassus' : 'reguler';
 

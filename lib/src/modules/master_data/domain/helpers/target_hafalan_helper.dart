@@ -76,9 +76,12 @@ class TargetHafalanHelper {
     String programCode,
   ) {
     final fullProgram = programCodeToFullName(programCode);
+    final cleanKelas = kelas.trim();
     try {
       return targets.firstWhere(
-        (t) => t.kelas == kelas && t.program == fullProgram,
+        (t) =>
+            t.kelas.trim() == cleanKelas &&
+            (t.program == fullProgram || t.program == programCode),
       );
     } catch (_) {
       return null;

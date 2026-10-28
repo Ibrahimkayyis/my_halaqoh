@@ -38,6 +38,19 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
   String _searchQuery = '';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = context.read<TargetHafalanCubit>().state;
+      state.maybeWhen(
+        loaded: (_) {},
+        loading: () {},
+        orElse: () => context.read<TargetHafalanCubit>().watchAll(),
+      );
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();

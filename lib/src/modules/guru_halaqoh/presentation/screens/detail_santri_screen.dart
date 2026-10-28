@@ -446,6 +446,12 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
 
   @override
   Widget wrappedRoute(BuildContext context) {
+    final targetState = context.read<TargetHafalanCubit>().state;
+    targetState.maybeWhen(
+      loaded: (_) {},
+      loading: () {},
+      orElse: () => context.read<TargetHafalanCubit>().watchAll(),
+    );
     final santriState = context.read<SantriCubit>().state;
     String? santriId;
     santriState.maybeWhen(

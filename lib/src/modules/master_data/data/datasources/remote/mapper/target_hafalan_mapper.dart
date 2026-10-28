@@ -7,16 +7,26 @@ class TargetHafalanMapper {
 
   static TargetHafalanModel fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data()!;
+    final data = doc.data() ?? {};
     return TargetHafalanModel(
       id: doc.id,
-      kelas: data['kelas'] as String,
-      program: data['program'] as String,
-      tahunAjaran: data['tahunAjaran'] as String? ?? '',
-      semesterAktif: data['semesterAktif'] as int?,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      kelas: data['kelas']?.toString() ?? '',
+      program: data['program']?.toString() ?? '',
+      tahunAjaran: data['tahunAjaran']?.toString() ?? '',
+      semesterAktif: (data['semesterAktif'] as num?)?.toInt(),
+      createdAt: _parseDateTime(data['createdAt']),
+      updatedAt: _parseDateTime(data['updatedAt']),
     );
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is String) {
+      final parsed = DateTime.tryParse(value);
+      if (parsed != null) return parsed;
+    }
+    return DateTime.now();
   }
 
   static Map<String, dynamic> toFirestore(TargetHafalanModel model) {
@@ -30,4 +40,3 @@ class TargetHafalanMapper {
     };
   }
 }
-

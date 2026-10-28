@@ -17,7 +17,13 @@ class TargetHafalanCubit extends Cubit<TargetHafalanState> {
     _subscription?.cancel();
     _subscription = _repository.watchAll().listen(
       (list) => emit(TargetHafalanState.loaded(list)),
-      onError: (e) => emit(TargetHafalanState.error(e.toString())),
+      onError: (e) async {
+        final result = await _repository.getAll();
+        result.fold(
+          (error) => emit(TargetHafalanState.error(e.toString())),
+          (list) => emit(TargetHafalanState.loaded(list)),
+        );
+      },
     );
   }
 

@@ -72,6 +72,12 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
       _loadedLinkedDocId = linkedDocId;
       _progressHafalanCubit.watchProgress(linkedDocId);
       _extraTargetCubit.watchExtraJuz(linkedDocId);
+      final targetState = context.read<TargetHafalanCubit>().state;
+      targetState.maybeWhen(
+        loaded: (_) {},
+        loading: () {},
+        orElse: () => context.read<TargetHafalanCubit>().watchAll(),
+      );
     }
     if (halaqohId != null && halaqohId != _loadedHalaqohId) {
       _loadedHalaqohId = halaqohId;
@@ -141,13 +147,15 @@ class _WaliSantriDashboardScreenState extends State<WaliSantriDashboardScreen> {
 
     // Look up the admin-defined target for this santri's kelas + program
     TargetHafalanModel? myTarget;
-    if (mySantri != null) {
+    final effectiveKelas = mySantri?.kelas ?? santriKelas;
+    final effectiveProgram = mySantri?.program ?? santriProgram;
+    if (effectiveKelas.isNotEmpty && effectiveProgram.isNotEmpty) {
       targetHafalanState.maybeWhen(
         loaded: (targets) {
           myTarget = TargetHafalanHelper.findTarget(
             targets,
-            mySantri!.kelas,
-            mySantri!.program,
+            effectiveKelas,
+            effectiveProgram,
           );
         },
         orElse: () {},

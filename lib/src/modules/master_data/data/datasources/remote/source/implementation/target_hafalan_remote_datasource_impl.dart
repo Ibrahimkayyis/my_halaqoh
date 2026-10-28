@@ -14,15 +14,28 @@ class TargetHafalanRemoteDataSourceImpl
   @override
   Stream<List<TargetHafalanModel>> watchAll() {
     return _col.snapshots().map(
-          (snap) =>
-              snap.docs.map(TargetHafalanMapper.fromFirestore).toList(),
+          (snap) {
+            final list = <TargetHafalanModel>[];
+            for (final doc in snap.docs) {
+              try {
+                list.add(TargetHafalanMapper.fromFirestore(doc));
+              } catch (_) {}
+            }
+            return list;
+          },
         );
   }
 
   @override
   Future<List<TargetHafalanModel>> getAll() async {
     final snap = await _col.get();
-    return snap.docs.map(TargetHafalanMapper.fromFirestore).toList();
+    final list = <TargetHafalanModel>[];
+    for (final doc in snap.docs) {
+      try {
+        list.add(TargetHafalanMapper.fromFirestore(doc));
+      } catch (_) {}
+    }
+    return list;
   }
 
   @override
