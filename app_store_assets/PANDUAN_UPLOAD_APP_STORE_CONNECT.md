@@ -30,14 +30,21 @@ app_store_assets/
 ├── 1_app_icon/
 │   └── app_icon_1024x1024.png          # Icon 1024x1024 px, 24-bit RGB (No Alpha/Transparansi)
 ├── 2_screenshots/
-│   └── iphone_6.7_inch/                # 7 Screenshot resolusi 1290x2796 px (Apple iPhone 6.7")
-│       ├── 01_welcome_login.png        # Welcome & Identitas Platform
-│       ├── 02_dashboard_guru.png       # Dashboard Guru & Sesi Sholat
-│       ├── 03_absensi_scanner.png      # Scanner Barcode Presensi Cepat
-│       ├── 04_mutabaah_hafalan.png     # Input Ziyadah & Muraja'ah
-│       ├── 05_progress_juz.png         # Tracking Capaian Target 30 Juz
-│       ├── 06_dashboard_wali.png       # Portal Transparansi Wali Santri
-│       └── 07_sertifikasi_tahfidz.png  # Ujian Kelulusan 1 Juz & Rapor
+│   ├── iphone_6.7_inch/                # 7 Screenshot resolusi 1290x2796 px (Apple iPhone 6.7")
+│   │   ├── 01_welcome_login.png        # Welcome & Identitas Platform
+│   │   ├── 02_dashboard_guru.png       # Dashboard Guru & Sesi Sholat
+│   │   ├── 03_absensi_scanner.png      # Scanner Barcode Presensi Cepat
+│   │   ├── 04_mutabaah_hafalan.png     # Input Ziyadah & Muraja'ah
+│   │   ├── 05_progress_juz.png         # Tracking Capaian Target 30 Juz
+│   │   ├── 06_dashboard_wali.png       # Portal Transparansi Wali Santri
+│   │   └── 07_sertifikasi_tahfidz.png  # Ujian Kelulusan 1 Juz & Rapor
+│   └── ipad_13_inch/                   # 6 Screenshot resolusi 2048x2732 px (Apple iPad Pro 12.9" / 13")
+│       ├── 01_dashboard_guru_ipad.png  # Dashboard Guru & Capaian Harian Halaqoh
+│       ├── 02_barcode_scanner_ipad.png # Scanner Barcode Presensi & Kartu Uji Santri
+│       ├── 03_input_hafalan_ipad.png   # Formulir Mutaba'ah Ziyadah & Muraja'ah
+│       ├── 04_dashboard_wali_ipad.png  # Portal Dashboard Transparansi Wali Santri
+│       ├── 05_progress_juz_ipad.png    # Pelacakan Target Hafalan 30 Juz & Sertifikasi
+│       └── 06_detail_absensi_ipad.png  # Rekapitulasi Presensi Sesi & Penguncian Status
 ├── 3_app_information/
 │   ├── metadata_app_store_id.txt       # Teks lengkap Bahasa Indonesia (App Name, Subtitle, Description, Keywords)
 │   ├── metadata_app_store_id.json      # Versi JSON Bahasa Indonesia
@@ -201,7 +208,24 @@ Buka tab aplikasi yang baru dibuat, lalu isi informasi berikut. Anda dapat memil
 > **Catatan Penting Device Family**:
 > Kita telah mengonfigurasi `TARGETED_DEVICE_FAMILY = 1` (iPhone Only) pada file `project.pbxproj`. Oleh karena itu, antum **TIDAK PERLU** mengunggah screenshot iPad (12.9" Display). Screenshot 6.7" iPhone ini sudah otomatis mencukupi seluruh lini perangkat iPhone.
 
-### B. App Icon
+### B. Upload Screenshots (iPad Pro 12.9" / 13" Display)
+Jika antum mengaktifkan dukungan iPad di App Store Connect (atau jika App Store Connect mewajibkan upload iPad Display):
+1. Pada menu **Screenshots**, pilih tab **12.9" Display** (iPad Pro 12.9" Gen 2/3/4/5/6 atau iPad Pro 13" M4).
+2. Buka folder `app_store_assets/2_screenshots/ipad_13_inch/` di komputer antum.
+3. Drag & drop ke-6 file berikut secara berurutan:
+   1. `01_dashboard_guru_ipad.png` (Dashboard Guru & Ringkasan Capaian)
+   2. `02_barcode_scanner_ipad.png` (Scanner Barcode Presensi Santri)
+   3. `03_input_hafalan_ipad.png` (Input Setoran Ziyadah & Muraja'ah)
+   4. `04_dashboard_wali_ipad.png` (Dashboard & Transparansi Wali Santri)
+   5. `05_progress_juz_ipad.png` (Pelacakan Target Hafalan Juz & Sertifikasi)
+   6. `06_detail_absensi_ipad.png` (Detail Rekapitulasi Presensi Sesi)
+
+> **Spesifikasi Teknis Screenshot iPad**:
+> - Resolusi: Tepat `2048 x 2732` piksel (aspek rasio portrait iPad Pro Apple).
+> - Format: PNG 24-bit Truecolor RGB murni **tanpa alpha channel / transparansi** (memenuhi syarat ketat App Store Connect).
+> - Typografi: Font Poppins & Material Icons asli Skia native render.
+
+### C. App Icon
 - Icon resolusi tinggi telah disediakan di `app_store_assets/1_app_icon/app_icon_1024x1024.png`.
 - Berkas ini telah diverifikasi: resolusi tepat `1024x1024`, format PNG 24-bit Truecolor RGB murni **tanpa transparansi (alpha channel)**, dan tanpa sudut melengkung (*square*).
 - Icon ini akan dikemas otomatis ke dalam bundle IPA oleh Xcode saat build.
