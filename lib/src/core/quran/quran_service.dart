@@ -52,6 +52,22 @@ class QuranService {
     }
   }
 
+  /// FOR TESTING ONLY: inject pre-built [QuranData] without loading assets.
+  /// Resets the singleton state so each test can start fresh.
+  // ignore: invalid_use_of_visible_for_testing_member
+  void injectForTest(QuranData data) {
+    _data = data;
+    _surahById.clear();
+    _juzByNumber.clear();
+    for (final s in data.surahs) {
+      _surahById[s.id] = s;
+    }
+    for (final j in data.juz) {
+      _juzByNumber[j.number] = j;
+    }
+    _initialized = true;
+  }
+
   void _assertInitialized() {
     assert(_initialized,
         'QuranService not initialized. Call initialize() first.');
@@ -193,9 +209,16 @@ class QuranService {
     if (ranges.isEmpty) return 0;
     final memorized = <int>{};
     for (final r in ranges) {
-      final s = r.start.clamp(rangeStart, rangeEnd);
-      final e = r.end.clamp(rangeStart, rangeEnd);
-      if (s > e) continue;
+      // Guard: skip if there is no overlap between the memorized range and
+      // the juz segment. Using .clamp() alone is insufficient because when
+      // both r.start and r.end fall outside rangeStart–rangeEnd on the same
+      // side, .clamp() forces both to rangeStart (or rangeEnd), making s==e
+      // and causing exactly 1 phantom ayat to be counted per non-overlapping
+      // juz segment.
+      if (r.end < rangeStart || r.start > rangeEnd) continue;
+
+      final s = r.start < rangeStart ? rangeStart : r.start;
+      final e = r.end > rangeEnd ? rangeEnd : r.end;
       for (int a = s; a <= e; a++) {
         memorized.add(a);
       }

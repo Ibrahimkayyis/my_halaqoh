@@ -342,20 +342,21 @@ class GuruDashboardHeader extends StatelessWidget {
                                 Text(
                                   name.toUpperCase(),
                                   style: textTheme.titleLarge?.copyWith(
-                                        fontSize: 18.sp,
+                                        fontSize: 17.sp,
                                         fontWeight: FontWeight.w800,
                                         color: colors.textOnButton,
-                                        letterSpacing: 0.3,
+                                        letterSpacing: 0.2,
+                                        height: 1.25,
                                       ) ??
                                       TextStyle(
-                                        fontSize: 18.sp,
+                                        fontSize: 17.sp,
                                         fontWeight: FontWeight.w800,
                                         color: colors.textOnButton,
-                                        letterSpacing: 0.3,
+                                        letterSpacing: 0.2,
                                         fontFamily: 'Poppins',
+                                        height: 1.25,
                                       ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: true,
                                 ),
                                 SizedBox(height: 3.h),
                                 Text(
