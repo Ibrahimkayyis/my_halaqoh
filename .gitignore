@@ -18,8 +18,9 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# VS Code
+# VS Code & Local IDE settings
 .vscode/
+*.local.json
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -30,6 +31,12 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+
+# Node.js / Cloud Functions dependencies
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Symbolication related
 app.*.symbols
@@ -56,8 +63,17 @@ lib/firebase_options.dart
 android/key.properties
 **/key.properties
 
-# Firebase CLI cache
+# Firebase CLI cache & Project Config
 .firebase/
+.firebaserc
+firestore.rules
+storage.rules
+
+# ============================================================
+# App Store & Deployment Sensitive Assets
+# ============================================================
+app_store_assets/
+test/store_screenshots/
 
 # ============================================================
 # Files Generated / Temporary
@@ -78,6 +94,10 @@ analyze_result.txt
 # ============================================================
 # Editor & AI Tool Configurations (lokal)
 # ============================================================
+# Antigravity Agent local config & lock
+.agents/
+skills-lock.json
+
 # Windsurf editor config
 .windsurf/
 
@@ -90,5 +110,8 @@ AGENTS.md
 # Flutter DevTools preferences (lokal per-developer)
 devtools_options.yaml
 
-# Antigravity Agent lock file
-skills-lock.json
+# ============================================================
+# Internal Documentation & Design Drafts
+# ============================================================
+design-system/
+docs/
