@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../feedback/data/datasources/remote/mapper/feedback_mapper.dart';
 import '../../domain/models/wali_santri_notification_item.dart';
 
 /// Real-time service for streaming Wali Santri in-app notifications
@@ -55,17 +56,24 @@ class WaliSantriNotificationService {
     StreamSubscription? absensiSub;
     StreamSubscription? hafalanSub;
     StreamSubscription? sertifikasiSub;
+    StreamSubscription? feedbackSub;
     StreamSubscription? readStateSub;
 
     List<WaliSantriNotificationItem> absensiItems = [];
     List<WaliSantriNotificationItem> hafalanItems = [];
     List<WaliSantriNotificationItem> sertifikasiItems = [];
+    List<WaliSantriNotificationItem> feedbackItems = [];
 
     void emitMerged() {
       if (controller.isClosed) return;
       final readIds = getReadNotificationIds(uid);
 
-      final merged = [...absensiItems, ...hafalanItems, ...sertifikasiItems];
+      final merged = [
+        ...absensiItems,
+        ...hafalanItems,
+        ...sertifikasiItems,
+        ...feedbackItems,
+      ];
       merged.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
       for (var item in merged) {
@@ -298,7 +306,49 @@ class WaliSantriNotificationService {
           },
         );
 
-        // ── 4. Read-state changes (SharedPreferences) ────────────────────────
+        // ── 4. Feedback resolved query stream ─────────────────────────────
+        feedbackSub = _firestore
+            .collection('feedback')
+            .where('userId', isEqualTo: uid)
+            .limit(30)
+            .snapshots()
+            .listen(
+          (snapshot) {
+            final List<WaliSantriNotificationItem> items = [];
+            for (var doc in snapshot.docs) {
+              final model = FeedbackMapper.fromFirestore(doc);
+              if (model.status.toLowerCase() != 'resolved') continue;
+
+              final resolvedDate = model.resolvedAt ?? model.createdAt ?? DateTime.now();
+              final adminResponse = (model.adminResponse != null && model.adminResponse!.trim().isNotEmpty)
+                  ? model.adminResponse!.trim()
+                  : 'Masukan Anda telah ditindaklanjuti oleh admin halaqoh.';
+              final title = model.title.isNotEmpty
+                  ? 'Masukan Ditindaklanjuti: ${model.title}'
+                  : 'Masukan Ditindaklanjuti';
+
+              items.add(
+                WaliSantriNotificationItem(
+                  id: 'feedback_${doc.id}',
+                  title: title,
+                  message: adminResponse,
+                  category: 'feedback',
+                  timestamp: resolvedDate,
+                  entityType: 'feedback',
+                  entityId: doc.id,
+                  metadata: {'feedbackModel': model},
+                ),
+              );
+            }
+            feedbackItems = items;
+            emitMerged();
+          },
+          onError: (e) {
+            emitMerged();
+          },
+        );
+
+        // ── 5. Read-state changes (SharedPreferences) ────────────────────────
         // Re-emit immediately when items are marked read/unread so the badge
         // updates instantly without waiting for a Firestore snapshot change.
         readStateSub = _readStateChanges.stream.listen((_) => emitMerged());
@@ -308,6 +358,7 @@ class WaliSantriNotificationService {
         absensiSub?.cancel();
         hafalanSub?.cancel();
         sertifikasiSub?.cancel();
+        feedbackSub?.cancel();
       },
     );
 
@@ -321,14 +372,16 @@ class WaliSantriNotificationService {
   ) {
     late StreamController<List<WaliSantriNotificationItem>> controller;
     StreamSubscription? sertifikasiSub;
+    StreamSubscription? feedbackSub;
     StreamSubscription? readStateSub;
     List<WaliSantriNotificationItem> sertifikasiItems = [];
+    List<WaliSantriNotificationItem> feedbackItems = [];
 
     void emitMerged() {
       if (controller.isClosed) return;
       final readIds = getReadNotificationIds(uid);
 
-      final merged = [...sertifikasiItems];
+      final merged = [...sertifikasiItems, ...feedbackItems];
       merged.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
       for (var item in merged) {
@@ -462,6 +515,48 @@ class WaliSantriNotificationService {
           },
         );
 
+        // ── Feedback resolved query stream ──────────────────────────────────
+        feedbackSub = _firestore
+            .collection('feedback')
+            .where('userId', isEqualTo: uid)
+            .limit(30)
+            .snapshots()
+            .listen(
+          (snapshot) {
+            final List<WaliSantriNotificationItem> items = [];
+            for (var doc in snapshot.docs) {
+              final model = FeedbackMapper.fromFirestore(doc);
+              if (model.status.toLowerCase() != 'resolved') continue;
+
+              final resolvedDate = model.resolvedAt ?? model.createdAt ?? DateTime.now();
+              final adminResponse = (model.adminResponse != null && model.adminResponse!.trim().isNotEmpty)
+                  ? model.adminResponse!.trim()
+                  : 'Masukan Anda telah ditindaklanjuti oleh admin halaqoh.';
+              final title = model.title.isNotEmpty
+                  ? 'Masukan Ditindaklanjuti: ${model.title}'
+                  : 'Masukan Ditindaklanjuti';
+
+              items.add(
+                WaliSantriNotificationItem(
+                  id: 'feedback_${doc.id}',
+                  title: title,
+                  message: adminResponse,
+                  category: 'feedback',
+                  timestamp: resolvedDate,
+                  entityType: 'feedback',
+                  entityId: doc.id,
+                  metadata: {'feedbackModel': model},
+                ),
+              );
+            }
+            feedbackItems = items;
+            emitMerged();
+          },
+          onError: (e) {
+            emitMerged();
+          },
+        );
+
         // ── Read-state changes (SharedPreferences) ───────────────────────────
         // Re-emit immediately when items are marked read/unread so the badge
         // updates instantly without waiting for a Firestore snapshot change.
@@ -470,6 +565,7 @@ class WaliSantriNotificationService {
       onCancel: () {
         readStateSub?.cancel();
         sertifikasiSub?.cancel();
+        feedbackSub?.cancel();
       },
     );
 

@@ -252,17 +252,7 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
     final totalAyat = surah['totalAyat'] as int;
     final memorized = surah['memorized'] as int;
 
-    String formatPercent(double v) {
-      if (v == 0) return '0';
-      if (v >= 1) {
-        final rounded = double.parse(v.toStringAsFixed(1));
-        return rounded == rounded.roundToDouble()
-            ? rounded.toInt().toString()
-            : rounded.toStringAsFixed(1);
-      }
-      final s = v.toStringAsFixed(2);
-      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
-    }
+    String formatPercent(double v) => TargetHafalanHelper.formatPercent(v);
 
     final progressVal = totalAyat > 0 ? (memorized / totalAyat * 100) : 0.0;
     final percentStr = formatPercent(progressVal);

@@ -12,8 +12,11 @@ import 'package:my_halaqoh/src/core/widget/button/primary_button.dart';
 import 'package:my_halaqoh/src/core/widget/input/app_text_field.dart';
 import '../cubits/feedback_cubit.dart';
 import '../cubits/feedback_state.dart';
+import '../../../auth/presentation/cubits/auth_cubit.dart';
+import '../../../auth/presentation/cubits/auth_state.dart';
 import '../widgets/feedback_attachment_picker.dart';
 import '../widgets/feedback_category_selector.dart';
+import '../widgets/feedback_history_sheet.dart';
 import '../widgets/feedback_success_sheet.dart';
 
 /// Screen allowing users (Guru, Wali Santri, Admin) to submit feedback or bug reports.
@@ -196,6 +199,21 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                   color: colors.textPrimary,
                 ),
               ),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.history_rounded, color: colors.textPrimary),
+                  tooltip: 'Riwayat Masukan',
+                  onPressed: () {
+                    final authState = context.read<AuthCubit>().state;
+                    authState.maybeWhen(
+                      authenticated: (user) {
+                        FeedbackHistorySheet.show(context, user.uid);
+                      },
+                      orElse: () {},
+                    );
+                  },
+                ),
+              ],
             ),
             body: SingleChildScrollView(
               padding: EdgeInsets.symmetric(

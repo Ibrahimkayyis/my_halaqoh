@@ -56,12 +56,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
     super.dispose();
   }
 
-  String _formatJuz(double v) {
-    if (v == 0) return '0';
-    if (v == v.roundToDouble()) return v.toInt().toString();
-    final s = v.toStringAsFixed(2);
-    return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
-  }
+  String _formatJuz(double v) => TargetHafalanHelper.formatJuz(v);
 
   @override
   Widget build(BuildContext context) {
@@ -453,22 +448,10 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                                     )
                                   : 0.0;
 
-                              String formatPercent(double v) {
-                                if (v == 0) return '0';
-                                if (v >= 1) {
-                                  final rounded = double.parse(v.toStringAsFixed(1));
-                                  return rounded == rounded.roundToDouble()
-                                      ? rounded.toInt().toString()
-                                      : rounded.toStringAsFixed(1);
-                                }
-                                final s = v.toStringAsFixed(2);
-                                return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
-                              }
-
                               final progress = targetJuz > 0
                                   ? completed / targetJuz
                                   : 0.0;
-                              final pct = formatPercent(progress * 100);
+                              final pct = TargetHafalanHelper.formatPercent(progress * 100);
 
                               return Padding(
                                 padding: EdgeInsets.only(bottom: 4.h),

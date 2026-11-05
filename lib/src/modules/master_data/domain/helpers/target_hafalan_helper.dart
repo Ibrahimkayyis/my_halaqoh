@@ -90,6 +90,28 @@ class TargetHafalanHelper {
 
   // ── Display helpers ───────────────────────────────────────────────────────
 
+  /// Formats a decimal number (such as juz count or percentage) up to 2 decimal
+  /// places without unwanted rounding (e.g. 1.469 -> "1.46", 1.5 -> "1.5", 2.0 -> "2").
+  static String formatDecimalMax2(double v) {
+    if (v == 0) return '0';
+    final rounded = v.roundToDouble();
+    if ((v - rounded).abs() < 1e-6) {
+      return rounded.toInt().toString();
+    }
+    final s = v.toStringAsFixed(4);
+    final parts = s.split('.');
+    final intPart = parts[0];
+    var decPart = parts[1].substring(0, 2).replaceAll(RegExp(r'0+$'), '');
+    if (decPart.isEmpty) return intPart;
+    return '$intPart.$decPart';
+  }
+
+  /// Formats a juz count up to 2 decimal places (e.g. 2 -> "2", 1.46 -> "1.46").
+  static String formatJuz(double v) => formatDecimalMax2(v);
+
+  /// Formats a percentage value up to 2 decimal places (e.g. 100 -> "100", 92.48 -> "92.48").
+  static String formatPercent(double v) => formatDecimalMax2(v);
+
   /// Returns a short summary string for the active semester target, suitable
   /// for display in Guru / Wali Santri screens.
   ///
@@ -585,24 +607,30 @@ class TargetHafalanHelper {
       final count = r.ayatEnd - r.ayatStart + 1;
       totalTarget += count;
 
-      final juz = QuranService.instance.getAllJuz().where((j) => j.surahs.any((s) => s.surahId == r.surahId)).firstOrNull;
-      if (juz != null) {
-        final jp = progressData.juzProgressList.where((j) => j.juzNumber == juz.number).firstOrNull;
-        if (jp != null) {
-          final sp = jp.surahProgressList.where((s) => s.surahId == r.surahId).firstOrNull;
-          if (sp != null) {
-            final seg = QuranService.instance.getSurahById(r.surahId)?.segmentForJuz(juz.number);
-            if (seg != null) {
-              final memorizedLimit = seg.ayatStart + sp.memorizedAyat - 1;
-              if (sp.memorizedAyat > 0) {
-                final start = r.ayatStart > seg.ayatStart ? r.ayatStart : seg.ayatStart;
-                final end = r.ayatEnd < memorizedLimit ? r.ayatEnd : memorizedLimit;
-                if (start <= end) {
-                  totalCompleted += (end - start + 1);
-                }
-              }
-            }
-          }
+      final surah = QuranService.instance.getSurahById(r.surahId);
+      if (surah == null) continue;
+
+      for (final seg in surah.juzMappings) {
+        final segRangeStart = r.ayatStart > seg.ayatStart ? r.ayatStart : seg.ayatStart;
+        final segRangeEnd = r.ayatEnd < seg.ayatEnd ? r.ayatEnd : seg.ayatEnd;
+        if (segRangeStart > segRangeEnd) continue;
+
+        final jp = progressData.juzProgressList
+            .where((j) => j.juzNumber == seg.juz)
+            .firstOrNull;
+        if (jp == null) continue;
+
+        final sp = jp.surahProgressList
+            .where((s) => s.surahId == r.surahId)
+            .firstOrNull;
+        if (sp == null || sp.memorizedAyat <= 0) continue;
+
+        final memorizedLimit = seg.ayatStart + sp.memorizedAyat - 1;
+        final actualStart = segRangeStart;
+        final actualEnd = segRangeEnd < memorizedLimit ? segRangeEnd : memorizedLimit;
+
+        if (actualStart <= actualEnd) {
+          totalCompleted += (actualEnd - actualStart + 1);
         }
       }
     }

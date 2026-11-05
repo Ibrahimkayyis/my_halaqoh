@@ -46,6 +46,18 @@ abstract class FeedbackModel with _$FeedbackModel {
     /// Current handling status: 'open', 'in_progress', 'resolved'
     @Default('open') String status,
 
+    /// Admin response or resolution note
+    String? adminResponse,
+
+    /// Timestamp when the feedback was resolved
+    DateTime? resolvedAt,
+
+    /// Admin user display name or identifier who handled the feedback
+    String? resolvedBy,
+
+    /// Timestamp when resolution notification was sent to user (deduplication flag)
+    DateTime? resolvedNotifiedAt,
+
     /// Timestamp when the feedback was created
     DateTime? createdAt,
   }) = _FeedbackModel;

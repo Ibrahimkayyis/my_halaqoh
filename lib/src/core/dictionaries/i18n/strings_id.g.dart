@@ -277,8 +277,8 @@ class _TranslationsTargetHafalanId implements TranslationsTargetHafalanEn {
 	@override String get belumDitetapkan => 'Belum ditetapkan';
 	@override String get semester1 => 'Semester 1';
 	@override String get semester2 => 'Semester 2';
-	@override String get periodeUTS => 'UTS';
-	@override String get periodeUAS => 'UAS';
+	@override String get periodeUTS => 'PTS';
+	@override String get periodeUAS => 'PAS';
 	@override String get tipeIdadTahsin => 'I\'dad Tahsin';
 	@override String get tipeDauroh => 'Dauroh';
 	@override String get tipeMurajaah => 'Muraja\'ah';
@@ -1647,8 +1647,8 @@ extension on TranslationsId {
 			case 'targetHafalan.belumDitetapkan': return 'Belum ditetapkan';
 			case 'targetHafalan.semester1': return 'Semester 1';
 			case 'targetHafalan.semester2': return 'Semester 2';
-			case 'targetHafalan.periodeUTS': return 'UTS';
-			case 'targetHafalan.periodeUAS': return 'UAS';
+			case 'targetHafalan.periodeUTS': return 'PTS';
+			case 'targetHafalan.periodeUAS': return 'PAS';
 			case 'targetHafalan.tipeIdadTahsin': return 'I\'dad Tahsin';
 			case 'targetHafalan.tipeDauroh': return 'Dauroh';
 			case 'targetHafalan.tipeMurajaah': return 'Muraja\'ah';

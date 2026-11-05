@@ -527,11 +527,11 @@ class TranslationsTargetHafalanEn {
 	/// en: 'Semester 2'
 	String get semester2 => 'Semester 2';
 
-	/// en: 'Midterm'
-	String get periodeUTS => 'Midterm';
+	/// en: 'PTS'
+	String get periodeUTS => 'PTS';
 
-	/// en: 'Finals'
-	String get periodeUAS => 'Finals';
+	/// en: 'PAS'
+	String get periodeUAS => 'PAS';
 
 	/// en: 'I'dad Tahsin'
 	String get tipeIdadTahsin => 'I\'dad Tahsin';
@@ -3442,8 +3442,8 @@ extension on Translations {
 			case 'targetHafalan.belumDitetapkan': return 'Not Set';
 			case 'targetHafalan.semester1': return 'Semester 1';
 			case 'targetHafalan.semester2': return 'Semester 2';
-			case 'targetHafalan.periodeUTS': return 'Midterm';
-			case 'targetHafalan.periodeUAS': return 'Finals';
+			case 'targetHafalan.periodeUTS': return 'PTS';
+			case 'targetHafalan.periodeUAS': return 'PAS';
 			case 'targetHafalan.tipeIdadTahsin': return 'I\'dad Tahsin';
 			case 'targetHafalan.tipeDauroh': return 'Dauroh';
 			case 'targetHafalan.tipeMurajaah': return 'Review (Muraja\'ah)';
