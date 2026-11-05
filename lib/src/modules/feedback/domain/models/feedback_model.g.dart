@@ -25,6 +25,14 @@ _FeedbackModel _$FeedbackModelFromJson(Map<String, dynamic> json) =>
       deviceModel: json['deviceModel'] as String,
       osVersion: json['osVersion'] as String,
       status: json['status'] as String? ?? 'open',
+      adminResponse: json['adminResponse'] as String?,
+      resolvedAt: json['resolvedAt'] == null
+          ? null
+          : DateTime.parse(json['resolvedAt'] as String),
+      resolvedBy: json['resolvedBy'] as String?,
+      resolvedNotifiedAt: json['resolvedNotifiedAt'] == null
+          ? null
+          : DateTime.parse(json['resolvedNotifiedAt'] as String),
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),
@@ -45,5 +53,9 @@ Map<String, dynamic> _$FeedbackModelToJson(_FeedbackModel instance) =>
       'deviceModel': instance.deviceModel,
       'osVersion': instance.osVersion,
       'status': instance.status,
+      'adminResponse': instance.adminResponse,
+      'resolvedAt': instance.resolvedAt?.toIso8601String(),
+      'resolvedBy': instance.resolvedBy,
+      'resolvedNotifiedAt': instance.resolvedNotifiedAt?.toIso8601String(),
       'createdAt': instance.createdAt?.toIso8601String(),
     };

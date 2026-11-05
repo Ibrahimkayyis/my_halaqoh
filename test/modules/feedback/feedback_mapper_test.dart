@@ -87,5 +87,43 @@ void main() {
       expect(fromJson.category, 'pertanyaan');
       expect(fromJson.status, 'open');
     });
+
+    test('FeedbackModel handles resolution fields correctly', () {
+      final resolvedDate = DateTime(2026, 11, 4, 15, 30);
+      final notifiedDate = DateTime(2026, 11, 4, 15, 31);
+      final model = FeedbackModel(
+        id: 'fb_resolved_001',
+        userId: 'user_guru_01',
+        userName: 'Ustadz Mansur',
+        userRole: 'guru',
+        userIdentifier: '19900101',
+        category: 'bug',
+        title: 'Tombol simpan disable',
+        description: 'Tombol simpan tidak dapat ditekan setelah pilih santri.',
+        appVersion: '1.0.0+1',
+        deviceModel: 'Samsung A52',
+        osVersion: 'Android 13',
+        status: 'resolved',
+        adminResponse: 'Bug ini telah kami perbaiki pada versi terbaru. Silakan coba kembali.',
+        resolvedAt: resolvedDate,
+        resolvedBy: 'Admin Pusat',
+        resolvedNotifiedAt: notifiedDate,
+      );
+
+      final map = FeedbackMapper.toFirestore(model);
+      expect(map['status'], 'resolved');
+      expect(map['adminResponse'], contains('Bug ini telah kami perbaiki'));
+      expect(map['resolvedBy'], 'Admin Pusat');
+      expect(map['resolvedAt'], isA<Timestamp>());
+      expect(map['resolvedNotifiedAt'], isA<Timestamp>());
+
+      final json = model.toJson();
+      final fromJson = FeedbackModel.fromJson(json);
+      expect(fromJson.status, 'resolved');
+      expect(fromJson.adminResponse, model.adminResponse);
+      expect(fromJson.resolvedBy, 'Admin Pusat');
+      expect(fromJson.resolvedAt, resolvedDate);
+      expect(fromJson.resolvedNotifiedAt, notifiedDate);
+    });
   });
 }

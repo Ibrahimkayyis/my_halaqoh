@@ -15,6 +15,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_cubit.dart';
 import 'package:my_halaqoh/src/modules/notifications/presentation/cubits/notification_badge_state.dart';
 import 'package:my_halaqoh/src/modules/notifications/domain/models/wali_santri_notification_item.dart';
+import 'package:my_halaqoh/src/modules/feedback/data/datasources/remote/mapper/feedback_mapper.dart';
+import 'package:my_halaqoh/src/modules/feedback/domain/models/feedback_model.dart';
+import 'package:my_halaqoh/src/modules/feedback/presentation/widgets/detail_feedback_sheet.dart';
 import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/data/datasources/remote/mapper/sertifikasi_mapper.dart';
 import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/domain/models/sertifikasi_model.dart';
 import 'package:my_halaqoh/src/modules/sertifikasi_tahfidz/presentation/widgets/detail_sertifikasi_sheet.dart';
@@ -152,6 +155,27 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
     }
 
     if (!mounted) return;
+
+    if (item.category == 'feedback') {
+      final cachedModel = item.metadata?['feedbackModel'] as FeedbackModel?;
+      if (cachedModel != null) {
+        DetailFeedbackSheet.show(context, cachedModel);
+        return;
+      }
+      if (item.entityId != null && item.entityId!.isNotEmpty) {
+        final doc = await FirebaseFirestore.instance
+            .collection('feedback')
+            .doc(item.entityId!)
+            .get();
+        if (doc.exists && mounted) {
+          DetailFeedbackSheet.show(
+            context,
+            FeedbackMapper.fromFirestore(doc),
+          );
+        }
+      }
+      return;
+    }
 
     if (item.category == 'sertifikasi') {
       final cachedModel = item.metadata?['sertifikasiModel'] as SertifikasiModel?;
@@ -338,6 +362,9 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                     SizedBox(width: 8.w),
                     _buildCategoryChip(
                         'Sertifikasi', 'sertifikasi', null, colors, textTheme),
+                    SizedBox(width: 8.w),
+                    _buildCategoryChip(
+                        'Masukan', 'feedback', null, colors, textTheme),
                   ],
                 ),
               ),
@@ -508,6 +535,11 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
         icon = Icons.workspace_premium_rounded;
         iconColor = colors.primary;
         categoryName = 'Sertifikasi';
+        break;
+      case 'feedback':
+        icon = Icons.feedback_rounded;
+        iconColor = colors.primary;
+        categoryName = 'Masukan';
         break;
       default:
         icon = Icons.notifications_rounded;

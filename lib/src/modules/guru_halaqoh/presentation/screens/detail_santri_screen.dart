@@ -617,24 +617,8 @@ class DetailSantriScreen extends StatelessWidget implements AutoRouteWrapper {
         : 0.0;
     final double percentValueExtra = progressExtra * 100;
 
-    String formatPercent(double v) {
-      if (v == 0) return '0';
-      if (v >= 1) {
-        final rounded = double.parse(v.toStringAsFixed(1));
-        return rounded == rounded.roundToDouble()
-            ? rounded.toInt().toString()
-            : rounded.toStringAsFixed(1);
-      }
-      final s = v.toStringAsFixed(2);
-      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
-    }
-
-    String formatJuz(double v) {
-      if (v == 0) return '0';
-      if (v == v.roundToDouble()) return v.toInt().toString();
-      final s = v.toStringAsFixed(2);
-      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
-    }
+    String formatPercent(double v) => TargetHafalanHelper.formatPercent(v);
+    String formatJuz(double v) => TargetHafalanHelper.formatJuz(v);
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20.w),

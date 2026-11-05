@@ -10,6 +10,7 @@ import { seedAdmin } from "./adminSeeder";
 import { sendAbsensiNotification } from "./sendAbsensiNotification";
 import { sendHafalanNotification } from "./sendHafalanNotification";
 import { sendSertifikasiNotification } from "./sendSertifikasiNotification";
+import { sendFeedbackNotification } from "./sendFeedbackNotification";
 import { resetUserPassword } from "./resetUserPassword";
 import { bulkCreateUserAccounts } from "./bulkCreateUserAccounts";
 import { deleteOwnAccount } from "./deleteOwnAccount";
@@ -35,6 +36,7 @@ export {
     sendAbsensiNotification,
     sendHafalanNotification,
     sendSertifikasiNotification,
+    sendFeedbackNotification,
     resetUserPassword,
     bulkCreateUserAccounts,
     deleteOwnAccount,

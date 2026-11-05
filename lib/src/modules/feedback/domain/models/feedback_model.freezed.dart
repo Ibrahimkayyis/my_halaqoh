@@ -28,7 +28,11 @@ mixin _$FeedbackModel {
  String get appVersion;/// Device manufacturer & model (e.g. "Samsung Galaxy A52")
  String get deviceModel;/// Operating system version (e.g. "Android 13 (SDK 33)")
  String get osVersion;/// Current handling status: 'open', 'in_progress', 'resolved'
- String get status;/// Timestamp when the feedback was created
+ String get status;/// Admin response or resolution note
+ String? get adminResponse;/// Timestamp when the feedback was resolved
+ DateTime? get resolvedAt;/// Admin user display name or identifier who handled the feedback
+ String? get resolvedBy;/// Timestamp when resolution notification was sent to user (deduplication flag)
+ DateTime? get resolvedNotifiedAt;/// Timestamp when the feedback was created
  DateTime? get createdAt;
 /// Create a copy of FeedbackModel
 /// with the given fields replaced by the non-null parameter values.
@@ -42,16 +46,16 @@ $FeedbackModelCopyWith<FeedbackModel> get copyWith => _$FeedbackModelCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FeedbackModel&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.userRole, userRole) || other.userRole == userRole)&&(identical(other.userIdentifier, userIdentifier) || other.userIdentifier == userIdentifier)&&(identical(other.category, category) || other.category == category)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other.attachmentUrls, attachmentUrls)&&(identical(other.appVersion, appVersion) || other.appVersion == appVersion)&&(identical(other.deviceModel, deviceModel) || other.deviceModel == deviceModel)&&(identical(other.osVersion, osVersion) || other.osVersion == osVersion)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FeedbackModel&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.userRole, userRole) || other.userRole == userRole)&&(identical(other.userIdentifier, userIdentifier) || other.userIdentifier == userIdentifier)&&(identical(other.category, category) || other.category == category)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other.attachmentUrls, attachmentUrls)&&(identical(other.appVersion, appVersion) || other.appVersion == appVersion)&&(identical(other.deviceModel, deviceModel) || other.deviceModel == deviceModel)&&(identical(other.osVersion, osVersion) || other.osVersion == osVersion)&&(identical(other.status, status) || other.status == status)&&(identical(other.adminResponse, adminResponse) || other.adminResponse == adminResponse)&&(identical(other.resolvedAt, resolvedAt) || other.resolvedAt == resolvedAt)&&(identical(other.resolvedBy, resolvedBy) || other.resolvedBy == resolvedBy)&&(identical(other.resolvedNotifiedAt, resolvedNotifiedAt) || other.resolvedNotifiedAt == resolvedNotifiedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,userName,userRole,userIdentifier,category,title,description,const DeepCollectionEquality().hash(attachmentUrls),appVersion,deviceModel,osVersion,status,createdAt);
+int get hashCode => Object.hash(runtimeType,id,userId,userName,userRole,userIdentifier,category,title,description,const DeepCollectionEquality().hash(attachmentUrls),appVersion,deviceModel,osVersion,status,adminResponse,resolvedAt,resolvedBy,resolvedNotifiedAt,createdAt);
 
 @override
 String toString() {
-  return 'FeedbackModel(id: $id, userId: $userId, userName: $userName, userRole: $userRole, userIdentifier: $userIdentifier, category: $category, title: $title, description: $description, attachmentUrls: $attachmentUrls, appVersion: $appVersion, deviceModel: $deviceModel, osVersion: $osVersion, status: $status, createdAt: $createdAt)';
+  return 'FeedbackModel(id: $id, userId: $userId, userName: $userName, userRole: $userRole, userIdentifier: $userIdentifier, category: $category, title: $title, description: $description, attachmentUrls: $attachmentUrls, appVersion: $appVersion, deviceModel: $deviceModel, osVersion: $osVersion, status: $status, adminResponse: $adminResponse, resolvedAt: $resolvedAt, resolvedBy: $resolvedBy, resolvedNotifiedAt: $resolvedNotifiedAt, createdAt: $createdAt)';
 }
 
 
@@ -62,7 +66,7 @@ abstract mixin class $FeedbackModelCopyWith<$Res>  {
   factory $FeedbackModelCopyWith(FeedbackModel value, $Res Function(FeedbackModel) _then) = _$FeedbackModelCopyWithImpl;
 @useResult
 $Res call({
- String? id, String userId, String userName, String userRole, String userIdentifier, String category, String title, String description, List<String> attachmentUrls, String appVersion, String deviceModel, String osVersion, String status, DateTime? createdAt
+ String? id, String userId, String userName, String userRole, String userIdentifier, String category, String title, String description, List<String> attachmentUrls, String appVersion, String deviceModel, String osVersion, String status, String? adminResponse, DateTime? resolvedAt, String? resolvedBy, DateTime? resolvedNotifiedAt, DateTime? createdAt
 });
 
 
@@ -79,7 +83,7 @@ class _$FeedbackModelCopyWithImpl<$Res>
 
 /// Create a copy of FeedbackModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? userId = null,Object? userName = null,Object? userRole = null,Object? userIdentifier = null,Object? category = null,Object? title = null,Object? description = null,Object? attachmentUrls = null,Object? appVersion = null,Object? deviceModel = null,Object? osVersion = null,Object? status = null,Object? createdAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? userId = null,Object? userName = null,Object? userRole = null,Object? userIdentifier = null,Object? category = null,Object? title = null,Object? description = null,Object? attachmentUrls = null,Object? appVersion = null,Object? deviceModel = null,Object? osVersion = null,Object? status = null,Object? adminResponse = freezed,Object? resolvedAt = freezed,Object? resolvedBy = freezed,Object? resolvedNotifiedAt = freezed,Object? createdAt = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -94,7 +98,11 @@ as List<String>,appVersion: null == appVersion ? _self.appVersion : appVersion /
 as String,deviceModel: null == deviceModel ? _self.deviceModel : deviceModel // ignore: cast_nullable_to_non_nullable
 as String,osVersion: null == osVersion ? _self.osVersion : osVersion // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,adminResponse: freezed == adminResponse ? _self.adminResponse : adminResponse // ignore: cast_nullable_to_non_nullable
+as String?,resolvedAt: freezed == resolvedAt ? _self.resolvedAt : resolvedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,resolvedBy: freezed == resolvedBy ? _self.resolvedBy : resolvedBy // ignore: cast_nullable_to_non_nullable
+as String?,resolvedNotifiedAt: freezed == resolvedNotifiedAt ? _self.resolvedNotifiedAt : resolvedNotifiedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }
@@ -180,10 +188,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String userId,  String userName,  String userRole,  String userIdentifier,  String category,  String title,  String description,  List<String> attachmentUrls,  String appVersion,  String deviceModel,  String osVersion,  String status,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String userId,  String userName,  String userRole,  String userIdentifier,  String category,  String title,  String description,  List<String> attachmentUrls,  String appVersion,  String deviceModel,  String osVersion,  String status,  String? adminResponse,  DateTime? resolvedAt,  String? resolvedBy,  DateTime? resolvedNotifiedAt,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FeedbackModel() when $default != null:
-return $default(_that.id,_that.userId,_that.userName,_that.userRole,_that.userIdentifier,_that.category,_that.title,_that.description,_that.attachmentUrls,_that.appVersion,_that.deviceModel,_that.osVersion,_that.status,_that.createdAt);case _:
+return $default(_that.id,_that.userId,_that.userName,_that.userRole,_that.userIdentifier,_that.category,_that.title,_that.description,_that.attachmentUrls,_that.appVersion,_that.deviceModel,_that.osVersion,_that.status,_that.adminResponse,_that.resolvedAt,_that.resolvedBy,_that.resolvedNotifiedAt,_that.createdAt);case _:
   return orElse();
 
 }
@@ -201,10 +209,10 @@ return $default(_that.id,_that.userId,_that.userName,_that.userRole,_that.userId
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String userId,  String userName,  String userRole,  String userIdentifier,  String category,  String title,  String description,  List<String> attachmentUrls,  String appVersion,  String deviceModel,  String osVersion,  String status,  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String userId,  String userName,  String userRole,  String userIdentifier,  String category,  String title,  String description,  List<String> attachmentUrls,  String appVersion,  String deviceModel,  String osVersion,  String status,  String? adminResponse,  DateTime? resolvedAt,  String? resolvedBy,  DateTime? resolvedNotifiedAt,  DateTime? createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _FeedbackModel():
-return $default(_that.id,_that.userId,_that.userName,_that.userRole,_that.userIdentifier,_that.category,_that.title,_that.description,_that.attachmentUrls,_that.appVersion,_that.deviceModel,_that.osVersion,_that.status,_that.createdAt);case _:
+return $default(_that.id,_that.userId,_that.userName,_that.userRole,_that.userIdentifier,_that.category,_that.title,_that.description,_that.attachmentUrls,_that.appVersion,_that.deviceModel,_that.osVersion,_that.status,_that.adminResponse,_that.resolvedAt,_that.resolvedBy,_that.resolvedNotifiedAt,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -221,10 +229,10 @@ return $default(_that.id,_that.userId,_that.userName,_that.userRole,_that.userId
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String userId,  String userName,  String userRole,  String userIdentifier,  String category,  String title,  String description,  List<String> attachmentUrls,  String appVersion,  String deviceModel,  String osVersion,  String status,  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String userId,  String userName,  String userRole,  String userIdentifier,  String category,  String title,  String description,  List<String> attachmentUrls,  String appVersion,  String deviceModel,  String osVersion,  String status,  String? adminResponse,  DateTime? resolvedAt,  String? resolvedBy,  DateTime? resolvedNotifiedAt,  DateTime? createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _FeedbackModel() when $default != null:
-return $default(_that.id,_that.userId,_that.userName,_that.userRole,_that.userIdentifier,_that.category,_that.title,_that.description,_that.attachmentUrls,_that.appVersion,_that.deviceModel,_that.osVersion,_that.status,_that.createdAt);case _:
+return $default(_that.id,_that.userId,_that.userName,_that.userRole,_that.userIdentifier,_that.category,_that.title,_that.description,_that.attachmentUrls,_that.appVersion,_that.deviceModel,_that.osVersion,_that.status,_that.adminResponse,_that.resolvedAt,_that.resolvedBy,_that.resolvedNotifiedAt,_that.createdAt);case _:
   return null;
 
 }
@@ -236,7 +244,7 @@ return $default(_that.id,_that.userId,_that.userName,_that.userRole,_that.userId
 @JsonSerializable()
 
 class _FeedbackModel implements FeedbackModel {
-  const _FeedbackModel({this.id, required this.userId, required this.userName, required this.userRole, required this.userIdentifier, required this.category, required this.title, required this.description, final  List<String> attachmentUrls = const [], required this.appVersion, required this.deviceModel, required this.osVersion, this.status = 'open', this.createdAt}): _attachmentUrls = attachmentUrls;
+  const _FeedbackModel({this.id, required this.userId, required this.userName, required this.userRole, required this.userIdentifier, required this.category, required this.title, required this.description, final  List<String> attachmentUrls = const [], required this.appVersion, required this.deviceModel, required this.osVersion, this.status = 'open', this.adminResponse, this.resolvedAt, this.resolvedBy, this.resolvedNotifiedAt, this.createdAt}): _attachmentUrls = attachmentUrls;
   factory _FeedbackModel.fromJson(Map<String, dynamic> json) => _$FeedbackModelFromJson(json);
 
 /// Firestore document ID (null before creation)
@@ -272,6 +280,14 @@ class _FeedbackModel implements FeedbackModel {
 @override final  String osVersion;
 /// Current handling status: 'open', 'in_progress', 'resolved'
 @override@JsonKey() final  String status;
+/// Admin response or resolution note
+@override final  String? adminResponse;
+/// Timestamp when the feedback was resolved
+@override final  DateTime? resolvedAt;
+/// Admin user display name or identifier who handled the feedback
+@override final  String? resolvedBy;
+/// Timestamp when resolution notification was sent to user (deduplication flag)
+@override final  DateTime? resolvedNotifiedAt;
 /// Timestamp when the feedback was created
 @override final  DateTime? createdAt;
 
@@ -288,16 +304,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FeedbackModel&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.userRole, userRole) || other.userRole == userRole)&&(identical(other.userIdentifier, userIdentifier) || other.userIdentifier == userIdentifier)&&(identical(other.category, category) || other.category == category)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other._attachmentUrls, _attachmentUrls)&&(identical(other.appVersion, appVersion) || other.appVersion == appVersion)&&(identical(other.deviceModel, deviceModel) || other.deviceModel == deviceModel)&&(identical(other.osVersion, osVersion) || other.osVersion == osVersion)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FeedbackModel&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.userRole, userRole) || other.userRole == userRole)&&(identical(other.userIdentifier, userIdentifier) || other.userIdentifier == userIdentifier)&&(identical(other.category, category) || other.category == category)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other._attachmentUrls, _attachmentUrls)&&(identical(other.appVersion, appVersion) || other.appVersion == appVersion)&&(identical(other.deviceModel, deviceModel) || other.deviceModel == deviceModel)&&(identical(other.osVersion, osVersion) || other.osVersion == osVersion)&&(identical(other.status, status) || other.status == status)&&(identical(other.adminResponse, adminResponse) || other.adminResponse == adminResponse)&&(identical(other.resolvedAt, resolvedAt) || other.resolvedAt == resolvedAt)&&(identical(other.resolvedBy, resolvedBy) || other.resolvedBy == resolvedBy)&&(identical(other.resolvedNotifiedAt, resolvedNotifiedAt) || other.resolvedNotifiedAt == resolvedNotifiedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,userName,userRole,userIdentifier,category,title,description,const DeepCollectionEquality().hash(_attachmentUrls),appVersion,deviceModel,osVersion,status,createdAt);
+int get hashCode => Object.hash(runtimeType,id,userId,userName,userRole,userIdentifier,category,title,description,const DeepCollectionEquality().hash(_attachmentUrls),appVersion,deviceModel,osVersion,status,adminResponse,resolvedAt,resolvedBy,resolvedNotifiedAt,createdAt);
 
 @override
 String toString() {
-  return 'FeedbackModel(id: $id, userId: $userId, userName: $userName, userRole: $userRole, userIdentifier: $userIdentifier, category: $category, title: $title, description: $description, attachmentUrls: $attachmentUrls, appVersion: $appVersion, deviceModel: $deviceModel, osVersion: $osVersion, status: $status, createdAt: $createdAt)';
+  return 'FeedbackModel(id: $id, userId: $userId, userName: $userName, userRole: $userRole, userIdentifier: $userIdentifier, category: $category, title: $title, description: $description, attachmentUrls: $attachmentUrls, appVersion: $appVersion, deviceModel: $deviceModel, osVersion: $osVersion, status: $status, adminResponse: $adminResponse, resolvedAt: $resolvedAt, resolvedBy: $resolvedBy, resolvedNotifiedAt: $resolvedNotifiedAt, createdAt: $createdAt)';
 }
 
 
@@ -308,7 +324,7 @@ abstract mixin class _$FeedbackModelCopyWith<$Res> implements $FeedbackModelCopy
   factory _$FeedbackModelCopyWith(_FeedbackModel value, $Res Function(_FeedbackModel) _then) = __$FeedbackModelCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, String userId, String userName, String userRole, String userIdentifier, String category, String title, String description, List<String> attachmentUrls, String appVersion, String deviceModel, String osVersion, String status, DateTime? createdAt
+ String? id, String userId, String userName, String userRole, String userIdentifier, String category, String title, String description, List<String> attachmentUrls, String appVersion, String deviceModel, String osVersion, String status, String? adminResponse, DateTime? resolvedAt, String? resolvedBy, DateTime? resolvedNotifiedAt, DateTime? createdAt
 });
 
 
@@ -325,7 +341,7 @@ class __$FeedbackModelCopyWithImpl<$Res>
 
 /// Create a copy of FeedbackModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? userId = null,Object? userName = null,Object? userRole = null,Object? userIdentifier = null,Object? category = null,Object? title = null,Object? description = null,Object? attachmentUrls = null,Object? appVersion = null,Object? deviceModel = null,Object? osVersion = null,Object? status = null,Object? createdAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? userId = null,Object? userName = null,Object? userRole = null,Object? userIdentifier = null,Object? category = null,Object? title = null,Object? description = null,Object? attachmentUrls = null,Object? appVersion = null,Object? deviceModel = null,Object? osVersion = null,Object? status = null,Object? adminResponse = freezed,Object? resolvedAt = freezed,Object? resolvedBy = freezed,Object? resolvedNotifiedAt = freezed,Object? createdAt = freezed,}) {
   return _then(_FeedbackModel(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -340,7 +356,11 @@ as List<String>,appVersion: null == appVersion ? _self.appVersion : appVersion /
 as String,deviceModel: null == deviceModel ? _self.deviceModel : deviceModel // ignore: cast_nullable_to_non_nullable
 as String,osVersion: null == osVersion ? _self.osVersion : osVersion // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,adminResponse: freezed == adminResponse ? _self.adminResponse : adminResponse // ignore: cast_nullable_to_non_nullable
+as String?,resolvedAt: freezed == resolvedAt ? _self.resolvedAt : resolvedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,resolvedBy: freezed == resolvedBy ? _self.resolvedBy : resolvedBy // ignore: cast_nullable_to_non_nullable
+as String?,resolvedNotifiedAt: freezed == resolvedNotifiedAt ? _self.resolvedNotifiedAt : resolvedNotifiedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }

@@ -87,26 +87,8 @@ class WaliSantriProgressCard extends StatelessWidget {
     final double progressExtra = juzTargetExtra > 0 ? (extraJuzCompleted / juzTargetExtra).clamp(0.0, 1.0) : 0.0;
     final double percentValueExtra = progressExtra * 100;
 
-    // Format percentage accurately: show up to 2 decimal places, trim trailing zeros
-    String formatPercent(double v) {
-      if (v == 0) return '0';
-      if (v >= 1) {
-        final rounded = double.parse(v.toStringAsFixed(1));
-        return rounded == rounded.roundToDouble()
-            ? rounded.toInt().toString()
-            : rounded.toStringAsFixed(1);
-      }
-      final s = v.toStringAsFixed(2);
-      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
-    }
-
-    // Format juzCompleted to remove .0 if it's a whole number, otherwise show 2 decimals
-    String formatJuz(double v) {
-      if (v == 0) return '0';
-      if (v == v.roundToDouble()) return v.toInt().toString();
-      final s = v.toStringAsFixed(2);
-      return s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
-    }
+    String formatPercent(double v) => TargetHafalanHelper.formatPercent(v);
+    String formatJuz(double v) => TargetHafalanHelper.formatJuz(v);
 
     return Container(
       width: double.infinity,

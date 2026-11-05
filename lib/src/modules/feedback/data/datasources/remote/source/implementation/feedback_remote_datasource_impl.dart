@@ -139,10 +139,15 @@ Lampiran: ${feedback.attachmentUrls.join(', ')}
       final snapshot = await _firestore
           .collection('feedback')
           .where('userId', isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return snapshot.docs.map(FeedbackMapper.fromFirestore).toList();
+      final list = snapshot.docs.map(FeedbackMapper.fromFirestore).toList();
+      list.sort((a, b) {
+        final aDate = a.createdAt ?? DateTime(2000);
+        final bDate = b.createdAt ?? DateTime(2000);
+        return bDate.compareTo(aDate);
+      });
+      return list;
     } catch (e, stack) {
       _logger.e('Error getting user feedback', error: e, stackTrace: stack);
       rethrow;

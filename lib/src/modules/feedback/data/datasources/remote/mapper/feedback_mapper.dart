@@ -25,6 +25,10 @@ class FeedbackMapper {
       deviceModel: data['deviceModel'] as String? ?? '',
       osVersion: data['osVersion'] as String? ?? '',
       status: data['status'] as String? ?? 'open',
+      adminResponse: data['adminResponse'] as String?,
+      resolvedAt: (data['resolvedAt'] as Timestamp?)?.toDate(),
+      resolvedBy: data['resolvedBy'] as String?,
+      resolvedNotifiedAt: (data['resolvedNotifiedAt'] as Timestamp?)?.toDate(),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
     );
   }
@@ -44,6 +48,14 @@ class FeedbackMapper {
       'deviceModel': model.deviceModel,
       'osVersion': model.osVersion,
       'status': model.status,
+      'adminResponse': model.adminResponse,
+      'resolvedAt': model.resolvedAt != null
+          ? Timestamp.fromDate(model.resolvedAt!)
+          : null,
+      'resolvedBy': model.resolvedBy,
+      'resolvedNotifiedAt': model.resolvedNotifiedAt != null
+          ? Timestamp.fromDate(model.resolvedNotifiedAt!)
+          : null,
       'createdAt': model.createdAt != null
           ? Timestamp.fromDate(model.createdAt!)
           : FieldValue.serverTimestamp(),
