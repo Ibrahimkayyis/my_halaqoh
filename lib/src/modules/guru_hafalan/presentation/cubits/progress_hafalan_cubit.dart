@@ -36,9 +36,9 @@ class ProgressHafalanCubit extends Cubit<ProgressHafalanState> {
       onError: (e) => emit(ProgressHafalanState.error(e.toString())),
     );
 
-    // Non-blocking seed: if Hive is empty for this santri, fetch from Firestore.
+    // Non-blocking fetch: ensure local cache has all latest records from Firestore.
     // The stream listener above will automatically receive the newly seeded data.
-    _repository.seedFromRemoteIfEmpty(santriId);
+    _repository.forceRefreshFromRemote(santriId);
   }
 
   @override

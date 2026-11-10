@@ -449,7 +449,7 @@ class _MyHalaqohScreenState extends State<MyHalaqohScreen> {
                                   : 0.0;
 
                               final progress = targetJuz > 0
-                                  ? completed / targetJuz
+                                  ? (completed / targetJuz).clamp(0.0, 1.0)
                                   : 0.0;
                               final pct = TargetHafalanHelper.formatPercent(progress * 100);
 

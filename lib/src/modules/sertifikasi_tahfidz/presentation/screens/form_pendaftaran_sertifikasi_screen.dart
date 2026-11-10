@@ -72,7 +72,7 @@ class _FormPendaftaranSertifikasiScreenState
     super.dispose();
   }
 
-  void _loadCompletedJuzForSantri(String santriId) {
+  void _loadCompletedJuzForSantri(String santriId) async {
     setState(() {
       _isLoadingCompletedJuz = true;
       _completedJuz = [];
@@ -93,7 +93,7 @@ class _FormPendaftaranSertifikasiScreenState
 
         final progress = QuranService.instance.calculateProgress(segments);
         final completed = progress.juzProgressList
-            .where((j) => j.percentage >= 100 || j.memorizedAyat >= j.totalAyat)
+            .where((j) => j.totalAyat > 0 && j.isComplete)
             .map((j) => j.juzNumber)
             .toList()
           ..sort();
@@ -101,7 +101,6 @@ class _FormPendaftaranSertifikasiScreenState
         if (mounted) {
           setState(() {
             _completedJuz = completed;
-            _isLoadingCompletedJuz = false;
 
             if (_selectedJuz != null && !completed.contains(_selectedJuz)) {
               _selectedJuz = completed.isNotEmpty ? completed.first : null;
@@ -121,7 +120,12 @@ class _FormPendaftaranSertifikasiScreenState
       },
     );
 
-    sl<HafalanSantriRepository>().seedFromRemoteIfEmpty(santriId);
+    await sl<HafalanSantriRepository>().forceRefreshFromRemote(santriId);
+    if (mounted) {
+      setState(() {
+        _isLoadingCompletedJuz = false;
+      });
+    }
   }
 
   void _handleSubmit({

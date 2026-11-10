@@ -124,14 +124,13 @@ class _WaliSantriProgressPerSuratScreenState
           final surahProg = juzProgress.surahProgressList
               .firstWhere((sp) => sp.surahId == seg.surahId);
           
-          final memorizedLimit = seg.ayatStart + surahProg.memorizedAyat - 1;
-          if (surahProg.memorizedAyat > 0) {
-            final start = match.ayatStart > seg.ayatStart ? match.ayatStart : seg.ayatStart;
-            final end = match.ayatEnd < memorizedLimit ? match.ayatEnd : memorizedLimit;
-            if (start <= end) {
-              memorized = end - start + 1;
-            }
-          }
+          final start = match.ayatStart > seg.ayatStart ? match.ayatStart : seg.ayatStart;
+          final end = match.ayatEnd < seg.ayatEnd ? match.ayatEnd : seg.ayatEnd;
+          memorized = surahProg.countMemorizedInSubRange(
+            start,
+            end,
+            segmentStart: seg.ayatStart,
+          );
         } catch (_) {}
       }
 

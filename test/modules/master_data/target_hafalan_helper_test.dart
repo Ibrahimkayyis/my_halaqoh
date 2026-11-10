@@ -182,5 +182,129 @@ void main() {
         }
       }
     });
+
+    test('Class 12 Takhassus: Juz 26-30 complete + Juz 25 missing Fussilat 47-54 yields 5.96 Juz (not 6.13)', () {
+      final targetModel = TargetHafalanModel(
+        id: '12_Takhassus',
+        kelas: '12',
+        program: 'Takhassus',
+        semesterAktif: 1,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final setoranSegments = <Map<String, int>>[];
+      // Complete Juz 26-30
+      for (int j = 26; j <= 30; j++) {
+        final juz = QuranService.instance.getJuzByNumber(j)!;
+        for (final seg in juz.surahs) {
+          setoranSegments.add({
+            'surah_id': seg.surahId,
+            'ayat_start': seg.ayatStart,
+            'ayat_end': seg.ayatEnd,
+          });
+        }
+      }
+      // Juz 25 without Surah 41 (Fussilat 47-54) -> 238/246 ayat
+      final juz25 = QuranService.instance.getJuzByNumber(25)!;
+      for (final seg in juz25.surahs.where((s) => s.surahId != 41)) {
+        setoranSegments.add({
+          'surah_id': seg.surahId,
+          'ayat_start': seg.ayatStart,
+          'ayat_end': seg.ayatEnd,
+        });
+      }
+
+      final progressPartial = QuranService.instance.calculateProgress(setoranSegments);
+      final juz25Prog = progressPartial.juzProgressList.firstWhere((j) => j.juzNumber == 25);
+      expect(juz25Prog.memorizedAyat, 238);
+      expect(juz25Prog.totalAyat, 246);
+      expect(juz25Prog.isComplete, isFalse);
+      expect(TargetHafalanHelper.formatPercent(juz25Prog.percentage * 100), '96.74');
+
+      final completedPartial = TargetHafalanHelper.getCompletedJuzCountDouble(
+        targetModel: targetModel,
+        kelas: '12',
+        programCode: 'T',
+        progressData: progressPartial,
+      );
+      expect(completedPartial, closeTo(5 + 238 / 246, 0.0001));
+      expect(TargetHafalanHelper.formatJuz(completedPartial), '5.96');
+
+      // Adding Fussilat 47-54 makes Juz 25 complete and total exactly 6 Juz
+      setoranSegments.add({'surah_id': 41, 'ayat_start': 47, 'ayat_end': 54});
+      final progressFull = QuranService.instance.calculateProgress(setoranSegments);
+      final completedFull = TargetHafalanHelper.getCompletedJuzCountDouble(
+        targetModel: targetModel,
+        kelas: '12',
+        programCode: 'T',
+        progressData: progressFull,
+      );
+      expect(completedFull, closeTo(6.0, 0.0001));
+      expect(TargetHafalanHelper.formatJuz(completedFull), '6');
+    });
+
+    test('Class 11 Takhassus unequal multi-juz period [27, 26]: 1 complete juz always equals 1.0', () {
+      final targetModel = TargetHafalanModel(
+        id: '11_Takhassus',
+        kelas: '11',
+        program: 'Takhassus',
+        semesterAktif: 1,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      // Complete Juz 30, 29, 28 (3 Juz) + ONLY Juz 27 (399 ayat, vs Juz 26 195 ayat)
+      final baseSegments = <Map<String, int>>[];
+      for (int j = 28; j <= 30; j++) {
+        for (final seg in QuranService.instance.getJuzByNumber(j)!.surahs) {
+          baseSegments.add({'surah_id': seg.surahId, 'ayat_start': seg.ayatStart, 'ayat_end': seg.ayatEnd});
+        }
+      }
+
+      final onlyJuz27 = [
+        ...baseSegments,
+        for (final seg in QuranService.instance.getJuzByNumber(27)!.surahs)
+          {'surah_id': seg.surahId, 'ayat_start': seg.ayatStart, 'ayat_end': seg.ayatEnd},
+      ];
+      final res27 = TargetHafalanHelper.getCompletedJuzCountDouble(
+        targetModel: targetModel,
+        kelas: '11',
+        programCode: 'T',
+        progressData: QuranService.instance.calculateProgress(onlyJuz27),
+      );
+      expect(res27, closeTo(4.0, 0.0001));
+
+      final onlyJuz26 = [
+        ...baseSegments,
+        for (final seg in QuranService.instance.getJuzByNumber(26)!.surahs)
+          {'surah_id': seg.surahId, 'ayat_start': seg.ayatStart, 'ayat_end': seg.ayatEnd},
+      ];
+      final res26 = TargetHafalanHelper.getCompletedJuzCountDouble(
+        targetModel: targetModel,
+        kelas: '11',
+        programCode: 'T',
+        progressData: QuranService.instance.calculateProgress(onlyJuz26),
+      );
+      expect(res26, closeTo(4.0, 0.0001));
+    });
+
+    test('Out-of-order sub-range memorization (Al-Baqarah 203-252 before 142-202) counts exact sub-range', () {
+      final progressData = QuranService.instance.calculateProgress([
+        {'surah_id': 2, 'ayat_start': 203, 'ayat_end': 252},
+      ]);
+
+      final utsFraction = TargetHafalanHelper.getCompletedFractionForRanges(
+        [const TargetAyatRange(surahId: 2, ayatStart: 142, ayatEnd: 202)],
+        progressData,
+      );
+      final uasFraction = TargetHafalanHelper.getCompletedFractionForRanges(
+        [const TargetAyatRange(surahId: 2, ayatStart: 203, ayatEnd: 252)],
+        progressData,
+      );
+
+      expect(utsFraction, closeTo(0.0, 0.0001));
+      expect(uasFraction, closeTo(1.0, 0.0001));
+    });
   });
 }

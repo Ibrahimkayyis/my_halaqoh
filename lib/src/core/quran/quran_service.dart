@@ -166,18 +166,19 @@ class QuranService {
         if (surahSegInJuz == null) continue;
 
         final ranges   = bySurah[surah.id] ?? [];
-        final memorized = _countMemorizedInRange(
+        final memorizedSet = _collectMemorizedInRange(
           ranges:     ranges,
           rangeStart: surahSegInJuz.ayatStart,
           rangeEnd:   surahSegInJuz.ayatEnd,
         );
 
-        juzMemorized += memorized;
+        juzMemorized += memorizedSet.length;
         surahProgressList.add(SurahProgress(
-          surahId:       surah.id,
-          surahName:     surah.name,
-          totalAyat:     surahSegInJuz.ayatEnd - surahSegInJuz.ayatStart + 1,
-          memorizedAyat: memorized,
+          surahId:        surah.id,
+          surahName:      surah.name,
+          totalAyat:      surahSegInJuz.ayatEnd - surahSegInJuz.ayatStart + 1,
+          memorizedAyat:  memorizedSet.length,
+          memorizedAyats: memorizedSet,
         ));
       }
 
@@ -201,12 +202,12 @@ class QuranService {
     );
   }
 
-  int _countMemorizedInRange({
+  Set<int> _collectMemorizedInRange({
     required List<_AyatRange> ranges,
     required int rangeStart,
     required int rangeEnd,
   }) {
-    if (ranges.isEmpty) return 0;
+    if (ranges.isEmpty) return const {};
     final memorized = <int>{};
     for (final r in ranges) {
       // Guard: skip if there is no overlap between the memorized range and
@@ -223,7 +224,7 @@ class QuranService {
         memorized.add(a);
       }
     }
-    return memorized.length;
+    return Set.unmodifiable(memorized);
   }
 
   /// Returns all segments for a list of target juz numbers.

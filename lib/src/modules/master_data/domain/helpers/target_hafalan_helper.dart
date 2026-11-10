@@ -198,27 +198,32 @@ class TargetHafalanHelper {
     return _getPeriodeWeight(semester.uts) + _getPeriodeWeight(semester.uas);
   }
 
+  static double? _parseFraksiWeight(String? fraksi) {
+    if (fraksi == null) return null;
+    final clean = fraksi.replaceAll(' Juz', '').trim();
+    if (clean == '½') return 0.5;
+    if (clean == '¾') return 0.75;
+    if (clean == '¼') return 0.25;
+
+    final parts = clean.split('/');
+    if (parts.length == 2) {
+      final num = double.tryParse(parts[0]);
+      final den = double.tryParse(parts[1]);
+      if (num != null && den != null && den != 0) {
+        return num / den;
+      }
+    }
+    return double.tryParse(clean);
+  }
+
   static double _getPeriodeWeight(PeriodeTarget periode) {
     if (periode.tipe != TipeHafalan.ziyadah) {
       return 0.0;
     }
 
-    if (periode.fraksi != null) {
-      final clean = periode.fraksi!.replaceAll(' Juz', '').trim();
-      if (clean == '½') return 0.5;
-      if (clean == '¾') return 0.75;
-      if (clean == '¼') return 0.25;
-
-      final parts = clean.split('/');
-      if (parts.length == 2) {
-        final num = double.tryParse(parts[0]);
-        final den = double.tryParse(parts[1]);
-        if (num != null && den != null && den != 0) {
-          return num / den;
-        }
-      }
-      final parsed = double.tryParse(clean);
-      if (parsed != null) return parsed;
+    final fraksiWeight = _parseFraksiWeight(periode.fraksi);
+    if (fraksiWeight != null) {
+      return fraksiWeight;
     }
 
     return periode.juzList.length.toDouble();
@@ -481,14 +486,13 @@ class TargetHafalanHelper {
               .where((s) => s.surahId == seg.surahId)
               .firstOrNull;
           if (sp != null) {
-            final memorizedLimit = seg.ayatStart + sp.memorizedAyat - 1;
-            if (sp.memorizedAyat > 0) {
-              final start = match.ayatStart > seg.ayatStart ? match.ayatStart : seg.ayatStart;
-              final end = match.ayatEnd < memorizedLimit ? match.ayatEnd : memorizedLimit;
-              if (start <= end) {
-                completedTargetAyat += (end - start + 1);
-              }
-            }
+            final start = match.ayatStart > seg.ayatStart ? match.ayatStart : seg.ayatStart;
+            final end = match.ayatEnd < seg.ayatEnd ? match.ayatEnd : seg.ayatEnd;
+            completedTargetAyat += sp.countMemorizedInSubRange(
+              start,
+              end,
+              segmentStart: seg.ayatStart,
+            );
           }
         }
       }
@@ -556,7 +560,6 @@ class TargetHafalanHelper {
     final cleanKelas = kelas.trim();
     final cleanProgram = program.trim();
 
-    double weight = 0.0;
     final semTarget = CurriculumData.getSemesterTarget(cleanKelas, cleanProgram, semester);
     if (semTarget == null) return 0.0;
     final periode = isUts ? semTarget.uts : semTarget.uas;
@@ -566,33 +569,26 @@ class TargetHafalanHelper {
     }
 
     if (periode.fraksi != null) {
-      final clean = periode.fraksi!.replaceAll(' Juz', '').trim();
-      if (clean == '½') {
-        weight = 0.5;
-      } else if (clean == '¾') {
-        weight = 0.75;
-      } else if (clean == '¼') {
-        weight = 0.25;
-      } else {
-        final parts = clean.split('/');
-        if (parts.length == 2) {
-          final num = double.tryParse(parts[0]);
-          final den = double.tryParse(parts[1]);
-          if (num != null && den != null && den != 0) {
-            weight = num / den;
-          }
-        } else {
-          weight = double.tryParse(clean) ?? 1.0;
-        }
-      }
-    } else {
-      weight = periode.juzList.length.toDouble();
+      final weight = _parseFraksiWeight(periode.fraksi) ?? 1.0;
+      final ranges = _getPeriodeRanges(cleanKelas, cleanProgram, semester, isUts);
+      final fraction = getCompletedFractionForRanges(ranges, progressData);
+      return (weight * fraction).clamp(0.0, weight);
     }
 
-    final ranges = _getPeriodeRanges(cleanKelas, cleanProgram, semester, isUts);
-    final fraction = getCompletedFractionForRanges(ranges, progressData);
-
-    return weight * fraction;
+    // When fraksi is null, each juz in juzList is an independent 1.0 juz target.
+    // Summing each juz's individual ratio (memorizedAyat / totalAyat) prevents
+    // unequal juz lengths (e.g. Juz 25=246 ayat vs Juz 24=175 ayat) from
+    // distorting a single juz above 1.0 or inflating total completed juz.
+    double completedJuzWeight = 0.0;
+    for (final juzNum in periode.juzList) {
+      final jp = progressData.juzProgressList
+          .where((j) => j.juzNumber == juzNum)
+          .firstOrNull;
+      if (jp != null && jp.totalAyat > 0) {
+        completedJuzWeight += (jp.memorizedAyat / jp.totalAyat).clamp(0.0, 1.0);
+      }
+    }
+    return completedJuzWeight;
   }
 
   static double getCompletedFractionForRanges(
@@ -625,18 +621,16 @@ class TargetHafalanHelper {
             .firstOrNull;
         if (sp == null || sp.memorizedAyat <= 0) continue;
 
-        final memorizedLimit = seg.ayatStart + sp.memorizedAyat - 1;
-        final actualStart = segRangeStart;
-        final actualEnd = segRangeEnd < memorizedLimit ? segRangeEnd : memorizedLimit;
-
-        if (actualStart <= actualEnd) {
-          totalCompleted += (actualEnd - actualStart + 1);
-        }
+        totalCompleted += sp.countMemorizedInSubRange(
+          segRangeStart,
+          segRangeEnd,
+          segmentStart: seg.ayatStart,
+        );
       }
     }
 
     if (totalTarget == 0) return 0.0;
-    return totalCompleted / totalTarget;
+    return (totalCompleted / totalTarget).clamp(0.0, 1.0);
   }
 
   static List<TargetAyatRange> getCumulativeTargetAyatRanges(

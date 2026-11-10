@@ -94,14 +94,13 @@ class ProgressHafalanPerSuratScreen extends StatelessWidget implements AutoRoute
                 .where((sp) => sp.surahId == seg.surahId)
                 .firstOrNull;
             if (surahProgress != null) {
-              final memorizedLimit = seg.ayatStart + surahProgress.memorizedAyat - 1;
-              if (surahProgress.memorizedAyat > 0) {
-                final start = match.ayatStart > seg.ayatStart ? match.ayatStart : seg.ayatStart;
-                final end = match.ayatEnd < memorizedLimit ? match.ayatEnd : memorizedLimit;
-                if (start <= end) {
-                  memorized = end - start + 1;
-                }
-              }
+              final start = match.ayatStart > seg.ayatStart ? match.ayatStart : seg.ayatStart;
+              final end = match.ayatEnd < seg.ayatEnd ? match.ayatEnd : seg.ayatEnd;
+              memorized = surahProgress.countMemorizedInSubRange(
+                start,
+                end,
+                segmentStart: seg.ayatStart,
+              );
             }
           }
         },
