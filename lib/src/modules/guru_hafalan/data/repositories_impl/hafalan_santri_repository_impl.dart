@@ -120,6 +120,22 @@ class HafalanSantriRepositoryImpl implements HafalanSantriRepository {
   }
 
   @override
+  Future<void> forceRefreshFromRemote(String santriId) async {
+    _log.i('forceRefreshFromRemote: Fetching all hafalan records from Firestore for santriId=$santriId...');
+    try {
+      final remoteRecords = await _remote.fetchBySantriId(santriId);
+      if (remoteRecords.isNotEmpty) {
+        await _local.putAll(remoteRecords);
+        _log.i('forceRefreshFromRemote: successfully synced ${remoteRecords.length} records into Hive for santriId=$santriId.');
+      } else {
+        _log.i('forceRefreshFromRemote: no records found in Firestore for santriId=$santriId.');
+      }
+    } catch (e, st) {
+      _log.e('forceRefreshFromRemote: Firestore fetch failed', error: e, stackTrace: st);
+    }
+  }
+
+  @override
   Stream<List<HafalanSantriModel>> watchByHalaqohFromRemote(String halaqohId) {
     return _remote.watchByHalaqoh(halaqohId).asyncMap((list) async {
       await _local.putAll(list);

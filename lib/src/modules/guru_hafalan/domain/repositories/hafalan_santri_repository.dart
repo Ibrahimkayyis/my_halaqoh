@@ -26,6 +26,12 @@ abstract class HafalanSantriRepository {
   /// ensure historical data is present after a fresh install or cache wipe.
   Future<void> seedFromRemoteIfEmpty(String santriId);
 
+  /// Force-refresh the local Hive cache from Firestore for a specific santri.
+  /// Always fetches from Firestore regardless of local cache state.
+  /// Used by screens (e.g. Sertifikasi Form, Progress) that require guaranteed
+  /// up-to-date data from remote.
+  Future<void> forceRefreshFromRemote(String santriId);
+
   /// Watch hafalan records for a specific halaqoh from Firestore, updating the local Hive cache.
   Stream<List<HafalanSantriModel>> watchByHalaqohFromRemote(String halaqohId);
 
